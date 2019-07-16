@@ -8,6 +8,12 @@ As this involves replicating the full data store on every host, it is only
 practical for situations where the write rate (<100/s total) and data volumes
 (<10GB total) are low.
 
+Recommended reading:
+
+* [Rick Branson's blog post on ctlstore](https://segment.com/blog/separating-our-data-and-control-planes-with-ctlstore/)
+* [Calvin talking about ctlstore at Synapse](https://vimeo.com/293246627)
+* [The ctlstore website](https://ctlstore.segment.com/)
+
 ## Security
 
 Note that because ctlstore replicates the central database to an LDB on each host 
