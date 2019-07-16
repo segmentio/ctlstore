@@ -1,0 +1,103 @@
+version: 2
+jobs:
+  build:
+    working_directory: /go/src/github.com/segmentio/ctlstore
+    docker:
+      - image: segment/circleci-golang:1.12
+      - image: mysql:5.6
+        ports:
+          - "3306:3306"
+        environment:
+          MYSQL_ROOT_PASSWORD: ctldbpw
+          MYSQL_DATABASE: ctldb
+          MYSQL_USER: ctldb
+          MYSQL_PASSWORD: ctldbpw
+
+    resource_class: large
+    steps:
+      - checkout
+      - setup_remote_docker: { reusable: true, docker_layer_caching: true }
+      - attach_workspace: { at: . }
+      - run:
+          name: Deps
+          command: |
+            make deps
+      - run:
+          name: Test
+          command: |
+            make test
+      - run:
+          name: Snyk Setup
+          command: curl -sL https://raw.githubusercontent.com/segmentio/snyk_helpers/master/initialization/snyk.sh | sh
+      - run:
+          name: Build
+          command: |
+            make build
+
+  docker_push:
+    working_directory: /go/src/github.com/segmentio/ctlstore
+    docker:
+      - image: segment/circleci-golang:1.12
+    steps:
+      - checkout
+      - setup_remote_docker: { reusable: true, docker_layer_caching: true }
+      - attach_workspace: { at: . }
+      - run:
+          name: Deps
+          command: |
+            make deps
+      - run:
+          name: Vendor
+          command: |
+            make vendor
+      - run:
+          name: Publish Docker Images
+          command: |
+            $(aws ecr get-login --no-include-email --region ${AWS_REGION})
+            make release
+      - store_artifacts:
+          path: .run
+          destination: trebuchet
+
+  docker_push_non_master:
+    working_directory: /go/src/github.com/segmentio/ctlstore
+    docker:
+      - image: segment/circleci-golang:1.12
+    steps:
+      - checkout
+      - setup_remote_docker: { reusable: true, docker_layer_caching: true }
+      - attach_workspace: { at: . }
+      - run:
+          name: Deps
+          command: |
+            make deps
+      - run:
+          name: Vendor
+          command: |
+            make vendor
+      - run:
+          name: Publish Docker Images
+          command: |
+            $(aws ecr get-login --no-include-email --region ${AWS_REGION})
+            make release-nonmaster
+      - store_artifacts:
+          path: .run
+          destination: trebuchet
+
+
+workflows:
+  version: 2
+  run:
+    jobs:
+      - build:
+          context: snyk
+      - docker_push:
+          filters:
+            branches:
+              only: master
+      - docker_push_non_master:
+          filters:
+            branches:
+              ignore: master
+
+

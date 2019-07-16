@@ -1,0 +1,20 @@
+version: '2.2'
+
+services:
+    mysql:
+        image: mysql:5.6
+        volumes:
+            - dbdata:/var/lib/mysql
+        restart:
+            always
+        ports:
+              - "3306:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: ctldbpw
+            MYSQL_DATABASE: ctldb
+            MYSQL_USER: ctldb
+            MYSQL_PASSWORD: ctldbpw
+        mem_limit: 536870912
+
+volumes:
+    dbdata:

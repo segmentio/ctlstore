@@ -1,0 +1,11 @@
+FROM node:latest
+
+ENV GENERATE_SOURCEMAP=false
+ENV NODE_ENV=production
+
+WORKDIR /website
+COPY website/package.json website/yarn.lock ./
+RUN yarn
+COPY ./website ./
+
+ENTRYPOINT ["sh", "-c", "yarn build && cp -r ./build/* /out"]

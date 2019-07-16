@@ -1,0 +1,114 @@
+version: '2.2'
+volumes:
+  ldb:
+services:
+
+    # sidecar exposes the reader API over HTTP
+    sidecar:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      ports:
+        - "1331"
+      restart: always
+      entrypoint:
+        - /usr/local/bin/ctlstore
+        - sidecar
+      volumes:
+        - ldb:/var/spool/ctlstore
+
+    # heartbeat sends a constant stream of mutations into the executive
+    heartbeat:
+      restart: always
+      build:
+        context: .
+        dockerfile: Dockerfile
+      entrypoint:
+      - /usr/local/bin/ctlstore
+      - heartbeat
+      - -executive-url
+      - executive:3000
+      - -heartbeat-interval
+      - 1s
+      - -family-name
+      - ctlstore
+      - -table-name
+      - heartbeats
+      - -writer-name
+      - heartbeat
+      - -writer-secret
+      - heartbeat
+
+  # supervisor periodically snapshots ldb
+    supervisor:
+      restart: always
+      build:
+        context: .
+        dockerfile: Dockerfile
+      entrypoint:
+      - /usr/local/bin/ctlstore
+      - supervisor
+      - -snapshot-url
+      - "file:///snapshots/snapshot.db"
+      - -snapshot-interval
+      - "60s"
+      - -reflector.ldb-path
+      - /data/supervisor-ldb.db
+      - -reflector.upstream-driver
+      - mysql
+      - -reflector.upstream-dsn
+      - ctldb:ctldbpw@tcp(mysql:3306)/ctldb?collation=utf8mb4_unicode_ci
+      volumes:
+      - ldb:/var/spool/ctlstore
+
+    # reflector pulls changes from mysql to a ldb
+    reflector:
+      restart: always
+      build:
+        context: .
+        dockerfile: Dockerfile
+      entrypoint:
+        - /usr/local/bin/ctlstore
+        - reflector
+        - -ldb-path
+        - /var/spool/ctlstore/ldb.db
+        - -changelog-path
+        - /var/spool/ctlstore/changelog
+        - -changelog-size
+        - "1000000"
+        - -upstream-driver
+        - mysql
+        - -upstream-dsn
+        - ctldb:ctldbpw@tcp(mysql:3306)/ctldb?collation=utf8mb4_unicode_ci
+        - -ledger-latency.disable # no ECS in a docker-compose environment
+      volumes:
+        - ldb:/var/spool/ctlstore
+
+    # executive guards the mysqldb
+    executive:
+      restart: always
+      build:
+        context: .
+        dockerfile: Dockerfile
+      entrypoint:
+        - /usr/local/bin/ctlstore
+        - executive
+        - -bind
+        - 0.0.0.0:3000
+        - -ctldb
+        - ctldb:ctldbpw@tcp(mysql:3306)/ctldb?collation=utf8mb4_unicode_ci
+
+    # mysql represents the upstream db
+    mysql:
+        build:
+          context: .
+          dockerfile: Dockerfile-mysql
+        restart:
+            always
+        environment:
+            MYSQL_ROOT_PASSWORD: ctldbpw
+            MYSQL_DATABASE: ctldb
+            MYSQL_USER: ctldb
+            MYSQL_PASSWORD: ctldbpw
+        mem_limit: 536870912
+

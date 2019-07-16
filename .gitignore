@@ -1,0 +1,5 @@
+*.swp
+/ctlstore
+/vendor
+/bin
+.coverprofile
