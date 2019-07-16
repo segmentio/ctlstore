@@ -78,6 +78,7 @@ trebvet:
 
 .PHONY: gensite
 gensite:
+	rm -rf ./website/gen/*
 	$Qdocker build \
 		-f Dockerfile-webgen \
 		-t ctlstore-webgen \
