@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -112,7 +113,8 @@ type heartbeatCliConfig struct {
 }
 
 type siteConfig struct {
-	Bind string `conf:"bind" help:"The bind address"`
+	Bind       string `conf:"bind" help:"The bind address"`
+	ForceHTTPS bool   `conf:"force-https" help:"Force https if http traffic encountered"`
 }
 
 type ldbReadKeyParams struct {
@@ -299,8 +301,25 @@ func site(ctx context.Context, args []string) {
 	loadConfig(&cfg, "site", args)
 	fs := http.FileServer(http.Dir("website/gen"))
 	normalizer := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		base := filepath.Base(r.URL.Path)
-		ext := filepath.Ext(r.URL.Path)
+		rURL := r.URL
+		if rURL.Scheme != "https" && cfg.ForceHTTPS {
+			targetUrl := url.URL{
+				Scheme:     "https",
+				Opaque:     rURL.Opaque,
+				User:       rURL.User,
+				Host:       r.Host,
+				Path:       rURL.Path,
+				RawPath:    rURL.RawPath,
+				ForceQuery: rURL.ForceQuery,
+				RawQuery:   rURL.RawQuery,
+				Fragment:   rURL.Fragment,
+			}
+			log.Printf("HTTPS: Redirecting %v to %v", rURL.String(), targetUrl.String())
+			http.Redirect(w, r, targetUrl.String(), http.StatusMovedPermanently)
+			return
+		}
+		base := filepath.Base(rURL.Path)
+		ext := filepath.Ext(rURL.Path)
 		if ext == "" && base != "/" {
 			r.URL.Path = "/"
 		}
