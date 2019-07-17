@@ -340,7 +340,9 @@ func site(ctx context.Context, args []string) {
 			r.URL.Path = "/"
 		}
 		events.Debug("Serving %{url}s", r.URL)
-		fs.ServeHTTP(w, r)
+		sw := &utils.StatusWriter{ResponseWriter: w}
+		fs.ServeHTTP(sw, r)
+		events.Debug("Returned %{code}d for %{url}s", sw.Status, r.URL)
 	})
 	http.Handle("/", normalizer)
 	log.Printf("Starting site at %s", cfg.Bind)
