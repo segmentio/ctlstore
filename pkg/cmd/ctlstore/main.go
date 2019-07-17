@@ -116,6 +116,7 @@ type siteConfig struct {
 	Bind                  string `conf:"bind" help:"The bind address"`
 	ForceHTTPS            bool   `conf:"force-https" help:"Force https if http traffic encountered"`
 	ForceHTTPSRequestHost string `conf:"force-https-request-host" help:"Force https for this request host"`
+	Debug                 bool   `conf:"debug" help:"Turns on debug logging"`
 }
 
 type ldbReadKeyParams struct {
@@ -300,15 +301,22 @@ func supervisor(ctx context.Context, args []string) {
 func site(ctx context.Context, args []string) {
 	cfg := siteConfig{Bind: "localhost:3000"}
 	loadConfig(&cfg, "site", args)
+	if cfg.Debug {
+		events.DefaultLogger.EnableDebug = true
+	}
+	events.Debug("Using config: %{cfg}#v", cfg)
 	fs := http.FileServer(http.Dir("website/gen"))
 	normalizer := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		events.Debug("REQ: %{url}s", r.URL)
 		rURL := r.URL
 		if rURL.Scheme != "https" && cfg.ForceHTTPS {
+			events.Debug("Checking for force HTTPS")
 			host := r.Host
 			parts := strings.Split(host, ":")
 			if len(parts) == 2 {
 				host = parts[0]
 			}
+			events.Debug("Determined host: %{host}s", host)
 			if cfg.ForceHTTPSRequestHost == "" || cfg.ForceHTTPSRequestHost == host {
 				targetUrl := url.URL{
 					Scheme:     "https",
@@ -331,6 +339,7 @@ func site(ctx context.Context, args []string) {
 		if ext == "" && base != "/" {
 			r.URL.Path = "/"
 		}
+		events.Debug("Serving %{url}s", r.URL)
 		fs.ServeHTTP(w, r)
 	})
 	http.Handle("/", normalizer)
