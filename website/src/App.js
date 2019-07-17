@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { HashRouter as Router, Route } from "react-router-dom";
 import { Pane } from "evergreen-ui";
 import Nav from "./Nav";
 import Content from "./Content";
