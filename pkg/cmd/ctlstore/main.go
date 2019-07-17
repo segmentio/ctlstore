@@ -297,7 +297,7 @@ func supervisor(ctx context.Context, args []string) {
 func site(ctx context.Context, args []string) {
 	cfg := siteConfig{Bind: "localhost:3000"}
 	loadConfig(&cfg, "site", args)
-	fs := http.FileServer(http.Dir("website/gen"))
+	fs := http.FileServer(http.Dir("docs"))
 	normalizer := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		base := filepath.Base(r.URL.Path)
 		ext := filepath.Ext(r.URL.Path)
