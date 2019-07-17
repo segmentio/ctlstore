@@ -113,8 +113,9 @@ type heartbeatCliConfig struct {
 }
 
 type siteConfig struct {
-	Bind       string `conf:"bind" help:"The bind address"`
-	ForceHTTPS bool   `conf:"force-https" help:"Force https if http traffic encountered"`
+	Bind                  string `conf:"bind" help:"The bind address"`
+	ForceHTTPS            bool   `conf:"force-https" help:"Force https if http traffic encountered"`
+	ForceHTTPSRequestHost string `conf:"force-https-request-host" help:"Force https for this request host"`
 }
 
 type ldbReadKeyParams struct {
@@ -303,20 +304,27 @@ func site(ctx context.Context, args []string) {
 	normalizer := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rURL := r.URL
 		if rURL.Scheme != "https" && cfg.ForceHTTPS {
-			targetUrl := url.URL{
-				Scheme:     "https",
-				Opaque:     rURL.Opaque,
-				User:       rURL.User,
-				Host:       r.Host,
-				Path:       rURL.Path,
-				RawPath:    rURL.RawPath,
-				ForceQuery: rURL.ForceQuery,
-				RawQuery:   rURL.RawQuery,
-				Fragment:   rURL.Fragment,
+			host := r.Host
+			parts := strings.Split(host, ":")
+			if len(parts) == 2 {
+				host = parts[0]
 			}
-			log.Printf("HTTPS: Redirecting %v to %v", rURL.String(), targetUrl.String())
-			http.Redirect(w, r, targetUrl.String(), http.StatusMovedPermanently)
-			return
+			if cfg.ForceHTTPSRequestHost == "" || cfg.ForceHTTPSRequestHost == host {
+				targetUrl := url.URL{
+					Scheme:     "https",
+					Opaque:     rURL.Opaque,
+					User:       rURL.User,
+					Host:       r.Host,
+					Path:       rURL.Path,
+					RawPath:    rURL.RawPath,
+					ForceQuery: rURL.ForceQuery,
+					RawQuery:   rURL.RawQuery,
+					Fragment:   rURL.Fragment,
+				}
+				log.Printf("HTTPS: Redirecting %v to %v", rURL.String(), targetUrl.String())
+				http.Redirect(w, r, targetUrl.String(), http.StatusMovedPermanently)
+				return
+			}
 		}
 		base := filepath.Base(rURL.Path)
 		ext := filepath.Ext(rURL.Path)
