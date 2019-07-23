@@ -261,7 +261,14 @@ func (r *Reflector) Start(ctx context.Context) error {
 		case events.IsTermination(errors.Cause(err)): // this is normal
 			events.Log("Reflector received termination signal")
 		case err != nil:
-			errs.Incr("reflector.shovel_error")
+			switch {
+			case errors.Is("SkippedSequence", err):
+				// this is instrumented elsewhere and is not an error that we need
+				// to handle normally, so we will skip instrumenting this as a
+				// shovel_error for now.
+			default:
+				errs.Incr("reflector.shovel_error")
+			}
 			events.Log("Error encountered during shoveling: %{error}+v", err)
 		}
 		select {
