@@ -2,13 +2,13 @@ package reflector
 
 import (
 	"context"
-	"errors"
 	"io"
 	"time"
 
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/ldbwriter"
 	"github.com/segmentio/ctlstore/pkg/schema"
+	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events"
 	"github.com/segmentio/stats"
 )
@@ -100,7 +100,9 @@ func (s *shovel) Start(ctx context.Context) error {
 				if s.abortOnSeqSkip {
 					// Mitigation for a bug that we haven't found yet
 					stats.Incr("shovel.skipped_sequence_abort")
-					return errors.New("shovel skipped sequence")
+					err = errors.New("shovel skipped sequence")
+					err = errors.WithTypes(err, "SkippedSequence")
+					return err
 				}
 			}
 		}
