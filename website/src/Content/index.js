@@ -3,6 +3,10 @@ import { Pane, Heading, Text, defaultTheme } from "evergreen-ui";
 import Highlight from "react-highlight";
 import Hero from "./Hero";
 
+window.analytics.page("Home Page", {
+  title: "Home Page"
+});
+
 const Content = () => (
   <Pane>
     <Hero />

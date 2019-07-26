@@ -2,6 +2,10 @@ import React from "react";
 import { Pane, Heading, Paragraph } from "evergreen-ui";
 import Highlight from "react-highlight"
 
+window.analytics.page("Getting Started -- Tables", {
+    title: "Getting Started -- Tables"
+});
+
 export default function Tables() {
   return (
     <Pane>

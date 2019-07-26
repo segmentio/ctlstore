@@ -1,6 +1,10 @@
 import React from "react";
 import { Link, Pane, Heading, Paragraph } from "evergreen-ui";
 
+window.analytics.page("Getting Started -- Introduction", {
+    title: "Getting Started -- Introduction"
+});
+
 export default function Introduction() {
   return (
     <Pane>
