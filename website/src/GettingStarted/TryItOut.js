@@ -2,6 +2,10 @@ import React from "react";
 import { ListItem, UnorderedList, Pane, Heading, Paragraph } from "evergreen-ui";
 import Highlight from "react-highlight"
 
+window.analytics.page("Getting Started -- Try It Out", {
+    title: "Getting Started -- Try It Out"
+});
+
 export default function TryItOut() {
   return (
     <Pane>

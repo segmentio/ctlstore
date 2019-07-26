@@ -2,6 +2,10 @@ import React from "react";
 import { Pane, Heading, Paragraph } from "evergreen-ui";
 import Highlight from "react-highlight"
 
+window.analytics.page("Getting Started -- Readers", {
+    title: "Getting Started -- Readers"
+});
+
 export default function Readers() {
   return (
     <Pane>

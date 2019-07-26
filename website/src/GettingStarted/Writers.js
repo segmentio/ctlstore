@@ -2,6 +2,10 @@ import React from "react";
 import { ListItem, OrderedList, Pane, Heading, Paragraph } from "evergreen-ui";
 import Highlight from "react-highlight"
 
+window.analytics.page("Getting Started -- Writers", {
+    title: "Getting Started -- Writers"
+});
+
 export default function Writers() {
   return (
     <Pane>

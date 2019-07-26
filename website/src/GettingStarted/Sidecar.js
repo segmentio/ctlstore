@@ -2,6 +2,10 @@ import React from "react";
 import { Pane, Heading, Paragraph } from "evergreen-ui";
 import Highlight from "react-highlight"
 
+window.analytics.page("Getting Started -- Sidecar", {
+    title: "Getting Started -- Sidecar"
+});
+
 export default function Sidecar() {
   return (
     <Pane>
