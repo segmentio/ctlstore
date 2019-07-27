@@ -162,6 +162,29 @@ func (tu *LDBTestUtil) InsertRows(family string, table string, rows [][]interfac
 	}
 }
 
+// DeleteAll deletes all rows from the given table.
+func (tu *LDBTestUtil) DeleteAll(family string, table string) {
+	hunks := []string{
+		"DELETE FROM",
+		fmt.Sprintf("%s___%s", family, table),
+	}
+
+	qs := strings.Join(hunks, " ")
+	_, err := tu.DB.Exec(qs)
+	if err != nil {
+		tu.T.Fatalf("Unexpected error deleting data: %+v", err)
+	}
+
+	qs = fmt.Sprintf(
+		"REPLACE INTO %s (name, timestamp) VALUES (?, ?)",
+		ldb.LDBLastUpdateTableName,
+	)
+	_, err = tu.DB.Exec(qs, ldb.LDBLastLedgerUpdateColumn, time.Now())
+	if err != nil {
+		tu.T.Fatalf("Unexpected error updating ledger timestamp: %+v", err)
+	}
+}
+
 // Reset completely clears the test LDB
 func (tu *LDBTestUtil) Reset() {
 	qs := "SELECT DISTINCT tbl_name FROM sqlite_master"
