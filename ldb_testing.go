@@ -174,15 +174,6 @@ func (tu *LDBTestUtil) DeleteAll(family string, table string) {
 	if err != nil {
 		tu.T.Fatalf("Unexpected error deleting data: %+v", err)
 	}
-
-	qs = fmt.Sprintf(
-		"REPLACE INTO %s (name, timestamp) VALUES (?, ?)",
-		ldb.LDBLastUpdateTableName,
-	)
-	_, err = tu.DB.Exec(qs, ldb.LDBLastLedgerUpdateColumn, time.Now())
-	if err != nil {
-		tu.T.Fatalf("Unexpected error updating ledger timestamp: %+v", err)
-	}
 }
 
 // Reset completely clears the test LDB
