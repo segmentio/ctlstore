@@ -407,7 +407,6 @@ func executive(ctx context.Context, args []string) {
 func sidecar(ctx context.Context, args []string) {
 	config := sidecarConfig{
 		BindAddr:  "0.0.0.0:1331",
-		MaxRows:   1000,
 		Dogstatsd: defaultDogstatsdConfig(),
 	}
 	loadConfig(&config, "sidecar", args)
