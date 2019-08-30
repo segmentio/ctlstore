@@ -29,7 +29,7 @@ type (
 	// instance attribute setting. Ledger latency health will be
 	// reflected in container instance attributes.
 	HealthConfig struct {
-		Disable                 bool          // whether or not to disable container instance attributing
+		DisableECSBehavior      bool          // whether or not to disable container instance attributing
 		MaxHealthyLatency       time.Duration // the max latency which is considered healthy
 		AttributeName           string        // the attribute name to indicate ledger latency health
 		HealthyAttributeValue   string        // if ledger latency is healthy use this attribute value
@@ -67,10 +67,6 @@ func NewLedgerMonitor(cfg HealthConfig, llf latencyFunc, opts ...MonitorOpt) (*M
 }
 
 func (m *Monitor) Start(ctx context.Context) {
-	if m.cfg.Disable {
-		events.Log("Ledger monitor is disabled")
-		return
-	}
 	events.Log("Ledger monitor starting")
 	defer events.Log("Ledger monitor stopped")
 	var health *bool // pointer for tri-state logic
@@ -80,29 +76,33 @@ func (m *Monitor) Start(ctx context.Context) {
 		err := func() error {
 			latency, err := m.latencyFunc(ctx)
 			if err != nil {
-				return errors.Wrap(err, "get latency")
+				return errors.Wrap(err, "get ledger latency")
 			}
-			switch {
-			case latency <= m.cfg.MaxHealthyLatency && (health == nil || *health != true):
-				// set a healthy attribute
-				if err := m.setHealthAttribute(ctx, m.cfg.HealthyAttributeValue); err != nil {
-					return errors.Wrap(err, "set healthy")
+			// always instrument ledger latency even if ECS behavior is disabled.
+			stats.Set("reflector-ledger-latency", latency)
+			if !m.cfg.DisableECSBehavior {
+				switch {
+				case latency <= m.cfg.MaxHealthyLatency && (health == nil || *health != true):
+					// set a healthy attribute
+					if err := m.setHealthAttribute(ctx, m.cfg.HealthyAttributeValue); err != nil {
+						return errors.Wrap(err, "set healthy")
+					}
+					health = pointer.ToBool(true)
+				case latency > m.cfg.MaxHealthyLatency && (health == nil || *health != false):
+					// set an unhealthy attribute
+					if err := m.setHealthAttribute(ctx, m.cfg.UnhealthyAttributeValue); err != nil {
+						return errors.Wrap(err, "set unhealthy")
+					}
+					health = pointer.ToBool(false)
 				}
-				health = pointer.ToBool(true)
-			case latency > m.cfg.MaxHealthyLatency && (health == nil || *health != false):
-				// set an unhealthy attribute
-				if err := m.setHealthAttribute(ctx, m.cfg.UnhealthyAttributeValue); err != nil {
-					return errors.Wrap(err, "set unhealthy")
+				switch {
+				case health == nil:
+					stats.Set("ledger-health", 1, stats.T("status", "unknown"))
+				case *health == false:
+					stats.Set("ledger-health", 1, stats.T("status", "unhealthy"))
+				case *health == true:
+					stats.Set("ledger-health", 1, stats.T("status", "healthy"))
 				}
-				health = pointer.ToBool(false)
-			}
-			switch {
-			case health == nil:
-				stats.Set("ledger-health", 1, stats.T("status", "unknown"))
-			case *health == false:
-				stats.Set("ledger-health", 1, stats.T("status", "unhealthy"))
-			case *health == true:
-				stats.Set("ledger-health", 1, stats.T("status", "healthy"))
 			}
 			return nil
 		}()

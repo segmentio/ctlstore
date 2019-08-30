@@ -91,7 +91,8 @@ type supervisorCliConfig struct {
 // instance attribute tagging. Ledger latency health will be
 // reflected in container instance attributes.
 type ledgerHealthConfig struct {
-	Disable                 bool          `conf:"disable" help:"disable ledger latency health attributing"`
+	Disable                 bool          `conf:"disable" help:"disable ledger latency health attributing (DEPRECATED: use disable-ecs-behavior instead)"`
+	DisableECSBehavior      bool          `conf:"disable-ecs-behavior" help:"disable ledger latency health attributing"`
 	MaxHealthyLatency       time.Duration `conf:"max-healty-latency" help:"Max latency considered healthy"`
 	AttributeName           string        `conf:"attribute-name" help:"The name of the attribute"`
 	HealthyAttributeValue   string        `conf:"healthy-attribute-value" help:"The value of the attribute if healthy"`
@@ -491,6 +492,9 @@ func newSidecar(config sidecarConfig) (*sidecarpkg.Sidecar, error) {
 }
 
 func newReflector(cliCfg reflectorCliConfig, isSupervisor bool) (*reflectorpkg.Reflector, error) {
+	if cliCfg.LedgerHealth.Disable {
+		events.Log("DEPRECATION NOTICE: use --disable-ecs-behavior instead of --disable to control this ledger monitor behavior")
+	}
 	return reflectorpkg.ReflectorFromConfig(reflectorpkg.ReflectorConfig{
 		LDBPath:       cliCfg.LDBPath,
 		ChangelogPath: cliCfg.ChangelogPath,
@@ -498,7 +502,7 @@ func newReflector(cliCfg reflectorCliConfig, isSupervisor bool) (*reflectorpkg.R
 		BootstrapURL:  cliCfg.BootstrapURL,
 		IsSupervisor:  isSupervisor,
 		LedgerHealth: ledger.HealthConfig{
-			Disable:                 cliCfg.LedgerHealth.Disable,
+			DisableECSBehavior:      cliCfg.LedgerHealth.Disable || cliCfg.LedgerHealth.DisableECSBehavior,
 			MaxHealthyLatency:       cliCfg.LedgerHealth.MaxHealthyLatency,
 			AttributeName:           cliCfg.LedgerHealth.AttributeName,
 			HealthyAttributeValue:   cliCfg.LedgerHealth.HealthyAttributeValue,
