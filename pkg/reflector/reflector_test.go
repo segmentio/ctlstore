@@ -151,6 +151,7 @@ func TestReflector(t *testing.T) {
 		},
 		LedgerHealth: ledger.HealthConfig{
 			DisableECSBehavior: true,
+			PollInterval:       10 * time.Second,
 		},
 	}
 	ctx, cancel := context.WithCancel(context.Background())
