@@ -85,13 +85,10 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 				stats.Incr("sql_dml_source.skipped_sequence")
 			}
 
-			// instrument how latent this record is compared to wall time
 			timestamp, err := time.Parse(dmlLedgerTimestampFormat, row.leaderTs)
 			if err != nil {
 				return statement, errors.Wrapf(err, "could not parse time '%s'", row.leaderTs)
 			}
-			latency := time.Now().Sub(timestamp)
-			stats.Observe("reflector-ledger-latency", latency)
 
 			dmlst := schema.DMLStatement{
 				Sequence:  schema.DMLSequence(row.seq),
