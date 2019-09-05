@@ -176,6 +176,7 @@ func (s *Sidecar) getRowsByKeyPrefix(w http.ResponseWriter, r *http.Request) err
 	if err != nil {
 		return err
 	}
+	stats.Observe("get-rows-by-key-prefix-num-rows", len(res), stats.T("family", family), stats.T("table", table))
 	err = json.NewEncoder(w).Encode(res)
 	return err
 }
