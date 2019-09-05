@@ -486,9 +486,10 @@ func newSidecar(config sidecarConfig) (*sidecarpkg.Sidecar, error) {
 		return nil, err
 	}
 	return sidecarpkg.New(sidecarpkg.Config{
-		BindAddr: config.BindAddr,
-		Reader:   reader,
-		MaxRows:  config.MaxRows,
+		BindAddr:    config.BindAddr,
+		Reader:      reader,
+		MaxRows:     config.MaxRows,
+		Application: config.Application,
 	})
 }
 
