@@ -109,7 +109,6 @@ func (s *Sidecar) Start(ctx context.Context) error {
 }
 
 func (s *Sidecar) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	httpstats.NewHandler(s.handler)
 	s.handler.ServeHTTP(w, r)
 }
 
