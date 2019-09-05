@@ -11,7 +11,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/segmentio/ctlstore"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events"
 	"github.com/segmentio/stats"
 	"github.com/segmentio/stats/httpstats"
 )
@@ -72,8 +71,11 @@ func New(config Config) (*Sidecar, error) {
 	handleErr := func(fn func(http.ResponseWriter, *http.Request) error) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			err := fn(w, r)
-			if err != nil {
-				events.Log("err=%{error}s url=%{url}s", err, r.URL)
+			switch {
+			case err == nil:
+			case errors.Is("limit-exceeded", err):
+				w.WriteHeader(http.StatusRequestedRangeNotSatisfiable)
+			default:
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 		}
@@ -165,7 +167,9 @@ func (s *Sidecar) getRowsByKeyPrefix(w http.ResponseWriter, r *http.Request) err
 		}
 		res = append(res, out)
 		if s.maxRows > 0 && len(res) > s.maxRows {
-			return errors.Errorf("max row count (%d) exceeded", s.maxRows)
+			err = errors.Errorf("max row count (%d) exceeded", s.maxRows)
+			err = errors.WithTypes(err, "limit-exceeded")
+			return err
 		}
 	}
 	err = rows.Err()
