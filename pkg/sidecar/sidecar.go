@@ -12,6 +12,7 @@ import (
 	"github.com/segmentio/ctlstore"
 	"github.com/segmentio/errors-go"
 	"github.com/segmentio/stats"
+	"github.com/segmentio/stats/datadog"
 	"github.com/segmentio/stats/httpstats"
 )
 
@@ -87,6 +88,7 @@ func New(config Config) (*Sidecar, error) {
 	mux.HandleFunc("/ping", handleErr(sidecar.ping)).Methods("GET")
 
 	application := orUnknown(config.Application)
+	datadog.DefaultFilters = []string{}
 	stats.DefaultEngine.Tags = append(stats.DefaultEngine.Tags, stats.T("application", application))
 	stats.DefaultEngine.Tags = stats.SortTags(stats.DefaultEngine.Tags) // tags must be sorted
 
