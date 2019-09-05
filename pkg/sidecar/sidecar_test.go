@@ -111,6 +111,7 @@ func TestFetchCtlstoreData(t *testing.T) {
 		family      string
 		table       string
 		useMulti    bool
+		maxRows     int
 		rr          ReadRequest
 		status      int
 		respHeaders map[string]string
@@ -190,6 +191,15 @@ func TestFetchCtlstoreData(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:     "too many rows returned",
+			family:   "test_family",
+			table:    "test_table",
+			useMulti: true,
+			maxRows:  1,
+			rr:       ReadRequest{[]Key{}},
+			status:   http.StatusRequestedRangeNotSatisfiable,
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			tu, teardown := ctlstore.NewLDBTestUtil(t)
@@ -221,7 +231,7 @@ func TestFetchCtlstoreData(t *testing.T) {
 			})
 			sc, err := New(Config{
 				Reader:  ctlstore.NewLDBReaderFromDB(tu.DB),
-				MaxRows: 0,
+				MaxRows: test.maxRows,
 			})
 			require.NoError(t, err)
 			keys, err := json.Marshal(test.rr)

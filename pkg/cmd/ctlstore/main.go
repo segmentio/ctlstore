@@ -38,10 +38,11 @@ type dogstatsdConfig struct {
 }
 
 type sidecarConfig struct {
-	BindAddr  string          `conf:"bind-addr" help:"The address and port to bind on"`
-	LDBPath   string          `conf:"ldb-path" help:"The location of the LDB"`
-	MaxRows   int             `conf:"max-rows" help:"Maximum number of rows that can be returned in one response"`
-	Dogstatsd dogstatsdConfig `conf:"dogstatsd" help:"dogstatsd Configuration"`
+	BindAddr    string          `conf:"bind-addr" help:"The address and port to bind on"`
+	LDBPath     string          `conf:"ldb-path" help:"The location of the LDB"`
+	MaxRows     int             `conf:"max-rows" help:"Maximum number of rows that can be returned in one response"`
+	Application string          `conf:"application" help:"The name of the application that will be using the sidecar"`
+	Dogstatsd   dogstatsdConfig `conf:"dogstatsd" help:"dogstatsd Configuration"`
 }
 
 type reflectorCliConfig struct {

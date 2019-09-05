@@ -11,8 +11,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/segmentio/ctlstore"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events"
 	"github.com/segmentio/stats"
+	"github.com/segmentio/stats/httpstats"
 )
 
 type (
@@ -23,9 +23,10 @@ type (
 		handler  http.Handler
 	}
 	Config struct {
-		BindAddr string
-		Reader   Reader
-		MaxRows  int
+		BindAddr    string
+		Reader      Reader
+		MaxRows     int
+		Application string
 	}
 	Reader interface {
 		GetRowByKey(ctx context.Context, out interface{}, familyName string, tableName string, key ...interface{}) (found bool, err error)
@@ -70,8 +71,11 @@ func New(config Config) (*Sidecar, error) {
 	handleErr := func(fn func(http.ResponseWriter, *http.Request) error) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			err := fn(w, r)
-			if err != nil {
-				events.Log("err=%{error}s url=%{url}s", err, r.URL)
+			switch {
+			case err == nil:
+			case errors.Is("limit-exceeded", err):
+				w.WriteHeader(http.StatusRequestedRangeNotSatisfiable)
+			default:
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 		}
@@ -81,7 +85,13 @@ func New(config Config) (*Sidecar, error) {
 	mux.HandleFunc("/get-ledger-latency", handleErr(sidecar.getLedgerLatency)).Methods("GET")
 	mux.HandleFunc("/healthcheck", handleErr(sidecar.healthcheck)).Methods("GET")
 	mux.HandleFunc("/ping", handleErr(sidecar.ping)).Methods("GET")
-	sidecar.handler = mux
+
+	application := orUnknown(config.Application)
+	stats.DefaultEngine.Tags = append(stats.DefaultEngine.Tags, stats.T("application", application))
+	stats.DefaultEngine.Tags = stats.SortTags(stats.DefaultEngine.Tags) // tags must be sorted
+
+	sidecar.handler = sidecar.statsHandler(mux)
+
 	return sidecar, nil
 }
 
@@ -99,21 +109,19 @@ func (s *Sidecar) Start(ctx context.Context) error {
 }
 
 func (s *Sidecar) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	httpstats.NewHandler(s.handler)
 	s.handler.ServeHTTP(w, r)
 }
 
-// if we decide to move forward with sampling, we can add it to this func.
-func (s *Sidecar) observeAPILatency(r *http.Request, op string) func() {
-	start := time.Now()
-	return func() {
-		stats.Observe("api-latency", time.Now().Sub(start),
-			stats.T("op", op),
-			stats.T("user-agent", r.UserAgent()))
-	}
+func (s *Sidecar) statsHandler(delegate http.Handler) http.Handler {
+	return httpstats.NewHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ua := orUnknown(r.UserAgent())
+		stats.Incr("requests-by-user-agent", stats.T("user-agent", ua))
+		delegate.ServeHTTP(w, r)
+	}))
 }
 
 func (s *Sidecar) getLedgerLatency(w http.ResponseWriter, r *http.Request) error {
-	defer s.observeAPILatency(r, "get-ledger-latency")()
 	duration, err := s.reader.GetLedgerLatency(r.Context())
 	if err != nil {
 		return errors.Wrap(err, "get ledger latency")
@@ -126,22 +134,16 @@ func (s *Sidecar) getLedgerLatency(w http.ResponseWriter, r *http.Request) error
 }
 
 func (s *Sidecar) healthcheck(w http.ResponseWriter, r *http.Request) error {
-	defer s.observeAPILatency(r, "healthcheck")()
-
 	_, err := s.reader.GetLedgerLatency(r.Context())
 	return errors.Wrap(err, "healthcheck")
 }
 
 func (s *Sidecar) ping(w http.ResponseWriter, r *http.Request) error {
-	defer s.observeAPILatency(r, "ping")()
-
 	// for now, just hit the healthcheck. we can change this later.
 	return s.healthcheck(w, r)
 }
 
 func (s *Sidecar) getRowsByKeyPrefix(w http.ResponseWriter, r *http.Request) error {
-	defer s.observeAPILatency(r, "get-rows-by-key-prefix")()
-
 	vars := mux.Vars(r)
 	family := vars["familyName"]
 	table := vars["tableName"]
@@ -165,20 +167,21 @@ func (s *Sidecar) getRowsByKeyPrefix(w http.ResponseWriter, r *http.Request) err
 		}
 		res = append(res, out)
 		if s.maxRows > 0 && len(res) > s.maxRows {
-			return errors.Errorf("max row count (%d) exceeded", s.maxRows)
+			err = errors.Errorf("max row count (%d) exceeded", s.maxRows)
+			err = errors.WithTypes(err, "limit-exceeded")
+			return err
 		}
 	}
 	err = rows.Err()
 	if err != nil {
 		return err
 	}
+	stats.Observe("get-rows-by-key-prefix-num-rows", len(res), stats.T("family", family), stats.T("table", table))
 	err = json.NewEncoder(w).Encode(res)
 	return err
 }
 
 func (s *Sidecar) getRowByKey(w http.ResponseWriter, r *http.Request) error {
-	defer s.observeAPILatency(r, "get-row-by-key")()
-
 	vars := mux.Vars(r)
 	family := vars["familyName"]
 	table := vars["tableName"]
@@ -201,4 +204,11 @@ func (s *Sidecar) getRowByKey(w http.ResponseWriter, r *http.Request) error {
 	}
 	err = json.NewEncoder(w).Encode(out)
 	return err
+}
+
+func orUnknown(value string) string {
+	if value == "" {
+		return "unknown"
+	}
+	return value
 }
