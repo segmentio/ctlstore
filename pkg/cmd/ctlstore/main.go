@@ -199,20 +199,29 @@ func defaultDogstatsdConfig() dogstatsdConfig {
 	}
 }
 
-func configureDogstatsd(ctx context.Context, config dogstatsdConfig, statsPrefix string, defaultTags ...stats.Tag) (dd *datadog.Client, teardown func()) {
+type dogstatsdOpts struct {
+	config            dogstatsdConfig
+	statsPrefix       string
+	defaultTags       []stats.Tag
+	defaultTagFilters []string
+}
+
+func configureDogstatsd(ctx context.Context, opts dogstatsdOpts) (dd *datadog.Client, teardown func()) {
+	config := opts.config
 	if config.Address != "" {
-		if statsPrefix == "" {
+		if opts.statsPrefix == "" {
 			panic("configureDogstatsd: Invalid statsPrefix passed. Stop.")
 		}
 
 		dd = datadog.NewClientWith(datadog.ClientConfig{
 			Address:    config.Address,
 			BufferSize: config.BufferSize,
+			Filters:    opts.defaultTagFilters,
 		})
 		stats.Register(dd)
-		stats.DefaultEngine.Prefix = fmt.Sprintf("ctlstore.%s", statsPrefix)
+		stats.DefaultEngine.Prefix = fmt.Sprintf("ctlstore.%s", opts.statsPrefix)
 		stats.DefaultEngine.Tags = append(stats.DefaultEngine.Tags, stats.Tag{Name: "version", Value: ctlstore.Version})
-		for _, t := range defaultTags {
+		for _, t := range opts.defaultTags {
 			stats.DefaultEngine.Tags = append(stats.DefaultEngine.Tags, t)
 		}
 		stats.DefaultEngine.Tags = stats.SortTags(stats.DefaultEngine.Tags) // tags must be sorted
@@ -220,7 +229,7 @@ func configureDogstatsd(ctx context.Context, config dogstatsdConfig, statsPrefix
 		c := procstats.StartCollector(procstats.NewGoMetrics())
 
 		events.Log("Setup dogstatsd with addr:%{addr}s, buffersize:%{buffersize}d, prefix:%{pfx}s, version:%{version}s",
-			config.Address, config.BufferSize, statsPrefix, ctlstore.Version)
+			config.Address, config.BufferSize, opts.statsPrefix, ctlstore.Version)
 
 		go utils.CtxLoop(ctx, config.FlushEvery, stats.Flush)
 		return dd, func() {
@@ -266,7 +275,11 @@ func supervisor(ctx context.Context, args []string) {
 		if cliCfg.Shadow {
 			shadow = "true"
 		}
-		_, teardown := configureDogstatsd(ctx, cliCfg.Dogstatsd, "supervisor", stats.T("shadow", shadow))
+		_, teardown := configureDogstatsd(ctx, dogstatsdOpts{
+			config:      cliCfg.Dogstatsd,
+			statsPrefix: "supervisor",
+			defaultTags: []stats.Tag{stats.T("shadow", shadow)},
+		})
 		defer teardown()
 		if err := utils.EnsureDirForFile(cliCfg.ReflectorConfig.LDBPath); err != nil {
 			return errors.Wrap(err, "ensure ldb dir")
@@ -334,7 +347,10 @@ func heartbeat(ctx context.Context, args []string) {
 	if cliCfg.Debug {
 		enableDebug()
 	}
-	_, teardown := configureDogstatsd(ctx, cliCfg.Dogstatsd, "heartbeat")
+	_, teardown := configureDogstatsd(ctx, dogstatsdOpts{
+		config:      cliCfg.Dogstatsd,
+		statsPrefix: "heartbeat",
+	})
 	defer teardown()
 	heartbeat, err := heartbeatpkg.HeartbeatFromConfig(heartbeatpkg.HeartbeatConfig{
 		HeartbeatInterval: cliCfg.HeartbeatInterval,
@@ -379,7 +395,11 @@ func executive(ctx context.Context, args []string) {
 		shadow = "true"
 	}
 
-	_, teardown := configureDogstatsd(ctx, cliCfg.Dogstatsd, "executive", stats.T("shadow", shadow))
+	_, teardown := configureDogstatsd(ctx, dogstatsdOpts{
+		config:      cliCfg.Dogstatsd,
+		statsPrefix: "executive",
+		defaultTags: []stats.Tag{stats.T("shadow", shadow)},
+	})
 	defer teardown()
 
 	executive, err := executivepkg.ExecutiveServiceFromConfig(executivepkg.ExecutiveServiceConfig{
@@ -412,7 +432,11 @@ func sidecar(ctx context.Context, args []string) {
 		Dogstatsd: defaultDogstatsdConfig(),
 	}
 	loadConfig(&config, "sidecar", args)
-	dd, teardown := configureDogstatsd(ctx, config.Dogstatsd, "sidecar")
+	dd, teardown := configureDogstatsd(ctx, dogstatsdOpts{
+		config:            config.Dogstatsd,
+		statsPrefix:       "sidecar",
+		defaultTagFilters: []string{},
+	})
 	defer teardown()
 	if dd != nil {
 		ctlstore.Initialize(ctx, "ctlstore-sidecar", dd)
@@ -432,7 +456,10 @@ func reflector(ctx context.Context, args []string) {
 	if cliCfg.Debug {
 		enableDebug()
 	}
-	_, teardown := configureDogstatsd(ctx, cliCfg.Dogstatsd, "reflector")
+	_, teardown := configureDogstatsd(ctx, dogstatsdOpts{
+		config:      cliCfg.Dogstatsd,
+		statsPrefix: "reflector",
+	})
 	defer teardown()
 	reflector, err := newReflector(cliCfg, false)
 	if err != nil {
