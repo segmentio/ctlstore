@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: /go/src/github.com/segmentio/ctlstore
     docker:
-      - image: segment/circleci-golang:1.13
+      - image: 528451384384.dkr.ecr.us-west-2.amazonaws.com/circleci-golang:1.13
       - image: mysql:5.6
         ports:
           - "3306:3306"
@@ -37,7 +37,7 @@ jobs:
   docker_push:
     working_directory: /go/src/github.com/segmentio/ctlstore
     docker:
-      - image: segment/circleci-golang:1.13
+      - image: 528451384384.dkr.ecr.us-west-2.amazonaws.com/circleci-golang:1.13
     steps:
       - checkout
       - setup_remote_docker: { reusable: true, docker_layer_caching: true }
@@ -62,7 +62,7 @@ jobs:
   docker_push_non_master:
     working_directory: /go/src/github.com/segmentio/ctlstore
     docker:
-      - image: segment/circleci-golang:1.13
+      - image: 528451384384.dkr.ecr.us-west-2.amazonaws.com/circleci-golang:1.13
     steps:
       - checkout
       - setup_remote_docker: { reusable: true, docker_layer_caching: true }
