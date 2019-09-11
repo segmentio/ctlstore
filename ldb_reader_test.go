@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -77,6 +79,23 @@ func TestGetLedgerLatency(t *testing.T) {
 	latency, err = reader.GetLedgerLatency(ctx)
 	require.NoError(t, err)
 	require.True(t, latency < time.Second, "weird latency: %v", latency)
+}
+
+func TestLDBMustExistForReader(t *testing.T) {
+	oldGlobal := globalLDBPath
+	defer func() { globalLDBPath = oldGlobal }()
+
+	tmpDir, err := ioutil.TempDir("", "ldb_must_exist")
+	require.NoError(t, err)
+	globalLDBPath = filepath.Join(tmpDir, ldb.DefaultLDBFilename)
+
+	r, err := Reader()
+	require.EqualError(t, err, "no LDB found at "+globalLDBPath)
+	require.Nil(t, r)
+
+	r, err = ReaderForPath("/does/not/exist/ldb.db")
+	require.EqualError(t, err, "no LDB found at /does/not/exist/ldb.db")
+	require.Nil(t, r)
 }
 
 func TestGetRowsByKeyPrefix(t *testing.T) {
