@@ -1,6 +1,7 @@
 package ctlstore
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -34,6 +35,14 @@ func init() {
 // ReaderForPath opens an LDB at the provided path and returns an LDBReader
 // instance pointed at that LDB.
 func ReaderForPath(path string) (*LDBReader, error) {
+	_, err := os.Stat(path)
+	switch {
+	case os.IsNotExist(err):
+		return nil, fmt.Errorf("no LDB found at %s", path)
+	case err != nil:
+		return nil, err
+	}
+
 	mode := "ro"
 	if !globalLDBReadOnly {
 		mode = "rwc"
