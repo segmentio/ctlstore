@@ -60,8 +60,12 @@ github.com/segmentio/events v0.0.0-20180910023553-a3cc374e8b73/go.mod h1:JAZRiF/
 github.com/segmentio/fasthash v0.0.0-20180216231524-a72b379d632e/go.mod h1:tm/wZFQ8e24NYaBGIlnO2WGCAi67re4HHuOm0sftE/M=
 github.com/segmentio/go-snakecase v1.0.0 h1:FSeHpP0sBL3O+MCpxvQZrS5a51WAki6gposZuwVE9L4=
 github.com/segmentio/go-snakecase v1.0.0/go.mod h1:jk1miR5MS7Na32PZUykG89Arm+1BUSYhuGR6b7+hJto=
+github.com/segmentio/go-sqlite3 v1.9.1-0.20190912141047-d8b9a2b17d60 h1:x0oNYSWO9YNKPnaUO9UUw7KEtwj7WiPItUJlZleRF8w=
+github.com/segmentio/go-sqlite3 v1.9.1-0.20190912141047-d8b9a2b17d60/go.mod h1:z/iftdsESjnobPNbO6U17aiq8MTcYsA6SxzhLHCJVSE=
 github.com/segmentio/go-sqlite3 v1.9.1 h1:zgy7sgxQQLwb9Xj0JYADMa/z9ii9C2jzFIBqx/p2QmM=
 github.com/segmentio/go-sqlite3 v1.9.1/go.mod h1:z/iftdsESjnobPNbO6U17aiq8MTcYsA6SxzhLHCJVSE=
+github.com/segmentio/go-sqlite3 v1.9.2-0.20190912151732-d6c2d79f4a5d h1:VowCQh7nVu05vdIZ1HX+QtHfXQJ9vySd++7aJb3b3ro=
+github.com/segmentio/go-sqlite3 v1.9.2-0.20190912151732-d6c2d79f4a5d/go.mod h1:z/iftdsESjnobPNbO6U17aiq8MTcYsA6SxzhLHCJVSE=
 github.com/segmentio/objconv v0.0.0-20180216231955-8998c9cea5fb/go.mod h1:l6IU9rGW/wpM+MUyfJLDCoJ+XXAv6wbpkqej46ESQ6g=
 github.com/segmentio/objconv v1.0.0/go.mod h1:l6IU9rGW/wpM+MUyfJLDCoJ+XXAv6wbpkqej46ESQ6g=
 github.com/segmentio/objconv v1.0.1 h1:QjfLzwriJj40JibCV3MGSEiAoXixbp4ybhwfTB8RXOM=

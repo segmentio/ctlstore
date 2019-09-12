@@ -21,7 +21,7 @@ require (
 	github.com/segmentio/errors-go v1.0.0
 	github.com/segmentio/events v0.0.0-20180910023553-a3cc374e8b73
 	github.com/segmentio/go-snakecase v1.0.0 // indirect
-	github.com/segmentio/go-sqlite3 v1.9.1
+	github.com/segmentio/go-sqlite3 v1.9.2-0.20190912151732-d6c2d79f4a5d
 	github.com/segmentio/objconv v1.0.1 // indirect
 	github.com/segmentio/stats v0.0.0-20180910023949-03436e32c942
 	github.com/segmentio/taskstats v0.0.0-20180810220338-a98a7e99006d // indirect
