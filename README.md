@@ -81,4 +81,4 @@ $ make vendor
 $ docker-compose -f docker-compose-example.yml up -d
 ```
 
-For more information be sure to check out the [Getting Started](http://ctlstore.segment.com/get-started/introduction) guide.
+For more information be sure to check out the [Getting Started](https://ctlstore.segment.com/#/get-started/introduction) guide.
