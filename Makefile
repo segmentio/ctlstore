@@ -5,6 +5,8 @@ Q=
 
 GOTESTFLAGS = -race -count 1
 
+export GO111MODULE?=on
+
 .PHONY: deps
 deps:
 	$Qgo get -d ./...
