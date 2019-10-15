@@ -26,21 +26,21 @@ type Reflector interface {
 }
 
 type SupervisorConfig struct {
-	SnapshotInterval     time.Duration
-	SnapshotURL          string
-	LDBPath              string
-	Reflector            Reflector
-	MinimumLedgerLatency time.Duration
+	SnapshotInterval time.Duration
+	SnapshotURL      string
+	LDBPath          string
+	Reflector        Reflector
+	MaxLedgerLatency time.Duration
 }
 
 type supervisor struct {
-	SleepDuration        time.Duration
-	BreatheDuration      time.Duration
-	LDBPath              string
-	Snapshots            []archivedSnapshot
-	reflectorCtl         *reflector.ReflectorCtl
-	reader               *ctlstore.LDBReader
-	minimumLedgerLatency time.Duration
+	SleepDuration    time.Duration
+	BreatheDuration  time.Duration
+	LDBPath          string
+	Snapshots        []archivedSnapshot
+	reflectorCtl     *reflector.ReflectorCtl
+	reader           *ctlstore.LDBReader
+	maxLedgerLatency time.Duration
 }
 
 func SupervisorFromConfig(config SupervisorConfig) (Supervisor, error) {
@@ -60,13 +60,13 @@ func SupervisorFromConfig(config SupervisorConfig) (Supervisor, error) {
 	}
 
 	return &supervisor{
-		SleepDuration:        config.SnapshotInterval,
-		BreatheDuration:      5 * time.Second,
-		LDBPath:              config.LDBPath,
-		Snapshots:            snapshots,
-		reflectorCtl:         reflector.NewReflectorCtl(config.Reflector),
-		reader:               reader,
-		minimumLedgerLatency: config.MinimumLedgerLatency,
+		SleepDuration:    config.SnapshotInterval,
+		BreatheDuration:  5 * time.Second,
+		LDBPath:          config.LDBPath,
+		Snapshots:        snapshots,
+		reflectorCtl:     reflector.NewReflectorCtl(config.Reflector),
+		reader:           reader,
+		maxLedgerLatency: config.MaxLedgerLatency,
 	}, nil
 }
 
@@ -151,11 +151,11 @@ func (s *supervisor) Start(ctx context.Context) {
 			if err != nil {
 				return err
 			}
-			isAcceptableLatency := s.minimumLedgerLatency > latency
-			stats.Set("is_acceptable_latency", isAcceptableLatency)
-			stats.Set("latency", latency)
+			isAcceptableLatency := s.maxLedgerLatency > latency
 
 			if !isAcceptableLatency {
+				stats.Incr("snapshot_skipped")
+				events.Log("Supervisor LDB is out-of-date; skipping snapshot (latency = %{latency}v, maximum latency allowed = %{maxLedgerLatency}v)", latency, s.maxLedgerLatency)
 				return nil
 			}
 
