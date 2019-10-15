@@ -79,13 +79,14 @@ type executiveCliConfig struct {
 // running its own reflector.  The LDBPath will come from the composed
 // reflector config instead of being a top level element in this struct.
 type supervisorCliConfig struct {
-	SnapshotInterval    time.Duration      `conf:"snapshot-interval" help:"Wait time between snapshots" validate:"nonzero"`
-	SnapshotURL         string             `conf:"snapshot-url" help:"URL for snapshot upload (i.e. s3://bucket/key)" validate:"nonzero"`
-	Debug               bool               `conf:"debug" help:"Turns on debug logging"`
-	LedgerLatencyConfig ledgerHealthConfig `conf:"ledger-latency-health" help:"Configures ledger latency health behavior"`
-	ReflectorConfig     reflectorCliConfig `conf:"reflector" help:"reflector configuration"`
-	Shadow              bool               `conf:"shadow" help:"set this to true to emit shadow=true metric tags"`
-	Dogstatsd           dogstatsdConfig    `conf:"dogstatsd" help:"dogstatsd Configuration"`
+	SnapshotInterval     time.Duration      `conf:"snapshot-interval" help:"Wait time between snapshots" validate:"nonzero"`
+	SnapshotURL          string             `conf:"snapshot-url" help:"URL for snapshot upload (i.e. s3://bucket/key)" validate:"nonzero"`
+	Debug                bool               `conf:"debug" help:"Turns on debug logging"`
+	LedgerLatencyConfig  ledgerHealthConfig `conf:"ledger-latency-health" help:"Configures ledger latency health behavior"`
+	ReflectorConfig      reflectorCliConfig `conf:"reflector" help:"reflector configuration"`
+	Shadow               bool               `conf:"shadow" help:"set this to true to emit shadow=true metric tags"`
+	Dogstatsd            dogstatsdConfig    `conf:"dogstatsd" help:"dogstatsd Configuration"`
+	MinimumLedgerLatency time.Duration      `conf:"minimum-ledger-latency" help:"Minimum ledger latency, at which the supervisor halts snapshots and waits for the ledger to catch up."`
 }
 
 // ledgerHealthConfig configures the behavior of the container
@@ -262,9 +263,10 @@ func supervisor(ctx context.Context, args []string) {
 	err := func() error {
 		reflectorConfig := defaultReflectorCLIConfig(true)
 		cliCfg := supervisorCliConfig{
-			SnapshotInterval: 5 * time.Minute,
-			Dogstatsd:        defaultDogstatsdConfig(),
-			ReflectorConfig:  reflectorConfig,
+			SnapshotInterval:     5 * time.Minute,
+			Dogstatsd:            defaultDogstatsdConfig(),
+			ReflectorConfig:      reflectorConfig,
+			MinimumLedgerLatency: time.Minute,
 		}
 		loadConfig(&cliCfg, "supervisor", args)
 		if cliCfg.Debug {
@@ -291,10 +293,11 @@ func supervisor(ctx context.Context, args []string) {
 		}
 
 		supervisor, err := supervisorpkg.SupervisorFromConfig(supervisorpkg.SupervisorConfig{
-			SnapshotInterval: cliCfg.SnapshotInterval,
-			SnapshotURL:      cliCfg.SnapshotURL,
-			LDBPath:          cliCfg.ReflectorConfig.LDBPath, // use the reflector config's ldb path here
-			Reflector:        reflector,                      // compose the reflector, since it will start with the supervisor
+			SnapshotInterval:     cliCfg.SnapshotInterval,
+			SnapshotURL:          cliCfg.SnapshotURL,
+			LDBPath:              cliCfg.ReflectorConfig.LDBPath, // use the reflector config's ldb path here
+			Reflector:            reflector,                      // compose the reflector, since it will start with the supervisor
+			MinimumLedgerLatency: cliCfg.MinimumLedgerLatency,
 		})
 		if err != nil {
 			return errors.Wrap(err, "start supervisor")

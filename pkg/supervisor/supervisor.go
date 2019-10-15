@@ -27,19 +27,21 @@ type Reflector interface {
 }
 
 type SupervisorConfig struct {
-	SnapshotInterval time.Duration
-	SnapshotURL      string
-	LDBPath          string
-	Reflector        Reflector
+	SnapshotInterval     time.Duration
+	SnapshotURL          string
+	LDBPath              string
+	Reflector            Reflector
+	MinimumLedgerLatency time.Duration
 }
 
 type supervisor struct {
-	SleepDuration   time.Duration
-	BreatheDuration time.Duration
-	LDBPath         string
-	Snapshots       []archivedSnapshot
-	reflectorCtl    *reflector.ReflectorCtl
-	reader          *ctlstore.LDBReader
+	SleepDuration        time.Duration
+	BreatheDuration      time.Duration
+	LDBPath              string
+	Snapshots            []archivedSnapshot
+	reflectorCtl         *reflector.ReflectorCtl
+	reader               *ctlstore.LDBReader
+	minimumLedgerLatency time.Duration
 }
 
 func SupervisorFromConfig(config SupervisorConfig) (Supervisor, error) {
@@ -59,12 +61,13 @@ func SupervisorFromConfig(config SupervisorConfig) (Supervisor, error) {
 	}
 
 	return &supervisor{
-		SleepDuration:   config.SnapshotInterval,
-		BreatheDuration: 5 * time.Second,
-		LDBPath:         config.LDBPath,
-		Snapshots:       snapshots,
-		reflectorCtl:    reflector.NewReflectorCtl(config.Reflector),
-		reader:          reader,
+		SleepDuration:        config.SnapshotInterval,
+		BreatheDuration:      5 * time.Second,
+		LDBPath:              config.LDBPath,
+		Snapshots:            snapshots,
+		reflectorCtl:         reflector.NewReflectorCtl(config.Reflector),
+		reader:               reader,
+		minimumLedgerLatency: config.MinimumLedgerLatency,
 	}, nil
 }
 
@@ -153,7 +156,7 @@ func (s *supervisor) Start(ctx context.Context) {
 			// Use a shorter sleep duration for faster retries
 			sleepDur = s.BreatheDuration
 		}
-		isAcceptableLatency := err == nil && time.Minute > latency
+		isAcceptableLatency := err == nil && s.minimumLedgerLatency > latency
 		stats.Set("acceptable_latency", fmt.Sprintf("%v", isAcceptableLatency))
 		stats.Set("latency", latency)
 
