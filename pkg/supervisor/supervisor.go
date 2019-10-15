@@ -3,7 +3,6 @@ package supervisor
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -143,31 +142,31 @@ func (s *supervisor) Start(ctx context.Context) {
 	s.reflectorCtl.Start(ctx)
 	defer events.Log("Stopped Supervisor")
 	for {
-		sleepDur := s.SleepDuration
+		err := func() error {
+			// If the ledger latency is too much, temporarily stop uploading snapshots.
+			// We need to first catch up, or else we'll upload snapshots that are out-of-date
+			// which would put a significant amount of load on the exective because every new
+			// reflector will have to sync a potentially very large chunk of the DML ledger.
+			latency, err := s.reader.GetLedgerLatency(ctx)
+			if err != nil {
+				return err
+			}
+			isAcceptableLatency := s.minimumLedgerLatency > latency
+			stats.Set("is_acceptable_latency", isAcceptableLatency)
+			stats.Set("latency", latency)
 
-		// If the ledger latency is too much, temporarily stop uploading snapshots.
-		// We need to first catch up, or else we'll upload snapshots that are out-of-date
-		// which would put a significant amount of load on the exective because every new
-		// reflector will have to sync a potentially very large chunk of the DML ledger.
-		latency, err := s.reader.GetLedgerLatency(ctx)
+			if !isAcceptableLatency {
+				return nil
+			}
+
+			return s.snapshot(ctx)
+		}()
+		sleepDur := s.SleepDuration
 		if err != nil && errors.Cause(err) != context.Canceled {
 			s.incrementSnapshotErrorMetric(1)
-			events.Log("Failed to fetch supervisor's ledger latency: %{error}+v", err)
+			events.Log("Error taking snapshot: %{error}+v", err)
 			// Use a shorter sleep duration for faster retries
 			sleepDur = s.BreatheDuration
-		}
-		isAcceptableLatency := err == nil && s.minimumLedgerLatency > latency
-		stats.Set("acceptable_latency", fmt.Sprintf("%v", isAcceptableLatency))
-		stats.Set("latency", latency)
-
-		if isAcceptableLatency {
-			err := s.snapshot(ctx)
-			if err != nil && errors.Cause(err) != context.Canceled {
-				s.incrementSnapshotErrorMetric(1)
-				events.Log("Error taking snapshot: %{error}+v", err)
-				// Use a shorter sleep duration for faster retries
-				sleepDur = s.BreatheDuration
-			}
 		}
 
 		select {
