@@ -266,7 +266,7 @@ func supervisor(ctx context.Context, args []string) {
 			SnapshotInterval: 5 * time.Minute,
 			Dogstatsd:        defaultDogstatsdConfig(),
 			ReflectorConfig:  reflectorConfig,
-			MaxLedgerLatency: time.Minute,
+			MaxLedgerLatency: 10 * time.Minute,
 		}
 		loadConfig(&cliCfg, "supervisor", args)
 		if cliCfg.Debug {
