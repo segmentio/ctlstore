@@ -58,6 +58,7 @@ func Disable() {
 
 	if flusherStop != nil {
 		close(flusherStop)
+		flusherStop = nil
 	}
 }
 
@@ -100,6 +101,7 @@ func Initialize(ctx context.Context, config Config) {
 	}()
 	if err != nil {
 		events.Log("Could not initialize ctlstore global stats: %{error}s", err)
+		return
 	}
 
 	// Stop any goroutines from any previous Initialize calls.
@@ -114,16 +116,16 @@ func Initialize(ctx context.Context, config Config) {
 	}
 	engine = stats.NewEngine(statsPrefix, config.StatsHandler, tags...)
 
-	go flusher(ctx, config.FlushEvery)
+	go flusher(ctx, flusherStop, config.FlushEvery)
 }
 
-func flusher(ctx context.Context, flushEvery time.Duration) {
+func flusher(ctx context.Context, stop <-chan struct{}, flushEvery time.Duration) {
 	defer engine.Flush()
 	for {
 		select {
 		case <-ctx.Done():
 			return
-		case <-flusherStop:
+		case <-stop:
 			return
 		case <-time.After(flushEvery):
 			engine.Flush()
