@@ -3,12 +3,14 @@ package supervisor
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"io"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/segmentio/ctlstore"
 	"github.com/segmentio/ctlstore/pkg/reflector"
 	"github.com/segmentio/events"
 	"github.com/segmentio/stats"
@@ -37,6 +39,7 @@ type supervisor struct {
 	LDBPath         string
 	Snapshots       []archivedSnapshot
 	reflectorCtl    *reflector.ReflectorCtl
+	reader          *ctlstore.LDBReader
 }
 
 func SupervisorFromConfig(config SupervisorConfig) (Supervisor, error) {
@@ -49,12 +52,19 @@ func SupervisorFromConfig(config SupervisorConfig) (Supervisor, error) {
 		}
 		snapshots = append(snapshots, snapshot)
 	}
+
+	reader, err := ctlstore.ReaderForPath(config.LDBPath)
+	if err != nil {
+		return nil, errors.Wrap(err, "create supervisor LDB reader")
+	}
+
 	return &supervisor{
 		SleepDuration:   config.SnapshotInterval,
 		BreatheDuration: 5 * time.Second,
 		LDBPath:         config.LDBPath,
 		Snapshots:       snapshots,
 		reflectorCtl:    reflector.NewReflectorCtl(config.Reflector),
+		reader:          reader,
 	}, nil
 }
 
@@ -131,13 +141,32 @@ func (s *supervisor) Start(ctx context.Context) {
 	defer events.Log("Stopped Supervisor")
 	for {
 		sleepDur := s.SleepDuration
-		err := s.snapshot(ctx)
+
+		// If the ledger latency is too much, temporarily stop uploading snapshots.
+		// We need to first catch up, or else we'll upload snapshots that are out-of-date
+		// which would put a significant amount of load on the exective because every new
+		// reflector will have to sync a potentially very large chunk of the DML ledger.
+		latency, err := s.reader.GetLedgerLatency(ctx)
 		if err != nil && errors.Cause(err) != context.Canceled {
 			s.incrementSnapshotErrorMetric(1)
-			events.Log("Error taking snapshot: %{error}+v", err)
+			events.Log("Failed to fetch supervisor's ledger latency: %{error}+v", err)
 			// Use a shorter sleep duration for faster retries
 			sleepDur = s.BreatheDuration
 		}
+		isAcceptableLatency := err == nil && time.Minute > latency
+		stats.Set("acceptable_latency", fmt.Sprintf("%v", isAcceptableLatency))
+		stats.Set("latency", latency)
+
+		if isAcceptableLatency {
+			err := s.snapshot(ctx)
+			if err != nil && errors.Cause(err) != context.Canceled {
+				s.incrementSnapshotErrorMetric(1)
+				events.Log("Error taking snapshot: %{error}+v", err)
+				// Use a shorter sleep duration for faster retries
+				sleepDur = s.BreatheDuration
+			}
+		}
+
 		select {
 		case <-time.After(sleepDur):
 		case <-ctx.Done():
