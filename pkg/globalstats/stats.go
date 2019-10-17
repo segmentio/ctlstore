@@ -30,23 +30,35 @@ type (
 
 var (
 	engine      *stats.Engine
-	samplePct   float64
 	mut         sync.Mutex
 	flusherStop chan struct{}
+	config      Config
+	globalctx   context.Context
+	stopped     bool
 )
 
 func Observe(name string, value interface{}, tags ...stats.Tag) {
-	if engine == nil {
+	mut.Lock()
+	defer mut.Unlock()
+
+	lazyInitializeEngine()
+
+	if stopped || engine == nil {
 		return
 	}
-	if rand.Float64() > samplePct {
+	if rand.Float64() > config.SamplePct {
 		return
 	}
 	engine.Observe(name, value, tags...)
 }
 
 func Incr(name string, tags ...stats.Tag) {
-	if engine == nil {
+	mut.Lock()
+	defer mut.Unlock()
+
+	lazyInitializeEngine()
+
+	if stopped || engine == nil {
 		return
 	}
 	engine.Incr(name, tags...)
@@ -56,15 +68,26 @@ func Disable() {
 	mut.Lock()
 	defer mut.Unlock()
 
+	stopped = true
+
 	if flusherStop != nil {
 		close(flusherStop)
 		flusherStop = nil
 	}
 }
 
-func Initialize(ctx context.Context, config Config) {
+func Initialize(ctx context.Context, cfg Config) {
 	mut.Lock()
 	defer mut.Unlock()
+
+	config = cfg
+	globalctx = ctx
+}
+
+func lazyInitializeEngine() {
+	if stopped || engine != nil {
+		return
+	}
 
 	if config.AppName == "" {
 		if len(os.Args) > 0 {
@@ -80,8 +103,6 @@ func Initialize(ctx context.Context, config Config) {
 	if config.FlushEvery == 0 {
 		config.FlushEvery = 10 * time.Second
 	}
-
-	samplePct = config.SamplePct
 
 	err := func() error {
 		if config.StatsHandler == nil {
@@ -116,7 +137,7 @@ func Initialize(ctx context.Context, config Config) {
 	}
 	engine = stats.NewEngine(statsPrefix, config.StatsHandler, tags...)
 
-	go flusher(ctx, flusherStop, config.FlushEvery)
+	defer flusher(globalctx, flusherStop, config.FlushEvery)
 }
 
 func flusher(ctx context.Context, stop <-chan struct{}, flushEvery time.Duration) {
@@ -125,19 +146,6 @@ func flusher(ctx context.Context, stop <-chan struct{}, flushEvery time.Duration
 	}()
 
 	for {
-		// segmentio/stats defaults to discarding metrics. If we initialize globalstats from ctlstore.init,
-		// then the user will not yet have been able to configure their own handler. In that case, we need
-		// to check if the user has supplied a handler, in which case we swap for that one.
-		mut.Lock()
-		if engine.Handler == stats.Discard {
-			if stats.DefaultEngine.Handler != stats.Discard {
-				engine = stats.NewEngine(engine.Prefix, stats.DefaultEngine.Handler, engine.Tags...)
-			} else {
-				events.Log("%{error}+v", errors.New("No stats.DefaultEngine handler configured, discarding ctlstore globalstats"))
-			}
-		}
-		mut.Unlock()
-
 		select {
 		case <-ctx.Done():
 			return
