@@ -120,8 +120,24 @@ func Initialize(ctx context.Context, config Config) {
 }
 
 func flusher(ctx context.Context, stop <-chan struct{}, flushEvery time.Duration) {
-	defer engine.Flush()
+	defer func() {
+		engine.Flush()
+	}()
+
 	for {
+		// segmentio/stats defaults to discarding metrics. If we initialize globalstats from ctlstore.init,
+		// then the user will not yet have been able to configure their own handler. In that case, we need
+		// to check if the user has supplied a handler, in which case we swap for that one.
+		mut.Lock()
+		if engine.Handler == stats.Discard {
+			if stats.DefaultEngine.Handler != stats.Discard {
+				engine = stats.NewEngine(engine.Prefix, stats.DefaultEngine.Handler, engine.Tags...)
+			} else {
+				events.Log("%{error}+v", errors.New("No stats.DefaultEngine handler configured, discarding ctlstore globalstats"))
+			}
+		}
+		mut.Unlock()
+
 		select {
 		case <-ctx.Done():
 			return
