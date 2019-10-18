@@ -10,19 +10,23 @@ import (
 	"testing"
 	"time"
 
-	"github.com/segmentio/ctlstore"
 	ldbpkg "github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/reflector/fakes"
 	"github.com/stretchr/testify/require"
 )
 
+// Helper for building a GetLedgerLatency func.
+func mockGetLedgerLatency(duration time.Duration, err error) func(ctx context.Context) (time.Duration, error) {
+	return func(ctx context.Context) (time.Duration, error) {
+		return duration, err
+	}
+}
+
 func TestSupervisorParsingSnapshotURL(t *testing.T) {
 	urls := "s3://segment-ctlstore-snapshots-stage/snapshot.db.gz,s3://segment-ctlstore-snapshots-stage/snapshot.db"
 	sup, err := SupervisorFromConfig(SupervisorConfig{
-		SnapshotURL: urls,
-		Latencier: &ctlstore.MockLatencier{
-			Latency: time.Second,
-		},
+		SnapshotURL:      urls,
+		GetLedgerLatency: mockGetLedgerLatency(time.Second, nil),
 		MaxLedgerLatency: time.Minute,
 	})
 	require.NoError(t, err)
@@ -62,9 +66,7 @@ func TestSupervisor(t *testing.T) {
 		SnapshotURL:      "file://" + archivePath,
 		LDBPath:          ldbDbPath,
 		Reflector:        reflector,
-		Latencier: &ctlstore.MockLatencier{
-			Latency: time.Second,
-		},
+		GetLedgerLatency: mockGetLedgerLatency(time.Second, nil),
 		MaxLedgerLatency: time.Minute,
 	}
 
@@ -193,9 +195,7 @@ func TestSupervisorSnapshotReflectorCtl(t *testing.T) {
 		SnapshotURL:      "file://" + archivePath,
 		LDBPath:          ldbDbPath,
 		Reflector:        reflector,
-		Latencier: &ctlstore.MockLatencier{
-			Latency: time.Second,
-		},
+		GetLedgerLatency: mockGetLedgerLatency(time.Second, nil),
 		MaxLedgerLatency: time.Minute,
 	})
 	require.NoError(t, err)
@@ -233,18 +233,16 @@ func TestSupervisorMaximumLedgerLatency(t *testing.T) {
 	ldbDbPath := filepath.Join(tmpPath, "ldb.db")
 	archivePath := filepath.Join(tmpPath, "archive.db")
 
-	mockLatencier := &ctlstore.MockLatencier{
-		Latency: time.Second,
-	}
-	sv, err := SupervisorFromConfig(SupervisorConfig{
+	svI, err := SupervisorFromConfig(SupervisorConfig{
 		SnapshotInterval: 100 * time.Millisecond,
 		SnapshotURL:      "file://" + archivePath,
 		LDBPath:          ldbDbPath,
 		Reflector:        fakes.NewFakeReflector(),
-		Latencier:        mockLatencier,
+		GetLedgerLatency: mockGetLedgerLatency(time.Second, nil),
 		MaxLedgerLatency: time.Minute,
 	})
 	require.NoError(t, err)
+	sv := svI.(*supervisor)
 	defer sv.Close()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -276,7 +274,7 @@ func TestSupervisorMaximumLedgerLatency(t *testing.T) {
 	}
 
 	// Bump up the latency
-	mockLatencier.Latency = time.Hour
+	sv.getLedgerLatency = mockGetLedgerLatency(time.Hour, nil)
 
 	sctx, scancel = context.WithTimeout(ctx, 1*time.Second)
 	defer scancel()

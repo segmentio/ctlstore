@@ -302,7 +302,7 @@ func supervisor(ctx context.Context, args []string) {
 			LDBPath:          cliCfg.ReflectorConfig.LDBPath, // use the reflector config's ldb path here
 			Reflector:        reflector,                      // compose the reflector, since it will start with the supervisor
 			MaxLedgerLatency: cliCfg.MaxLedgerLatency,
-			Latencier:        reader,
+			GetLedgerLatency: reader.GetLedgerLatency,
 		})
 		if err != nil {
 			return errors.Wrap(err, "start supervisor")

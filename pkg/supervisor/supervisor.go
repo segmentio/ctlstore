@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/segmentio/ctlstore"
 	"github.com/segmentio/ctlstore/pkg/reflector"
 	"github.com/segmentio/events"
 	"github.com/segmentio/stats"
@@ -31,7 +30,7 @@ type SupervisorConfig struct {
 	LDBPath          string
 	Reflector        Reflector
 	MaxLedgerLatency time.Duration
-	Latencier        ctlstore.Latencier
+	GetLedgerLatency func(ctx context.Context) (time.Duration, error)
 }
 
 type supervisor struct {
@@ -40,13 +39,13 @@ type supervisor struct {
 	LDBPath          string
 	Snapshots        []archivedSnapshot
 	reflectorCtl     *reflector.ReflectorCtl
-	latencier        ctlstore.Latencier
+	getLedgerLatency func(ctx context.Context) (time.Duration, error)
 	maxLedgerLatency time.Duration
 }
 
 func SupervisorFromConfig(config SupervisorConfig) (Supervisor, error) {
-	if config.Latencier == nil {
-		return nil, errors.New("latencier is required")
+	if config.GetLedgerLatency == nil {
+		return nil, errors.New("GetLedgerLatency func is required")
 	}
 	if config.MaxLedgerLatency == 0 {
 		return nil, errors.New("max ledger latency is required")
@@ -68,7 +67,7 @@ func SupervisorFromConfig(config SupervisorConfig) (Supervisor, error) {
 		LDBPath:          config.LDBPath,
 		Snapshots:        snapshots,
 		reflectorCtl:     reflector.NewReflectorCtl(config.Reflector),
-		latencier:        config.Latencier,
+		getLedgerLatency: config.GetLedgerLatency,
 		maxLedgerLatency: config.MaxLedgerLatency,
 	}, nil
 }
@@ -150,7 +149,7 @@ func (s *supervisor) Start(ctx context.Context) {
 			// We need to first catch up, or else we'll upload snapshots that are out-of-date
 			// which would put a significant amount of load on the exective because every new
 			// reflector will have to sync a potentially very large chunk of the DML ledger.
-			latency, err := s.latencier.GetLedgerLatency(ctx)
+			latency, err := s.getLedgerLatency(ctx)
 			if err != nil {
 				return err
 			}
