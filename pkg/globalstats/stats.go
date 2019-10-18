@@ -43,14 +43,11 @@ var (
 )
 
 func Observe(name string, value interface{}, tags ...stats.Tag) {
-	mut.Lock()
-	defer mut.Unlock()
-
-	lazyInitializeEngine()
-
-	if stopped || engine == nil {
+	engine, ok := lazyInitializeEngine()
+	if !ok {
 		return
 	}
+
 	if rand.Float64() > config.SamplePct {
 		return
 	}
@@ -58,14 +55,11 @@ func Observe(name string, value interface{}, tags ...stats.Tag) {
 }
 
 func Incr(name string, tags ...stats.Tag) {
-	mut.Lock()
-	defer mut.Unlock()
-
-	lazyInitializeEngine()
-
-	if stopped || engine == nil {
+	engine, ok := lazyInitializeEngine()
+	if !ok {
 		return
 	}
+
 	engine.Incr(name, tags...)
 }
 
@@ -75,6 +69,7 @@ func Disable() {
 
 	stopped = true
 
+	// Stop any goroutines launched from any previous Initialize calls.
 	if flusherStop != nil {
 		close(flusherStop)
 		flusherStop = nil
@@ -89,9 +84,17 @@ func Initialize(ctx context.Context, cfg Config) {
 	globalctx = ctx
 }
 
-func lazyInitializeEngine() {
+func lazyInitializeEngine() (*stats.Engine, bool) {
 	if stopped || engine != nil {
-		return
+		return engine, !stopped
+	}
+
+	mut.Lock()
+	defer mut.Unlock()
+
+	// Perform a second check after grabbing the mutex, in case there was competition for the lock.
+	if stopped || engine != nil {
+		return engine, !stopped
 	}
 
 	if config.AppName == "" {
@@ -115,6 +118,9 @@ func lazyInitializeEngine() {
 	if config.CtlstoreVersion == "" {
 		config.CtlstoreVersion = version
 	}
+	if globalctx == nil {
+		globalctx = context.Background()
+	}
 
 	err := func() error {
 		if config.SamplePct > 1 || config.SamplePct < 0 {
@@ -127,11 +133,11 @@ func lazyInitializeEngine() {
 		return nil
 	}()
 	if err != nil {
-		events.Log("Could not initialize ctlstore global stats: %{error}s", err)
-		return
+		events.Log("Could not initialize ctlstore globalstats: %{error}s", err)
+		return nil, false
 	}
 
-	// Stop any goroutines from any previous Initialize calls.
+	// Stop any goroutines launched from any previous Initialize calls.
 	if flusherStop != nil {
 		close(flusherStop)
 	}
@@ -144,6 +150,8 @@ func lazyInitializeEngine() {
 	engine = stats.NewEngine(statsPrefix, config.StatsHandler, tags...)
 
 	defer flusher(globalctx, flusherStop, config.FlushEvery, engine)
+
+	return engine, true
 }
 
 func flusher(ctx context.Context, stop <-chan struct{}, flushEvery time.Duration, engine *stats.Engine) {
