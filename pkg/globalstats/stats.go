@@ -104,11 +104,11 @@ func lazyInitializeEngine() {
 	if config.FlushEvery == 0 {
 		config.FlushEvery = 10 * time.Second
 	}
+	if config.StatsHandler == nil {
+		config.StatsHandler = stats.DefaultEngine.Handler
+	}
 
 	err := func() error {
-		if config.StatsHandler == nil {
-			return errors.New("no datadog client supplied")
-		}
 		if config.SamplePct > 1 || config.SamplePct < 0 {
 			return errors.New("sample percentage must be in the range of (0, 1]")
 		}
