@@ -137,14 +137,11 @@ func lazyInitializeEngine() {
 	}
 	engine = stats.NewEngine(statsPrefix, config.StatsHandler, tags...)
 
-	defer flusher(globalctx, flusherStop, config.FlushEvery)
+	defer flusher(globalctx, flusherStop, config.FlushEvery, engine)
 }
 
-func flusher(ctx context.Context, stop <-chan struct{}, flushEvery time.Duration) {
-	defer func() {
-		engine.Flush()
-	}()
-
+func flusher(ctx context.Context, stop <-chan struct{}, flushEvery time.Duration, engine *stats.Engine) {
+	defer engine.Flush()
 	for {
 		select {
 		case <-ctx.Done():
