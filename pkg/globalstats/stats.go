@@ -18,6 +18,11 @@ const (
 	statsPrefix = "ctlstore.global"
 )
 
+// version will be set by CI using ld_flags to the git SHA on which the binary was built
+var (
+	version = "unknown"
+)
+
 type (
 	Config struct {
 		CtlstoreVersion string
@@ -107,6 +112,9 @@ func lazyInitializeEngine() {
 	if config.StatsHandler == nil {
 		config.StatsHandler = stats.DefaultEngine.Handler
 	}
+	if config.CtlstoreVersion == "" {
+		config.CtlstoreVersion = version
+	}
 
 	err := func() error {
 		if config.SamplePct > 1 || config.SamplePct < 0 {
@@ -114,9 +122,6 @@ func lazyInitializeEngine() {
 		}
 		if config.FlushEvery < 0 {
 			return errors.New("flush rate must be a positive duration")
-		}
-		if config.CtlstoreVersion == "" {
-			return errors.New("must supply the ctlstore version")
 		}
 
 		return nil

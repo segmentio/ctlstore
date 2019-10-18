@@ -25,7 +25,7 @@ install:
 
 .PHONY: build
 build: deps
-	$Qgo build -ldflags="-X github.com/segmentio/ctlstore.Version=${VERSION}" -o ./bin/ctlstore ./pkg/cmd/ctlstore
+	$Qgo build -ldflags="-X github.com/segmentio/ctlstore.Version=${VERSION} -X github.com/segmentio/ctlstore/pkg/globalstats.version=${VERSION}" -o ./bin/ctlstore ./pkg/cmd/ctlstore
 
 .PHONY: docker
 docker:
