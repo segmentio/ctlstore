@@ -31,6 +31,7 @@ type SupervisorConfig struct {
 	LDBPath          string
 	Reflector        Reflector
 	MaxLedgerLatency time.Duration
+	Latencier        ctlstore.Latencier
 }
 
 type supervisor struct {
@@ -39,11 +40,18 @@ type supervisor struct {
 	LDBPath          string
 	Snapshots        []archivedSnapshot
 	reflectorCtl     *reflector.ReflectorCtl
-	reader           *ctlstore.LDBReader
+	latencier        ctlstore.Latencier
 	maxLedgerLatency time.Duration
 }
 
 func SupervisorFromConfig(config SupervisorConfig) (Supervisor, error) {
+	if config.Latencier == nil {
+		return nil, errors.New("latencier is required")
+	}
+	if config.MaxLedgerLatency == 0 {
+		return nil, errors.New("max ledger latency is required")
+	}
+
 	var snapshots []archivedSnapshot
 	urls := strings.Split(config.SnapshotURL, ",")
 	for _, url := range urls {
@@ -54,18 +62,13 @@ func SupervisorFromConfig(config SupervisorConfig) (Supervisor, error) {
 		snapshots = append(snapshots, snapshot)
 	}
 
-	reader, err := ctlstore.ReaderForPath(config.LDBPath)
-	if err != nil {
-		return nil, errors.Wrap(err, "create supervisor LDB reader")
-	}
-
 	return &supervisor{
 		SleepDuration:    config.SnapshotInterval,
 		BreatheDuration:  5 * time.Second,
 		LDBPath:          config.LDBPath,
 		Snapshots:        snapshots,
 		reflectorCtl:     reflector.NewReflectorCtl(config.Reflector),
-		reader:           reader,
+		latencier:        config.Latencier,
 		maxLedgerLatency: config.MaxLedgerLatency,
 	}, nil
 }
@@ -147,7 +150,7 @@ func (s *supervisor) Start(ctx context.Context) {
 			// We need to first catch up, or else we'll upload snapshots that are out-of-date
 			// which would put a significant amount of load on the exective because every new
 			// reflector will have to sync a potentially very large chunk of the DML ledger.
-			latency, err := s.reader.GetLedgerLatency(ctx)
+			latency, err := s.latencier.GetLedgerLatency(ctx)
 			if err != nil {
 				return err
 			}

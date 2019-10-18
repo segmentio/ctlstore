@@ -292,12 +292,17 @@ func supervisor(ctx context.Context, args []string) {
 			return errors.Wrap(err, "build supervisor reflector")
 		}
 
+		reader, err := ctlstore.ReaderForPath(cliCfg.ReflectorConfig.LDBPath)
+		if err != nil {
+			return errors.Wrap(err, "create supervisor LDB reader")
+		}
 		supervisor, err := supervisorpkg.SupervisorFromConfig(supervisorpkg.SupervisorConfig{
 			SnapshotInterval: cliCfg.SnapshotInterval,
 			SnapshotURL:      cliCfg.SnapshotURL,
 			LDBPath:          cliCfg.ReflectorConfig.LDBPath, // use the reflector config's ldb path here
 			Reflector:        reflector,                      // compose the reflector, since it will start with the supervisor
 			MaxLedgerLatency: cliCfg.MaxLedgerLatency,
+			Latencier:        reader,
 		})
 		if err != nil {
 			return errors.Wrap(err, "start supervisor")

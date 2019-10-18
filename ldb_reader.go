@@ -50,6 +50,23 @@ func (reader *LDBReader) GetLastSequence(ctx context.Context) (schema.DMLSequenc
 	return ldb.FetchSeqFromLdb(ctx, reader.Db)
 }
 
+type Latencier interface {
+	GetLedgerLatency(ctx context.Context) (time.Duration, error)
+}
+
+type MockLatencier struct {
+	Latency time.Duration
+	Err     error
+}
+
+var _ Latencier = (*MockLatencier)(nil)
+
+func (l *MockLatencier) GetLedgerLatency(ctx context.Context) (time.Duration, error) {
+	return l.Latency, l.Err
+}
+
+var _ Latencier = (*LDBReader)(nil)
+
 // GetLedgerLatency returns the difference between the current time and the timestamp
 // from the last DML ledger update processed by the reflector. ErrNoLedgerUpdates will
 // be returned if no DML statements have been processed.
