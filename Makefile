@@ -5,6 +5,8 @@ Q=
 
 GOTESTFLAGS = -race -count 1
 
+export GO111MODULE?=on
+
 .PHONY: deps
 deps:
 	$Qgo get -d ./...
@@ -23,7 +25,7 @@ install:
 
 .PHONY: build
 build: deps
-	$Qgo build -ldflags="-X github.com/segmentio/ctlstore.Version=${VERSION}" -o ./bin/ctlstore ./pkg/cmd/ctlstore
+	$Qgo build -ldflags="-X github.com/segmentio/ctlstore.Version=${VERSION} -X github.com/segmentio/ctlstore/pkg/globalstats.version=${VERSION}" -o ./bin/ctlstore ./pkg/cmd/ctlstore
 
 .PHONY: docker
 docker:
