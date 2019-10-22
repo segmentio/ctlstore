@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/pkg/errors"
 	ldbpkg "github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/reflector/fakes"
 	"github.com/stretchr/testify/require"
@@ -284,6 +285,25 @@ func TestSupervisorMaximumLedgerLatency(t *testing.T) {
 	}()
 
 	// This should skip a snapshot because of the latency, we don't expect an archive to be created.
+	sv.Start(sctx)
+
+	_, err = os.Stat(archivePath)
+	require.Error(t, err, "Did not expect an archive to be created, due to max ledger latency")
+
+	// Return an error from GetLedgerLatency
+	sv.getLedgerLatency = mockGetLedgerLatency(time.Minute, errors.New("Oops"))
+
+	sctx, scancel = context.WithTimeout(ctx, 1*time.Second)
+	defer scancel()
+	go func() {
+		// Wait for snapshot to complete
+		time.Sleep(10 * time.Millisecond)
+		// Cancels the context passed to the supervisor, which should cause it
+		// to return from the Start() call
+		scancel()
+	}()
+
+	// This should skip a snapshot because of the error, we don't expect an archive to be created.
 	sv.Start(sctx)
 
 	_, err = os.Stat(archivePath)
