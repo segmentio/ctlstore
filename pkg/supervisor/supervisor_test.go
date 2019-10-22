@@ -263,15 +263,12 @@ func TestSupervisorMaximumLedgerLatency(t *testing.T) {
 	sv.Start(sctx)
 
 	_, err = os.Stat(archivePath)
-	if err != nil {
-		t.Fatalf("No archive created")
-	}
+	require.NoError(t, err, "Expected an archive to be created")
 
-	// Now clear the archive file.
+	// Now clear the archive file so we can verify that the supervisor does not
+	// create a snapshot if the ledger latency is too much.
 	err = os.Remove(archivePath)
-	if err != nil {
-		t.Fatalf("Failed to remove archive")
-	}
+	require.NoError(t, err, "Failed to remove archive")
 
 	// Bump up the latency
 	sv.getLedgerLatency = mockGetLedgerLatency(time.Hour, nil)
@@ -290,7 +287,5 @@ func TestSupervisorMaximumLedgerLatency(t *testing.T) {
 	sv.Start(sctx)
 
 	_, err = os.Stat(archivePath)
-	if err == nil {
-		t.Fatalf("Archive created, but not expected")
-	}
+	require.Error(t, err, "Did not expect an archive to be created, due to max ledger latency")
 }
