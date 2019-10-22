@@ -149,7 +149,7 @@ func lazyInitializeEngine() (*stats.Engine, bool) {
 	}
 	engine = stats.NewEngine(statsPrefix, config.StatsHandler, tags...)
 
-	defer flusher(globalctx, flusherStop, config.FlushEvery, engine)
+	go flusher(globalctx, flusherStop, config.FlushEvery, engine)
 
 	return engine, true
 }
