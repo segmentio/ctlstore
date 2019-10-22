@@ -106,8 +106,7 @@ func lazyInitializeEngine() (*stats.Engine, bool) {
 	}
 	if config.SamplePct == 0 {
 		// By default, only sample 10% of the observations.
-		// TODO: reset to 10% vvvv
-		config.SamplePct = 1
+		config.SamplePct = 0.10
 	}
 	if config.FlushEvery == 0 {
 		config.FlushEvery = 10 * time.Second
