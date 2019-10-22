@@ -292,17 +292,24 @@ func supervisor(ctx context.Context, args []string) {
 			return errors.Wrap(err, "build supervisor reflector")
 		}
 
-		reader, err := ctlstore.ReaderForPath(cliCfg.ReflectorConfig.LDBPath)
-		if err != nil {
-			return errors.Wrap(err, "create supervisor LDB reader")
-		}
 		supervisor, err := supervisorpkg.SupervisorFromConfig(supervisorpkg.SupervisorConfig{
 			SnapshotInterval: cliCfg.SnapshotInterval,
 			SnapshotURL:      cliCfg.SnapshotURL,
 			LDBPath:          cliCfg.ReflectorConfig.LDBPath, // use the reflector config's ldb path here
 			Reflector:        reflector,                      // compose the reflector, since it will start with the supervisor
 			MaxLedgerLatency: cliCfg.MaxLedgerLatency,
-			GetLedgerLatency: reader.GetLedgerLatency,
+			GetLedgerLatency: func(ctx context.Context) (time.Duration, error) {
+				// Construct a new reader on each call to GetLedgerLatency, since the
+				// LDB may not exist yet. In that case, we just want to surface an error
+				// to the supervisor itself so it can decide how to handle it, instead of
+				// failing on start up.
+				reader, err := ctlstore.ReaderForPath(cliCfg.ReflectorConfig.LDBPath)
+				if err != nil {
+					return 0, errors.Wrap(err, "create supervisor LDB reader")
+				}
+
+				return reader.GetLedgerLatency(ctx)
+			},
 		})
 		if err != nil {
 			return errors.Wrap(err, "start supervisor")
