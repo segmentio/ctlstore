@@ -86,7 +86,7 @@ type supervisorCliConfig struct {
 	ReflectorConfig     reflectorCliConfig `conf:"reflector" help:"reflector configuration"`
 	Shadow              bool               `conf:"shadow" help:"set this to true to emit shadow=true metric tags"`
 	Dogstatsd           dogstatsdConfig    `conf:"dogstatsd" help:"dogstatsd Configuration"`
-	MaxLedgerLatency    time.Duration      `conf:"minimum-ledger-latency" help:"Minimum ledger latency, at which the supervisor halts snapshots and waits for the ledger to catch up."`
+	MaxLedgerLatency    time.Duration      `conf:"max-ledger-latency" help:"Maximum ledger latency, at which the supervisor halts snapshots and waits for the ledger to catch up."`
 }
 
 // ledgerHealthConfig configures the behavior of the container
