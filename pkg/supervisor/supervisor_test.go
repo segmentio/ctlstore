@@ -10,15 +10,25 @@ import (
 	"testing"
 	"time"
 
+	"github.com/pkg/errors"
 	ldbpkg "github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/reflector/fakes"
 	"github.com/stretchr/testify/require"
 )
 
+// Helper for building a GetLedgerLatency func.
+func mockGetLedgerLatency(duration time.Duration, err error) func(ctx context.Context) (time.Duration, error) {
+	return func(ctx context.Context) (time.Duration, error) {
+		return duration, err
+	}
+}
+
 func TestSupervisorParsingSnapshotURL(t *testing.T) {
 	urls := "s3://segment-ctlstore-snapshots-stage/snapshot.db.gz,s3://segment-ctlstore-snapshots-stage/snapshot.db"
 	sup, err := SupervisorFromConfig(SupervisorConfig{
-		SnapshotURL: urls,
+		SnapshotURL:      urls,
+		GetLedgerLatency: mockGetLedgerLatency(time.Second, nil),
+		MaxLedgerLatency: time.Minute,
 	})
 	require.NoError(t, err)
 	supi, ok := sup.(*supervisor)
@@ -42,6 +52,8 @@ func TestSupervisor(t *testing.T) {
 	ldbDbPath := filepath.Join(tmpPath, "ldb.db")
 	archivePath := filepath.Join(tmpPath, "archive.db")
 
+	expectedSeqNumber := 100
+
 	reflector := fakes.NewFakeReflector()
 	defer func() {
 		// reflector should not be running
@@ -55,6 +67,8 @@ func TestSupervisor(t *testing.T) {
 		SnapshotURL:      "file://" + archivePath,
 		LDBPath:          ldbDbPath,
 		Reflector:        reflector,
+		GetLedgerLatency: mockGetLedgerLatency(time.Second, nil),
+		MaxLedgerLatency: time.Minute,
 	}
 
 	sv, err := SupervisorFromConfig(cfg)
@@ -72,7 +86,7 @@ func TestSupervisor(t *testing.T) {
 
 	_, err = ldb.Exec(
 		fmt.Sprintf("REPLACE INTO %s (id, seq) VALUES(?, ?)", ldbpkg.LDBSeqTableName),
-		ldbpkg.LDBSeqTableID, 100)
+		ldbpkg.LDBSeqTableID, expectedSeqNumber)
 	require.NoError(t, err)
 
 	sctx, scancel := context.WithTimeout(ctx, 1*time.Second)
@@ -155,7 +169,7 @@ func TestSupervisor(t *testing.T) {
 	var gotSeq int
 	err = row.Scan(&gotSeq)
 	require.NoError(t, err)
-	require.EqualValues(t, 100, gotSeq)
+	require.EqualValues(t, expectedSeqNumber, gotSeq)
 }
 
 // verifies that the embedded reflector is properly shutdown
@@ -182,6 +196,8 @@ func TestSupervisorSnapshotReflectorCtl(t *testing.T) {
 		SnapshotURL:      "file://" + archivePath,
 		LDBPath:          ldbDbPath,
 		Reflector:        reflector,
+		GetLedgerLatency: mockGetLedgerLatency(time.Second, nil),
+		MaxLedgerLatency: time.Minute,
 	})
 	require.NoError(t, err)
 	require.NotNil(t, supervisorI)
@@ -209,4 +225,87 @@ func TestSupervisorSnapshotReflectorCtl(t *testing.T) {
 	// verify no more events (steady state)
 	time.Sleep(100 * time.Millisecond)
 	require.Equal(t, 0, len(reflector.Events))
+}
+
+func TestSupervisorMaximumLedgerLatency(t *testing.T) {
+	tmpPath, err := ioutil.TempDir("", "")
+	require.NoError(t, err)
+	defer os.RemoveAll(tmpPath)
+	ldbDbPath := filepath.Join(tmpPath, "ldb.db")
+	archivePath := filepath.Join(tmpPath, "archive.db")
+
+	svI, err := SupervisorFromConfig(SupervisorConfig{
+		SnapshotInterval: 100 * time.Millisecond,
+		SnapshotURL:      "file://" + archivePath,
+		LDBPath:          ldbDbPath,
+		Reflector:        fakes.NewFakeReflector(),
+		GetLedgerLatency: mockGetLedgerLatency(time.Second, nil),
+		MaxLedgerLatency: time.Minute,
+	})
+	require.NoError(t, err)
+	sv := svI.(*supervisor)
+	defer sv.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sctx, scancel := context.WithTimeout(ctx, 1*time.Second)
+	defer scancel()
+
+	go func() {
+		// Wait for snapshot to complete
+		time.Sleep(10 * time.Millisecond)
+		// Cancels the context passed to the supervisor, which should cause it
+		// to return from the Start() call
+		scancel()
+	}()
+
+	// This should create a snapshot because the latency is below the max. An archive file should be created.
+	sv.Start(sctx)
+
+	_, err = os.Stat(archivePath)
+	require.NoError(t, err, "Expected an archive to be created")
+
+	// Now clear the archive file so we can verify that the supervisor does not
+	// create a snapshot if the ledger latency is too much.
+	err = os.Remove(archivePath)
+	require.NoError(t, err, "Failed to remove archive")
+
+	// Bump up the latency
+	sv.getLedgerLatency = mockGetLedgerLatency(time.Hour, nil)
+
+	sctx, scancel = context.WithTimeout(ctx, 1*time.Second)
+	defer scancel()
+	go func() {
+		// Wait for snapshot to complete
+		time.Sleep(10 * time.Millisecond)
+		// Cancels the context passed to the supervisor, which should cause it
+		// to return from the Start() call
+		scancel()
+	}()
+
+	// This should skip a snapshot because of the latency, we don't expect an archive to be created.
+	sv.Start(sctx)
+
+	_, err = os.Stat(archivePath)
+	require.Error(t, err, "Did not expect an archive to be created, due to max ledger latency")
+
+	// Return an error from GetLedgerLatency
+	sv.getLedgerLatency = mockGetLedgerLatency(time.Minute, errors.New("Oops"))
+
+	sctx, scancel = context.WithTimeout(ctx, 1*time.Second)
+	defer scancel()
+	go func() {
+		// Wait for snapshot to complete
+		time.Sleep(10 * time.Millisecond)
+		// Cancels the context passed to the supervisor, which should cause it
+		// to return from the Start() call
+		scancel()
+	}()
+
+	// This should skip a snapshot because of the error, we don't expect an archive to be created.
+	sv.Start(sctx)
+
+	_, err = os.Stat(archivePath)
+	require.Error(t, err, "Did not expect an archive to be created, due to max ledger latency")
 }

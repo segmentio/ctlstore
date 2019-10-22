@@ -86,6 +86,7 @@ type supervisorCliConfig struct {
 	ReflectorConfig     reflectorCliConfig `conf:"reflector" help:"reflector configuration"`
 	Shadow              bool               `conf:"shadow" help:"set this to true to emit shadow=true metric tags"`
 	Dogstatsd           dogstatsdConfig    `conf:"dogstatsd" help:"dogstatsd Configuration"`
+	MaxLedgerLatency    time.Duration      `conf:"max-ledger-latency" help:"Maximum ledger latency, at which the supervisor halts snapshots and waits for the ledger to catch up."`
 }
 
 // ledgerHealthConfig configures the behavior of the container
@@ -265,6 +266,7 @@ func supervisor(ctx context.Context, args []string) {
 			SnapshotInterval: 5 * time.Minute,
 			Dogstatsd:        defaultDogstatsdConfig(),
 			ReflectorConfig:  reflectorConfig,
+			MaxLedgerLatency: 10 * time.Minute,
 		}
 		loadConfig(&cliCfg, "supervisor", args)
 		if cliCfg.Debug {
@@ -295,6 +297,19 @@ func supervisor(ctx context.Context, args []string) {
 			SnapshotURL:      cliCfg.SnapshotURL,
 			LDBPath:          cliCfg.ReflectorConfig.LDBPath, // use the reflector config's ldb path here
 			Reflector:        reflector,                      // compose the reflector, since it will start with the supervisor
+			MaxLedgerLatency: cliCfg.MaxLedgerLatency,
+			GetLedgerLatency: func(ctx context.Context) (time.Duration, error) {
+				// Construct a new reader on each call to GetLedgerLatency, since the
+				// LDB may not exist yet. In that case, we just want to surface an error
+				// to the supervisor itself so it can decide how to handle it, instead of
+				// failing on start up.
+				reader, err := ctlstore.ReaderForPath(cliCfg.ReflectorConfig.LDBPath)
+				if err != nil {
+					return 0, errors.Wrap(err, "create supervisor LDB reader")
+				}
+
+				return reader.GetLedgerLatency(ctx)
+			},
 		})
 		if err != nil {
 			return errors.Wrap(err, "start supervisor")

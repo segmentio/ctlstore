@@ -29,17 +29,28 @@ type SupervisorConfig struct {
 	SnapshotURL      string
 	LDBPath          string
 	Reflector        Reflector
+	MaxLedgerLatency time.Duration
+	GetLedgerLatency func(ctx context.Context) (time.Duration, error)
 }
 
 type supervisor struct {
-	SleepDuration   time.Duration
-	BreatheDuration time.Duration
-	LDBPath         string
-	Snapshots       []archivedSnapshot
-	reflectorCtl    *reflector.ReflectorCtl
+	SleepDuration    time.Duration
+	BreatheDuration  time.Duration
+	LDBPath          string
+	Snapshots        []archivedSnapshot
+	reflectorCtl     *reflector.ReflectorCtl
+	getLedgerLatency func(ctx context.Context) (time.Duration, error)
+	maxLedgerLatency time.Duration
 }
 
 func SupervisorFromConfig(config SupervisorConfig) (Supervisor, error) {
+	if config.GetLedgerLatency == nil {
+		return nil, errors.New("GetLedgerLatency func is required")
+	}
+	if config.MaxLedgerLatency == 0 {
+		return nil, errors.New("max ledger latency is required")
+	}
+
 	var snapshots []archivedSnapshot
 	urls := strings.Split(config.SnapshotURL, ",")
 	for _, url := range urls {
@@ -49,12 +60,15 @@ func SupervisorFromConfig(config SupervisorConfig) (Supervisor, error) {
 		}
 		snapshots = append(snapshots, snapshot)
 	}
+
 	return &supervisor{
-		SleepDuration:   config.SnapshotInterval,
-		BreatheDuration: 5 * time.Second,
-		LDBPath:         config.LDBPath,
-		Snapshots:       snapshots,
-		reflectorCtl:    reflector.NewReflectorCtl(config.Reflector),
+		SleepDuration:    config.SnapshotInterval,
+		BreatheDuration:  5 * time.Second,
+		LDBPath:          config.LDBPath,
+		Snapshots:        snapshots,
+		reflectorCtl:     reflector.NewReflectorCtl(config.Reflector),
+		getLedgerLatency: config.GetLedgerLatency,
+		maxLedgerLatency: config.MaxLedgerLatency,
 	}, nil
 }
 
@@ -130,14 +144,33 @@ func (s *supervisor) Start(ctx context.Context) {
 	s.reflectorCtl.Start(ctx)
 	defer events.Log("Stopped Supervisor")
 	for {
+		err := func() error {
+			// If the ledger latency is too much, temporarily stop uploading snapshots.
+			// We need to first catch up, or else we'll upload snapshots that are out-of-date
+			// which would put a significant amount of load on the exective because every new
+			// reflector will have to sync a potentially very large chunk of the DML ledger.
+			latency, err := s.getLedgerLatency(ctx)
+			if err != nil {
+				return err
+			}
+			isAcceptableLatency := s.maxLedgerLatency > latency
+
+			if !isAcceptableLatency {
+				stats.Incr("snapshot_skipped")
+				events.Log("Supervisor LDB is out-of-date; skipping snapshot (latency = %{latency}v, maximum latency allowed = %{maxLedgerLatency}v)", latency, s.maxLedgerLatency)
+				return nil
+			}
+
+			return s.snapshot(ctx)
+		}()
 		sleepDur := s.SleepDuration
-		err := s.snapshot(ctx)
 		if err != nil && errors.Cause(err) != context.Canceled {
 			s.incrementSnapshotErrorMetric(1)
 			events.Log("Error taking snapshot: %{error}+v", err)
 			// Use a shorter sleep duration for faster retries
 			sleepDur = s.BreatheDuration
 		}
+
 		select {
 		case <-time.After(sleepDur):
 		case <-ctx.Done():
