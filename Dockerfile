@@ -1,6 +1,8 @@
 FROM golang:alpine
-ENV SRC github.com/segmentio/ctlstore
+
 ARG VERSION
+ENV SRC github.com/segmentio/ctlstore
+ENV GO111MODULE on
 
 RUN apk --update add gcc git curl alpine-sdk libc6-compat ca-certificates sqlite \
   && curl -SsL https://github.com/segmentio/chamber/releases/download/v2.1.0/chamber-v2.1.0-linux-amd64 -o /bin/chamber \
@@ -8,11 +10,18 @@ RUN apk --update add gcc git curl alpine-sdk libc6-compat ca-certificates sqlite
 
 COPY . /go/src/${SRC}
 
-RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore.Version=$VERSION" ${SRC}/pkg/cmd/ctlstore \
-  && cp ${GOPATH}/bin/ctlstore /usr/local/bin
+RUN CGO_ENABLED=1 \
+  go install \
+  -ldflags="-X github.com/segmentio/ctlstore.Version=$VERSION -X github.com/segmentio/ctlstore/pkg/globalstats.version=$VERSION" \
+  ${SRC}/pkg/cmd/ctlstore \
+  && \
+  cp ${GOPATH}/bin/ctlstore /usr/local/bin
 
-RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore.Version=$VERSION" ${SRC}/pkg/cmd/ctlstore-cli \
-  && cp ${GOPATH}/bin/ctlstore-cli /usr/local/bin
+RUN CGO_ENABLED=1 go install \
+  -ldflags="-X github.com/segmentio/ctlstore.Version=$VERSION -X github.com/segmentio/ctlstore/pkg/globalstats.version=$VERSION" \
+  ${SRC}/pkg/cmd/ctlstore-cli \
+  && \
+  cp ${GOPATH}/bin/ctlstore-cli /usr/local/bin
 
 RUN apk del gcc git curl alpine-sdk libc6-compat
 
