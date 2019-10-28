@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"path/filepath"
 	"strings"
@@ -87,6 +88,8 @@ type supervisorCliConfig struct {
 	Shadow              bool               `conf:"shadow" help:"set this to true to emit shadow=true metric tags"`
 	Dogstatsd           dogstatsdConfig    `conf:"dogstatsd" help:"dogstatsd Configuration"`
 	MaxLedgerLatency    time.Duration      `conf:"max-ledger-latency" help:"Maximum ledger latency, at which the supervisor halts snapshots and waits for the ledger to catch up."`
+	PPROF               conf.PPROF         `conf:"pprof" help:"Go profiling configuration"`
+	Address             string             `conf:"address" help:"address on which the server should listen for health checks"`
 }
 
 // ledgerHealthConfig configures the behavior of the container
@@ -267,11 +270,25 @@ func supervisor(ctx context.Context, args []string) {
 			Dogstatsd:        defaultDogstatsdConfig(),
 			ReflectorConfig:  reflectorConfig,
 			MaxLedgerLatency: 10 * time.Minute,
+			PPROF:            conf.DefaultPPROF(),
+			Address:          ":3000",
 		}
 		loadConfig(&cliCfg, "supervisor", args)
 		if cliCfg.Debug {
 			enableDebug()
 		}
+
+		// Install the configured PPROF settings.
+		conf.SetPPROF(cliCfg.PPROF)
+
+		// Start an HTTP server to respond to ECS health checks and serve PPROF.
+		go func() {
+			http.HandleFunc("/internal/health", func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(200)
+			})
+
+			events.Log("error with healthcheck: %+{error}v", http.ListenAndServe(cliCfg.Address, nil))
+		}()
 
 		shadow := "false"
 		if cliCfg.Shadow {
