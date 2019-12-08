@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/stats"
+	"github.com/segmentio/stats/v4"
 )
 
 const (

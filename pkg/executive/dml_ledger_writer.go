@@ -7,7 +7,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
-	"github.com/segmentio/stats"
+	"github.com/segmentio/stats/v4"
 )
 
 // Writes DML entries to log table within an existing transaction. Make

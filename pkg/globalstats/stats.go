@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/segmentio/events"
-	"github.com/segmentio/stats"
+	"github.com/segmentio/stats/v4"
 )
 
 const (

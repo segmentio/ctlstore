@@ -25,7 +25,7 @@ import (
 	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events"
 	_ "github.com/segmentio/events/log" // lets events actually log
-	"github.com/segmentio/stats"
+	"github.com/segmentio/stats/v4"
 )
 
 // Reflector represents a fully materialized reflector, which polls an

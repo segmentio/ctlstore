@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
-	"github.com/segmentio/stats"
+	"github.com/segmentio/stats/v4"
 )
 
 const (

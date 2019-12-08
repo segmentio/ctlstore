@@ -14,7 +14,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events"
-	"github.com/segmentio/stats"
+	"github.com/segmentio/stats/v4"
 )
 
 type (

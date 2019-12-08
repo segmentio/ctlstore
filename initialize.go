@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/segmentio/ctlstore/pkg/globalstats"
-	"github.com/segmentio/stats"
+	"github.com/segmentio/stats/v4"
 )
 
 // Initialize setup up global state for thing including global

@@ -10,7 +10,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/limits"
 	"github.com/segmentio/ctlstore/pkg/schema"
-	"github.com/segmentio/stats"
+	"github.com/segmentio/stats/v4"
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
