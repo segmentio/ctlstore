@@ -26,9 +26,9 @@ import (
 	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events"
 	_ "github.com/segmentio/events/sigevents"
-	"github.com/segmentio/stats"
-	"github.com/segmentio/stats/datadog"
-	"github.com/segmentio/stats/procstats"
+	"github.com/segmentio/stats/v4"
+	"github.com/segmentio/stats/v4/datadog"
+	"github.com/segmentio/stats/v4/procstats"
 )
 
 type dogstatsdConfig struct {

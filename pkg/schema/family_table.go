@@ -3,7 +3,7 @@ package schema
 import (
 	"strings"
 
-	"github.com/segmentio/stats"
+	"github.com/segmentio/stats/v4"
 )
 
 // FamilyTable composes a family name and a table name

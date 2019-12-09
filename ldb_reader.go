@@ -13,7 +13,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/stats"
+	"github.com/segmentio/stats/v4"
 )
 
 // LDBReader reads data from the LDB. The external interface is

@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/stats"
-	"github.com/segmentio/stats/datadog"
+	"github.com/segmentio/stats/v4"
+	"github.com/segmentio/stats/v4/datadog"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

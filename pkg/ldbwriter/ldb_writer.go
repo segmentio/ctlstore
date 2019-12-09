@@ -11,7 +11,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlite"
 	"github.com/segmentio/events"
-	"github.com/segmentio/stats"
+	"github.com/segmentio/stats/v4"
 )
 
 // Statement to update the sequence tracker, ensuring that it doesn't go
