@@ -9,7 +9,7 @@ import (
 
 const (
 	MinFieldNameLength = 1
-	MaxFieldNameLength = 30
+	MaxFieldNameLength = 64
 )
 
 var fieldNameChars = regexp.MustCompile("^$|^[a-z][a-z0-9_]*$")
