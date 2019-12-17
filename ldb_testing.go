@@ -18,7 +18,7 @@ import (
 
 // SetupLDBForTest changes the global default LDB path to the specified
 // path. A temporary directory should be passed here.
-func NewLDBTestUtil(t *testing.T) (*LDBTestUtil, func()) {
+func NewLDBTestUtil(t testing.TB) (*LDBTestUtil, func()) {
 	tmpDir, err := ioutil.TempDir("", "ldb_test")
 	if err != nil {
 		t.Fatal(err)
@@ -54,7 +54,7 @@ func NewLDBTestUtil(t *testing.T) (*LDBTestUtil, func()) {
 // into a "fake" LDB.
 type LDBTestUtil struct {
 	DB *sql.DB
-	T  *testing.T
+	T  testing.TB
 }
 
 // LDBTestTableDef is used to pass a table definition to CreateTable
