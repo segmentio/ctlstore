@@ -1,4 +1,10 @@
 package ctlstore
 
-// version will be set by CI using ld_flags to the git SHA on which the binary was built
-var Version = "unknown"
+import "github.com/segmentio/ctlstore/pkg/version"
+
+// Version is the current ctlstore client library version.
+var Version string
+
+func init() {
+	Version = version.Get()
+}
