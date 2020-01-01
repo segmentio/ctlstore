@@ -73,7 +73,7 @@ func TestNormalizeFieldName(t *testing.T) {
 	}{
 		{"Lowers", "LOWER", "lower", nil},
 		{"Too short", "", "", ErrFieldNameTooShort},
-		{"Too long", strings.Repeat("a", 31), "", ErrFieldNameTooLong},
+		{"Too long", strings.Repeat("a", 100), "", ErrFieldNameTooLong},
 		{"Invalid chars", "abc-123", "", ErrFieldNameInvalid},
 		{"Starts with number", "1abc", "", ErrFieldNameInvalid},
 	}

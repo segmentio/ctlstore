@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: /go/src/github.com/segmentio/ctlstore
     docker:
-      - image: 528451384384.dkr.ecr.us-west-2.amazonaws.com/circleci-golang:1.13
+      - image: circleci/golang:1.13
       - image: mysql:5.6
         ports:
           - "3306:3306"
@@ -34,70 +34,9 @@ jobs:
           command: |
             make build
 
-  docker_push:
-    working_directory: /go/src/github.com/segmentio/ctlstore
-    docker:
-      - image: 528451384384.dkr.ecr.us-west-2.amazonaws.com/circleci-golang:1.13
-    steps:
-      - checkout
-      - setup_remote_docker: { reusable: true, docker_layer_caching: true }
-      - attach_workspace: { at: . }
-      - run:
-          name: Deps
-          command: |
-            make deps
-      - run:
-          name: Vendor
-          command: |
-            make vendor
-      - run:
-          name: Publish Docker Images
-          command: |
-            $(aws ecr get-login --no-include-email --region ${AWS_REGION})
-            make release
-      - store_artifacts:
-          path: .run
-          destination: trebuchet
-
-  docker_push_non_master:
-    working_directory: /go/src/github.com/segmentio/ctlstore
-    docker:
-      - image: 528451384384.dkr.ecr.us-west-2.amazonaws.com/circleci-golang:1.13
-    steps:
-      - checkout
-      - setup_remote_docker: { reusable: true, docker_layer_caching: true }
-      - attach_workspace: { at: . }
-      - run:
-          name: Deps
-          command: |
-            make deps
-      - run:
-          name: Vendor
-          command: |
-            make vendor
-      - run:
-          name: Publish Docker Images
-          command: |
-            $(aws ecr get-login --no-include-email --region ${AWS_REGION})
-            make release-nonmaster
-      - store_artifacts:
-          path: .run
-          destination: trebuchet
-
-
 workflows:
   version: 2
   run:
     jobs:
       - build:
           context: snyk
-      - docker_push:
-          filters:
-            branches:
-              only: master
-      - docker_push_non_master:
-          filters:
-            branches:
-              ignore: master
-
-
