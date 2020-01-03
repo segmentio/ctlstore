@@ -118,7 +118,7 @@ func Initialize(ctx context.Context, cfg Config) {
 
 	// Validate that all config values are valid.
 	if cfg.FlushEvery < 0 {
-		events.Log("Could not initialize flagon global stats: %{error}s", errors.New("flush rate must be a positive duration"))
+		events.Log("Could not initialize ctlstore global stats: %{error}s", errors.New("flush rate must be a positive duration"))
 		return
 	}
 
