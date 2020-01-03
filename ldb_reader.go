@@ -107,7 +107,7 @@ func (reader *LDBReader) GetRowsByKeyPrefix(ctx context.Context, familyName stri
 		return nil, err
 	}
 	if len(key) == 0 {
-		globalstats.Incr("full-table-scans", stats.T("family", familyName), stats.T("table", tableName))
+		globalstats.Incr("full-table-scans", familyName, tableName)
 	}
 	rows, err := stmt.QueryContext(ctx, key...)
 	switch {

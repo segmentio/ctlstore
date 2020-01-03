@@ -1,5 +1,5 @@
 VERSION     := $(shell git describe --tags --always --dirty="-dev")
-LDFLAGS     := -ldflags='-X "github.com/segmentio/ctlstore.Version=$(VERSION)"'
+LDFLAGS     := -ldflags='-X "github.com/segmentio/ctlstore/pkg/version.version=$(VERSION)"'
 DOCKER_REPO := 528451384384.dkr.ecr.us-west-2.amazonaws.com/ctlstore
 Q=
 
@@ -25,7 +25,7 @@ install:
 
 .PHONY: build
 build: deps
-	$Qgo build -ldflags="-X github.com/segmentio/ctlstore.Version=${VERSION} -X github.com/segmentio/ctlstore/pkg/globalstats.version=${VERSION}" -o ./bin/ctlstore ./pkg/cmd/ctlstore
+	$Qgo build -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=${VERSION} -X github.com/segmentio/ctlstore/pkg/globalstats.version=${VERSION}" -o ./bin/ctlstore ./pkg/cmd/ctlstore
 
 .PHONY: docker
 docker:
