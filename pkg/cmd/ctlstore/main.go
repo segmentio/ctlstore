@@ -46,6 +46,7 @@ type sidecarConfig struct {
 }
 
 type reflectorCliConfig struct {
+	CreateDirsOnStartup   bool               `conf:"create-dirs-on-startup" help:"Whether or not the reflector should create required directories on startup"`
 	LDBPath               string             `conf:"ldb-path" help:"Path to LDB file" validate:"nonzero"`
 	ChangelogPath         string             `conf:"changelog-path" help:"Path to changelog file"`
 	ChangelogSize         int                `conf:"changelog-size" help:"Maximum size of the changelog file"`
@@ -472,6 +473,7 @@ func reflector(ctx context.Context, args []string) {
 
 func defaultReflectorCLIConfig(isSupervisor bool) reflectorCliConfig {
 	config := reflectorCliConfig{
+		CreateDirsOnStartup:   false,
 		LDBPath:               "",
 		ChangelogPath:         "",
 		ChangelogSize:         1 * 1024 * 1024,
@@ -523,6 +525,25 @@ func newSidecar(config sidecarConfig) (*sidecarpkg.Sidecar, error) {
 func newReflector(cliCfg reflectorCliConfig, isSupervisor bool) (*reflectorpkg.Reflector, error) {
 	if cliCfg.LedgerHealth.Disable {
 		events.Log("DEPRECATION NOTICE: use --disable-ecs-behavior instead of --disable to control this ledger monitor behavior")
+	}
+	if cliCfg.CreateDirsOnStartup {
+		paths := []string{cliCfg.LDBPath, cliCfg.ChangelogPath}
+		for _, path := range paths {
+			if path == "" {
+				continue
+			}
+			dir := filepath.Dir(path)
+			_, err := os.Stat(dir)
+			if err != nil {
+				if os.IsNotExist(err) {
+					events.Log("Required directory %{dir}q does not exist. Creating...", dir)
+					err = os.MkdirAll(dir, 0755)
+					if err != nil {
+						return nil, errors.Wrapf(err, "make required reflector dir %q", dir)
+					}
+				}
+			}
+		}
 	}
 	return reflectorpkg.ReflectorFromConfig(reflectorpkg.ReflectorConfig{
 		LDBPath:       cliCfg.LDBPath,
