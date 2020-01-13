@@ -70,7 +70,6 @@ func TestGlobalStats(t *testing.T) {
 
 	// Verify that the three Incr operations were flushed.
 	flusherMeasures, ok := h.measuresByName["ctlstore.global"]
-	fmt.Printf("%+v\n", h.measuresByName)
 	require.True(t, ok)
 	// Sort the measures we received so that we can reliably compare the output.
 	sort.Slice(flusherMeasures, func(i, j int) bool {
@@ -78,11 +77,14 @@ func TestGlobalStats(t *testing.T) {
 		if len(fi.Fields) != len(fj.Fields) || len(fi.Fields) == 0 {
 			return len(fi.Fields) < len(fj.Fields)
 		}
-
-		return fi.Fields[0].Value.Int() < fj.Fields[0].Value.Int()
+		if fi.Fields[0].Value.Int() != fj.Fields[0].Value.Int() {
+			return fi.Fields[0].Value.Int() < fj.Fields[0].Value.Int()
+		}
+		return fi.Fields[0].Name < fj.Fields[0].Name
 	})
+	fmt.Printf("%+v\n", flusherMeasures)
 	require.Equal(t, []stats.Measure{
-		stats.Measure{
+		{
 			Name: "ctlstore.global",
 			Fields: []stats.Field{
 				stats.MakeField("dropped-stats", 0, stats.Counter),
@@ -92,19 +94,7 @@ func TestGlobalStats(t *testing.T) {
 				stats.T("version", "unknown"),
 			},
 		},
-		stats.Measure{
-			Name: "ctlstore.global",
-			Fields: []stats.Field{
-				stats.MakeField("b", 1, stats.Counter),
-			},
-			Tags: []stats.Tag{
-				stats.T("app", "globalstats.test"),
-				stats.T("family", "family-a"),
-				stats.T("table", "table-a"),
-				stats.T("version", "unknown"),
-			},
-		},
-		stats.Measure{
+		{
 			Name: "ctlstore.global",
 			Fields: []stats.Field{
 				stats.MakeField("a", 1, stats.Counter),
@@ -116,7 +106,19 @@ func TestGlobalStats(t *testing.T) {
 				stats.T("version", "unknown"),
 			},
 		},
-		stats.Measure{
+		{
+			Name: "ctlstore.global",
+			Fields: []stats.Field{
+				stats.MakeField("b", 1, stats.Counter),
+			},
+			Tags: []stats.Tag{
+				stats.T("app", "globalstats.test"),
+				stats.T("family", "family-a"),
+				stats.T("table", "table-a"),
+				stats.T("version", "unknown"),
+			},
+		},
+		{
 			Name: "ctlstore.global",
 			Fields: []stats.Field{
 				stats.MakeField("a", 2, stats.Counter),
