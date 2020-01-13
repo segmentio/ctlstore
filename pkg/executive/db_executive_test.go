@@ -163,6 +163,7 @@ func newCtlDBTestConnection(t *testing.T, dbType string) (*sql.DB, func()) {
 		if err != nil {
 			t.Fatalf("Query error: %+v", err)
 		}
+		defer rows.Close()
 
 		dropDDL := []string{}
 		for rows.Next() {

@@ -77,6 +77,7 @@ func TestDMLLogWriterAdd(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
+			defer rows.Close()
 
 			i := 0
 			for rows.Next() {
