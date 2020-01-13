@@ -51,8 +51,9 @@ func TestApplyDMLStatement(t *testing.T) {
 
 	rows, err := db.Query("SELECT * FROM foo")
 	if err != nil {
-		t.Errorf("Could not SELECT from test table, error %v", err)
+		t.Fatalf("Could not SELECT from test table, error %v", err)
 	}
+	defer rows.Close()
 
 	rowCount := 0
 	rowData := []string{}
@@ -177,6 +178,7 @@ func TestApplyDMLStatementTransaction(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Could not SELECT from test table, error %v", err)
 	}
+	defer rows.Close()
 
 	rowCount := 0
 	rowData := []string{}
