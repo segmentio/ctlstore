@@ -293,6 +293,7 @@ func supervisor(ctx context.Context, args []string) {
 			http.Handle("/metrics", promHandler)
 
 			go func() {
+				events.Log("Serving Prometheus metrics on %s", reflectorConfig.MetricsBind)
 				http.ListenAndServe(reflectorConfig.MetricsBind, nil)
 			}()
 		}
