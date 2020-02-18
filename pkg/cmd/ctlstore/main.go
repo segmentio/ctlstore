@@ -286,23 +286,10 @@ func supervisor(ctx context.Context, args []string) {
 			shadow = "true"
 		}
 
-		var promHandler *prometheus.Handler
-		if len(reflectorConfig.MetricsBind) > 0 {
-			promHandler = &prometheus.Handler{}
-
-			http.Handle("/metrics", promHandler)
-
-			go func() {
-				events.Log("Serving Prometheus metrics on %s", reflectorConfig.MetricsBind)
-				http.ListenAndServe(reflectorConfig.MetricsBind, nil)
-			}()
-		}
-
 		_, teardown := configureDogstatsd(ctx, dogstatsdOpts{
-			config:            cliCfg.Dogstatsd,
-			statsPrefix:       "supervisor",
-			defaultTags:       []stats.Tag{stats.T("shadow", shadow)},
-			prometheusHandler: promHandler,
+			config:      cliCfg.Dogstatsd,
+			statsPrefix: "supervisor",
+			defaultTags: []stats.Tag{stats.T("shadow", shadow)},
 		})
 		defer teardown()
 		if err := utils.EnsureDirForFile(cliCfg.ReflectorConfig.LDBPath); err != nil {
@@ -480,9 +467,25 @@ func reflector(ctx context.Context, args []string) {
 	if cliCfg.Debug {
 		enableDebug()
 	}
+
+	var promHandler *prometheus.Handler
+	if len(cliCfg.MetricsBind) > 0 {
+		promHandler = &prometheus.Handler{}
+
+		http.Handle("/metrics", promHandler)
+
+		go func() {
+			events.Log("Serving Prometheus metrics on %s", cliCfg.MetricsBind)
+			err := http.ListenAndServe(cliCfg.MetricsBind, nil)
+			if err != nil {
+				events.Log("Failed to served Prometheus metrics: %s", err)
+			}
+		}()
+	}
 	_, teardown := configureDogstatsd(ctx, dogstatsdOpts{
-		config:      cliCfg.Dogstatsd,
-		statsPrefix: "reflector",
+		config:            cliCfg.Dogstatsd,
+		statsPrefix:       "reflector",
+		prometheusHandler: promHandler,
 	})
 	defer teardown()
 	reflector, err := newReflector(cliCfg, false)
