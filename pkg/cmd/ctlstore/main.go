@@ -29,6 +29,7 @@ import (
 	"github.com/segmentio/stats/v4"
 	"github.com/segmentio/stats/v4/datadog"
 	"github.com/segmentio/stats/v4/procstats"
+	"github.com/segmentio/stats/v4/prometheus"
 )
 
 type dogstatsdConfig struct {
@@ -59,6 +60,7 @@ type reflectorCliConfig struct {
 	Debug                 bool               `conf:"debug" help:"Turns on debug logging"`
 	LedgerHealth          ledgerHealthConfig `conf:"ledger-latency" help:"Configure ledger latency behavior"`
 	Dogstatsd             dogstatsdConfig    `conf:"dogstatsd" help:"dogstatsd Configuration"`
+	MetricsBind           string             `conf:"metrics-bind" help:"address to serve Prometheus metircs"`
 }
 
 type executiveCliConfig struct {
@@ -204,21 +206,32 @@ type dogstatsdOpts struct {
 	statsPrefix       string
 	defaultTags       []stats.Tag
 	defaultTagFilters []string
+	prometheusHandler *prometheus.Handler
 }
 
 func configureDogstatsd(ctx context.Context, opts dogstatsdOpts) (dd *datadog.Client, teardown func()) {
 	config := opts.config
-	if config.Address != "" {
-		if opts.statsPrefix == "" {
-			panic("configureDogstatsd: Invalid statsPrefix passed. Stop.")
-		}
+	if opts.statsPrefix == "" {
+		panic("configureDogstatsd: Invalid statsPrefix passed. Stop.")
+	}
 
+	if config.Address != "" {
 		dd = datadog.NewClientWith(datadog.ClientConfig{
 			Address:    config.Address,
 			BufferSize: config.BufferSize,
 			Filters:    opts.defaultTagFilters,
 		})
 		stats.Register(dd)
+
+		events.Log("Setup dogstatsd with addr:%{addr}s, buffersize:%{buffersize}d, prefix:%{pfx}s, version:%{version}s",
+			config.Address, config.BufferSize, opts.statsPrefix, ctlstore.Version)
+	}
+
+	if opts.prometheusHandler != nil {
+		stats.Register(opts.prometheusHandler)
+	}
+
+	if stats.DefaultEngine.Handler != stats.Discard {
 		stats.DefaultEngine.Prefix = fmt.Sprintf("ctlstore.%s", opts.statsPrefix)
 		stats.DefaultEngine.Tags = append(stats.DefaultEngine.Tags, stats.Tag{Name: "version", Value: ctlstore.Version})
 		for _, t := range opts.defaultTags {
@@ -227,9 +240,6 @@ func configureDogstatsd(ctx context.Context, opts dogstatsdOpts) (dd *datadog.Cl
 		stats.DefaultEngine.Tags = stats.SortTags(stats.DefaultEngine.Tags) // tags must be sorted
 
 		c := procstats.StartCollector(procstats.NewGoMetrics())
-
-		events.Log("Setup dogstatsd with addr:%{addr}s, buffersize:%{buffersize}d, prefix:%{pfx}s, version:%{version}s",
-			config.Address, config.BufferSize, opts.statsPrefix, ctlstore.Version)
 
 		go utils.CtxLoop(ctx, config.FlushEvery, stats.Flush)
 		return dd, func() {
@@ -275,6 +285,7 @@ func supervisor(ctx context.Context, args []string) {
 		if cliCfg.Shadow {
 			shadow = "true"
 		}
+
 		_, teardown := configureDogstatsd(ctx, dogstatsdOpts{
 			config:      cliCfg.Dogstatsd,
 			statsPrefix: "supervisor",
@@ -456,9 +467,25 @@ func reflector(ctx context.Context, args []string) {
 	if cliCfg.Debug {
 		enableDebug()
 	}
+
+	var promHandler *prometheus.Handler
+	if len(cliCfg.MetricsBind) > 0 {
+		promHandler = &prometheus.Handler{}
+
+		http.Handle("/metrics", promHandler)
+
+		go func() {
+			events.Log("Serving Prometheus metrics on %s", cliCfg.MetricsBind)
+			err := http.ListenAndServe(cliCfg.MetricsBind, nil)
+			if err != nil {
+				events.Log("Failed to served Prometheus metrics: %s", err)
+			}
+		}()
+	}
 	_, teardown := configureDogstatsd(ctx, dogstatsdOpts{
-		config:      cliCfg.Dogstatsd,
-		statsPrefix: "reflector",
+		config:            cliCfg.Dogstatsd,
+		statsPrefix:       "reflector",
+		prometheusHandler: promHandler,
 	})
 	defer teardown()
 	reflector, err := newReflector(cliCfg, false)

@@ -67,6 +67,8 @@ services:
       build:
         context: .
         dockerfile: Dockerfile
+      ports:
+        - 9090:9090
       entrypoint:
         - /usr/local/bin/ctlstore
         - reflector
@@ -81,6 +83,8 @@ services:
         - -upstream-dsn
         - ctldb:ctldbpw@tcp(mysql:3306)/ctldb?collation=utf8mb4_unicode_ci
         - -ledger-latency.disable # no ECS in a docker-compose environment
+        - -metrics-bind
+        - 0.0.0.0:9090
       volumes:
         - ldb:/var/spool/ctlstore
 
