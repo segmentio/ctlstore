@@ -3,16 +3,22 @@ package ctlstore
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/globalstats"
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/scanfunc"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
 	"github.com/segmentio/errors-go"
+	"github.com/segmentio/events"
 	"github.com/segmentio/stats/v4"
 )
 
@@ -25,6 +31,7 @@ type LDBReader struct {
 	getRowByKeyStmtCache        map[string]*sql.Stmt         // keyed by ldbTableName()
 	getRowsByKeyPrefixStmtCache map[prefixCacheKey]*sql.Stmt
 	mu                          sync.RWMutex
+	cancelWatcher               context.CancelFunc
 }
 
 type prefixCacheKey struct {
@@ -37,6 +44,55 @@ var (
 	ErrNeedFullKey          = errors.New("All primary key fields are required")
 	ErrNoLedgerUpdates      = errors.New("no ledger updates have been received yet")
 )
+
+func newLDBReaderFromPath(dirPath string, watch bool) (*LDBReader, error) {
+	var reader LDBReader
+	if watch {
+		ctx, cancel := context.WithCancel(context.Background())
+		reader.cancelWatcher = cancel
+
+		// To initialize this reader, we must first load an LDB:
+		last, err := lastLDBSync(dirPath)
+		if err != nil {
+			return nil, errors.Wrap(err, "checking last ldb sync")
+		}
+		if last == 0 {
+			return nil, fmt.Errorf("no LDB in path (%s)", dirPath)
+		}
+		err = reader.switchToLDB(dirPath, last)
+		if err != nil {
+			return nil, errors.Wrap(err, "switching ldbs")
+		}
+
+		// Then we can defer to the watcher goroutine to swap this
+		// reader LDB if a newer one appears:
+		go reader.watchForLDBs(ctx, dirPath, last)
+	} else {
+		path := filepath.Join(dirPath, ldb.DefaultLDBFilename)
+		db, err := newLDB(path)
+		if err != nil {
+			return nil, err
+		}
+
+		reader = LDBReader{Db: db}
+	}
+
+	return &reader, nil
+}
+
+func newLDB(path string) (*sql.DB, error) {
+	mode := "ro"
+	if !globalLDBReadOnly {
+		mode = "rwc"
+	}
+
+	db, err := ldb.OpenLDB(path, mode)
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
 
 // Constructs an LDBReader from a sql.DB. Really only useful for testing.
 func NewLDBReaderFromDB(db *sql.DB) *LDBReader {
@@ -244,14 +300,30 @@ func (reader *LDBReader) Close() error {
 	reader.mu.Lock()
 	defer reader.mu.Unlock()
 
+	if reader.cancelWatcher != nil {
+		reader.cancelWatcher()
+	}
+
+	return reader.closeDB()
+}
+
+// closeDB closes all reader-owned resources associated with the current DB.
+// It should only be called when the caller is holding the reader.mu mutex.
+func (reader *LDBReader) closeDB() error {
 	for _, stmt := range reader.getRowByKeyStmtCache {
 		stmt.Close()
 	}
+	reader.getRowByKeyStmtCache = map[string]*sql.Stmt{}
 	for _, stmt := range reader.getRowsByKeyPrefixStmtCache {
 		stmt.Close()
 	}
+	reader.getRowsByKeyPrefixStmtCache = map[prefixCacheKey]*sql.Stmt{}
 
-	return reader.Db.Close()
+	if reader.Db != nil {
+		return reader.Db.Close()
+	}
+
+	return nil
 }
 
 // Ping checks if the LDB is available
@@ -489,4 +561,111 @@ func (reader *LDBReader) getGetRowByKeyStmt(ctx context.Context, pk schema.Prima
 	}
 
 	return stmt, err
+}
+
+func (reader *LDBReader) watchForLDBs(ctx context.Context, dirPath string, last int64) {
+	// TODO: consider using a fs notification library instead of polling.
+	ticker := time.NewTicker(time.Second)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			fsLast, err := lastLDBSync(dirPath)
+			if err != nil {
+				events.Log("failed checking for last LDB sync: %{error}+v", errors.Wrap(err, "checking last ldb sync"))
+				errs.Incr("check-last-ldb-sync")
+				continue
+			}
+
+			// Only swap LDBs for this reader
+			if fsLast <= last {
+				continue
+			}
+			events.Log("found new LDB (%d > %d), switching...", fsLast, last)
+			last = fsLast
+
+			err = reader.switchToLDB(dirPath, last)
+			if err != nil {
+				events.Log("failed reloading new LDB: %{error}+v", errors.Wrap(err, "reloading LDB"))
+				errs.Incr("reload-ldb")
+			}
+		}
+	}
+}
+
+func (reader *LDBReader) switchToLDB(dirPath string, timestamp int64) error {
+	fullPath := filepath.Join(dirPath, fmt.Sprintf("%013d", timestamp), ldb.DefaultLDBFilename)
+
+	db, err := newLDB(fullPath)
+	if err != nil {
+		return errors.Wrap(err, "new ldb")
+	}
+
+	reader.mu.Lock()
+	defer reader.mu.Unlock()
+
+	if err = reader.closeDB(); err != nil {
+		return errors.Wrap(err, "closing db")
+	}
+
+	reader.Db = db
+
+	return nil
+}
+
+func lastLDBSync(dirPath string) (int64, error) {
+	// Loop through the files in the `dirPath` and look for the ldb.db with the
+	// highest associated timestamp. Return that.
+	var lastSync int64
+	err := filepath.Walk(dirPath, func(filePath string, info os.FileInfo, _ error) error {
+		// Ignore directories:
+		if info.IsDir() {
+			return nil
+		}
+
+		// We only care about the timestamps associated with `<path>/<timestamp>/ldb.db` files.
+		// Therefore, we ignore all other files (ldb.db.wal, etc).
+		if !strings.HasSuffix(filePath, ldb.DefaultLDBFilename) {
+			return nil
+		}
+
+		// Ignore `<path>/ldb.db`, which is the standard path for LDBs. We only care
+		// about versioned LDBs, which are those in a timestamped directory.
+		if strings.HasPrefix(filePath, filepath.Join(dirPath, ldb.DefaultLDBFilename)) {
+			return nil
+		}
+
+		// Omit the root path from the file path:
+		// dirPath + ["<timestamp>", ldb.DefaultLDBFilename]
+		localPath, err := filepath.Rel(dirPath, filePath)
+		if err != nil {
+			return errors.Wrapf(err, "base path (%s)", filePath)
+		}
+		fields := strings.Split(localPath, "/")
+
+		if len(fields) != 2 || fields[1] != ldb.DefaultLDBFilename {
+			events.Log("ignoring unexpected file in LDB path (%+v)", fields)
+			errs.Incr("unexpected-local-file")
+			return nil
+		}
+		timestamp, err := strconv.ParseInt(fields[0], 10, 64)
+		if err != nil {
+			events.Log("ignoring file with invalid timestamp in LDB path (%+v)", fields)
+			errs.Incr("invalid-timestamp-local-file")
+			return nil
+		}
+
+		if timestamp > lastSync {
+			lastSync = timestamp
+		}
+
+		return nil
+	})
+	if err != nil {
+		return 0, errors.Wrap(err, "filepath walk")
+	}
+
+	return lastSync, nil
 }

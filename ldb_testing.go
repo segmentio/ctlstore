@@ -24,13 +24,14 @@ func NewLDBTestUtil(t testing.TB) (*LDBTestUtil, func()) {
 		t.Fatal(err)
 	}
 
-	globalLDBPath = filepath.Join(tmpDir, ldb.DefaultLDBFilename)
+	globalLDBDirPath = tmpDir
+	path := filepath.Join(tmpDir, ldb.DefaultLDBFilename)
 	globalLDBReadOnly = false
 	globalReader = nil
 
 	db, err := sql.Open(ldb.LDBDatabaseDriver, fmt.Sprintf(
 		"file:%s?_journal_mode=wal&mode=%s&cache=shared",
-		globalLDBPath,
+		path,
 		"rwc",
 	))
 	if err != nil {
