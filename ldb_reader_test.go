@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -82,15 +83,15 @@ func TestGetLedgerLatency(t *testing.T) {
 }
 
 func TestLDBMustExistForReader(t *testing.T) {
-	oldGlobal := globalLDBPath
-	defer func() { globalLDBPath = oldGlobal }()
+	oldGlobal := globalLDBDirPath
+	defer func() { globalLDBDirPath = oldGlobal }()
 
-	tmpDir, err := ioutil.TempDir("", "ldb_must_exist")
+	var err error
+	globalLDBDirPath, err = ioutil.TempDir("", "ldb_must_exist")
 	require.NoError(t, err)
-	globalLDBPath = filepath.Join(tmpDir, ldb.DefaultLDBFilename)
 
 	r, err := Reader()
-	require.EqualError(t, err, "no LDB found at "+globalLDBPath)
+	require.EqualError(t, err, fmt.Sprintf("no LDB found at %s/%s", globalLDBDirPath, ldb.DefaultLDBFilename))
 	require.Nil(t, r)
 
 	r, err = ReaderForPath("/does/not/exist/ldb.db")
@@ -476,6 +477,92 @@ func TestLDBReaderPing(t *testing.T) {
 	if want, got := true, reader.Ping(ctx); want != got {
 		t.Errorf("Expected %v, got %v", want, got)
 	}
+}
+
+func TestLDBVersioning(t *testing.T) {
+	require := require.New(t)
+	globalLDBReadOnly = false
+
+	// Initialize a new temporary directory, which we'll use
+	// as the path for storing timestamp-versioned LDBs.
+	path, err := ioutil.TempDir("", "ldb-versioning-tmp-path")
+	require.NoError(err)
+	defer os.RemoveAll(path)
+
+	// Initialize an LDBVersioned reader pointing at this directory
+	// which currently does not contain any LDBs. It should error.
+	reader, err := newVersionedLDBReader(path)
+	require.Error(err, "expected new reader to fail when directory contains no LDBs")
+	require.Nil(reader)
+
+	// So now we initialize a new LDB in this path, which should
+	// allow us to create a new LDB without error.
+	generateVersionedLDB(t, path, int64(1500000000000))
+
+	// Create a new reader, which should not fail this time, since an LDB exists
+	// in the associated folder.
+	reader, err = newVersionedLDBReader(path)
+	require.NoError(err)
+	defer reader.Close()
+	require.True(reader.Ping(context.Background()))
+
+	// Verify that this reader is consuming from the LDB we created above, based on
+	// what timestamp was written into the LDB on creation.
+	require.Equal(int64(1500000000000), getLDBTimestamp(t, reader))
+
+	// Now, create a newer LDB with a higher timestamp. The reader should pick this
+	// up and return the new timestamp.
+	generateVersionedLDB(t, path, int64(1500000000001))
+	time.Sleep(2 * time.Second) // Wait for the reader to pick up the new LDB.
+	require.Equal(int64(1500000000001), getLDBTimestamp(t, reader))
+
+	// As a safeguard, should a new LDB be generated with a _lower_ timestamp
+	// make sure that the reader does not consume it.
+	generateVersionedLDB(t, path, int64(1400000000000))
+	time.Sleep(2 * time.Second) // Wait for the reader to pick up the new LDB.
+	require.Equal(int64(1500000000001), getLDBTimestamp(t, reader))
+}
+
+func generateVersionedLDB(t *testing.T, path string, timestamp int64) {
+	require := require.New(t)
+
+	dirPath := filepath.Join(path, fmt.Sprintf("%013d", timestamp))
+	require.NoError(os.Mkdir(dirPath, 0755))
+
+	dbPath := filepath.Join(dirPath, "ldb.db")
+	db, err := sql.Open("sqlite3", dbPath)
+	require.NoError(err)
+
+	// Initialize the ctlstore LDB tables:
+	require.NoError(ldb.EnsureLdbInitialized(context.Background(), db))
+	_, err = db.Exec(
+		fmt.Sprintf("REPLACE INTO %s (id, seq) VALUES(?, ?)", ldb.LDBSeqTableName),
+		ldb.LDBSeqTableID, 1)
+	require.NoError(err)
+
+	// Initialize a fake ctlstore table which will store the timestamp
+	// of this LDB.
+	_, err = db.Exec(`
+		CREATE TABLE versioning___curr_ts (
+			key VARCHAR PRIMARY KEY,
+			timestamp BIGINT
+		);
+		
+		INSERT INTO versioning___curr_ts VALUES('now', ?);
+	`, timestamp)
+	require.NoError(err)
+}
+
+func getLDBTimestamp(t *testing.T, reader *LDBReader) int64 {
+	require := require.New(t)
+
+	var out struct {
+		timestamp int64 `ctlstore:"timestamp"`
+	}
+	ok, err := reader.GetRowByKey(context.Background(), &out, "versioning", "curr_ts", "now")
+	require.True(ok)
+	require.NoError(err)
+	return out.timestamp
 }
 
 // sql that is used to initialize the tests and benchmarks that
