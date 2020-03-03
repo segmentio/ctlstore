@@ -68,7 +68,7 @@ func newVersionedLDBReader(dirPath string) (*LDBReader, error) {
 	if last == 0 {
 		return nil, fmt.Errorf("no LDB in path (%s)", dirPath)
 	}
-	err = reader.switchToLDB(dirPath, last)
+	err = reader.switchLDB(dirPath, last)
 	if err != nil {
 		return nil, errors.Wrap(err, "switching ldbs")
 	}
@@ -94,7 +94,12 @@ func newLDB(path string) (*sql.DB, error) {
 		mode = "rwc"
 	}
 
-	db, err := ldb.OpenLDB(path, mode)
+	var db *sql.DB
+	if ldbVersioning {
+		db, err = ldb.OpenImmutableLDB(path)
+	} else {
+		db, err = ldb.OpenLDB(path, mode)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -594,7 +599,7 @@ func (reader *LDBReader) watchForLDBs(ctx context.Context, dirPath string, last 
 			events.Log("found new LDB (%d > %d), switching...", fsLast, last)
 			last = fsLast
 
-			err = reader.switchToLDB(dirPath, last)
+			err = reader.switchLDB(dirPath, last)
 			if err != nil {
 				events.Log("failed switching to new LDB: %{error}+v", err)
 				errs.Incr("switch-ldb")
@@ -603,7 +608,7 @@ func (reader *LDBReader) watchForLDBs(ctx context.Context, dirPath string, last 
 	}
 }
 
-func (reader *LDBReader) switchToLDB(dirPath string, timestamp int64) error {
+func (reader *LDBReader) switchLDB(dirPath string, timestamp int64) error {
 	fullPath := filepath.Join(dirPath, fmt.Sprintf("%013d", timestamp), ldb.DefaultLDBFilename)
 
 	db, err := newLDB(fullPath)
