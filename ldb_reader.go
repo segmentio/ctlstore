@@ -324,11 +324,15 @@ func (reader *LDBReader) Close() error {
 // It should only be called when the caller is holding the reader.mu mutex.
 func (reader *LDBReader) closeDB() error {
 	for _, stmt := range reader.getRowByKeyStmtCache {
-		stmt.Close()
+		if err := stmt.Close(); err != nil {
+			return err
+		}
 	}
 	reader.getRowByKeyStmtCache = map[string]*sql.Stmt{}
 	for _, stmt := range reader.getRowsByKeyPrefixStmtCache {
-		stmt.Close()
+		if err := stmt.Close(); err != nil {
+			return err
+		}
 	}
 	reader.getRowsByKeyPrefixStmtCache = map[prefixCacheKey]*sql.Stmt{}
 
