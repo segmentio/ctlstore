@@ -10,22 +10,25 @@ import (
 )
 
 const (
-	DefaultCtlstorePath      = "/var/spool/ctlstore/"
-	DefaultChangelogFilename = "change.log"
+	DefaultCtlstorePath        = "/var/spool/ctlstore/"
+	DefaultChangelogFilename   = "change.log"
+	defaultLDBVersioningSubdir = "versioned"
 )
 
 var (
-	globalLDBDirPath  = DefaultCtlstorePath
-	globalCLPath      = filepath.Join(DefaultCtlstorePath, DefaultChangelogFilename)
-	globalLDBReadOnly = true
-	globalReader      *LDBReader
-	globalReaderMu    sync.RWMutex
+	globalLDBDirPath           = DefaultCtlstorePath
+	globalLDBVersioningDirPath = filepath.Join(DefaultCtlstorePath, defaultLDBVersioningSubdir)
+	globalCLPath               = filepath.Join(DefaultCtlstorePath, DefaultChangelogFilename)
+	globalLDBReadOnly          = true
+	globalReader               *LDBReader
+	globalReaderMu             sync.RWMutex
 )
 
 func init() {
 	envPath := os.Getenv("CTLSTORE_PATH")
 	if envPath != "" {
 		globalLDBDirPath = envPath
+		globalLDBVersioningDirPath = filepath.Join(envPath, defaultLDBVersioningSubdir)
 		globalCLPath = filepath.Join(envPath, DefaultChangelogFilename)
 	}
 	sqlite.InitDriver()
@@ -52,7 +55,7 @@ func Reader() (*LDBReader, error) {
 			var reader *LDBReader
 			var err error
 			if ldbVersioning {
-				reader, err = newVersionedLDBReader(globalLDBDirPath)
+				reader, err = newVersionedLDBReader(globalLDBVersioningDirPath)
 			} else {
 				reader, err = newLDBReader(filepath.Join(globalLDBDirPath, ldb.DefaultLDBFilename))
 			}
