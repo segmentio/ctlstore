@@ -577,7 +577,6 @@ func (reader *LDBReader) getGetRowByKeyStmt(ctx context.Context, pk schema.Prima
 }
 
 func (reader *LDBReader) watchForLDBs(ctx context.Context, dirPath string, last int64) {
-	// TODO: consider using a fs notification library instead of polling.
 	ticker := time.NewTicker(time.Second)
 
 	for {
