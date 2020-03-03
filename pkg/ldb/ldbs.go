@@ -73,6 +73,10 @@ func OpenLDB(path string, mode string) (*sql.DB, error) {
 		fmt.Sprintf("file:%s?_journal_mode=wal&mode=%s", path, mode))
 }
 
+func OpenImmutableLDB(path string) (*sql.DB, error) {
+	return sql.Open("sqlite3_with_autocheckpoint_off", fmt.Sprintf("file:%s?immutable=true", path))
+}
+
 // Ensures the LDB is prepared for queries
 func EnsureLdbInitialized(ctx context.Context, db *sql.DB) error {
 	for _, statement := range ldbInitializeDDLs {

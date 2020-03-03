@@ -1,7 +1,6 @@
 package ctlstore
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -11,22 +10,25 @@ import (
 )
 
 const (
-	DefaultCtlstorePath      = "/var/spool/ctlstore/"
-	DefaultChangelogFilename = "change.log"
+	DefaultCtlstorePath        = "/var/spool/ctlstore/"
+	DefaultChangelogFilename   = "change.log"
+	defaultLDBVersioningSubdir = "versioned"
 )
 
 var (
-	globalLDBPath     = filepath.Join(DefaultCtlstorePath, ldb.DefaultLDBFilename)
-	globalCLPath      = filepath.Join(DefaultCtlstorePath, DefaultChangelogFilename)
-	globalLDBReadOnly = true
-	globalReader      *LDBReader
-	globalReaderMu    sync.RWMutex
+	globalLDBDirPath           = DefaultCtlstorePath
+	globalLDBVersioningDirPath = filepath.Join(DefaultCtlstorePath, defaultLDBVersioningSubdir)
+	globalCLPath               = filepath.Join(DefaultCtlstorePath, DefaultChangelogFilename)
+	globalLDBReadOnly          = true
+	globalReader               *LDBReader
+	globalReaderMu             sync.RWMutex
 )
 
 func init() {
 	envPath := os.Getenv("CTLSTORE_PATH")
 	if envPath != "" {
-		globalLDBPath = filepath.Join(envPath, ldb.DefaultLDBFilename)
+		globalLDBDirPath = envPath
+		globalLDBVersioningDirPath = filepath.Join(envPath, defaultLDBVersioningSubdir)
 		globalCLPath = filepath.Join(envPath, DefaultChangelogFilename)
 	}
 	sqlite.InitDriver()
@@ -35,24 +37,7 @@ func init() {
 // ReaderForPath opens an LDB at the provided path and returns an LDBReader
 // instance pointed at that LDB.
 func ReaderForPath(path string) (*LDBReader, error) {
-	_, err := os.Stat(path)
-	switch {
-	case os.IsNotExist(err):
-		return nil, fmt.Errorf("no LDB found at %s", path)
-	case err != nil:
-		return nil, err
-	}
-
-	mode := "ro"
-	if !globalLDBReadOnly {
-		mode = "rwc"
-	}
-
-	ldb, err := ldb.OpenLDB(path, mode)
-	if err != nil {
-		return nil, err
-	}
-	return &LDBReader{Db: ldb}, nil
+	return newLDBReader(path)
 }
 
 // Reader returns an LDBReader that can be used globally.
@@ -67,7 +52,13 @@ func Reader() (*LDBReader, error) {
 		defer globalReaderMu.Unlock()
 
 		if globalReader == nil {
-			reader, err := ReaderForPath(globalLDBPath)
+			var reader *LDBReader
+			var err error
+			if ldbVersioning {
+				reader, err = newVersionedLDBReader(globalLDBVersioningDirPath)
+			} else {
+				reader, err = newLDBReader(filepath.Join(globalLDBDirPath, ldb.DefaultLDBFilename))
+			}
 			if err != nil {
 				return nil, err
 			}
