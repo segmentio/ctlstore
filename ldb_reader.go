@@ -89,15 +89,15 @@ func newLDB(path string) (*sql.DB, error) {
 		return nil, err
 	}
 
-	mode := "ro"
-	if !globalLDBReadOnly {
-		mode = "rwc"
-	}
-
 	var db *sql.DB
 	if ldbVersioning {
 		db, err = ldb.OpenImmutableLDB(path)
 	} else {
+		mode := "ro"
+		if !globalLDBReadOnly {
+			mode = "rwc"
+		}
+
 		db, err = ldb.OpenLDB(path, mode)
 	}
 	if err != nil {
