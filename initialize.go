@@ -19,7 +19,7 @@ type Config struct {
 	// hot-reload new LDBs as they appear.
 	//
 	// By default, this is disabled.
-	LDBVersioning *bool
+	LDBVersioning bool
 }
 
 var ldbVersioning bool
@@ -36,9 +36,7 @@ func InitializeWithConfig(ctx context.Context, cfg Config) {
 		// Initialize globalstats with the provided configuration:
 		globalstats.Initialize(ctx, *cfg.Stats)
 	}
-	if cfg.LDBVersioning != nil {
-		ldbVersioning = *cfg.LDBVersioning
-	}
+	ldbVersioning = cfg.LDBVersioning
 }
 
 // Initialize sets up global state for thing including global
