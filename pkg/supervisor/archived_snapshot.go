@@ -12,7 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/utils"
-	"github.com/segmentio/events"
+	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
 )
 

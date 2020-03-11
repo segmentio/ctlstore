@@ -17,7 +17,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/limits"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
 	"github.com/segmentio/ctlstore/pkg/units"
-	"github.com/segmentio/events"
+	"github.com/segmentio/events/v2"
 )
 
 type TestExecutiveService struct {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/segmentio/ctlstore/pkg/changelog"
 	"github.com/segmentio/ctlstore/pkg/schema"
-	"github.com/segmentio/events"
+	"github.com/segmentio/events/v2"
 )
 
 type ChangelogCallback struct {

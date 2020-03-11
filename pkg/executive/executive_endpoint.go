@@ -14,7 +14,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
-	"github.com/segmentio/events"
+	"github.com/segmentio/events/v2"
 )
 
 // ExecutiveEndpoint is an HTTP 'wrapper' for ExecutiveInterface

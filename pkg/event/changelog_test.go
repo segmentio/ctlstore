@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/segmentio/ctlstore/pkg/tests"
-	_ "github.com/segmentio/events/text"
+	_ "github.com/segmentio/events/v2/text"
 	"github.com/stretchr/testify/require"
 )
 

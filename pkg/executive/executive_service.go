@@ -16,7 +16,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/limits"
 	"github.com/segmentio/ctlstore/pkg/utils"
-	"github.com/segmentio/events"
+	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
 )
 
