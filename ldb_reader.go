@@ -114,6 +114,7 @@ func NewLDBReaderFromDB(db *sql.DB) *LDBReader {
 
 // GetLastSequence returns the highest sequence number applied to the DB
 func (reader *LDBReader) GetLastSequence(ctx context.Context) (schema.DMLSequence, error) {
+	ctx = discardContext()
 	reader.mu.RLock()
 	defer reader.mu.RUnlock()
 	return ldb.FetchSeqFromLdb(ctx, reader.Db)
@@ -123,6 +124,7 @@ func (reader *LDBReader) GetLastSequence(ctx context.Context) (schema.DMLSequenc
 // from the last DML ledger update processed by the reflector. ErrNoLedgerUpdates will
 // be returned if no DML statements have been processed.
 func (reader *LDBReader) GetLedgerLatency(ctx context.Context) (time.Duration, error) {
+	ctx = discardContext()
 	row := reader.Db.QueryRowContext(ctx, "select timestamp from "+ldb.LDBLastUpdateTableName+" where name=?", ldb.LDBLastLedgerUpdateColumn)
 	var timestamp time.Time
 	err := row.Scan(&timestamp)
@@ -139,6 +141,7 @@ func (reader *LDBReader) GetLedgerLatency(ctx context.Context) (time.Duration, e
 // GetRowsByKeyPrefix returns a *Rows iterator that will supply all of the rows in
 // the family and table match the supplied primary key prefix.
 func (reader *LDBReader) GetRowsByKeyPrefix(ctx context.Context, familyName string, tableName string, key ...interface{}) (*Rows, error) {
+	ctx = discardContext()
 	start := time.Now()
 	defer func() {
 		globalstats.Observe("get_rows_by_key_prefix", time.Now().Sub(start),
@@ -209,6 +212,7 @@ func (reader *LDBReader) GetRowByKey(
 	tableName string,
 	key ...interface{},
 ) (found bool, err error) {
+	ctx = discardContext()
 	start := time.Now()
 	defer func() {
 		globalstats.Observe("get_row_by_key", time.Now().Sub(start),
@@ -345,6 +349,7 @@ func (reader *LDBReader) closeDB() error {
 
 // Ping checks if the LDB is available
 func (reader *LDBReader) Ping(ctx context.Context) bool {
+	ctx = discardContext()
 	reader.mu.RLock()
 	defer reader.mu.RUnlock()
 
@@ -684,4 +689,13 @@ func lookupLastLDBSync(dirPath string) (int64, error) {
 	}
 
 	return lastSync, nil
+}
+
+// discardContext returns context.Background(). the exported reader API uses the returned
+// value instead. This is done because the underlying sqlite CGO code that
+// the reader API ultimately calls does not handle interruptions optimally. Additionally
+// because the calls read from disk instead of making network calls, context cancellation is
+// arguably less important to begin with.
+func discardContext() context.Context {
+	return context.Background()
 }
