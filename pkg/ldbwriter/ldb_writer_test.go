@@ -14,6 +14,54 @@ import (
 
 var testLdbSeq int
 
+func TestNewlines(t *testing.T) {
+	for _, test := range []struct {
+		name       string
+		statements []string
+	}{
+		{
+			name: "newlines",
+			statements: []string{
+				"CREATE TABLE testing (id INTEGER, val VARCHAR, PRIMARY KEY(id));",
+				`REPLACE INTO testing ("id", "val") VALUES (1, 'one
+two
+three');`,
+			},
+		},
+		{
+			name: "newlines with literal",
+			statements: []string{
+				"CREATE TABLE testing (id INTEGER, val VARCHAR, PRIMARY KEY(id));",
+				`REPLACE INTO testing ("id", "val") VALUES (1, 'one
+\ntwo
+\nthree');`,
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			db, teardown := ldb.LDBForTest(t)
+			defer teardown()
+			ctx := context.Background()
+			writer := SqlLdbWriter{Db: db}
+
+			for _, statement := range test.statements {
+				err := writer.ApplyDMLStatement(ctx, schema.NewTestDMLStatement(statement))
+				require.NoError(t, err, "original statment: %q", statement)
+			}
+
+			rows, err := db.Query("select val from testing")
+			require.NoError(t, err)
+			for rows.Next() {
+				var val string
+				require.NoError(t, rows.Scan(&val))
+				fmt.Printf("%q\n", val)
+			}
+			require.NoError(t, rows.Err())
+			require.NoError(t, rows.Close())
+		})
+	}
+}
+
 func TestApplyDMLStatement(t *testing.T) {
 	var err error
 	db, teardown := ldb.LDBForTest(t)
