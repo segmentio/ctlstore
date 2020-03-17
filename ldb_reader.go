@@ -640,7 +640,12 @@ func lookupLastLDBSync(dirPath string) (int64, error) {
 	// Loop through the files in the `dirPath` and look for the ldb.db with the
 	// highest associated timestamp. Return that.
 	var lastSync int64
-	err := filepath.Walk(dirPath, func(filePath string, info os.FileInfo, _ error) error {
+	err := filepath.Walk(dirPath, func(filePath string, info os.FileInfo, err error) error {
+		// Bail if we hit any errors while visiting files/directories:
+		if info == nil || err != nil {
+			return err
+		}
+
 		// Ignore directories:
 		if info.IsDir() {
 			return nil
