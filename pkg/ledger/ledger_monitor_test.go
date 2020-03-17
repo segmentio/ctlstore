@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/ledger"
 	"github.com/segmentio/ctlstore/pkg/ledger/fakes"
-	_ "github.com/segmentio/events/log"
+	_ "github.com/segmentio/events/v2/log"
 	"github.com/stretchr/testify/require"
 )
 

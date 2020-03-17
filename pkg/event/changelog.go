@@ -13,7 +13,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events"
+	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
 )
 

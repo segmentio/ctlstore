@@ -10,7 +10,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/reflector"
-	"github.com/segmentio/events"
+	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
 )
 

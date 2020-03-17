@@ -6,7 +6,7 @@ import (
 
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlite"
-	"github.com/segmentio/events"
+	"github.com/segmentio/events/v2"
 )
 
 // CallbackWriter is an LDBWriter that delegates to another

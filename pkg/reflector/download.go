@@ -13,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events"
+	"github.com/segmentio/events/v2"
 )
 
 type downloadTo interface {

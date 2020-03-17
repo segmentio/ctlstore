@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events"
+	"github.com/segmentio/events/v2"
 )
 
 type fakeLogWriter struct {

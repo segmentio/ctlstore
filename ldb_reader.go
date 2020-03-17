@@ -18,7 +18,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events"
+	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
 )
 

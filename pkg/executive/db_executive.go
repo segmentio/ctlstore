@@ -14,7 +14,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/scanfunc"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
-	"github.com/segmentio/events"
+	"github.com/segmentio/events/v2"
 )
 
 const dmlLedgerTableName = "ctlstore_dml_ledger"

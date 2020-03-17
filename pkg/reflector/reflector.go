@@ -23,8 +23,8 @@ import (
 	"github.com/segmentio/ctlstore/pkg/logwriter"
 	"github.com/segmentio/ctlstore/pkg/sqlite"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events"
-	_ "github.com/segmentio/events/log" // lets events actually log
+	"github.com/segmentio/events/v2"
+	_ "github.com/segmentio/events/v2/log" // lets events actually log
 	"github.com/segmentio/stats/v4"
 )
 

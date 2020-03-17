@@ -8,7 +8,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/changelog"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlite"
-	"github.com/segmentio/events"
+	"github.com/segmentio/events/v2"
 )
 
 type LDBWriterWithChangelog struct {

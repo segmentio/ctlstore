@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/pkg/errors"
-	"github.com/segmentio/events"
+	"github.com/segmentio/events/v2"
 )
 
 type (
