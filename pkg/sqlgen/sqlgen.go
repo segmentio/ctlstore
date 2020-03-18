@@ -436,11 +436,18 @@ func SQLQuote(src interface{}) (dst string, err error) {
 	case []byte:
 		dst, err = sqlQuoteByteArray(v)
 	case string:
-		buf := bytes.NewBuffer([]byte{})
-		buf.WriteRune('\'')
-		buf.WriteString(strings.Replace(v, "'", "''", -1))
-		buf.WriteRune('\'')
-		dst = buf.String()
+		switch {
+		case strings.ContainsRune(v, '\x00'):
+			// if the string contains a NUL we need to encode as hex to prevent
+			// sqlite3 parsing errors.
+			dst, err = sqlQuoteByteArray([]byte(v))
+		default:
+			buf := bytes.NewBuffer([]byte{})
+			buf.WriteRune('\'')
+			buf.WriteString(strings.Replace(v, "'", "''", -1))
+			buf.WriteRune('\'')
+			dst = buf.String()
+		}
 	case fmt.Stringer:
 		dst = v.String()
 	default:
