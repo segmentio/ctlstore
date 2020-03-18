@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/segmentio/ctlstore/pkg/ctldb"
 	"github.com/segmentio/ctlstore/pkg/schema"
@@ -159,58 +161,148 @@ func TestMetaTableAddColumnDDL(t *testing.T) {
 }
 
 func TestMetaTableUpsertDML(t *testing.T) {
-	famName, _ := schema.NewFamilyName("family1")
-	tblName, _ := schema.NewTableName("table1")
-	tbl := MetaTable{
-		FamilyName: famName,
-		TableName:  tblName,
-		Fields: []schema.NamedFieldType{
-			{schema.FieldName{Name: "field1"}, schema.FTString},
-			{schema.FieldName{Name: "field2"}, schema.FTString},
-			{schema.FieldName{Name: "field3"}, schema.FTInteger},
-			{schema.FieldName{Name: "field4"}, schema.FTByteString},
+	for _, test := range []struct {
+		name string
+		meta func() MetaTable
+		row  func() []interface{}
+		want string
+	}{
+		{
+			name: "basic test",
+			meta: func() MetaTable {
+				famName, _ := schema.NewFamilyName("family1")
+				tblName, _ := schema.NewTableName("table1")
+				return MetaTable{
+					FamilyName: famName,
+					TableName:  tblName,
+					Fields: []schema.NamedFieldType{
+						{schema.FieldName{Name: "field1"}, schema.FTString},
+						{schema.FieldName{Name: "field2"}, schema.FTString},
+						{schema.FieldName{Name: "field3"}, schema.FTInteger},
+						{schema.FieldName{Name: "field4"}, schema.FTByteString},
+					},
+					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
+				}
+			},
+			row: func() []interface{} {
+				encoded := base64.StdEncoding.EncodeToString([]byte{1, 2, 3})
+				return []interface{}{"hello", "there", 123, encoded}
+			},
+			want: `REPLACE INTO family1___table1 ("field1","field2","field3","field4") ` +
+				`VALUES('hello','there',123,x'010203')`,
 		},
-		KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
-	}
-
-	encoded := base64.StdEncoding.EncodeToString([]byte{1, 2, 3})
-	got, err := tbl.UpsertDML([]interface{}{"hello", "there", 123, encoded})
-	if err != nil {
-		t.Fatalf("Unexpected error: %+v", err)
-	}
-	want := `REPLACE INTO family1___table1 ("field1","field2","field3","field4") ` +
-		`VALUES('hello','there',123,x'010203')`
-
-	if got != want {
-		t.Errorf("Expected: %v, Got: %v", want, got)
+		{
+			name: "upsert with null in key column",
+			meta: func() MetaTable {
+				famName, _ := schema.NewFamilyName("family1")
+				tblName, _ := schema.NewTableName("table1")
+				return MetaTable{
+					FamilyName: famName,
+					TableName:  tblName,
+					Fields: []schema.NamedFieldType{
+						{schema.FieldName{Name: "field1"}, schema.FTString},
+						{schema.FieldName{Name: "field2"}, schema.FTString},
+						{schema.FieldName{Name: "field3"}, schema.FTInteger},
+					},
+					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
+				}
+			},
+			row: func() []interface{} {
+				return []interface{}{"a\x00b", "there", 123}
+			},
+			want: `REPLACE INTO family1___table1 ("field1","field2","field3") ` +
+				`VALUES(x'610062','there',123)`,
+		},
+		{
+			name: "upsert with null in non-key column",
+			meta: func() MetaTable {
+				famName, _ := schema.NewFamilyName("family1")
+				tblName, _ := schema.NewTableName("table1")
+				return MetaTable{
+					FamilyName: famName,
+					TableName:  tblName,
+					Fields: []schema.NamedFieldType{
+						{schema.FieldName{Name: "field1"}, schema.FTString},
+						{schema.FieldName{Name: "field2"}, schema.FTString},
+						{schema.FieldName{Name: "field3"}, schema.FTInteger},
+					},
+					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
+				}
+			},
+			row: func() []interface{} {
+				return []interface{}{"hi", "a\x00b", 123}
+			},
+			want: `REPLACE INTO family1___table1 ("field1","field2","field3") ` +
+				`VALUES('hi',x'610062',123)`,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			tbl := test.meta()
+			got, err := tbl.UpsertDML(test.row())
+			require.NoError(t, err)
+			require.EqualValues(t, test.want, got)
+		})
 	}
 }
 
 func TestMetaTableDeleteDML(t *testing.T) {
-	famName, _ := schema.NewFamilyName("family1")
-	tblName, _ := schema.NewTableName("table1")
-	tbl := MetaTable{
-		FamilyName: famName,
-		TableName:  tblName,
-		Fields: []schema.NamedFieldType{
-			{schema.FieldName{Name: "field1"}, schema.FTString},
-			{schema.FieldName{Name: "field2"}, schema.FTByteString},
-			{schema.FieldName{Name: "field3"}, schema.FTInteger},
+	for _, test := range []struct {
+		name string
+		meta func() MetaTable
+		row  func() []interface{}
+		want string
+	}{
+		{
+			name: "basic test",
+			meta: func() MetaTable {
+				famName, _ := schema.NewFamilyName("family1")
+				tblName, _ := schema.NewTableName("table1")
+				return MetaTable{
+					FamilyName: famName,
+					TableName:  tblName,
+					Fields: []schema.NamedFieldType{
+						{schema.FieldName{Name: "field1"}, schema.FTString},
+						{schema.FieldName{Name: "field2"}, schema.FTByteString},
+						{schema.FieldName{Name: "field3"}, schema.FTInteger},
+					},
+					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
+				}
+			},
+			row: func() []interface{} {
+				encoded := base64.StdEncoding.EncodeToString([]byte{1, 2, 3})
+				return []interface{}{"hello", encoded}
+			},
+			want: `DELETE FROM family1___table1 WHERE ` +
+				`"field1" = 'hello' AND ` +
+				`"field2" = x'010203'`,
 		},
-		KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
-	}
-
-	encoded := base64.StdEncoding.EncodeToString([]byte{1, 2, 3})
-	got, err := tbl.DeleteDML([]interface{}{"hello", encoded})
-	if err != nil {
-		t.Fatalf("Unexpected error: %+v", err)
-	}
-	want := `DELETE FROM family1___table1 WHERE ` +
-		`"field1" = 'hello' AND ` +
-		`"field2" = x'010203'`
-
-	if got != want {
-		t.Errorf("Expected: %v, Got: %v", want, got)
+		{
+			name: "delete with null in key column",
+			meta: func() MetaTable {
+				famName, _ := schema.NewFamilyName("family1")
+				tblName, _ := schema.NewTableName("table1")
+				return MetaTable{
+					FamilyName: famName,
+					TableName:  tblName,
+					Fields: []schema.NamedFieldType{
+						{schema.FieldName{Name: "field1"}, schema.FTString},
+						{schema.FieldName{Name: "field2"}, schema.FTString},
+					},
+					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}}},
+				}
+			},
+			row: func() []interface{} {
+				return []interface{}{"a\x00b"}
+			},
+			want: `DELETE FROM family1___table1 WHERE "field1" = x'610062'`,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			tbl := test.meta()
+			got, err := tbl.DeleteDML(test.row())
+			require.NoError(t, err)
+			require.EqualValues(t, test.want, got)
+		})
 	}
 }
 

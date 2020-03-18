@@ -738,7 +738,32 @@ func testDBExecutiveMutate(t *testing.T, dbType string) {
 		expectErr   error
 		expectRows  map[string][]map[string]interface{}
 		expectDML   []string
+		skipDBTypes []string
 	}{
+		{
+			desc:        "MySQL String Column With Null Value",
+			skipDBTypes: []string{"sqlite3"}, // sqlite3 cannot retrieve this data without truncating so we skip it as a backend
+			reqs: []ExecutiveMutationRequest{
+				{
+					TableName: "table1",
+					Delete:    false,
+					Values: map[string]interface{}{
+						"field1": 1,
+						"field2": "a\u0000b",
+						"field3": 42,
+					},
+				},
+			},
+			expectRows: map[string][]map[string]interface{}{
+				"table1": {
+					{"field1": 1},
+				},
+			},
+			expectDML: []string{
+				`REPLACE INTO family1___table1 ("field1","field2","field3") ` +
+					`VALUES(1,x'610062',42)`,
+			},
+		},
 		{
 			desc: "Binary Column Null Value",
 			reqs: []ExecutiveMutationRequest{
@@ -1007,6 +1032,16 @@ func testDBExecutiveMutate(t *testing.T, dbType string) {
 	}
 
 	for caseIdx, testCase := range suite {
+		var skipTest bool
+		for _, skipDBType := range testCase.skipDBTypes {
+			if skipDBType == dbType {
+				skipTest = true
+			}
+		}
+		if skipTest {
+			continue
+		}
+
 		testName := fmt.Sprintf("[%d] %s", caseIdx, testCase.desc)
 		t.Run(testName, func(t *testing.T) {
 			u := newDbExecTestUtil(t, dbType)
