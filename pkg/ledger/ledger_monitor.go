@@ -103,6 +103,7 @@ func (m *Monitor) Start(ctx context.Context) {
 				}
 				m.healthy.SetFalse()
 			}
+			//TODO: do we care about the unknown state ?
 			//switch {
 			//case atomic.LoadInt64(&m.healthy) == 0:
 			//	stats.Set("ledger-health", 1, stats.T("status", "unknown"))
