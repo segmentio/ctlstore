@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"time"
 
-	"github.com/AlekSi/pointer"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecs"
@@ -36,6 +37,7 @@ type (
 		UnhealthyAttributeValue string        // if ledger latency is unhealthy use this attribute value
 		PollInterval            time.Duration // how often to check for ledger latency
 		AWSRegion               string        // which region to use for setting instance atts
+		HealthSocket            string
 	}
 	// Monitor is the main type which performs the ledger health monitoring.
 	Monitor struct {
@@ -45,6 +47,7 @@ type (
 		tickerFunc      func() *time.Ticker // helps us mock out time in tests
 		ecsClient       ECSClient           // helps us to mock out ECS API
 		checkCallback   func()              // called when a check is done. used for testing.
+		healthy         utils.AtomicBool
 	}
 	latencyFunc     func(ctx context.Context) (time.Duration, error)
 	ecsMetadataFunc func(ctx context.Context) (EcsMetadata, error)
@@ -69,7 +72,9 @@ func NewLedgerMonitor(cfg HealthConfig, llf latencyFunc, opts ...MonitorOpt) (*M
 func (m *Monitor) Start(ctx context.Context) {
 	events.Log("Ledger monitor starting")
 	defer events.Log("Ledger monitor stopped")
-	var health *bool // pointer for tri-state logic
+	if m.cfg.HealthSocket != "" {
+		go m.listenSocket(m.cfg.HealthSocket)
+	}
 	temporaryErrorLimit := 3
 	utils.CtxFireLoopTicker(ctx, m.tickerFunc(), func() {
 		defer m.checkCallback() // signal that the tick has finished
@@ -80,29 +85,37 @@ func (m *Monitor) Start(ctx context.Context) {
 			}
 			// always instrument ledger latency even if ECS behavior is disabled.
 			stats.Set("reflector-ledger-latency", latency)
-			if !m.cfg.DisableECSBehavior {
-				switch {
-				case latency <= m.cfg.MaxHealthyLatency && (health == nil || *health != true):
+			switch {
+			case latency <= m.cfg.MaxHealthyLatency && !m.isHealthy():
+				if !m.cfg.DisableECSBehavior {
 					// set a healthy attribute
 					if err := m.setHealthAttribute(ctx, m.cfg.HealthyAttributeValue); err != nil {
 						return errors.Wrap(err, "set healthy")
 					}
-					health = pointer.ToBool(true)
-				case latency > m.cfg.MaxHealthyLatency && (health == nil || *health != false):
+				}
+				m.healthy.SetTrue()
+			case latency > m.cfg.MaxHealthyLatency && m.isHealthy():
+				if !m.cfg.DisableECSBehavior {
 					// set an unhealthy attribute
 					if err := m.setHealthAttribute(ctx, m.cfg.UnhealthyAttributeValue); err != nil {
 						return errors.Wrap(err, "set unhealthy")
 					}
-					health = pointer.ToBool(false)
 				}
-				switch {
-				case health == nil:
-					stats.Set("ledger-health", 1, stats.T("status", "unknown"))
-				case *health == false:
-					stats.Set("ledger-health", 1, stats.T("status", "unhealthy"))
-				case *health == true:
-					stats.Set("ledger-health", 1, stats.T("status", "healthy"))
-				}
+				m.healthy.SetFalse()
+			}
+			//switch {
+			//case atomic.LoadInt64(&m.healthy) == 0:
+			//	stats.Set("ledger-health", 1, stats.T("status", "unknown"))
+			//case atomic.LoadInt64(m.healthy) == -1:
+			//	stats.Set("ledger-health", 1, stats.T("status", "unhealthy"))
+			//case atomic.LoadInt64(m.healthy) == 1:
+			//	stats.Set("ledger-health", 1, stats.T("status", "healthy"))
+			//}
+			switch {
+			case !m.isHealthy():
+				stats.Set("ledger-health", 1, stats.T("status", "unhealthy"))
+			case m.isHealthy():
+				stats.Set("ledger-health", 1, stats.T("status", "healthy"))
 			}
 			return nil
 		}()
@@ -120,6 +133,33 @@ func (m *Monitor) Start(ctx context.Context) {
 			events.Log("Could not monitor ledger latency: %s", err)
 			errs.IncrDefault(stats.Tag{Name: "op", Value: "monitor-ledger-latency"})
 		}
+	})
+}
+
+func (m *Monitor) isHealthy() bool {
+	return m.healthy.IsSet()
+}
+
+func (m *Monitor) listenSocket(sock string) error {
+	srv := http.Server{
+		Handler: m.hander(),
+	}
+	unix, err := net.Listen("unix", sock)
+	if err != nil {
+		return err
+	}
+	return srv.Serve(unix)
+}
+
+func (m *Monitor) hander() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		if m.isHealthy() {
+			if _, err := io.WriteString(w, "OK"); err != nil {
+				events.Log("failed to write monitor response: %s", err)
+			}
+			return
+		}
+		http.Error(w, "NOT OK", http.StatusServiceUnavailable)
 	})
 }
 

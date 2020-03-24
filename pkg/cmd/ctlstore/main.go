@@ -102,6 +102,7 @@ type ledgerHealthConfig struct {
 	UnhealthyAttributeValue string        `conf:"unhealth-attribute-value" help:"The value of the attribute if unhealthy"`
 	PollInterval            time.Duration `conf:"poll-interval" help:"How frequently the ledger health should be checked"`
 	AWSRegion               string        `conf:"aws-region" help:"The AWS region to use"`
+	HealthSocket            string        `conf:"health-socket" help:"Path to the health socket file"`
 }
 
 type heartbeatCliConfig struct {
