@@ -58,7 +58,7 @@ type reflectorCliConfig struct {
 	PollJitterCoefficient float64            `conf:"poll-jitter-coefficient" help:"Coefficient for poll jittering"`
 	QueryBlockSize        int                `conf:"query-block-size" help:"Number of ledger entries to get at once"`
 	Debug                 bool               `conf:"debug" help:"Turns on debug logging"`
-	LedgerHealth          ledgerHealthConfig `conf:"ledger-latency" help:"Configure ledger latency behavior"`
+	LedgerHealth          ledgerHealthConfig `conf:"ledger-health" help:"Configure ledger healthchecking behavior"`
 	Dogstatsd             dogstatsdConfig    `conf:"dogstatsd" help:"dogstatsd Configuration"`
 	MetricsBind           string             `conf:"metrics-bind" help:"address to serve Prometheus metircs"`
 }
@@ -566,6 +566,7 @@ func newReflector(cliCfg reflectorCliConfig, isSupervisor bool) (*reflectorpkg.R
 			UnhealthyAttributeValue: cliCfg.LedgerHealth.UnhealthyAttributeValue,
 			PollInterval:            cliCfg.LedgerHealth.PollInterval,
 			AWSRegion:               cliCfg.LedgerHealth.AWSRegion,
+			HealthSocket:            cliCfg.LedgerHealth.HealthSocket,
 		},
 		Upstream: reflectorpkg.UpstreamConfig{
 			Driver:                cliCfg.UpstreamDriver,
