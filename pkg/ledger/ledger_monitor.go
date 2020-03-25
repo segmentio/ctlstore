@@ -37,7 +37,7 @@ type (
 		UnhealthyAttributeValue string        // if ledger latency is unhealthy use this attribute value
 		PollInterval            time.Duration // how often to check for ledger latency
 		AWSRegion               string        // which region to use for setting instance atts
-		HealthSocket            string
+		HealthSocket            string        // unix-socket file to be used to expose health status
 	}
 	// Monitor is the main type which performs the ledger health monitoring.
 	Monitor struct {
@@ -73,7 +73,11 @@ func (m *Monitor) Start(ctx context.Context) {
 	events.Log("Ledger monitor starting")
 	defer events.Log("Ledger monitor stopped")
 	if m.cfg.HealthSocket != "" {
-		go m.listenSocket(m.cfg.HealthSocket)
+		go func() {
+			if err := m.listenSocket(m.cfg.HealthSocket); err != nil {
+				events.Log("failed to service health socket: %s", err)
+			}
+		}()
 	}
 	temporaryErrorLimit := 3
 	utils.CtxFireLoopTicker(ctx, m.tickerFunc(), func() {
@@ -103,15 +107,6 @@ func (m *Monitor) Start(ctx context.Context) {
 				}
 				m.healthy.SetFalse()
 			}
-			//TODO: do we care about the unknown state ?
-			//switch {
-			//case atomic.LoadInt64(&m.healthy) == 0:
-			//	stats.Set("ledger-health", 1, stats.T("status", "unknown"))
-			//case atomic.LoadInt64(m.healthy) == -1:
-			//	stats.Set("ledger-health", 1, stats.T("status", "unhealthy"))
-			//case atomic.LoadInt64(m.healthy) == 1:
-			//	stats.Set("ledger-health", 1, stats.T("status", "healthy"))
-			//}
 			switch {
 			case !m.isHealthy():
 				stats.Set("ledger-health", 1, stats.T("status", "unhealthy"))
