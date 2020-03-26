@@ -245,6 +245,114 @@ func TestMetaTableUpsertDML(t *testing.T) {
 	}
 }
 
+func TestMetaTableBatchInsertDML(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		meta func() MetaTable
+		rows [][]interface{}
+		want string
+	}{
+		{
+			name: "basic test",
+			meta: func() MetaTable {
+				famName, _ := schema.NewFamilyName("family1")
+				tblName, _ := schema.NewTableName("table1")
+				return MetaTable{
+					FamilyName: famName,
+					TableName:  tblName,
+					Fields: []schema.NamedFieldType{
+						{schema.FieldName{Name: "field1"}, schema.FTString},
+						{schema.FieldName{Name: "field2"}, schema.FTString},
+						{schema.FieldName{Name: "field3"}, schema.FTInteger},
+						{schema.FieldName{Name: "field4"}, schema.FTByteString},
+					},
+					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
+				}
+			},
+			rows: [][]interface{}{
+				[]interface{}{"hello", "there", 123, []byte{1, 2, 3}},
+			},
+			want: `INSERT INTO family1___table1 ("field1","field2","field3","field4") ` +
+				`VALUES('hello','there',123,x'010203')`,
+		},
+		{
+			name: "basic test with multiple rows",
+			meta: func() MetaTable {
+				famName, _ := schema.NewFamilyName("family1")
+				tblName, _ := schema.NewTableName("table1")
+				return MetaTable{
+					FamilyName: famName,
+					TableName:  tblName,
+					Fields: []schema.NamedFieldType{
+						{schema.FieldName{Name: "field1"}, schema.FTString},
+						{schema.FieldName{Name: "field2"}, schema.FTString},
+						{schema.FieldName{Name: "field3"}, schema.FTInteger},
+						{schema.FieldName{Name: "field4"}, schema.FTByteString},
+					},
+					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
+				}
+			},
+			rows: [][]interface{}{
+				[]interface{}{"hello", "there", 123, []byte{4, 5, 6}},
+				[]interface{}{"how", "are'ya", 789, []byte{0, 1, 2}},
+			},
+			want: `INSERT INTO family1___table1 ("field1","field2","field3","field4") ` +
+				`VALUES('hello','there',123,x'040506'),('how','are''ya',789,x'000102')`,
+		},
+		{
+			name: "upsert with null in key column",
+			meta: func() MetaTable {
+				famName, _ := schema.NewFamilyName("family1")
+				tblName, _ := schema.NewTableName("table1")
+				return MetaTable{
+					FamilyName: famName,
+					TableName:  tblName,
+					Fields: []schema.NamedFieldType{
+						{schema.FieldName{Name: "field1"}, schema.FTString},
+						{schema.FieldName{Name: "field2"}, schema.FTString},
+						{schema.FieldName{Name: "field3"}, schema.FTInteger},
+					},
+					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
+				}
+			},
+			rows: [][]interface{}{
+				[]interface{}{"a\x00b", "there", 123},
+			},
+			want: `INSERT INTO family1___table1 ("field1","field2","field3") ` +
+				`VALUES(x'610062','there',123)`,
+		},
+		{
+			name: "upsert with null in non-key column",
+			meta: func() MetaTable {
+				famName, _ := schema.NewFamilyName("family1")
+				tblName, _ := schema.NewTableName("table1")
+				return MetaTable{
+					FamilyName: famName,
+					TableName:  tblName,
+					Fields: []schema.NamedFieldType{
+						{schema.FieldName{Name: "field1"}, schema.FTString},
+						{schema.FieldName{Name: "field2"}, schema.FTString},
+						{schema.FieldName{Name: "field3"}, schema.FTInteger},
+					},
+					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
+				}
+			},
+			rows: [][]interface{}{
+				[]interface{}{"hi", "a\x00b", 123},
+			},
+			want: `INSERT INTO family1___table1 ("field1","field2","field3") ` +
+				`VALUES('hi',x'610062',123)`,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			tbl := test.meta()
+			got, err := tbl.BatchInsertDML(test.rows)
+			require.NoError(t, err)
+			require.EqualValues(t, test.want, got)
+		})
+	}
+}
+
 func TestMetaTableDeleteDML(t *testing.T) {
 	for _, test := range []struct {
 		name string

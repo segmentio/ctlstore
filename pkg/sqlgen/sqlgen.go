@@ -224,6 +224,55 @@ func (t *MetaTable) UpsertDML(values []interface{}) (string, error) {
 	return buf.String(), nil
 }
 
+// Returns the DML string for an 'Insert' for a batch of provided values.
+// We use this to build custom LDBs in bulk where we are not streaming individual writes.
+//
+// Keep in mind that `BatchInsertDML` differs from `UpsertDML` in that it does not expect
+// any values to be base64 encoded since this is not used for streaming use-cases, where
+// values are read from dbz.
+func (t *MetaTable) BatchInsertDML(rows [][]interface{}) (string, error) {
+	if len(rows) == 0 {
+		return "", errors.New("assertion failed: expected at least one row to insert")
+	}
+	for i, values := range rows {
+		if len(values) != len(t.Fields) {
+			return "", fmt.Errorf("assertion failed: len(rows[%d]) != len(t.Fields)", i)
+		}
+	}
+
+	tableName := schema.LDBTableName(t.FamilyName, t.TableName)
+	fieldNames := t.FieldNames()
+	fieldNamesSQL := strings.Join(dblquoteStrings(schema.StringifyFieldNames(fieldNames)), ",")
+	baseSQL := SqlSprintf("INSERT INTO $1 ($2) VALUES", tableName, fieldNamesSQL)
+
+	buf := bytes.NewBuffer([]byte{})
+	buf.WriteString(baseSQL)
+
+	for rowi, values := range rows {
+		if rowi > 0 {
+			buf.WriteString(",")
+		}
+		buf.WriteString("(")
+
+		for i, val := range values {
+			if i > 0 {
+				buf.WriteString(",")
+			}
+
+			quoted, err := SQLQuote(val)
+			if err != nil {
+				return "", err
+			}
+
+			buf.WriteString(quoted)
+		}
+
+		buf.WriteString(")")
+	}
+
+	return buf.String(), nil
+}
+
 // Returns the DML string for a delete for provided fields with placeholders
 // for all of the key fields in proper order.
 func (t *MetaTable) DeleteDML(values []interface{}) (string, error) {
