@@ -111,7 +111,7 @@ func (s *shovel) Start(ctx context.Context) error {
 		err = s.writer.ApplyDMLStatement(ctx, st)
 		if err != nil {
 			errs.Incr("shovel.apply_statement.error")
-			return err
+			return errors.Wrapf(err, "ledger seq: %d", st.Sequence)
 		}
 
 		lastSeq = st.Sequence
