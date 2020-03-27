@@ -259,6 +259,17 @@ func (t *MetaTable) BatchInsertDML(rows [][]interface{}) (string, error) {
 				buf.WriteString(",")
 			}
 
+			// TODO(colinking): I'm seeing some odd serialization behavior after removing
+			// these lines so I'm bringing them back as a test. Notably this does convert
+			// bytestrings + binary from strings to []byte, so if we remove this then we'll
+			// need to retain that functionality. TBD
+			val, err := maybeDecodeBase64(val,
+				isBase64EncodedFieldType(t.Fields[i].FieldType))
+			if err != nil {
+				return "", err
+			}
+			// -----------------------------------------------------------------------------
+
 			quoted, err := SQLQuote(val)
 			if err != nil {
 				return "", err
