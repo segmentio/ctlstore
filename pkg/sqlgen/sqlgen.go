@@ -226,10 +226,6 @@ func (t *MetaTable) UpsertDML(values []interface{}) (string, error) {
 
 // Returns the DML string for an 'Insert' for a batch of provided values.
 // We use this to build custom LDBs in bulk where we are not streaming individual writes.
-//
-// Keep in mind that `BatchInsertDML` differs from `UpsertDML` in that it does not expect
-// any values to be base64 encoded since this is not used for streaming use-cases, where
-// values are read from dbz.
 func (t *MetaTable) BatchInsertDML(rows [][]interface{}) (string, error) {
 	if len(rows) == 0 {
 		return "", errors.New("assertion failed: expected at least one row to insert")
@@ -259,17 +255,11 @@ func (t *MetaTable) BatchInsertDML(rows [][]interface{}) (string, error) {
 				buf.WriteString(",")
 			}
 
-			// TODO(colinking): I'm seeing some odd serialization behavior after removing
-			// these lines so I'm bringing them back as a test. Notably this does convert
-			// bytestrings + binary from strings to []byte, so if we remove this then we'll
-			// need to retain that functionality. TBD
 			val, err := maybeDecodeBase64(val,
 				isBase64EncodedFieldType(t.Fields[i].FieldType))
 			if err != nil {
 				return "", err
 			}
-			// -----------------------------------------------------------------------------
-
 			quoted, err := SQLQuote(val)
 			if err != nil {
 				return "", err

@@ -249,7 +249,7 @@ func TestMetaTableBatchInsertDML(t *testing.T) {
 	for _, test := range []struct {
 		name string
 		meta func() MetaTable
-		rows [][]interface{}
+		rows func() [][]interface{}
 		want string
 	}{
 		{
@@ -269,8 +269,10 @@ func TestMetaTableBatchInsertDML(t *testing.T) {
 					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
 				}
 			},
-			rows: [][]interface{}{
-				[]interface{}{"hello", "there", 123, []byte{1, 2, 3}},
+			rows: func() [][]interface{} {
+				return [][]interface{}{
+					[]interface{}{"hello", "there", 123, base64.StdEncoding.EncodeToString([]byte{1, 2, 3})},
+				}
 			},
 			want: `INSERT INTO family1___table1 ("field1","field2","field3","field4") ` +
 				`VALUES('hello','there',123,x'010203')`,
@@ -292,9 +294,11 @@ func TestMetaTableBatchInsertDML(t *testing.T) {
 					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
 				}
 			},
-			rows: [][]interface{}{
-				[]interface{}{"hello", "there", 123, []byte{4, 5, 6}},
-				[]interface{}{"how", "are'ya", 789, []byte{0, 1, 2}},
+			rows: func() [][]interface{} {
+				return [][]interface{}{
+					[]interface{}{"hello", "there", 123, base64.StdEncoding.EncodeToString([]byte{4, 5, 6})},
+					[]interface{}{"how", "are'ya", 789, base64.StdEncoding.EncodeToString([]byte{0, 1, 2})},
+				}
 			},
 			want: `INSERT INTO family1___table1 ("field1","field2","field3","field4") ` +
 				`VALUES('hello','there',123,x'040506'),('how','are''ya',789,x'000102')`,
@@ -315,8 +319,10 @@ func TestMetaTableBatchInsertDML(t *testing.T) {
 					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
 				}
 			},
-			rows: [][]interface{}{
-				[]interface{}{"a\x00b", "there", 123},
+			rows: func() [][]interface{} {
+				return [][]interface{}{
+					[]interface{}{"a\x00b", "there", 123},
+				}
 			},
 			want: `INSERT INTO family1___table1 ("field1","field2","field3") ` +
 				`VALUES(x'610062','there',123)`,
@@ -337,8 +343,10 @@ func TestMetaTableBatchInsertDML(t *testing.T) {
 					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
 				}
 			},
-			rows: [][]interface{}{
-				[]interface{}{"hi", "a\x00b", 123},
+			rows: func() [][]interface{} {
+				return [][]interface{}{
+					[]interface{}{"hi", "a\x00b", 123},
+				}
 			},
 			want: `INSERT INTO family1___table1 ("field1","field2","field3") ` +
 				`VALUES('hi',x'610062',123)`,
@@ -346,7 +354,7 @@ func TestMetaTableBatchInsertDML(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			tbl := test.meta()
-			got, err := tbl.BatchInsertDML(test.rows)
+			got, err := tbl.BatchInsertDML(test.rows())
 			require.NoError(t, err)
 			require.EqualValues(t, test.want, got)
 		})
