@@ -29,6 +29,9 @@ jobs:
       - run:
           name: Snyk Setup
           command: curl -sL https://raw.githubusercontent.com/segmentio/snyk_helpers/master/initialization/snyk.sh | sh
+          environment:
+            SNYK_FAIL_ON: upgradable
+            SNYK_SEVERITY_THRESHOLD: high
       - run:
           name: Build
           command: |
