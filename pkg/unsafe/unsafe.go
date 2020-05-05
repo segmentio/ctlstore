@@ -7,12 +7,12 @@ import (
 )
 
 type iptr struct {
-	itab uintptr
-	ptr  uintptr
+	itab unsafe.Pointer
+	ptr  unsafe.Pointer
 }
 
 func (p iptr) String() string {
-	return fmt.Sprintf("itab=0x%x, ptr=0x%x", p.itab, p.ptr)
+	return fmt.Sprintf("itab=0x%x, ptr=0x%x", uintptr(p.itab), uintptr(p.ptr))
 }
 
 func (p iptr) Interface() interface{} {
@@ -52,12 +52,12 @@ func (f *InterfaceFactory) PtrToStructField(any interface{}, field reflect.Struc
 	anyIptr := *(*iptr)(unsafe.Pointer(&any))
 
 	// construct the new pointer (&struct.field) that will be returned
-	interptr := unsafe.Pointer(anyIptr.ptr + field.Offset)
+	interptr := unsafe.Pointer(uintptr(anyIptr.ptr) + field.Offset)
 
 	// create a new iptr by copying the template iptr, which has the proper type
 	newIptr := iptr{
-		itab: uintptr(f.ptritab),
-		ptr:  uintptr(interptr),
+		itab: f.ptritab,
+		ptr:  interptr,
 	}
 
 	return newIptr.Interface()
