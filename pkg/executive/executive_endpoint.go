@@ -296,8 +296,11 @@ func (ee *ExecutiveEndpoint) Handler() http.Handler {
 	r.HandleFunc("/limits/writers/{writerName}", ee.handleWriterLimitsUpdate).Methods("POST")
 	r.HandleFunc("/limits/writers/{writerName}", ee.handleWriterLimitsDelete).Methods("DELETE")
 
+	// destructive routes below
+
 	r.HandleFunc("/clear-rows/families/{familyName}", ee.handleClearFamilyRows).Methods("DELETE")
 	r.HandleFunc("/clear-rows/families/{familyName}/tables/{tableName}", ee.handleClearTableRows).Methods("DELETE")
+	r.HandleFunc("/drop-table/families/{familyName}/tables/{tableName}", ee.handleDropTable).Methods("DELETE")
 
 	// Limit request body sizes
 	r.Use(func(next http.Handler) http.Handler {
@@ -407,6 +410,32 @@ func handlingErrorDo(w http.ResponseWriter, fn func() error) {
 	if err := fn(); err != nil {
 		writeErrorResponse(err, w)
 	}
+}
+
+func (ee *ExecutiveEndpoint) handleDropTable(w http.ResponseWriter, r *http.Request) {
+	if !ee.EnableDropTables {
+		writeErrorResponse(&errs.BadRequestError{Err: "Dropping tables is not enabled."}, w)
+		return
+	}
+
+	vars := mux.Vars(r)
+	// if these panic, Mux is broken and nothing is sacred anymore
+	familyName := vars["familyName"]
+	tableName := vars["tableName"]
+	familyName, tableName, err := sanitizeFamilyAndTableNames(familyName, tableName)
+	if err != nil {
+		writeErrorResponse(&errs.BadRequestError{Err: err.Error()}, w)
+		return
+	}
+
+	ft := schema.FamilyTable{Family: familyName, Table: tableName}
+	err = ee.Exec.DropTable(ft)
+	if err != nil {
+		writeErrorResponse(err, w)
+		return
+	}
+
+	return
 }
 
 func (ee *ExecutiveEndpoint) handleClearTableRows(w http.ResponseWriter, r *http.Request) {
