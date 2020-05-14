@@ -851,6 +851,40 @@ func TestExecEndpointHandler(_t *testing.T) {
 					atom.rr.Body.String())
 			},
 		},
+		{
+			Desc:               "Drop Table Success",
+			Path:               "/drop-table/families/myfamily/tables/mytable",
+			Method:             http.MethodDelete,
+			ExpectedStatusCode: http.StatusOK,
+			PreFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
+				atom.ei.DropTableReturns(nil)
+			},
+			PostFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
+				require.EqualValues(t, 1, atom.ei.DropTableCallCount())
+				ft := atom.ei.DropTableArgsForCall(0)
+				require.EqualValues(t, schema.FamilyTable{
+					Family: "myfamily",
+					Table:  "mytable",
+				}, ft)
+			},
+		},
+		{
+			Desc:               "Drop Table Failure",
+			Path:               "/drop-table/families/myfamily/tables/mytable",
+			Method:             http.MethodDelete,
+			ExpectedStatusCode: http.StatusInternalServerError,
+			PreFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
+				atom.ei.DropTableReturns(errors.New("boom"))
+			},
+			PostFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
+				require.EqualValues(t, 1, atom.ei.DropTableCallCount())
+				ft := atom.ei.DropTableArgsForCall(0)
+				require.EqualValues(t, schema.FamilyTable{
+					Family: "myfamily",
+					Table:  "mytable",
+				}, ft)
+			},
+		},
 	}
 
 	///////////////////////////////////////////////////
@@ -889,7 +923,7 @@ func TestExecEndpointHandler(_t *testing.T) {
 			}
 
 			a.ei = new(fakes.FakeExecutiveInterface)
-			a.ee = &executive.ExecutiveEndpoint{Exec: a.ei, EnableClearTables: true}
+			a.ee = &executive.ExecutiveEndpoint{Exec: a.ei, EnableClearTables: true, EnableDropTables: true}
 			a.rr = httptest.NewRecorder()
 
 			if a.PreFunc != nil {
@@ -898,9 +932,7 @@ func TestExecEndpointHandler(_t *testing.T) {
 
 			a.ee.Handler().ServeHTTP(a.rr, req)
 
-			if want, got := a.ExpectedStatusCode, a.rr.Code; want != got {
-				t.Errorf("Expected status code to be %v, was %v", want, got)
-			}
+			require.EqualValues(t, a.ExpectedStatusCode, a.rr.Code)
 
 			if a.PostFunc != nil {
 				a.PostFunc(t, a)
