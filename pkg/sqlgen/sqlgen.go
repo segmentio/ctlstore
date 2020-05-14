@@ -265,6 +265,14 @@ func (t *MetaTable) DeleteDML(values []interface{}) (string, error) {
 	return buf.String(), nil
 }
 
+func (t *MetaTable) DropTableDDL() string {
+	tableName := schema.LDBTableName(t.FamilyName, t.TableName)
+	ddl := SqlSprintf(
+		"DROP TABLE IF EXISTS $1",
+		tableName)
+	return ddl
+}
+
 func (t *MetaTable) ClearTableDDL() string {
 	tableName := schema.LDBTableName(t.FamilyName, t.TableName)
 	ddl := SqlSprintf(
