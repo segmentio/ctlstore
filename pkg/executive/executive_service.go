@@ -33,6 +33,7 @@ type ExecutiveServiceConfig struct {
 	WriterLimitPeriod time.Duration
 	WriterLimit       int64
 	EnableClearTables bool
+	EnableDropTables  bool
 }
 
 type executiveService struct {
@@ -41,6 +42,7 @@ type executiveService struct {
 	ctx               context.Context
 	serveTimeout      time.Duration
 	enableClearTables bool
+	enableDropTables  bool
 }
 
 func ExecutiveServiceFromConfig(config ExecutiveServiceConfig) (ExecutiveService, error) {
@@ -60,6 +62,7 @@ func ExecutiveServiceFromConfig(config ExecutiveServiceConfig) (ExecutiveService
 		serveTimeout:      config.RequestTimeout,
 		limiter:           limiter,
 		enableClearTables: config.EnableClearTables,
+		enableDropTables:  config.EnableDropTables,
 	}
 	return es, nil
 }
@@ -71,7 +74,12 @@ func (s *executiveService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Setup and tear these down every req to limit thread-safety garbage
 	cR := r.WithContext(ctx)
 	exec := &dbExecutive{DB: s.ctldb, Ctx: ctx, limiter: s.limiter}
-	ep := ExecutiveEndpoint{Exec: exec, HealthChecker: exec, EnableClearTables: s.enableClearTables}
+	ep := ExecutiveEndpoint{
+		Exec:              exec,
+		HealthChecker:     exec,
+		EnableClearTables: s.enableClearTables,
+		EnableDropTables:  s.enableDropTables,
+	}
 	defer ep.Close()
 
 	events.Debug("Request: %{request}+v", cR)

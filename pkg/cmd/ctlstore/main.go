@@ -75,6 +75,7 @@ type executiveCliConfig struct {
 	Shadow            bool            `conf:"shadow" help:"set this to true to emit shadow=true metric tags"`
 	Dogstatsd         dogstatsdConfig `conf:"dogstatsd" help:"dogstatsd Configuration"`
 	EnableClearTables bool            `conf:"enable-clear-tables" help:"Turns on the ability to use the clear table executive endpoint which deletes all rows from a table"`
+	EnableDropTables  bool            `conf:"enable-drop-tables" help:"Turns on the ability to use the drop table executive endpoint which drops a table"`
 }
 
 // supervisorCliConfig also composes a reflectorCliConfig because it ends up
@@ -391,6 +392,7 @@ func executive(ctx context.Context, args []string) {
 		WarnTableSize:     50 * units.MEGABYTE,
 		MaxTableSize:      100 * units.MEGABYTE,
 		EnableClearTables: false,
+		EnableDropTables:  false,
 	}
 
 	loadConfig(&cliCfg, "executive", args)
@@ -421,6 +423,7 @@ func executive(ctx context.Context, args []string) {
 		WriterLimit:       cliCfg.WriterLimit,
 		WriterLimitPeriod: cliCfg.WriterLimitPeriod,
 		EnableClearTables: cliCfg.EnableClearTables,
+		EnableDropTables:  cliCfg.EnableDropTables,
 	})
 	if err != nil {
 		errs.IncrDefault(stats.T("op", "startup"))

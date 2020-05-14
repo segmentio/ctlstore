@@ -22,6 +22,7 @@ type ExecutiveEndpoint struct {
 	HealthChecker     HealthChecker
 	Exec              ExecutiveInterface
 	EnableClearTables bool
+	EnableDropTables  bool
 }
 
 func (ee *ExecutiveEndpoint) handleFamilyRoute(w http.ResponseWriter, r *http.Request) {
