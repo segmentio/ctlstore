@@ -876,6 +876,72 @@ func (e *dbExecutive) DeleteWriterRateLimit(writerName string) error {
 	return nil
 }
 
+func (e *dbExecutive) DropTable(table schema.FamilyTable) error {
+	ctx, cancel := e.ctx()
+	defer cancel()
+
+	famName, tblName, tbl, err := sqlgen.BuildMetaTableFromInput(
+		sqlgen.SqlDriverToDriverName(e.DB.Driver()),
+		table.Family,
+		table.Table,
+		nil,
+		nil,
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+	_, ok, err := e.fetchMetaTableByName(famName, tblName)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errs.NotFound("table %q not found", famName.String()+tblName.String())
+	}
+
+	ddl := tbl.DropTableDDL()
+	dmlLogTbl, err := tbl.ForDriver(ldb.LDBDatabaseDriver)
+	if err != nil {
+		return err
+	}
+
+	logDDL := dmlLogTbl.DropTableDDL()
+
+	events.Debug("[DropTable %{tableName}s] ctldb DDL: %{ddl}s", table, ddl)
+	events.Debug("[DropTable %{tableName}s] log DDL: %{ddl}s", table, logDDL)
+
+	tx, err := e.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return errors.Wrap(err, "error beginning transaction")
+	}
+	defer tx.Rollback()
+
+	dlw := dmlLedgerWriter{
+		Tx:        tx,
+		TableName: dmlLedgerTableName,
+	}
+	defer dlw.Close()
+
+	_, err = e.DB.ExecContext(ctx, ddl)
+	if err != nil {
+		return errors.Wrap(err, "error running drop command")
+	}
+
+	seq, err := dlw.Add(ctx, logDDL)
+	if err != nil {
+		return errors.Wrap(err, "error inserting drop command into ledger")
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return errors.Wrap(err, "error committing transaction")
+	}
+
+	events.Log("Successfully dropped `%{tableName}s` at seq %{seq}v", table.String(), seq)
+
+	return nil
+}
+
 func (e *dbExecutive) ClearTable(table schema.FamilyTable) error {
 	ctx, cancel := e.ctx()
 	defer cancel()
