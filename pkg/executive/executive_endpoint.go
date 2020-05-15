@@ -19,10 +19,9 @@ import (
 
 // ExecutiveEndpoint is an HTTP 'wrapper' for ExecutiveInterface
 type ExecutiveEndpoint struct {
-	HealthChecker     HealthChecker
-	Exec              ExecutiveInterface
-	EnableClearTables bool
-	EnableDropTables  bool
+	HealthChecker                  HealthChecker
+	Exec                           ExecutiveInterface
+	EnableDestructiveSchemaChanges bool
 }
 
 func (ee *ExecutiveEndpoint) handleFamilyRoute(w http.ResponseWriter, r *http.Request) {
@@ -413,7 +412,7 @@ func handlingErrorDo(w http.ResponseWriter, fn func() error) {
 }
 
 func (ee *ExecutiveEndpoint) handleDropTable(w http.ResponseWriter, r *http.Request) {
-	if !ee.EnableDropTables {
+	if !ee.EnableDestructiveSchemaChanges {
 		writeErrorResponse(&errs.BadRequestError{Err: "Dropping tables is not enabled."}, w)
 		return
 	}
@@ -439,7 +438,7 @@ func (ee *ExecutiveEndpoint) handleDropTable(w http.ResponseWriter, r *http.Requ
 }
 
 func (ee *ExecutiveEndpoint) handleClearTableRows(w http.ResponseWriter, r *http.Request) {
-	if !ee.EnableClearTables {
+	if !ee.EnableDestructiveSchemaChanges {
 		writeErrorResponse(&errs.BadRequestError{Err: "Clearing tables is not enabled."}, w)
 		return
 	}
@@ -465,7 +464,7 @@ func (ee *ExecutiveEndpoint) handleClearTableRows(w http.ResponseWriter, r *http
 }
 
 func (ee *ExecutiveEndpoint) handleClearFamilyRows(w http.ResponseWriter, r *http.Request) {
-	if !ee.EnableClearTables {
+	if !ee.EnableDestructiveSchemaChanges {
 		writeErrorResponse(&errs.BadRequestError{Err: "Clearing tables is not enabled."}, w)
 		return
 	}

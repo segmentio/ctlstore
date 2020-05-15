@@ -64,18 +64,17 @@ type reflectorCliConfig struct {
 }
 
 type executiveCliConfig struct {
-	Bind              string          `conf:"bind" help:"Address for binding the HTTP server" validate:"nonzero"`
-	CtlDBDSN          string          `conf:"ctldb" help:"SQL DSN for ctldb" validate:"nonzero"`
-	Debug             bool            `conf:"debug" help:"Turns on debug logging"`
-	HandlerTimeout    time.Duration   `conf:"handler-timeout" help:"Timeout on request handling"`
-	MaxTableSize      int64           `conf:"max-table-size" help:"Max table size in bytes"`
-	WarnTableSize     int64           `conf:"warn-table-size" help:"Emit a metric when a table sizes grows past this threshold"`
-	WriterLimitPeriod time.Duration   `conf:"writer-limit-period" help:"The period to use for writer-limit"`
-	WriterLimit       int64           `conf:"writer-limit" help:"How many rows a writer may mutate per period"`
-	Shadow            bool            `conf:"shadow" help:"set this to true to emit shadow=true metric tags"`
-	Dogstatsd         dogstatsdConfig `conf:"dogstatsd" help:"dogstatsd Configuration"`
-	EnableClearTables bool            `conf:"enable-clear-tables" help:"Turns on the ability to use the clear table executive endpoint which deletes all rows from a table"`
-	EnableDropTables  bool            `conf:"enable-drop-tables" help:"Turns on the ability to use the drop table executive endpoint which drops a table"`
+	Bind                           string          `conf:"bind" help:"Address for binding the HTTP server" validate:"nonzero"`
+	CtlDBDSN                       string          `conf:"ctldb" help:"SQL DSN for ctldb" validate:"nonzero"`
+	Debug                          bool            `conf:"debug" help:"Turns on debug logging"`
+	HandlerTimeout                 time.Duration   `conf:"handler-timeout" help:"Timeout on request handling"`
+	MaxTableSize                   int64           `conf:"max-table-size" help:"Max table size in bytes"`
+	WarnTableSize                  int64           `conf:"warn-table-size" help:"Emit a metric when a table sizes grows past this threshold"`
+	WriterLimitPeriod              time.Duration   `conf:"writer-limit-period" help:"The period to use for writer-limit"`
+	WriterLimit                    int64           `conf:"writer-limit" help:"How many rows a writer may mutate per period"`
+	Shadow                         bool            `conf:"shadow" help:"set this to true to emit shadow=true metric tags"`
+	Dogstatsd                      dogstatsdConfig `conf:"dogstatsd" help:"dogstatsd Configuration"`
+	EnableDestructiveSchemaChanges bool            `conf:"enable-destructive-schema-changes" help:"Turns on the ability to clear and drop tables from the executive API"`
 }
 
 // supervisorCliConfig also composes a reflectorCliConfig because it ends up
@@ -383,16 +382,15 @@ func heartbeat(ctx context.Context, args []string) {
 
 func executive(ctx context.Context, args []string) {
 	cliCfg := executiveCliConfig{
-		Bind:              "",
-		CtlDBDSN:          "",
-		HandlerTimeout:    5 * time.Second,
-		Dogstatsd:         defaultDogstatsdConfig(),
-		WriterLimitPeriod: time.Minute,
-		WriterLimit:       1000,
-		WarnTableSize:     50 * units.MEGABYTE,
-		MaxTableSize:      100 * units.MEGABYTE,
-		EnableClearTables: false,
-		EnableDropTables:  false,
+		Bind:                           "",
+		CtlDBDSN:                       "",
+		HandlerTimeout:                 5 * time.Second,
+		Dogstatsd:                      defaultDogstatsdConfig(),
+		WriterLimitPeriod:              time.Minute,
+		WriterLimit:                    1000,
+		WarnTableSize:                  50 * units.MEGABYTE,
+		MaxTableSize:                   100 * units.MEGABYTE,
+		EnableDestructiveSchemaChanges: false,
 	}
 
 	loadConfig(&cliCfg, "executive", args)
@@ -416,14 +414,13 @@ func executive(ctx context.Context, args []string) {
 	defer teardown()
 
 	executive, err := executivepkg.ExecutiveServiceFromConfig(executivepkg.ExecutiveServiceConfig{
-		CtlDBDSN:          cliCfg.CtlDBDSN,
-		RequestTimeout:    cliCfg.HandlerTimeout,
-		MaxTableSize:      cliCfg.MaxTableSize,
-		WarnTableSize:     cliCfg.WarnTableSize,
-		WriterLimit:       cliCfg.WriterLimit,
-		WriterLimitPeriod: cliCfg.WriterLimitPeriod,
-		EnableClearTables: cliCfg.EnableClearTables,
-		EnableDropTables:  cliCfg.EnableDropTables,
+		CtlDBDSN:                       cliCfg.CtlDBDSN,
+		RequestTimeout:                 cliCfg.HandlerTimeout,
+		MaxTableSize:                   cliCfg.MaxTableSize,
+		WarnTableSize:                  cliCfg.WarnTableSize,
+		WriterLimit:                    cliCfg.WriterLimit,
+		WriterLimitPeriod:              cliCfg.WriterLimitPeriod,
+		EnableDestructiveSchemaChanges: cliCfg.EnableDestructiveSchemaChanges,
 	})
 	if err != nil {
 		errs.IncrDefault(stats.T("op", "startup"))

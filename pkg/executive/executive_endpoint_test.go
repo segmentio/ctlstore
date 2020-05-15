@@ -764,7 +764,7 @@ func TestExecEndpointHandler(_t *testing.T) {
 			Method:             http.MethodDelete,
 			ExpectedStatusCode: http.StatusBadRequest,
 			PreFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
-				atom.ee.EnableClearTables = false
+				atom.ee.EnableDestructiveSchemaChanges = false
 			},
 			PostFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
 				require.EqualValues(t, 0, atom.ei.ClearTableCallCount())
@@ -841,7 +841,7 @@ func TestExecEndpointHandler(_t *testing.T) {
 			Method:             http.MethodDelete,
 			ExpectedStatusCode: http.StatusBadRequest,
 			PreFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
-				atom.ee.EnableClearTables = false
+				atom.ee.EnableDestructiveSchemaChanges = false
 			},
 			PostFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
 				require.EqualValues(t, 0, atom.ei.ReadFamilyTableNamesCallCount())
@@ -923,7 +923,7 @@ func TestExecEndpointHandler(_t *testing.T) {
 			}
 
 			a.ei = new(fakes.FakeExecutiveInterface)
-			a.ee = &executive.ExecutiveEndpoint{Exec: a.ei, EnableClearTables: true, EnableDropTables: true}
+			a.ee = &executive.ExecutiveEndpoint{Exec: a.ei, EnableDestructiveSchemaChanges: true}
 			a.rr = httptest.NewRecorder()
 
 			if a.PreFunc != nil {
