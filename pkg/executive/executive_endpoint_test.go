@@ -853,7 +853,7 @@ func TestExecEndpointHandler(_t *testing.T) {
 		},
 		{
 			Desc:               "Drop Table Success",
-			Path:               "/drop-table/families/myfamily/tables/mytable",
+			Path:               "/families/myfamily/tables/mytable",
 			Method:             http.MethodDelete,
 			ExpectedStatusCode: http.StatusOK,
 			PreFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
@@ -870,7 +870,7 @@ func TestExecEndpointHandler(_t *testing.T) {
 		},
 		{
 			Desc:               "Drop Table Failure",
-			Path:               "/drop-table/families/myfamily/tables/mytable",
+			Path:               "/families/myfamily/tables/mytable",
 			Method:             http.MethodDelete,
 			ExpectedStatusCode: http.StatusInternalServerError,
 			PreFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {

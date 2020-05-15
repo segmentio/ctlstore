@@ -300,7 +300,7 @@ func (ee *ExecutiveEndpoint) Handler() http.Handler {
 
 	r.HandleFunc("/clear-rows/families/{familyName}", ee.handleClearFamilyRows).Methods("DELETE")
 	r.HandleFunc("/clear-rows/families/{familyName}/tables/{tableName}", ee.handleClearTableRows).Methods("DELETE")
-	r.HandleFunc("/drop-table/families/{familyName}/tables/{tableName}", ee.handleDropTable).Methods("DELETE")
+	r.HandleFunc("/families/{familyName}/tables/{tableName}", ee.handleDropTable).Methods("DELETE")
 
 	// Limit request body sizes
 	r.Use(func(next http.Handler) http.Handler {
