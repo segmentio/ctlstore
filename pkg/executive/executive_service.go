@@ -26,21 +26,21 @@ type ExecutiveService interface {
 }
 
 type ExecutiveServiceConfig struct {
-	CtlDBDSN          string
-	RequestTimeout    time.Duration
-	MaxTableSize      int64
-	WarnTableSize     int64
-	WriterLimitPeriod time.Duration
-	WriterLimit       int64
-	EnableClearTables bool
+	CtlDBDSN                       string
+	RequestTimeout                 time.Duration
+	MaxTableSize                   int64
+	WarnTableSize                  int64
+	WriterLimitPeriod              time.Duration
+	WriterLimit                    int64
+	EnableDestructiveSchemaChanges bool
 }
 
 type executiveService struct {
-	ctldb             *sql.DB
-	limiter           *dbLimiter
-	ctx               context.Context
-	serveTimeout      time.Duration
-	enableClearTables bool
+	ctldb                          *sql.DB
+	limiter                        *dbLimiter
+	ctx                            context.Context
+	serveTimeout                   time.Duration
+	enableDestructiveSchemaChanges bool
 }
 
 func ExecutiveServiceFromConfig(config ExecutiveServiceConfig) (ExecutiveService, error) {
@@ -56,10 +56,10 @@ func ExecutiveServiceFromConfig(config ExecutiveServiceConfig) (ExecutiveService
 	defaultTableLimit := limits.SizeLimits{MaxSize: config.MaxTableSize, WarnSize: config.WarnTableSize}
 	limiter := newDBLimiter(ctldb, dbType, defaultTableLimit, config.WriterLimitPeriod, config.WriterLimit)
 	es := &executiveService{
-		ctldb:             ctldb,
-		serveTimeout:      config.RequestTimeout,
-		limiter:           limiter,
-		enableClearTables: config.EnableClearTables,
+		ctldb:                          ctldb,
+		serveTimeout:                   config.RequestTimeout,
+		limiter:                        limiter,
+		enableDestructiveSchemaChanges: config.EnableDestructiveSchemaChanges,
 	}
 	return es, nil
 }
@@ -71,7 +71,11 @@ func (s *executiveService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Setup and tear these down every req to limit thread-safety garbage
 	cR := r.WithContext(ctx)
 	exec := &dbExecutive{DB: s.ctldb, Ctx: ctx, limiter: s.limiter}
-	ep := ExecutiveEndpoint{Exec: exec, HealthChecker: exec, EnableClearTables: s.enableClearTables}
+	ep := ExecutiveEndpoint{
+		Exec:                           exec,
+		HealthChecker:                  exec,
+		EnableDestructiveSchemaChanges: s.enableDestructiveSchemaChanges,
+	}
 	defer ep.Close()
 
 	events.Debug("Request: %{request}+v", cR)

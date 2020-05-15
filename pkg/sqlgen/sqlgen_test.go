@@ -327,6 +327,22 @@ func TestMetaTableClearTableDDL(t *testing.T) {
 	}
 }
 
+func TestMetaTableDropTableDDL(t *testing.T) {
+	famName, _ := schema.NewFamilyName("family1")
+	tblName, _ := schema.NewTableName("table1")
+	tbl := MetaTable{
+		FamilyName: famName,
+		TableName:  tblName,
+		Fields: []schema.NamedFieldType{
+			{schema.FieldName{Name: "field1"}, schema.FTString},
+		},
+		KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}}},
+	}
+
+	got := tbl.DropTableDDL()
+	require.EqualValues(t, `DROP TABLE IF EXISTS family1___table1`, got)
+}
+
 func TestSQLQuote(t *testing.T) {
 	suite := []struct {
 		desc   string

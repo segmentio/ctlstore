@@ -39,6 +39,7 @@ type ExecutiveInterface interface {
 	DeleteWriterRateLimit(writerName string) error
 
 	ClearTable(table schema.FamilyTable) error
+	DropTable(table schema.FamilyTable) error
 	ReadFamilyTableNames(familyName schema.FamilyName) ([]schema.FamilyTable, error)
 }
 

@@ -2,11 +2,11 @@
 package fakes
 
 import (
-	sync "sync"
+	"sync"
 
-	executive "github.com/segmentio/ctlstore/pkg/executive"
-	limits "github.com/segmentio/ctlstore/pkg/limits"
-	schema "github.com/segmentio/ctlstore/pkg/schema"
+	"github.com/segmentio/ctlstore/pkg/executive"
+	"github.com/segmentio/ctlstore/pkg/limits"
+	"github.com/segmentio/ctlstore/pkg/schema"
 )
 
 type FakeExecutiveInterface struct {
@@ -81,6 +81,17 @@ type FakeExecutiveInterface struct {
 		result1 error
 	}
 	deleteWriterRateLimitReturnsOnCall map[int]struct {
+		result1 error
+	}
+	DropTableStub        func(schema.FamilyTable) error
+	dropTableMutex       sync.RWMutex
+	dropTableArgsForCall []struct {
+		arg1 schema.FamilyTable
+	}
+	dropTableReturns struct {
+		result1 error
+	}
+	dropTableReturnsOnCall map[int]struct {
 		result1 error
 	}
 	GetWriterCookieStub        func(string, string) ([]byte, error)
@@ -604,6 +615,66 @@ func (fake *FakeExecutiveInterface) DeleteWriterRateLimitReturnsOnCall(i int, re
 		})
 	}
 	fake.deleteWriterRateLimitReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeExecutiveInterface) DropTable(arg1 schema.FamilyTable) error {
+	fake.dropTableMutex.Lock()
+	ret, specificReturn := fake.dropTableReturnsOnCall[len(fake.dropTableArgsForCall)]
+	fake.dropTableArgsForCall = append(fake.dropTableArgsForCall, struct {
+		arg1 schema.FamilyTable
+	}{arg1})
+	fake.recordInvocation("DropTable", []interface{}{arg1})
+	fake.dropTableMutex.Unlock()
+	if fake.DropTableStub != nil {
+		return fake.DropTableStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.dropTableReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeExecutiveInterface) DropTableCallCount() int {
+	fake.dropTableMutex.RLock()
+	defer fake.dropTableMutex.RUnlock()
+	return len(fake.dropTableArgsForCall)
+}
+
+func (fake *FakeExecutiveInterface) DropTableCalls(stub func(schema.FamilyTable) error) {
+	fake.dropTableMutex.Lock()
+	defer fake.dropTableMutex.Unlock()
+	fake.DropTableStub = stub
+}
+
+func (fake *FakeExecutiveInterface) DropTableArgsForCall(i int) schema.FamilyTable {
+	fake.dropTableMutex.RLock()
+	defer fake.dropTableMutex.RUnlock()
+	argsForCall := fake.dropTableArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeExecutiveInterface) DropTableReturns(result1 error) {
+	fake.dropTableMutex.Lock()
+	defer fake.dropTableMutex.Unlock()
+	fake.DropTableStub = nil
+	fake.dropTableReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeExecutiveInterface) DropTableReturnsOnCall(i int, result1 error) {
+	fake.dropTableMutex.Lock()
+	defer fake.dropTableMutex.Unlock()
+	fake.DropTableStub = nil
+	if fake.dropTableReturnsOnCall == nil {
+		fake.dropTableReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.dropTableReturnsOnCall[i] = struct {
 		result1 error
 	}{result1}
 }
@@ -1253,6 +1324,8 @@ func (fake *FakeExecutiveInterface) Invocations() map[string][][]interface{} {
 	defer fake.deleteTableSizeLimitMutex.RUnlock()
 	fake.deleteWriterRateLimitMutex.RLock()
 	defer fake.deleteWriterRateLimitMutex.RUnlock()
+	fake.dropTableMutex.RLock()
+	defer fake.dropTableMutex.RUnlock()
 	fake.getWriterCookieMutex.RLock()
 	defer fake.getWriterCookieMutex.RUnlock()
 	fake.mutateMutex.RLock()

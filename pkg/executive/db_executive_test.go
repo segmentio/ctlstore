@@ -129,6 +129,7 @@ func TestAllDBExecutive(t *testing.T) {
 		"testDBExecutiveWriterRates":          testDBExecutiveWriterRates,
 		"testDBExecutiveTableLimits":          testDBExecutiveTableLimits,
 		"testDBExecutiveClearTable":           testDBExecutiveClearTable,
+		"testDBExecutiveDropTable":            testDBExecutiveDropTable,
 		"testDBExecutiveReadFamilyTableNames": testDBExecutiveReadFamilyTableNames,
 	}
 
@@ -1300,6 +1301,48 @@ func testDBExecutiveReadRow(t *testing.T, dbType string) {
 			}
 		})
 	}
+}
+
+func testDBExecutiveDropTable(t *testing.T, dbType string) {
+	u := newDbExecTestUtil(t, dbType)
+	defer u.Close()
+
+	err := u.e.CreateTable("family1",
+		"delete_test",
+		[]string{"field1"},
+		[]schema.FieldType{schema.FTString},
+		[]string{"field1"},
+	)
+	require.NoError(t, err)
+
+	// verify the table exists and has no rows
+	row := u.db.QueryRow("SELECT COUNT(*) FROM family1___delete_test")
+	var cnt sql.NullInt64
+	err = row.Scan(&cnt)
+	require.NoError(t, err)
+	require.EqualValues(t, 0, cnt.Int64)
+
+	err = u.e.DropTable(schema.FamilyTable{Family: "family1", Table: "delete_test"})
+	require.NoError(t, err)
+
+	// assert that we can't query the table anymore
+	row = u.db.QueryRow("SELECT COUNT(*) FROM family1___delete_test")
+	err = row.Scan(&cnt)
+	switch dbType {
+	case "sqlite3":
+		require.EqualError(t, err, "no such table: family1___delete_test")
+	case "mysql":
+		require.EqualError(t, err, "Error 1146: Table 'ctldb.family1___delete_test' doesn't exist")
+	default:
+		require.Fail(t, "unknown db type: "+dbType)
+	}
+
+	// double check the dml
+	row = u.db.QueryRow("select statement from ctlstore_dml_ledger order by seq desc limit 1")
+	var statement string
+	err = row.Scan(&statement)
+	require.NoError(t, err)
+	require.EqualValues(t, "DROP TABLE IF EXISTS family1___delete_test", statement)
 }
 
 func testDBExecutiveClearTable(t *testing.T, dbType string) {
