@@ -17,14 +17,10 @@ const path = "github.com/segmentio/ctlstore"
 // with the build tag above.
 func init() {
 	if info, ok := debug.ReadBuildInfo(); ok && info != nil {
-		if info.Main.Path == path {
-			version = info.Main.Version
-		} else {
-			for _, mod := range info.Deps {
-				if mod != nil {
-					if mod.Path == path {
-						version = mod.Version
-					}
+		for _, mod := range info.Deps {
+			if mod != nil {
+				if mod.Path == path {
+					version = mod.Version
 				}
 			}
 		}
