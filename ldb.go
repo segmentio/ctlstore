@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/segmentio/ctlstore/pkg/ldb"
-	"github.com/segmentio/ctlstore/pkg/sqlite"
+	// "github.com/segmentio/ctlstore/pkg/sqlite"
 )
 
 const (
@@ -31,7 +31,7 @@ func init() {
 		globalLDBVersioningDirPath = filepath.Join(envPath, defaultLDBVersioningSubdir)
 		globalCLPath = filepath.Join(envPath, DefaultChangelogFilename)
 	}
-	sqlite.InitDriver()
+	// sqlite.InitDriver()
 }
 
 // ReaderForPath opens an LDB at the provided path and returns an LDBReader
