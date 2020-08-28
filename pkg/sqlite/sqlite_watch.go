@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/scanfunc"
 	"github.com/segmentio/ctlstore/pkg/schema"
-	"modernc.org/sqlite"
+	sqlite3 "modernc.org/sqlite"
 )
 
 type (
