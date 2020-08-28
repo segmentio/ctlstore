@@ -14,11 +14,11 @@ import (
 func TestPipelineIntegration(t *testing.T) {
 	var err error
 	ctx := context.Background()
-	ldb, err := sql.Open("sqlite3", ":memory:")
+	ldb, err := sql.Open("sqlite", ":memory:")
 	if err != nil {
 		t.Fatalf("Couldn't open LDB, error: %+v", err)
 	}
-	ctldb, err := sql.Open("sqlite3", ":memory:")
+	ctldb, err := sql.Open("sqlite", ":memory:")
 	if err != nil {
 		t.Fatalf("Couldn't open ctldb, error: %+v", err)
 	}

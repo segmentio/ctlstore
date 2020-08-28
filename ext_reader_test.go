@@ -24,7 +24,7 @@ CREATE TABLE family1___table1 (
 INSERT INTO family1___table1 VALUES('foo', 'bar');
 `
 	ctx := context.Background()
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	if err != nil {
 		t.Fatalf("Unexpected error %+v", err)
 	}

@@ -1,0 +1,37 @@
+goos: darwin
+goarch: amd64
+pkg: github.com/segmentio/ctlstore
+BenchmarkLDBQueryBaseline-8    	   51636	     25530 ns/op
+BenchmarkLDBQueryBaseline-8    	   46780	     23614 ns/op
+BenchmarkLDBQueryBaseline-8    	   50294	     23006 ns/op
+BenchmarkLDBQueryBaseline-8    	   52845	     22155 ns/op
+BenchmarkLDBQueryBaseline-8    	   53202	     23052 ns/op
+BenchmarkLDBQueryBaseline-8    	   48765	     25969 ns/op
+BenchmarkLDBQueryBaseline-8    	   51561	     24321 ns/op
+BenchmarkLDBQueryBaseline-8    	   52063	     22644 ns/op
+BenchmarkGetRowByKey-8         	   38980	     32249 ns/op
+BenchmarkGetRowByKey-8         	   37669	     30814 ns/op
+BenchmarkGetRowByKey-8         	   38571	     34997 ns/op
+BenchmarkGetRowByKey-8         	   38233	     31320 ns/op
+BenchmarkGetRowByKey-8         	   40298	     31642 ns/op
+BenchmarkGetRowByKey-8         	   37394	     31976 ns/op
+BenchmarkGetRowByKey-8         	   38244	     31664 ns/op
+BenchmarkGetRowByKey-8         	   40040	     34356 ns/op
+BenchmarkStructGetRowByKey-8   	   99262	     12251 ns/op	    1363 B/op	      39 allocs/op
+BenchmarkStructGetRowByKey-8   	   93758	     12501 ns/op	    1364 B/op	      39 allocs/op
+BenchmarkStructGetRowByKey-8   	  104388	     11313 ns/op	    1361 B/op	      39 allocs/op
+BenchmarkStructGetRowByKey-8   	  105907	     11503 ns/op	    1362 B/op	      39 allocs/op
+BenchmarkStructGetRowByKey-8   	  104948	     11310 ns/op	    1366 B/op	      39 allocs/op
+BenchmarkStructGetRowByKey-8   	  104775	     11313 ns/op	    1365 B/op	      39 allocs/op
+BenchmarkStructGetRowByKey-8   	  106152	     11270 ns/op	    1361 B/op	      39 allocs/op
+BenchmarkStructGetRowByKey-8   	  107226	     11358 ns/op	    1366 B/op	      39 allocs/op
+BenchmarkMapGetRowByKey-8      	  104768	     11621 ns/op	    1462 B/op	      41 allocs/op
+BenchmarkMapGetRowByKey-8      	  103082	     11669 ns/op	    1464 B/op	      41 allocs/op
+BenchmarkMapGetRowByKey-8      	  103173	     11639 ns/op	    1466 B/op	      41 allocs/op
+BenchmarkMapGetRowByKey-8      	  104032	     11611 ns/op	    1467 B/op	      41 allocs/op
+BenchmarkMapGetRowByKey-8      	  100960	     11645 ns/op	    1464 B/op	      41 allocs/op
+BenchmarkMapGetRowByKey-8      	  103995	     11903 ns/op	    1465 B/op	      41 allocs/op
+BenchmarkMapGetRowByKey-8      	   85936	     12531 ns/op	    1463 B/op	      41 allocs/op
+BenchmarkMapGetRowByKey-8      	   97444	     12115 ns/op	    1465 B/op	      41 allocs/op
+PASS
+ok  	github.com/segmentio/ctlstore	50.610s

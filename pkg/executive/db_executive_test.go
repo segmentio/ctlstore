@@ -195,7 +195,7 @@ func newCtlDBTestConnection(t *testing.T, dbType string) (*sql.DB, func()) {
 		schemaUp = testCtlDBSchemaUpForSQLite3
 		tmpDir, td := tests.WithTmpDir(t)
 		teardowns.Add(td)
-		db, err = sql.Open("sqlite3", filepath.Join(tmpDir, "ctldb.db"))
+		db, err = sql.Open("sqlite", filepath.Join(tmpDir, "ctldb.db"))
 	default:
 		t.Fatalf("unknown dbtype %q", dbType)
 	}

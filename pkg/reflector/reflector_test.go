@@ -33,12 +33,12 @@ func TestShovelSequenceReset(t *testing.T) {
 	emptyLdbPath := filepath.Join(tmpPath, "emptyLdb.db")
 
 	upstreamSQL := ctldb.CtlDBSchemaByDriver["sqlite3"]
-	upstreamDB, err := sql.Open("sqlite3", upstreamDbPath)
+	upstreamDB, err := sql.Open("sqlite", upstreamDbPath)
 	require.NoError(t, err)
 	_, err = upstreamDB.Exec(upstreamSQL)
 	require.NoError(t, err)
 
-	ldbDB, err := sql.Open("sqlite3", emptyLdbPath)
+	ldbDB, err := sql.Open("sqlite", emptyLdbPath)
 	require.NoError(t, err)
 
 	defer ldbDB.Close()
@@ -126,7 +126,7 @@ func TestReflector(t *testing.T) {
 	changelogPath := filepath.Join(tmpPath, "changelog")
 
 	emptyLdbPath := filepath.Join(tmpPath, "emptyLdb.db")
-	ldbDB, err := sql.Open("sqlite3", emptyLdbPath)
+	ldbDB, err := sql.Open("sqlite", emptyLdbPath)
 	require.NoError(t, err)
 
 	defer ldbDB.Close()
@@ -158,7 +158,7 @@ func TestReflector(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 
-	upstreamDb, err := sql.Open("sqlite3", upstreamDbPath)
+	upstreamDb, err := sql.Open("sqlite", upstreamDbPath)
 	require.NoError(t, err)
 	defer upstreamDb.Close()
 

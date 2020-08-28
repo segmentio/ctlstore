@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	sqlite3 "github.com/segmentio/go-sqlite3"
+	sqlite3 "modernc.org/sqlite"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -174,7 +174,7 @@ func TestSQLiteWatchChangeExtractKeys(t *testing.T) {
 
 	for _, testCase := range suite {
 		t.Run(testCase.desc, func(t *testing.T) {
-			db, err := sql.Open("sqlite3", ":memory:")
+			db, err := sql.Open("sqlite", ":memory:")
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
