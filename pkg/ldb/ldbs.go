@@ -69,12 +69,14 @@ func LDBForTest(t testing.TB) (res *sql.DB, teardown func()) {
 }
 
 func OpenLDB(path string, mode string) (*sql.DB, error) {
-	return sql.Open("sqlite3_with_autocheckpoint_off",
+	// TODO: sqlite3_with_autocheckpoint_off for modernc.org/sqlite
+	return sql.Open("sqlite",
 		fmt.Sprintf("file:%s?_journal_mode=wal&mode=%s", path, mode))
 }
 
 func OpenImmutableLDB(path string) (*sql.DB, error) {
-	return sql.Open("sqlite3_with_autocheckpoint_off", fmt.Sprintf("file:%s?immutable=true", path))
+	// TODO: sqlite3_with_autocheckpoint_off for modernc.org/sqlite
+	return sql.Open("sqlite", fmt.Sprintf("file:%s?immutable=true", path))
 }
 
 // Ensures the LDB is prepared for queries

@@ -166,6 +166,6 @@ func openSQLiteDB(path string) (*sql.DB, error) {
 		path = "file:" + path + "?_journal_mode=wal&mode=ro"
 	}
 
-	db, err := sql.Open("sqlite3", path)
+	db, err := sql.Open("sqlite", path)
 	return db, err
 }

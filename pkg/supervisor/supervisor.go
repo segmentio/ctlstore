@@ -87,7 +87,7 @@ func (s *supervisor) snapshot(ctx context.Context) error {
 
 func (s *supervisor) checkpointLDB() error {
 	ctx := context.Background() // we do not want to interrupt this operation
-	srcDb, err := sql.Open("sqlite3", s.LDBPath+"?_journal_mode=wal")
+	srcDb, err := sql.Open("sqlite", s.LDBPath+"?_journal_mode=wal")
 	if err != nil {
 		return errors.Wrap(err, "opening source db")
 	}

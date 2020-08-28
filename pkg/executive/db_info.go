@@ -9,7 +9,7 @@ import (
 	mysql2 "github.com/segmentio/ctlstore/pkg/mysql"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	sqlite2 "github.com/segmentio/ctlstore/pkg/sqlite"
-	sqlite "github.com/segmentio/go-sqlite3"
+	"modernc.org/sqlite"
 )
 
 type sqlDBInfo interface {

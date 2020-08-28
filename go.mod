@@ -15,11 +15,11 @@ require (
 	github.com/segmentio/conf v1.1.0
 	github.com/segmentio/errors-go v1.0.0
 	github.com/segmentio/events/v2 v2.3.2
-	github.com/segmentio/go-sqlite3 v1.11.1
 	github.com/segmentio/stats/v4 v4.5.2
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.4.0
 	github.com/stretchr/testify v1.4.0
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
+	modernc.org/sqlite v1.4.0
 )
