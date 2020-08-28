@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/segmentio/ctlstore/pkg/ldb"
+	_ "modernc.org/sqlite" // gives us sqlite3 everywhere
 	// "github.com/segmentio/ctlstore/pkg/sqlite"
 )
 
