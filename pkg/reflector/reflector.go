@@ -141,7 +141,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 
 	upstreamdb, err := sql.Open(config.Upstream.Driver, dsn)
 	if err != nil {
-		return nil, fmt.Errorf("Error when opening upstream DB (%v) '%v': %v", config.Upstream.Driver, config.Upstream.DSN, err)
+		return nil, fmt.Errorf("Error when opening upstream DB (%v): %v", config.Upstream.Driver, err)
 	}
 
 	row := upstreamdb.QueryRow("select max(seq) from " + config.Upstream.LedgerTable)
