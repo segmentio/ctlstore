@@ -50,7 +50,7 @@ func TestDMLLogWriterAdd(t *testing.T) {
 				seqs = append(seqs, seq)
 			}
 
-			row := db.QueryRowContext(ctx, "SELECT COUNT(*) FROM ctlstore_dml_ledger")
+			row := tx.QueryRowContext(ctx, "SELECT COUNT(*) FROM ctlstore_dml_ledger")
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}

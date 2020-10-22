@@ -124,7 +124,7 @@ func (e *dbExecutive) CreateTable(familyName string, tableName string, fieldName
 	}
 	defer dlw.Close()
 
-	_, err = e.DB.ExecContext(ctx, ddl)
+	_, err = tx.ExecContext(ctx, ddl)
 	if err != nil {
 		if strings.Index(err.Error(), "Error 1050:") == 0 ||
 			strings.Contains(err.Error(), "already exists") {
@@ -922,7 +922,7 @@ func (e *dbExecutive) DropTable(table schema.FamilyTable) error {
 	}
 	defer dlw.Close()
 
-	_, err = e.DB.ExecContext(ctx, ddl)
+	_, err = tx.ExecContext(ctx, ddl)
 	if err != nil {
 		return errors.Wrap(err, "error running drop command")
 	}
@@ -989,7 +989,7 @@ func (e *dbExecutive) ClearTable(table schema.FamilyTable) error {
 	}
 	defer dlw.Close()
 
-	_, err = e.DB.ExecContext(ctx, ddl)
+	_, err = tx.ExecContext(ctx, ddl)
 	if err != nil {
 		return errors.Wrap(err, "error running delete command")
 	}
