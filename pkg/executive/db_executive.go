@@ -203,7 +203,7 @@ func (e *dbExecutive) AddFields(familyName string, tableName string, fieldNames 
 				TableName: dmlLedgerTableName,
 			}
 			defer dlw.Close()
-			_, err = e.DB.ExecContext(ctx, ddl)
+			_, err = tx.ExecContext(ctx, ddl)
 			if err != nil {
 				if strings.Index(err.Error(), "Error 1060:") == 0 || // mysql
 					strings.Contains(err.Error(), "duplicate column name") { // sqlite
