@@ -487,7 +487,7 @@ func SqlSprintf(format string, args ...string) string {
 
 		whichArg := int(parsed) - 1
 		if whichArg > len(args) {
-			panic("Placeholder $" + string(whichArg) + " exceeds argument count")
+			panic("Placeholder $" + strconv.Itoa(whichArg) + " exceeds argument count")
 		}
 		if !sqlPrintfValidValue.MatchString(args[whichArg]) {
 			panic("Invalid value: " + args[whichArg])
