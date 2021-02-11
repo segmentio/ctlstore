@@ -2,15 +2,56 @@
 package fakes
 
 import (
-	sync "sync"
+	"context"
+	"sync"
 
-	aws "github.com/aws/aws-sdk-go/aws"
-	request "github.com/aws/aws-sdk-go/aws/request"
-	ecs "github.com/aws/aws-sdk-go/service/ecs"
-	ledger "github.com/segmentio/ctlstore/pkg/ledger"
+	"github.com/aws/aws-sdk-go/aws/request"
+	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/segmentio/ctlstore/pkg/ledger"
 )
 
 type FakeECSClient struct {
+	CreateCapacityProviderStub        func(*ecs.CreateCapacityProviderInput) (*ecs.CreateCapacityProviderOutput, error)
+	createCapacityProviderMutex       sync.RWMutex
+	createCapacityProviderArgsForCall []struct {
+		arg1 *ecs.CreateCapacityProviderInput
+	}
+	createCapacityProviderReturns struct {
+		result1 *ecs.CreateCapacityProviderOutput
+		result2 error
+	}
+	createCapacityProviderReturnsOnCall map[int]struct {
+		result1 *ecs.CreateCapacityProviderOutput
+		result2 error
+	}
+	CreateCapacityProviderRequestStub        func(*ecs.CreateCapacityProviderInput) (*request.Request, *ecs.CreateCapacityProviderOutput)
+	createCapacityProviderRequestMutex       sync.RWMutex
+	createCapacityProviderRequestArgsForCall []struct {
+		arg1 *ecs.CreateCapacityProviderInput
+	}
+	createCapacityProviderRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.CreateCapacityProviderOutput
+	}
+	createCapacityProviderRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.CreateCapacityProviderOutput
+	}
+	CreateCapacityProviderWithContextStub        func(context.Context, *ecs.CreateCapacityProviderInput, ...request.Option) (*ecs.CreateCapacityProviderOutput, error)
+	createCapacityProviderWithContextMutex       sync.RWMutex
+	createCapacityProviderWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.CreateCapacityProviderInput
+		arg3 []request.Option
+	}
+	createCapacityProviderWithContextReturns struct {
+		result1 *ecs.CreateCapacityProviderOutput
+		result2 error
+	}
+	createCapacityProviderWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.CreateCapacityProviderOutput
+		result2 error
+	}
 	CreateClusterStub        func(*ecs.CreateClusterInput) (*ecs.CreateClusterOutput, error)
 	createClusterMutex       sync.RWMutex
 	createClusterArgsForCall []struct {
@@ -37,10 +78,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.CreateClusterOutput
 	}
-	CreateClusterWithContextStub        func(aws.Context, *ecs.CreateClusterInput, ...request.Option) (*ecs.CreateClusterOutput, error)
+	CreateClusterWithContextStub        func(context.Context, *ecs.CreateClusterInput, ...request.Option) (*ecs.CreateClusterOutput, error)
 	createClusterWithContextMutex       sync.RWMutex
 	createClusterWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.CreateClusterInput
 		arg3 []request.Option
 	}
@@ -78,10 +119,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.CreateServiceOutput
 	}
-	CreateServiceWithContextStub        func(aws.Context, *ecs.CreateServiceInput, ...request.Option) (*ecs.CreateServiceOutput, error)
+	CreateServiceWithContextStub        func(context.Context, *ecs.CreateServiceInput, ...request.Option) (*ecs.CreateServiceOutput, error)
 	createServiceWithContextMutex       sync.RWMutex
 	createServiceWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.CreateServiceInput
 		arg3 []request.Option
 	}
@@ -91,6 +132,88 @@ type FakeECSClient struct {
 	}
 	createServiceWithContextReturnsOnCall map[int]struct {
 		result1 *ecs.CreateServiceOutput
+		result2 error
+	}
+	CreateTaskSetStub        func(*ecs.CreateTaskSetInput) (*ecs.CreateTaskSetOutput, error)
+	createTaskSetMutex       sync.RWMutex
+	createTaskSetArgsForCall []struct {
+		arg1 *ecs.CreateTaskSetInput
+	}
+	createTaskSetReturns struct {
+		result1 *ecs.CreateTaskSetOutput
+		result2 error
+	}
+	createTaskSetReturnsOnCall map[int]struct {
+		result1 *ecs.CreateTaskSetOutput
+		result2 error
+	}
+	CreateTaskSetRequestStub        func(*ecs.CreateTaskSetInput) (*request.Request, *ecs.CreateTaskSetOutput)
+	createTaskSetRequestMutex       sync.RWMutex
+	createTaskSetRequestArgsForCall []struct {
+		arg1 *ecs.CreateTaskSetInput
+	}
+	createTaskSetRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.CreateTaskSetOutput
+	}
+	createTaskSetRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.CreateTaskSetOutput
+	}
+	CreateTaskSetWithContextStub        func(context.Context, *ecs.CreateTaskSetInput, ...request.Option) (*ecs.CreateTaskSetOutput, error)
+	createTaskSetWithContextMutex       sync.RWMutex
+	createTaskSetWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.CreateTaskSetInput
+		arg3 []request.Option
+	}
+	createTaskSetWithContextReturns struct {
+		result1 *ecs.CreateTaskSetOutput
+		result2 error
+	}
+	createTaskSetWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.CreateTaskSetOutput
+		result2 error
+	}
+	DeleteAccountSettingStub        func(*ecs.DeleteAccountSettingInput) (*ecs.DeleteAccountSettingOutput, error)
+	deleteAccountSettingMutex       sync.RWMutex
+	deleteAccountSettingArgsForCall []struct {
+		arg1 *ecs.DeleteAccountSettingInput
+	}
+	deleteAccountSettingReturns struct {
+		result1 *ecs.DeleteAccountSettingOutput
+		result2 error
+	}
+	deleteAccountSettingReturnsOnCall map[int]struct {
+		result1 *ecs.DeleteAccountSettingOutput
+		result2 error
+	}
+	DeleteAccountSettingRequestStub        func(*ecs.DeleteAccountSettingInput) (*request.Request, *ecs.DeleteAccountSettingOutput)
+	deleteAccountSettingRequestMutex       sync.RWMutex
+	deleteAccountSettingRequestArgsForCall []struct {
+		arg1 *ecs.DeleteAccountSettingInput
+	}
+	deleteAccountSettingRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.DeleteAccountSettingOutput
+	}
+	deleteAccountSettingRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.DeleteAccountSettingOutput
+	}
+	DeleteAccountSettingWithContextStub        func(context.Context, *ecs.DeleteAccountSettingInput, ...request.Option) (*ecs.DeleteAccountSettingOutput, error)
+	deleteAccountSettingWithContextMutex       sync.RWMutex
+	deleteAccountSettingWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.DeleteAccountSettingInput
+		arg3 []request.Option
+	}
+	deleteAccountSettingWithContextReturns struct {
+		result1 *ecs.DeleteAccountSettingOutput
+		result2 error
+	}
+	deleteAccountSettingWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.DeleteAccountSettingOutput
 		result2 error
 	}
 	DeleteAttributesStub        func(*ecs.DeleteAttributesInput) (*ecs.DeleteAttributesOutput, error)
@@ -119,10 +242,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.DeleteAttributesOutput
 	}
-	DeleteAttributesWithContextStub        func(aws.Context, *ecs.DeleteAttributesInput, ...request.Option) (*ecs.DeleteAttributesOutput, error)
+	DeleteAttributesWithContextStub        func(context.Context, *ecs.DeleteAttributesInput, ...request.Option) (*ecs.DeleteAttributesOutput, error)
 	deleteAttributesWithContextMutex       sync.RWMutex
 	deleteAttributesWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DeleteAttributesInput
 		arg3 []request.Option
 	}
@@ -132,6 +255,47 @@ type FakeECSClient struct {
 	}
 	deleteAttributesWithContextReturnsOnCall map[int]struct {
 		result1 *ecs.DeleteAttributesOutput
+		result2 error
+	}
+	DeleteCapacityProviderStub        func(*ecs.DeleteCapacityProviderInput) (*ecs.DeleteCapacityProviderOutput, error)
+	deleteCapacityProviderMutex       sync.RWMutex
+	deleteCapacityProviderArgsForCall []struct {
+		arg1 *ecs.DeleteCapacityProviderInput
+	}
+	deleteCapacityProviderReturns struct {
+		result1 *ecs.DeleteCapacityProviderOutput
+		result2 error
+	}
+	deleteCapacityProviderReturnsOnCall map[int]struct {
+		result1 *ecs.DeleteCapacityProviderOutput
+		result2 error
+	}
+	DeleteCapacityProviderRequestStub        func(*ecs.DeleteCapacityProviderInput) (*request.Request, *ecs.DeleteCapacityProviderOutput)
+	deleteCapacityProviderRequestMutex       sync.RWMutex
+	deleteCapacityProviderRequestArgsForCall []struct {
+		arg1 *ecs.DeleteCapacityProviderInput
+	}
+	deleteCapacityProviderRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.DeleteCapacityProviderOutput
+	}
+	deleteCapacityProviderRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.DeleteCapacityProviderOutput
+	}
+	DeleteCapacityProviderWithContextStub        func(context.Context, *ecs.DeleteCapacityProviderInput, ...request.Option) (*ecs.DeleteCapacityProviderOutput, error)
+	deleteCapacityProviderWithContextMutex       sync.RWMutex
+	deleteCapacityProviderWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.DeleteCapacityProviderInput
+		arg3 []request.Option
+	}
+	deleteCapacityProviderWithContextReturns struct {
+		result1 *ecs.DeleteCapacityProviderOutput
+		result2 error
+	}
+	deleteCapacityProviderWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.DeleteCapacityProviderOutput
 		result2 error
 	}
 	DeleteClusterStub        func(*ecs.DeleteClusterInput) (*ecs.DeleteClusterOutput, error)
@@ -160,10 +324,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.DeleteClusterOutput
 	}
-	DeleteClusterWithContextStub        func(aws.Context, *ecs.DeleteClusterInput, ...request.Option) (*ecs.DeleteClusterOutput, error)
+	DeleteClusterWithContextStub        func(context.Context, *ecs.DeleteClusterInput, ...request.Option) (*ecs.DeleteClusterOutput, error)
 	deleteClusterWithContextMutex       sync.RWMutex
 	deleteClusterWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DeleteClusterInput
 		arg3 []request.Option
 	}
@@ -201,10 +365,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.DeleteServiceOutput
 	}
-	DeleteServiceWithContextStub        func(aws.Context, *ecs.DeleteServiceInput, ...request.Option) (*ecs.DeleteServiceOutput, error)
+	DeleteServiceWithContextStub        func(context.Context, *ecs.DeleteServiceInput, ...request.Option) (*ecs.DeleteServiceOutput, error)
 	deleteServiceWithContextMutex       sync.RWMutex
 	deleteServiceWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DeleteServiceInput
 		arg3 []request.Option
 	}
@@ -214,6 +378,47 @@ type FakeECSClient struct {
 	}
 	deleteServiceWithContextReturnsOnCall map[int]struct {
 		result1 *ecs.DeleteServiceOutput
+		result2 error
+	}
+	DeleteTaskSetStub        func(*ecs.DeleteTaskSetInput) (*ecs.DeleteTaskSetOutput, error)
+	deleteTaskSetMutex       sync.RWMutex
+	deleteTaskSetArgsForCall []struct {
+		arg1 *ecs.DeleteTaskSetInput
+	}
+	deleteTaskSetReturns struct {
+		result1 *ecs.DeleteTaskSetOutput
+		result2 error
+	}
+	deleteTaskSetReturnsOnCall map[int]struct {
+		result1 *ecs.DeleteTaskSetOutput
+		result2 error
+	}
+	DeleteTaskSetRequestStub        func(*ecs.DeleteTaskSetInput) (*request.Request, *ecs.DeleteTaskSetOutput)
+	deleteTaskSetRequestMutex       sync.RWMutex
+	deleteTaskSetRequestArgsForCall []struct {
+		arg1 *ecs.DeleteTaskSetInput
+	}
+	deleteTaskSetRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.DeleteTaskSetOutput
+	}
+	deleteTaskSetRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.DeleteTaskSetOutput
+	}
+	DeleteTaskSetWithContextStub        func(context.Context, *ecs.DeleteTaskSetInput, ...request.Option) (*ecs.DeleteTaskSetOutput, error)
+	deleteTaskSetWithContextMutex       sync.RWMutex
+	deleteTaskSetWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.DeleteTaskSetInput
+		arg3 []request.Option
+	}
+	deleteTaskSetWithContextReturns struct {
+		result1 *ecs.DeleteTaskSetOutput
+		result2 error
+	}
+	deleteTaskSetWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.DeleteTaskSetOutput
 		result2 error
 	}
 	DeregisterContainerInstanceStub        func(*ecs.DeregisterContainerInstanceInput) (*ecs.DeregisterContainerInstanceOutput, error)
@@ -242,10 +447,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.DeregisterContainerInstanceOutput
 	}
-	DeregisterContainerInstanceWithContextStub        func(aws.Context, *ecs.DeregisterContainerInstanceInput, ...request.Option) (*ecs.DeregisterContainerInstanceOutput, error)
+	DeregisterContainerInstanceWithContextStub        func(context.Context, *ecs.DeregisterContainerInstanceInput, ...request.Option) (*ecs.DeregisterContainerInstanceOutput, error)
 	deregisterContainerInstanceWithContextMutex       sync.RWMutex
 	deregisterContainerInstanceWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DeregisterContainerInstanceInput
 		arg3 []request.Option
 	}
@@ -283,10 +488,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.DeregisterTaskDefinitionOutput
 	}
-	DeregisterTaskDefinitionWithContextStub        func(aws.Context, *ecs.DeregisterTaskDefinitionInput, ...request.Option) (*ecs.DeregisterTaskDefinitionOutput, error)
+	DeregisterTaskDefinitionWithContextStub        func(context.Context, *ecs.DeregisterTaskDefinitionInput, ...request.Option) (*ecs.DeregisterTaskDefinitionOutput, error)
 	deregisterTaskDefinitionWithContextMutex       sync.RWMutex
 	deregisterTaskDefinitionWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DeregisterTaskDefinitionInput
 		arg3 []request.Option
 	}
@@ -296,6 +501,47 @@ type FakeECSClient struct {
 	}
 	deregisterTaskDefinitionWithContextReturnsOnCall map[int]struct {
 		result1 *ecs.DeregisterTaskDefinitionOutput
+		result2 error
+	}
+	DescribeCapacityProvidersStub        func(*ecs.DescribeCapacityProvidersInput) (*ecs.DescribeCapacityProvidersOutput, error)
+	describeCapacityProvidersMutex       sync.RWMutex
+	describeCapacityProvidersArgsForCall []struct {
+		arg1 *ecs.DescribeCapacityProvidersInput
+	}
+	describeCapacityProvidersReturns struct {
+		result1 *ecs.DescribeCapacityProvidersOutput
+		result2 error
+	}
+	describeCapacityProvidersReturnsOnCall map[int]struct {
+		result1 *ecs.DescribeCapacityProvidersOutput
+		result2 error
+	}
+	DescribeCapacityProvidersRequestStub        func(*ecs.DescribeCapacityProvidersInput) (*request.Request, *ecs.DescribeCapacityProvidersOutput)
+	describeCapacityProvidersRequestMutex       sync.RWMutex
+	describeCapacityProvidersRequestArgsForCall []struct {
+		arg1 *ecs.DescribeCapacityProvidersInput
+	}
+	describeCapacityProvidersRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.DescribeCapacityProvidersOutput
+	}
+	describeCapacityProvidersRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.DescribeCapacityProvidersOutput
+	}
+	DescribeCapacityProvidersWithContextStub        func(context.Context, *ecs.DescribeCapacityProvidersInput, ...request.Option) (*ecs.DescribeCapacityProvidersOutput, error)
+	describeCapacityProvidersWithContextMutex       sync.RWMutex
+	describeCapacityProvidersWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.DescribeCapacityProvidersInput
+		arg3 []request.Option
+	}
+	describeCapacityProvidersWithContextReturns struct {
+		result1 *ecs.DescribeCapacityProvidersOutput
+		result2 error
+	}
+	describeCapacityProvidersWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.DescribeCapacityProvidersOutput
 		result2 error
 	}
 	DescribeClustersStub        func(*ecs.DescribeClustersInput) (*ecs.DescribeClustersOutput, error)
@@ -324,10 +570,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.DescribeClustersOutput
 	}
-	DescribeClustersWithContextStub        func(aws.Context, *ecs.DescribeClustersInput, ...request.Option) (*ecs.DescribeClustersOutput, error)
+	DescribeClustersWithContextStub        func(context.Context, *ecs.DescribeClustersInput, ...request.Option) (*ecs.DescribeClustersOutput, error)
 	describeClustersWithContextMutex       sync.RWMutex
 	describeClustersWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeClustersInput
 		arg3 []request.Option
 	}
@@ -365,10 +611,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.DescribeContainerInstancesOutput
 	}
-	DescribeContainerInstancesWithContextStub        func(aws.Context, *ecs.DescribeContainerInstancesInput, ...request.Option) (*ecs.DescribeContainerInstancesOutput, error)
+	DescribeContainerInstancesWithContextStub        func(context.Context, *ecs.DescribeContainerInstancesInput, ...request.Option) (*ecs.DescribeContainerInstancesOutput, error)
 	describeContainerInstancesWithContextMutex       sync.RWMutex
 	describeContainerInstancesWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeContainerInstancesInput
 		arg3 []request.Option
 	}
@@ -406,10 +652,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.DescribeServicesOutput
 	}
-	DescribeServicesWithContextStub        func(aws.Context, *ecs.DescribeServicesInput, ...request.Option) (*ecs.DescribeServicesOutput, error)
+	DescribeServicesWithContextStub        func(context.Context, *ecs.DescribeServicesInput, ...request.Option) (*ecs.DescribeServicesOutput, error)
 	describeServicesWithContextMutex       sync.RWMutex
 	describeServicesWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeServicesInput
 		arg3 []request.Option
 	}
@@ -447,10 +693,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.DescribeTaskDefinitionOutput
 	}
-	DescribeTaskDefinitionWithContextStub        func(aws.Context, *ecs.DescribeTaskDefinitionInput, ...request.Option) (*ecs.DescribeTaskDefinitionOutput, error)
+	DescribeTaskDefinitionWithContextStub        func(context.Context, *ecs.DescribeTaskDefinitionInput, ...request.Option) (*ecs.DescribeTaskDefinitionOutput, error)
 	describeTaskDefinitionWithContextMutex       sync.RWMutex
 	describeTaskDefinitionWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeTaskDefinitionInput
 		arg3 []request.Option
 	}
@@ -460,6 +706,47 @@ type FakeECSClient struct {
 	}
 	describeTaskDefinitionWithContextReturnsOnCall map[int]struct {
 		result1 *ecs.DescribeTaskDefinitionOutput
+		result2 error
+	}
+	DescribeTaskSetsStub        func(*ecs.DescribeTaskSetsInput) (*ecs.DescribeTaskSetsOutput, error)
+	describeTaskSetsMutex       sync.RWMutex
+	describeTaskSetsArgsForCall []struct {
+		arg1 *ecs.DescribeTaskSetsInput
+	}
+	describeTaskSetsReturns struct {
+		result1 *ecs.DescribeTaskSetsOutput
+		result2 error
+	}
+	describeTaskSetsReturnsOnCall map[int]struct {
+		result1 *ecs.DescribeTaskSetsOutput
+		result2 error
+	}
+	DescribeTaskSetsRequestStub        func(*ecs.DescribeTaskSetsInput) (*request.Request, *ecs.DescribeTaskSetsOutput)
+	describeTaskSetsRequestMutex       sync.RWMutex
+	describeTaskSetsRequestArgsForCall []struct {
+		arg1 *ecs.DescribeTaskSetsInput
+	}
+	describeTaskSetsRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.DescribeTaskSetsOutput
+	}
+	describeTaskSetsRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.DescribeTaskSetsOutput
+	}
+	DescribeTaskSetsWithContextStub        func(context.Context, *ecs.DescribeTaskSetsInput, ...request.Option) (*ecs.DescribeTaskSetsOutput, error)
+	describeTaskSetsWithContextMutex       sync.RWMutex
+	describeTaskSetsWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.DescribeTaskSetsInput
+		arg3 []request.Option
+	}
+	describeTaskSetsWithContextReturns struct {
+		result1 *ecs.DescribeTaskSetsOutput
+		result2 error
+	}
+	describeTaskSetsWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.DescribeTaskSetsOutput
 		result2 error
 	}
 	DescribeTasksStub        func(*ecs.DescribeTasksInput) (*ecs.DescribeTasksOutput, error)
@@ -488,10 +775,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.DescribeTasksOutput
 	}
-	DescribeTasksWithContextStub        func(aws.Context, *ecs.DescribeTasksInput, ...request.Option) (*ecs.DescribeTasksOutput, error)
+	DescribeTasksWithContextStub        func(context.Context, *ecs.DescribeTasksInput, ...request.Option) (*ecs.DescribeTasksOutput, error)
 	describeTasksWithContextMutex       sync.RWMutex
 	describeTasksWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeTasksInput
 		arg3 []request.Option
 	}
@@ -529,10 +816,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.DiscoverPollEndpointOutput
 	}
-	DiscoverPollEndpointWithContextStub        func(aws.Context, *ecs.DiscoverPollEndpointInput, ...request.Option) (*ecs.DiscoverPollEndpointOutput, error)
+	DiscoverPollEndpointWithContextStub        func(context.Context, *ecs.DiscoverPollEndpointInput, ...request.Option) (*ecs.DiscoverPollEndpointOutput, error)
 	discoverPollEndpointWithContextMutex       sync.RWMutex
 	discoverPollEndpointWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DiscoverPollEndpointInput
 		arg3 []request.Option
 	}
@@ -542,6 +829,73 @@ type FakeECSClient struct {
 	}
 	discoverPollEndpointWithContextReturnsOnCall map[int]struct {
 		result1 *ecs.DiscoverPollEndpointOutput
+		result2 error
+	}
+	ListAccountSettingsStub        func(*ecs.ListAccountSettingsInput) (*ecs.ListAccountSettingsOutput, error)
+	listAccountSettingsMutex       sync.RWMutex
+	listAccountSettingsArgsForCall []struct {
+		arg1 *ecs.ListAccountSettingsInput
+	}
+	listAccountSettingsReturns struct {
+		result1 *ecs.ListAccountSettingsOutput
+		result2 error
+	}
+	listAccountSettingsReturnsOnCall map[int]struct {
+		result1 *ecs.ListAccountSettingsOutput
+		result2 error
+	}
+	ListAccountSettingsPagesStub        func(*ecs.ListAccountSettingsInput, func(*ecs.ListAccountSettingsOutput, bool) bool) error
+	listAccountSettingsPagesMutex       sync.RWMutex
+	listAccountSettingsPagesArgsForCall []struct {
+		arg1 *ecs.ListAccountSettingsInput
+		arg2 func(*ecs.ListAccountSettingsOutput, bool) bool
+	}
+	listAccountSettingsPagesReturns struct {
+		result1 error
+	}
+	listAccountSettingsPagesReturnsOnCall map[int]struct {
+		result1 error
+	}
+	ListAccountSettingsPagesWithContextStub        func(context.Context, *ecs.ListAccountSettingsInput, func(*ecs.ListAccountSettingsOutput, bool) bool, ...request.Option) error
+	listAccountSettingsPagesWithContextMutex       sync.RWMutex
+	listAccountSettingsPagesWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.ListAccountSettingsInput
+		arg3 func(*ecs.ListAccountSettingsOutput, bool) bool
+		arg4 []request.Option
+	}
+	listAccountSettingsPagesWithContextReturns struct {
+		result1 error
+	}
+	listAccountSettingsPagesWithContextReturnsOnCall map[int]struct {
+		result1 error
+	}
+	ListAccountSettingsRequestStub        func(*ecs.ListAccountSettingsInput) (*request.Request, *ecs.ListAccountSettingsOutput)
+	listAccountSettingsRequestMutex       sync.RWMutex
+	listAccountSettingsRequestArgsForCall []struct {
+		arg1 *ecs.ListAccountSettingsInput
+	}
+	listAccountSettingsRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.ListAccountSettingsOutput
+	}
+	listAccountSettingsRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.ListAccountSettingsOutput
+	}
+	ListAccountSettingsWithContextStub        func(context.Context, *ecs.ListAccountSettingsInput, ...request.Option) (*ecs.ListAccountSettingsOutput, error)
+	listAccountSettingsWithContextMutex       sync.RWMutex
+	listAccountSettingsWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.ListAccountSettingsInput
+		arg3 []request.Option
+	}
+	listAccountSettingsWithContextReturns struct {
+		result1 *ecs.ListAccountSettingsOutput
+		result2 error
+	}
+	listAccountSettingsWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.ListAccountSettingsOutput
 		result2 error
 	}
 	ListAttributesStub        func(*ecs.ListAttributesInput) (*ecs.ListAttributesOutput, error)
@@ -557,6 +911,32 @@ type FakeECSClient struct {
 		result1 *ecs.ListAttributesOutput
 		result2 error
 	}
+	ListAttributesPagesStub        func(*ecs.ListAttributesInput, func(*ecs.ListAttributesOutput, bool) bool) error
+	listAttributesPagesMutex       sync.RWMutex
+	listAttributesPagesArgsForCall []struct {
+		arg1 *ecs.ListAttributesInput
+		arg2 func(*ecs.ListAttributesOutput, bool) bool
+	}
+	listAttributesPagesReturns struct {
+		result1 error
+	}
+	listAttributesPagesReturnsOnCall map[int]struct {
+		result1 error
+	}
+	ListAttributesPagesWithContextStub        func(context.Context, *ecs.ListAttributesInput, func(*ecs.ListAttributesOutput, bool) bool, ...request.Option) error
+	listAttributesPagesWithContextMutex       sync.RWMutex
+	listAttributesPagesWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.ListAttributesInput
+		arg3 func(*ecs.ListAttributesOutput, bool) bool
+		arg4 []request.Option
+	}
+	listAttributesPagesWithContextReturns struct {
+		result1 error
+	}
+	listAttributesPagesWithContextReturnsOnCall map[int]struct {
+		result1 error
+	}
 	ListAttributesRequestStub        func(*ecs.ListAttributesInput) (*request.Request, *ecs.ListAttributesOutput)
 	listAttributesRequestMutex       sync.RWMutex
 	listAttributesRequestArgsForCall []struct {
@@ -570,10 +950,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.ListAttributesOutput
 	}
-	ListAttributesWithContextStub        func(aws.Context, *ecs.ListAttributesInput, ...request.Option) (*ecs.ListAttributesOutput, error)
+	ListAttributesWithContextStub        func(context.Context, *ecs.ListAttributesInput, ...request.Option) (*ecs.ListAttributesOutput, error)
 	listAttributesWithContextMutex       sync.RWMutex
 	listAttributesWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListAttributesInput
 		arg3 []request.Option
 	}
@@ -610,10 +990,10 @@ type FakeECSClient struct {
 	listClustersPagesReturnsOnCall map[int]struct {
 		result1 error
 	}
-	ListClustersPagesWithContextStub        func(aws.Context, *ecs.ListClustersInput, func(*ecs.ListClustersOutput, bool) bool, ...request.Option) error
+	ListClustersPagesWithContextStub        func(context.Context, *ecs.ListClustersInput, func(*ecs.ListClustersOutput, bool) bool, ...request.Option) error
 	listClustersPagesWithContextMutex       sync.RWMutex
 	listClustersPagesWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListClustersInput
 		arg3 func(*ecs.ListClustersOutput, bool) bool
 		arg4 []request.Option
@@ -637,10 +1017,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.ListClustersOutput
 	}
-	ListClustersWithContextStub        func(aws.Context, *ecs.ListClustersInput, ...request.Option) (*ecs.ListClustersOutput, error)
+	ListClustersWithContextStub        func(context.Context, *ecs.ListClustersInput, ...request.Option) (*ecs.ListClustersOutput, error)
 	listClustersWithContextMutex       sync.RWMutex
 	listClustersWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListClustersInput
 		arg3 []request.Option
 	}
@@ -677,10 +1057,10 @@ type FakeECSClient struct {
 	listContainerInstancesPagesReturnsOnCall map[int]struct {
 		result1 error
 	}
-	ListContainerInstancesPagesWithContextStub        func(aws.Context, *ecs.ListContainerInstancesInput, func(*ecs.ListContainerInstancesOutput, bool) bool, ...request.Option) error
+	ListContainerInstancesPagesWithContextStub        func(context.Context, *ecs.ListContainerInstancesInput, func(*ecs.ListContainerInstancesOutput, bool) bool, ...request.Option) error
 	listContainerInstancesPagesWithContextMutex       sync.RWMutex
 	listContainerInstancesPagesWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListContainerInstancesInput
 		arg3 func(*ecs.ListContainerInstancesOutput, bool) bool
 		arg4 []request.Option
@@ -704,10 +1084,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.ListContainerInstancesOutput
 	}
-	ListContainerInstancesWithContextStub        func(aws.Context, *ecs.ListContainerInstancesInput, ...request.Option) (*ecs.ListContainerInstancesOutput, error)
+	ListContainerInstancesWithContextStub        func(context.Context, *ecs.ListContainerInstancesInput, ...request.Option) (*ecs.ListContainerInstancesOutput, error)
 	listContainerInstancesWithContextMutex       sync.RWMutex
 	listContainerInstancesWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListContainerInstancesInput
 		arg3 []request.Option
 	}
@@ -744,10 +1124,10 @@ type FakeECSClient struct {
 	listServicesPagesReturnsOnCall map[int]struct {
 		result1 error
 	}
-	ListServicesPagesWithContextStub        func(aws.Context, *ecs.ListServicesInput, func(*ecs.ListServicesOutput, bool) bool, ...request.Option) error
+	ListServicesPagesWithContextStub        func(context.Context, *ecs.ListServicesInput, func(*ecs.ListServicesOutput, bool) bool, ...request.Option) error
 	listServicesPagesWithContextMutex       sync.RWMutex
 	listServicesPagesWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListServicesInput
 		arg3 func(*ecs.ListServicesOutput, bool) bool
 		arg4 []request.Option
@@ -771,10 +1151,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.ListServicesOutput
 	}
-	ListServicesWithContextStub        func(aws.Context, *ecs.ListServicesInput, ...request.Option) (*ecs.ListServicesOutput, error)
+	ListServicesWithContextStub        func(context.Context, *ecs.ListServicesInput, ...request.Option) (*ecs.ListServicesOutput, error)
 	listServicesWithContextMutex       sync.RWMutex
 	listServicesWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListServicesInput
 		arg3 []request.Option
 	}
@@ -784,6 +1164,47 @@ type FakeECSClient struct {
 	}
 	listServicesWithContextReturnsOnCall map[int]struct {
 		result1 *ecs.ListServicesOutput
+		result2 error
+	}
+	ListTagsForResourceStub        func(*ecs.ListTagsForResourceInput) (*ecs.ListTagsForResourceOutput, error)
+	listTagsForResourceMutex       sync.RWMutex
+	listTagsForResourceArgsForCall []struct {
+		arg1 *ecs.ListTagsForResourceInput
+	}
+	listTagsForResourceReturns struct {
+		result1 *ecs.ListTagsForResourceOutput
+		result2 error
+	}
+	listTagsForResourceReturnsOnCall map[int]struct {
+		result1 *ecs.ListTagsForResourceOutput
+		result2 error
+	}
+	ListTagsForResourceRequestStub        func(*ecs.ListTagsForResourceInput) (*request.Request, *ecs.ListTagsForResourceOutput)
+	listTagsForResourceRequestMutex       sync.RWMutex
+	listTagsForResourceRequestArgsForCall []struct {
+		arg1 *ecs.ListTagsForResourceInput
+	}
+	listTagsForResourceRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.ListTagsForResourceOutput
+	}
+	listTagsForResourceRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.ListTagsForResourceOutput
+	}
+	ListTagsForResourceWithContextStub        func(context.Context, *ecs.ListTagsForResourceInput, ...request.Option) (*ecs.ListTagsForResourceOutput, error)
+	listTagsForResourceWithContextMutex       sync.RWMutex
+	listTagsForResourceWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.ListTagsForResourceInput
+		arg3 []request.Option
+	}
+	listTagsForResourceWithContextReturns struct {
+		result1 *ecs.ListTagsForResourceOutput
+		result2 error
+	}
+	listTagsForResourceWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.ListTagsForResourceOutput
 		result2 error
 	}
 	ListTaskDefinitionFamiliesStub        func(*ecs.ListTaskDefinitionFamiliesInput) (*ecs.ListTaskDefinitionFamiliesOutput, error)
@@ -811,10 +1232,10 @@ type FakeECSClient struct {
 	listTaskDefinitionFamiliesPagesReturnsOnCall map[int]struct {
 		result1 error
 	}
-	ListTaskDefinitionFamiliesPagesWithContextStub        func(aws.Context, *ecs.ListTaskDefinitionFamiliesInput, func(*ecs.ListTaskDefinitionFamiliesOutput, bool) bool, ...request.Option) error
+	ListTaskDefinitionFamiliesPagesWithContextStub        func(context.Context, *ecs.ListTaskDefinitionFamiliesInput, func(*ecs.ListTaskDefinitionFamiliesOutput, bool) bool, ...request.Option) error
 	listTaskDefinitionFamiliesPagesWithContextMutex       sync.RWMutex
 	listTaskDefinitionFamiliesPagesWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListTaskDefinitionFamiliesInput
 		arg3 func(*ecs.ListTaskDefinitionFamiliesOutput, bool) bool
 		arg4 []request.Option
@@ -838,10 +1259,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.ListTaskDefinitionFamiliesOutput
 	}
-	ListTaskDefinitionFamiliesWithContextStub        func(aws.Context, *ecs.ListTaskDefinitionFamiliesInput, ...request.Option) (*ecs.ListTaskDefinitionFamiliesOutput, error)
+	ListTaskDefinitionFamiliesWithContextStub        func(context.Context, *ecs.ListTaskDefinitionFamiliesInput, ...request.Option) (*ecs.ListTaskDefinitionFamiliesOutput, error)
 	listTaskDefinitionFamiliesWithContextMutex       sync.RWMutex
 	listTaskDefinitionFamiliesWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListTaskDefinitionFamiliesInput
 		arg3 []request.Option
 	}
@@ -878,10 +1299,10 @@ type FakeECSClient struct {
 	listTaskDefinitionsPagesReturnsOnCall map[int]struct {
 		result1 error
 	}
-	ListTaskDefinitionsPagesWithContextStub        func(aws.Context, *ecs.ListTaskDefinitionsInput, func(*ecs.ListTaskDefinitionsOutput, bool) bool, ...request.Option) error
+	ListTaskDefinitionsPagesWithContextStub        func(context.Context, *ecs.ListTaskDefinitionsInput, func(*ecs.ListTaskDefinitionsOutput, bool) bool, ...request.Option) error
 	listTaskDefinitionsPagesWithContextMutex       sync.RWMutex
 	listTaskDefinitionsPagesWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListTaskDefinitionsInput
 		arg3 func(*ecs.ListTaskDefinitionsOutput, bool) bool
 		arg4 []request.Option
@@ -905,10 +1326,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.ListTaskDefinitionsOutput
 	}
-	ListTaskDefinitionsWithContextStub        func(aws.Context, *ecs.ListTaskDefinitionsInput, ...request.Option) (*ecs.ListTaskDefinitionsOutput, error)
+	ListTaskDefinitionsWithContextStub        func(context.Context, *ecs.ListTaskDefinitionsInput, ...request.Option) (*ecs.ListTaskDefinitionsOutput, error)
 	listTaskDefinitionsWithContextMutex       sync.RWMutex
 	listTaskDefinitionsWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListTaskDefinitionsInput
 		arg3 []request.Option
 	}
@@ -945,10 +1366,10 @@ type FakeECSClient struct {
 	listTasksPagesReturnsOnCall map[int]struct {
 		result1 error
 	}
-	ListTasksPagesWithContextStub        func(aws.Context, *ecs.ListTasksInput, func(*ecs.ListTasksOutput, bool) bool, ...request.Option) error
+	ListTasksPagesWithContextStub        func(context.Context, *ecs.ListTasksInput, func(*ecs.ListTasksOutput, bool) bool, ...request.Option) error
 	listTasksPagesWithContextMutex       sync.RWMutex
 	listTasksPagesWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListTasksInput
 		arg3 func(*ecs.ListTasksOutput, bool) bool
 		arg4 []request.Option
@@ -972,10 +1393,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.ListTasksOutput
 	}
-	ListTasksWithContextStub        func(aws.Context, *ecs.ListTasksInput, ...request.Option) (*ecs.ListTasksOutput, error)
+	ListTasksWithContextStub        func(context.Context, *ecs.ListTasksInput, ...request.Option) (*ecs.ListTasksOutput, error)
 	listTasksWithContextMutex       sync.RWMutex
 	listTasksWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListTasksInput
 		arg3 []request.Option
 	}
@@ -985,6 +1406,88 @@ type FakeECSClient struct {
 	}
 	listTasksWithContextReturnsOnCall map[int]struct {
 		result1 *ecs.ListTasksOutput
+		result2 error
+	}
+	PutAccountSettingStub        func(*ecs.PutAccountSettingInput) (*ecs.PutAccountSettingOutput, error)
+	putAccountSettingMutex       sync.RWMutex
+	putAccountSettingArgsForCall []struct {
+		arg1 *ecs.PutAccountSettingInput
+	}
+	putAccountSettingReturns struct {
+		result1 *ecs.PutAccountSettingOutput
+		result2 error
+	}
+	putAccountSettingReturnsOnCall map[int]struct {
+		result1 *ecs.PutAccountSettingOutput
+		result2 error
+	}
+	PutAccountSettingDefaultStub        func(*ecs.PutAccountSettingDefaultInput) (*ecs.PutAccountSettingDefaultOutput, error)
+	putAccountSettingDefaultMutex       sync.RWMutex
+	putAccountSettingDefaultArgsForCall []struct {
+		arg1 *ecs.PutAccountSettingDefaultInput
+	}
+	putAccountSettingDefaultReturns struct {
+		result1 *ecs.PutAccountSettingDefaultOutput
+		result2 error
+	}
+	putAccountSettingDefaultReturnsOnCall map[int]struct {
+		result1 *ecs.PutAccountSettingDefaultOutput
+		result2 error
+	}
+	PutAccountSettingDefaultRequestStub        func(*ecs.PutAccountSettingDefaultInput) (*request.Request, *ecs.PutAccountSettingDefaultOutput)
+	putAccountSettingDefaultRequestMutex       sync.RWMutex
+	putAccountSettingDefaultRequestArgsForCall []struct {
+		arg1 *ecs.PutAccountSettingDefaultInput
+	}
+	putAccountSettingDefaultRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.PutAccountSettingDefaultOutput
+	}
+	putAccountSettingDefaultRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.PutAccountSettingDefaultOutput
+	}
+	PutAccountSettingDefaultWithContextStub        func(context.Context, *ecs.PutAccountSettingDefaultInput, ...request.Option) (*ecs.PutAccountSettingDefaultOutput, error)
+	putAccountSettingDefaultWithContextMutex       sync.RWMutex
+	putAccountSettingDefaultWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.PutAccountSettingDefaultInput
+		arg3 []request.Option
+	}
+	putAccountSettingDefaultWithContextReturns struct {
+		result1 *ecs.PutAccountSettingDefaultOutput
+		result2 error
+	}
+	putAccountSettingDefaultWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.PutAccountSettingDefaultOutput
+		result2 error
+	}
+	PutAccountSettingRequestStub        func(*ecs.PutAccountSettingInput) (*request.Request, *ecs.PutAccountSettingOutput)
+	putAccountSettingRequestMutex       sync.RWMutex
+	putAccountSettingRequestArgsForCall []struct {
+		arg1 *ecs.PutAccountSettingInput
+	}
+	putAccountSettingRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.PutAccountSettingOutput
+	}
+	putAccountSettingRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.PutAccountSettingOutput
+	}
+	PutAccountSettingWithContextStub        func(context.Context, *ecs.PutAccountSettingInput, ...request.Option) (*ecs.PutAccountSettingOutput, error)
+	putAccountSettingWithContextMutex       sync.RWMutex
+	putAccountSettingWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.PutAccountSettingInput
+		arg3 []request.Option
+	}
+	putAccountSettingWithContextReturns struct {
+		result1 *ecs.PutAccountSettingOutput
+		result2 error
+	}
+	putAccountSettingWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.PutAccountSettingOutput
 		result2 error
 	}
 	PutAttributesStub        func(*ecs.PutAttributesInput) (*ecs.PutAttributesOutput, error)
@@ -1013,10 +1516,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.PutAttributesOutput
 	}
-	PutAttributesWithContextStub        func(aws.Context, *ecs.PutAttributesInput, ...request.Option) (*ecs.PutAttributesOutput, error)
+	PutAttributesWithContextStub        func(context.Context, *ecs.PutAttributesInput, ...request.Option) (*ecs.PutAttributesOutput, error)
 	putAttributesWithContextMutex       sync.RWMutex
 	putAttributesWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.PutAttributesInput
 		arg3 []request.Option
 	}
@@ -1026,6 +1529,47 @@ type FakeECSClient struct {
 	}
 	putAttributesWithContextReturnsOnCall map[int]struct {
 		result1 *ecs.PutAttributesOutput
+		result2 error
+	}
+	PutClusterCapacityProvidersStub        func(*ecs.PutClusterCapacityProvidersInput) (*ecs.PutClusterCapacityProvidersOutput, error)
+	putClusterCapacityProvidersMutex       sync.RWMutex
+	putClusterCapacityProvidersArgsForCall []struct {
+		arg1 *ecs.PutClusterCapacityProvidersInput
+	}
+	putClusterCapacityProvidersReturns struct {
+		result1 *ecs.PutClusterCapacityProvidersOutput
+		result2 error
+	}
+	putClusterCapacityProvidersReturnsOnCall map[int]struct {
+		result1 *ecs.PutClusterCapacityProvidersOutput
+		result2 error
+	}
+	PutClusterCapacityProvidersRequestStub        func(*ecs.PutClusterCapacityProvidersInput) (*request.Request, *ecs.PutClusterCapacityProvidersOutput)
+	putClusterCapacityProvidersRequestMutex       sync.RWMutex
+	putClusterCapacityProvidersRequestArgsForCall []struct {
+		arg1 *ecs.PutClusterCapacityProvidersInput
+	}
+	putClusterCapacityProvidersRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.PutClusterCapacityProvidersOutput
+	}
+	putClusterCapacityProvidersRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.PutClusterCapacityProvidersOutput
+	}
+	PutClusterCapacityProvidersWithContextStub        func(context.Context, *ecs.PutClusterCapacityProvidersInput, ...request.Option) (*ecs.PutClusterCapacityProvidersOutput, error)
+	putClusterCapacityProvidersWithContextMutex       sync.RWMutex
+	putClusterCapacityProvidersWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.PutClusterCapacityProvidersInput
+		arg3 []request.Option
+	}
+	putClusterCapacityProvidersWithContextReturns struct {
+		result1 *ecs.PutClusterCapacityProvidersOutput
+		result2 error
+	}
+	putClusterCapacityProvidersWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.PutClusterCapacityProvidersOutput
 		result2 error
 	}
 	RegisterContainerInstanceStub        func(*ecs.RegisterContainerInstanceInput) (*ecs.RegisterContainerInstanceOutput, error)
@@ -1054,10 +1598,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.RegisterContainerInstanceOutput
 	}
-	RegisterContainerInstanceWithContextStub        func(aws.Context, *ecs.RegisterContainerInstanceInput, ...request.Option) (*ecs.RegisterContainerInstanceOutput, error)
+	RegisterContainerInstanceWithContextStub        func(context.Context, *ecs.RegisterContainerInstanceInput, ...request.Option) (*ecs.RegisterContainerInstanceOutput, error)
 	registerContainerInstanceWithContextMutex       sync.RWMutex
 	registerContainerInstanceWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.RegisterContainerInstanceInput
 		arg3 []request.Option
 	}
@@ -1095,10 +1639,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.RegisterTaskDefinitionOutput
 	}
-	RegisterTaskDefinitionWithContextStub        func(aws.Context, *ecs.RegisterTaskDefinitionInput, ...request.Option) (*ecs.RegisterTaskDefinitionOutput, error)
+	RegisterTaskDefinitionWithContextStub        func(context.Context, *ecs.RegisterTaskDefinitionInput, ...request.Option) (*ecs.RegisterTaskDefinitionOutput, error)
 	registerTaskDefinitionWithContextMutex       sync.RWMutex
 	registerTaskDefinitionWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.RegisterTaskDefinitionInput
 		arg3 []request.Option
 	}
@@ -1136,10 +1680,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.RunTaskOutput
 	}
-	RunTaskWithContextStub        func(aws.Context, *ecs.RunTaskInput, ...request.Option) (*ecs.RunTaskOutput, error)
+	RunTaskWithContextStub        func(context.Context, *ecs.RunTaskInput, ...request.Option) (*ecs.RunTaskOutput, error)
 	runTaskWithContextMutex       sync.RWMutex
 	runTaskWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.RunTaskInput
 		arg3 []request.Option
 	}
@@ -1177,10 +1721,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.StartTaskOutput
 	}
-	StartTaskWithContextStub        func(aws.Context, *ecs.StartTaskInput, ...request.Option) (*ecs.StartTaskOutput, error)
+	StartTaskWithContextStub        func(context.Context, *ecs.StartTaskInput, ...request.Option) (*ecs.StartTaskOutput, error)
 	startTaskWithContextMutex       sync.RWMutex
 	startTaskWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.StartTaskInput
 		arg3 []request.Option
 	}
@@ -1218,10 +1762,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.StopTaskOutput
 	}
-	StopTaskWithContextStub        func(aws.Context, *ecs.StopTaskInput, ...request.Option) (*ecs.StopTaskOutput, error)
+	StopTaskWithContextStub        func(context.Context, *ecs.StopTaskInput, ...request.Option) (*ecs.StopTaskOutput, error)
 	stopTaskWithContextMutex       sync.RWMutex
 	stopTaskWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.StopTaskInput
 		arg3 []request.Option
 	}
@@ -1231,6 +1775,47 @@ type FakeECSClient struct {
 	}
 	stopTaskWithContextReturnsOnCall map[int]struct {
 		result1 *ecs.StopTaskOutput
+		result2 error
+	}
+	SubmitAttachmentStateChangesStub        func(*ecs.SubmitAttachmentStateChangesInput) (*ecs.SubmitAttachmentStateChangesOutput, error)
+	submitAttachmentStateChangesMutex       sync.RWMutex
+	submitAttachmentStateChangesArgsForCall []struct {
+		arg1 *ecs.SubmitAttachmentStateChangesInput
+	}
+	submitAttachmentStateChangesReturns struct {
+		result1 *ecs.SubmitAttachmentStateChangesOutput
+		result2 error
+	}
+	submitAttachmentStateChangesReturnsOnCall map[int]struct {
+		result1 *ecs.SubmitAttachmentStateChangesOutput
+		result2 error
+	}
+	SubmitAttachmentStateChangesRequestStub        func(*ecs.SubmitAttachmentStateChangesInput) (*request.Request, *ecs.SubmitAttachmentStateChangesOutput)
+	submitAttachmentStateChangesRequestMutex       sync.RWMutex
+	submitAttachmentStateChangesRequestArgsForCall []struct {
+		arg1 *ecs.SubmitAttachmentStateChangesInput
+	}
+	submitAttachmentStateChangesRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.SubmitAttachmentStateChangesOutput
+	}
+	submitAttachmentStateChangesRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.SubmitAttachmentStateChangesOutput
+	}
+	SubmitAttachmentStateChangesWithContextStub        func(context.Context, *ecs.SubmitAttachmentStateChangesInput, ...request.Option) (*ecs.SubmitAttachmentStateChangesOutput, error)
+	submitAttachmentStateChangesWithContextMutex       sync.RWMutex
+	submitAttachmentStateChangesWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.SubmitAttachmentStateChangesInput
+		arg3 []request.Option
+	}
+	submitAttachmentStateChangesWithContextReturns struct {
+		result1 *ecs.SubmitAttachmentStateChangesOutput
+		result2 error
+	}
+	submitAttachmentStateChangesWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.SubmitAttachmentStateChangesOutput
 		result2 error
 	}
 	SubmitContainerStateChangeStub        func(*ecs.SubmitContainerStateChangeInput) (*ecs.SubmitContainerStateChangeOutput, error)
@@ -1259,10 +1844,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.SubmitContainerStateChangeOutput
 	}
-	SubmitContainerStateChangeWithContextStub        func(aws.Context, *ecs.SubmitContainerStateChangeInput, ...request.Option) (*ecs.SubmitContainerStateChangeOutput, error)
+	SubmitContainerStateChangeWithContextStub        func(context.Context, *ecs.SubmitContainerStateChangeInput, ...request.Option) (*ecs.SubmitContainerStateChangeOutput, error)
 	submitContainerStateChangeWithContextMutex       sync.RWMutex
 	submitContainerStateChangeWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.SubmitContainerStateChangeInput
 		arg3 []request.Option
 	}
@@ -1300,10 +1885,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.SubmitTaskStateChangeOutput
 	}
-	SubmitTaskStateChangeWithContextStub        func(aws.Context, *ecs.SubmitTaskStateChangeInput, ...request.Option) (*ecs.SubmitTaskStateChangeOutput, error)
+	SubmitTaskStateChangeWithContextStub        func(context.Context, *ecs.SubmitTaskStateChangeInput, ...request.Option) (*ecs.SubmitTaskStateChangeOutput, error)
 	submitTaskStateChangeWithContextMutex       sync.RWMutex
 	submitTaskStateChangeWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.SubmitTaskStateChangeInput
 		arg3 []request.Option
 	}
@@ -1313,6 +1898,170 @@ type FakeECSClient struct {
 	}
 	submitTaskStateChangeWithContextReturnsOnCall map[int]struct {
 		result1 *ecs.SubmitTaskStateChangeOutput
+		result2 error
+	}
+	TagResourceStub        func(*ecs.TagResourceInput) (*ecs.TagResourceOutput, error)
+	tagResourceMutex       sync.RWMutex
+	tagResourceArgsForCall []struct {
+		arg1 *ecs.TagResourceInput
+	}
+	tagResourceReturns struct {
+		result1 *ecs.TagResourceOutput
+		result2 error
+	}
+	tagResourceReturnsOnCall map[int]struct {
+		result1 *ecs.TagResourceOutput
+		result2 error
+	}
+	TagResourceRequestStub        func(*ecs.TagResourceInput) (*request.Request, *ecs.TagResourceOutput)
+	tagResourceRequestMutex       sync.RWMutex
+	tagResourceRequestArgsForCall []struct {
+		arg1 *ecs.TagResourceInput
+	}
+	tagResourceRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.TagResourceOutput
+	}
+	tagResourceRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.TagResourceOutput
+	}
+	TagResourceWithContextStub        func(context.Context, *ecs.TagResourceInput, ...request.Option) (*ecs.TagResourceOutput, error)
+	tagResourceWithContextMutex       sync.RWMutex
+	tagResourceWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.TagResourceInput
+		arg3 []request.Option
+	}
+	tagResourceWithContextReturns struct {
+		result1 *ecs.TagResourceOutput
+		result2 error
+	}
+	tagResourceWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.TagResourceOutput
+		result2 error
+	}
+	UntagResourceStub        func(*ecs.UntagResourceInput) (*ecs.UntagResourceOutput, error)
+	untagResourceMutex       sync.RWMutex
+	untagResourceArgsForCall []struct {
+		arg1 *ecs.UntagResourceInput
+	}
+	untagResourceReturns struct {
+		result1 *ecs.UntagResourceOutput
+		result2 error
+	}
+	untagResourceReturnsOnCall map[int]struct {
+		result1 *ecs.UntagResourceOutput
+		result2 error
+	}
+	UntagResourceRequestStub        func(*ecs.UntagResourceInput) (*request.Request, *ecs.UntagResourceOutput)
+	untagResourceRequestMutex       sync.RWMutex
+	untagResourceRequestArgsForCall []struct {
+		arg1 *ecs.UntagResourceInput
+	}
+	untagResourceRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.UntagResourceOutput
+	}
+	untagResourceRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.UntagResourceOutput
+	}
+	UntagResourceWithContextStub        func(context.Context, *ecs.UntagResourceInput, ...request.Option) (*ecs.UntagResourceOutput, error)
+	untagResourceWithContextMutex       sync.RWMutex
+	untagResourceWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.UntagResourceInput
+		arg3 []request.Option
+	}
+	untagResourceWithContextReturns struct {
+		result1 *ecs.UntagResourceOutput
+		result2 error
+	}
+	untagResourceWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.UntagResourceOutput
+		result2 error
+	}
+	UpdateCapacityProviderStub        func(*ecs.UpdateCapacityProviderInput) (*ecs.UpdateCapacityProviderOutput, error)
+	updateCapacityProviderMutex       sync.RWMutex
+	updateCapacityProviderArgsForCall []struct {
+		arg1 *ecs.UpdateCapacityProviderInput
+	}
+	updateCapacityProviderReturns struct {
+		result1 *ecs.UpdateCapacityProviderOutput
+		result2 error
+	}
+	updateCapacityProviderReturnsOnCall map[int]struct {
+		result1 *ecs.UpdateCapacityProviderOutput
+		result2 error
+	}
+	UpdateCapacityProviderRequestStub        func(*ecs.UpdateCapacityProviderInput) (*request.Request, *ecs.UpdateCapacityProviderOutput)
+	updateCapacityProviderRequestMutex       sync.RWMutex
+	updateCapacityProviderRequestArgsForCall []struct {
+		arg1 *ecs.UpdateCapacityProviderInput
+	}
+	updateCapacityProviderRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.UpdateCapacityProviderOutput
+	}
+	updateCapacityProviderRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.UpdateCapacityProviderOutput
+	}
+	UpdateCapacityProviderWithContextStub        func(context.Context, *ecs.UpdateCapacityProviderInput, ...request.Option) (*ecs.UpdateCapacityProviderOutput, error)
+	updateCapacityProviderWithContextMutex       sync.RWMutex
+	updateCapacityProviderWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.UpdateCapacityProviderInput
+		arg3 []request.Option
+	}
+	updateCapacityProviderWithContextReturns struct {
+		result1 *ecs.UpdateCapacityProviderOutput
+		result2 error
+	}
+	updateCapacityProviderWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.UpdateCapacityProviderOutput
+		result2 error
+	}
+	UpdateClusterSettingsStub        func(*ecs.UpdateClusterSettingsInput) (*ecs.UpdateClusterSettingsOutput, error)
+	updateClusterSettingsMutex       sync.RWMutex
+	updateClusterSettingsArgsForCall []struct {
+		arg1 *ecs.UpdateClusterSettingsInput
+	}
+	updateClusterSettingsReturns struct {
+		result1 *ecs.UpdateClusterSettingsOutput
+		result2 error
+	}
+	updateClusterSettingsReturnsOnCall map[int]struct {
+		result1 *ecs.UpdateClusterSettingsOutput
+		result2 error
+	}
+	UpdateClusterSettingsRequestStub        func(*ecs.UpdateClusterSettingsInput) (*request.Request, *ecs.UpdateClusterSettingsOutput)
+	updateClusterSettingsRequestMutex       sync.RWMutex
+	updateClusterSettingsRequestArgsForCall []struct {
+		arg1 *ecs.UpdateClusterSettingsInput
+	}
+	updateClusterSettingsRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.UpdateClusterSettingsOutput
+	}
+	updateClusterSettingsRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.UpdateClusterSettingsOutput
+	}
+	UpdateClusterSettingsWithContextStub        func(context.Context, *ecs.UpdateClusterSettingsInput, ...request.Option) (*ecs.UpdateClusterSettingsOutput, error)
+	updateClusterSettingsWithContextMutex       sync.RWMutex
+	updateClusterSettingsWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.UpdateClusterSettingsInput
+		arg3 []request.Option
+	}
+	updateClusterSettingsWithContextReturns struct {
+		result1 *ecs.UpdateClusterSettingsOutput
+		result2 error
+	}
+	updateClusterSettingsWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.UpdateClusterSettingsOutput
 		result2 error
 	}
 	UpdateContainerAgentStub        func(*ecs.UpdateContainerAgentInput) (*ecs.UpdateContainerAgentOutput, error)
@@ -1341,10 +2090,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.UpdateContainerAgentOutput
 	}
-	UpdateContainerAgentWithContextStub        func(aws.Context, *ecs.UpdateContainerAgentInput, ...request.Option) (*ecs.UpdateContainerAgentOutput, error)
+	UpdateContainerAgentWithContextStub        func(context.Context, *ecs.UpdateContainerAgentInput, ...request.Option) (*ecs.UpdateContainerAgentOutput, error)
 	updateContainerAgentWithContextMutex       sync.RWMutex
 	updateContainerAgentWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.UpdateContainerAgentInput
 		arg3 []request.Option
 	}
@@ -1382,10 +2131,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.UpdateContainerInstancesStateOutput
 	}
-	UpdateContainerInstancesStateWithContextStub        func(aws.Context, *ecs.UpdateContainerInstancesStateInput, ...request.Option) (*ecs.UpdateContainerInstancesStateOutput, error)
+	UpdateContainerInstancesStateWithContextStub        func(context.Context, *ecs.UpdateContainerInstancesStateInput, ...request.Option) (*ecs.UpdateContainerInstancesStateOutput, error)
 	updateContainerInstancesStateWithContextMutex       sync.RWMutex
 	updateContainerInstancesStateWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.UpdateContainerInstancesStateInput
 		arg3 []request.Option
 	}
@@ -1410,6 +2159,47 @@ type FakeECSClient struct {
 		result1 *ecs.UpdateServiceOutput
 		result2 error
 	}
+	UpdateServicePrimaryTaskSetStub        func(*ecs.UpdateServicePrimaryTaskSetInput) (*ecs.UpdateServicePrimaryTaskSetOutput, error)
+	updateServicePrimaryTaskSetMutex       sync.RWMutex
+	updateServicePrimaryTaskSetArgsForCall []struct {
+		arg1 *ecs.UpdateServicePrimaryTaskSetInput
+	}
+	updateServicePrimaryTaskSetReturns struct {
+		result1 *ecs.UpdateServicePrimaryTaskSetOutput
+		result2 error
+	}
+	updateServicePrimaryTaskSetReturnsOnCall map[int]struct {
+		result1 *ecs.UpdateServicePrimaryTaskSetOutput
+		result2 error
+	}
+	UpdateServicePrimaryTaskSetRequestStub        func(*ecs.UpdateServicePrimaryTaskSetInput) (*request.Request, *ecs.UpdateServicePrimaryTaskSetOutput)
+	updateServicePrimaryTaskSetRequestMutex       sync.RWMutex
+	updateServicePrimaryTaskSetRequestArgsForCall []struct {
+		arg1 *ecs.UpdateServicePrimaryTaskSetInput
+	}
+	updateServicePrimaryTaskSetRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.UpdateServicePrimaryTaskSetOutput
+	}
+	updateServicePrimaryTaskSetRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.UpdateServicePrimaryTaskSetOutput
+	}
+	UpdateServicePrimaryTaskSetWithContextStub        func(context.Context, *ecs.UpdateServicePrimaryTaskSetInput, ...request.Option) (*ecs.UpdateServicePrimaryTaskSetOutput, error)
+	updateServicePrimaryTaskSetWithContextMutex       sync.RWMutex
+	updateServicePrimaryTaskSetWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.UpdateServicePrimaryTaskSetInput
+		arg3 []request.Option
+	}
+	updateServicePrimaryTaskSetWithContextReturns struct {
+		result1 *ecs.UpdateServicePrimaryTaskSetOutput
+		result2 error
+	}
+	updateServicePrimaryTaskSetWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.UpdateServicePrimaryTaskSetOutput
+		result2 error
+	}
 	UpdateServiceRequestStub        func(*ecs.UpdateServiceInput) (*request.Request, *ecs.UpdateServiceOutput)
 	updateServiceRequestMutex       sync.RWMutex
 	updateServiceRequestArgsForCall []struct {
@@ -1423,10 +2213,10 @@ type FakeECSClient struct {
 		result1 *request.Request
 		result2 *ecs.UpdateServiceOutput
 	}
-	UpdateServiceWithContextStub        func(aws.Context, *ecs.UpdateServiceInput, ...request.Option) (*ecs.UpdateServiceOutput, error)
+	UpdateServiceWithContextStub        func(context.Context, *ecs.UpdateServiceInput, ...request.Option) (*ecs.UpdateServiceOutput, error)
 	updateServiceWithContextMutex       sync.RWMutex
 	updateServiceWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.UpdateServiceInput
 		arg3 []request.Option
 	}
@@ -1436,6 +2226,47 @@ type FakeECSClient struct {
 	}
 	updateServiceWithContextReturnsOnCall map[int]struct {
 		result1 *ecs.UpdateServiceOutput
+		result2 error
+	}
+	UpdateTaskSetStub        func(*ecs.UpdateTaskSetInput) (*ecs.UpdateTaskSetOutput, error)
+	updateTaskSetMutex       sync.RWMutex
+	updateTaskSetArgsForCall []struct {
+		arg1 *ecs.UpdateTaskSetInput
+	}
+	updateTaskSetReturns struct {
+		result1 *ecs.UpdateTaskSetOutput
+		result2 error
+	}
+	updateTaskSetReturnsOnCall map[int]struct {
+		result1 *ecs.UpdateTaskSetOutput
+		result2 error
+	}
+	UpdateTaskSetRequestStub        func(*ecs.UpdateTaskSetInput) (*request.Request, *ecs.UpdateTaskSetOutput)
+	updateTaskSetRequestMutex       sync.RWMutex
+	updateTaskSetRequestArgsForCall []struct {
+		arg1 *ecs.UpdateTaskSetInput
+	}
+	updateTaskSetRequestReturns struct {
+		result1 *request.Request
+		result2 *ecs.UpdateTaskSetOutput
+	}
+	updateTaskSetRequestReturnsOnCall map[int]struct {
+		result1 *request.Request
+		result2 *ecs.UpdateTaskSetOutput
+	}
+	UpdateTaskSetWithContextStub        func(context.Context, *ecs.UpdateTaskSetInput, ...request.Option) (*ecs.UpdateTaskSetOutput, error)
+	updateTaskSetWithContextMutex       sync.RWMutex
+	updateTaskSetWithContextArgsForCall []struct {
+		arg1 context.Context
+		arg2 *ecs.UpdateTaskSetInput
+		arg3 []request.Option
+	}
+	updateTaskSetWithContextReturns struct {
+		result1 *ecs.UpdateTaskSetOutput
+		result2 error
+	}
+	updateTaskSetWithContextReturnsOnCall map[int]struct {
+		result1 *ecs.UpdateTaskSetOutput
 		result2 error
 	}
 	WaitUntilServicesInactiveStub        func(*ecs.DescribeServicesInput) error
@@ -1449,10 +2280,10 @@ type FakeECSClient struct {
 	waitUntilServicesInactiveReturnsOnCall map[int]struct {
 		result1 error
 	}
-	WaitUntilServicesInactiveWithContextStub        func(aws.Context, *ecs.DescribeServicesInput, ...request.WaiterOption) error
+	WaitUntilServicesInactiveWithContextStub        func(context.Context, *ecs.DescribeServicesInput, ...request.WaiterOption) error
 	waitUntilServicesInactiveWithContextMutex       sync.RWMutex
 	waitUntilServicesInactiveWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeServicesInput
 		arg3 []request.WaiterOption
 	}
@@ -1473,10 +2304,10 @@ type FakeECSClient struct {
 	waitUntilServicesStableReturnsOnCall map[int]struct {
 		result1 error
 	}
-	WaitUntilServicesStableWithContextStub        func(aws.Context, *ecs.DescribeServicesInput, ...request.WaiterOption) error
+	WaitUntilServicesStableWithContextStub        func(context.Context, *ecs.DescribeServicesInput, ...request.WaiterOption) error
 	waitUntilServicesStableWithContextMutex       sync.RWMutex
 	waitUntilServicesStableWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeServicesInput
 		arg3 []request.WaiterOption
 	}
@@ -1497,10 +2328,10 @@ type FakeECSClient struct {
 	waitUntilTasksRunningReturnsOnCall map[int]struct {
 		result1 error
 	}
-	WaitUntilTasksRunningWithContextStub        func(aws.Context, *ecs.DescribeTasksInput, ...request.WaiterOption) error
+	WaitUntilTasksRunningWithContextStub        func(context.Context, *ecs.DescribeTasksInput, ...request.WaiterOption) error
 	waitUntilTasksRunningWithContextMutex       sync.RWMutex
 	waitUntilTasksRunningWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeTasksInput
 		arg3 []request.WaiterOption
 	}
@@ -1521,10 +2352,10 @@ type FakeECSClient struct {
 	waitUntilTasksStoppedReturnsOnCall map[int]struct {
 		result1 error
 	}
-	WaitUntilTasksStoppedWithContextStub        func(aws.Context, *ecs.DescribeTasksInput, ...request.WaiterOption) error
+	WaitUntilTasksStoppedWithContextStub        func(context.Context, *ecs.DescribeTasksInput, ...request.WaiterOption) error
 	waitUntilTasksStoppedWithContextMutex       sync.RWMutex
 	waitUntilTasksStoppedWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeTasksInput
 		arg3 []request.WaiterOption
 	}
@@ -1536,6 +2367,197 @@ type FakeECSClient struct {
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
+}
+
+func (fake *FakeECSClient) CreateCapacityProvider(arg1 *ecs.CreateCapacityProviderInput) (*ecs.CreateCapacityProviderOutput, error) {
+	fake.createCapacityProviderMutex.Lock()
+	ret, specificReturn := fake.createCapacityProviderReturnsOnCall[len(fake.createCapacityProviderArgsForCall)]
+	fake.createCapacityProviderArgsForCall = append(fake.createCapacityProviderArgsForCall, struct {
+		arg1 *ecs.CreateCapacityProviderInput
+	}{arg1})
+	fake.recordInvocation("CreateCapacityProvider", []interface{}{arg1})
+	fake.createCapacityProviderMutex.Unlock()
+	if fake.CreateCapacityProviderStub != nil {
+		return fake.CreateCapacityProviderStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.createCapacityProviderReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderCallCount() int {
+	fake.createCapacityProviderMutex.RLock()
+	defer fake.createCapacityProviderMutex.RUnlock()
+	return len(fake.createCapacityProviderArgsForCall)
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderCalls(stub func(*ecs.CreateCapacityProviderInput) (*ecs.CreateCapacityProviderOutput, error)) {
+	fake.createCapacityProviderMutex.Lock()
+	defer fake.createCapacityProviderMutex.Unlock()
+	fake.CreateCapacityProviderStub = stub
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderArgsForCall(i int) *ecs.CreateCapacityProviderInput {
+	fake.createCapacityProviderMutex.RLock()
+	defer fake.createCapacityProviderMutex.RUnlock()
+	argsForCall := fake.createCapacityProviderArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderReturns(result1 *ecs.CreateCapacityProviderOutput, result2 error) {
+	fake.createCapacityProviderMutex.Lock()
+	defer fake.createCapacityProviderMutex.Unlock()
+	fake.CreateCapacityProviderStub = nil
+	fake.createCapacityProviderReturns = struct {
+		result1 *ecs.CreateCapacityProviderOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderReturnsOnCall(i int, result1 *ecs.CreateCapacityProviderOutput, result2 error) {
+	fake.createCapacityProviderMutex.Lock()
+	defer fake.createCapacityProviderMutex.Unlock()
+	fake.CreateCapacityProviderStub = nil
+	if fake.createCapacityProviderReturnsOnCall == nil {
+		fake.createCapacityProviderReturnsOnCall = make(map[int]struct {
+			result1 *ecs.CreateCapacityProviderOutput
+			result2 error
+		})
+	}
+	fake.createCapacityProviderReturnsOnCall[i] = struct {
+		result1 *ecs.CreateCapacityProviderOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderRequest(arg1 *ecs.CreateCapacityProviderInput) (*request.Request, *ecs.CreateCapacityProviderOutput) {
+	fake.createCapacityProviderRequestMutex.Lock()
+	ret, specificReturn := fake.createCapacityProviderRequestReturnsOnCall[len(fake.createCapacityProviderRequestArgsForCall)]
+	fake.createCapacityProviderRequestArgsForCall = append(fake.createCapacityProviderRequestArgsForCall, struct {
+		arg1 *ecs.CreateCapacityProviderInput
+	}{arg1})
+	fake.recordInvocation("CreateCapacityProviderRequest", []interface{}{arg1})
+	fake.createCapacityProviderRequestMutex.Unlock()
+	if fake.CreateCapacityProviderRequestStub != nil {
+		return fake.CreateCapacityProviderRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.createCapacityProviderRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderRequestCallCount() int {
+	fake.createCapacityProviderRequestMutex.RLock()
+	defer fake.createCapacityProviderRequestMutex.RUnlock()
+	return len(fake.createCapacityProviderRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderRequestCalls(stub func(*ecs.CreateCapacityProviderInput) (*request.Request, *ecs.CreateCapacityProviderOutput)) {
+	fake.createCapacityProviderRequestMutex.Lock()
+	defer fake.createCapacityProviderRequestMutex.Unlock()
+	fake.CreateCapacityProviderRequestStub = stub
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderRequestArgsForCall(i int) *ecs.CreateCapacityProviderInput {
+	fake.createCapacityProviderRequestMutex.RLock()
+	defer fake.createCapacityProviderRequestMutex.RUnlock()
+	argsForCall := fake.createCapacityProviderRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderRequestReturns(result1 *request.Request, result2 *ecs.CreateCapacityProviderOutput) {
+	fake.createCapacityProviderRequestMutex.Lock()
+	defer fake.createCapacityProviderRequestMutex.Unlock()
+	fake.CreateCapacityProviderRequestStub = nil
+	fake.createCapacityProviderRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.CreateCapacityProviderOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.CreateCapacityProviderOutput) {
+	fake.createCapacityProviderRequestMutex.Lock()
+	defer fake.createCapacityProviderRequestMutex.Unlock()
+	fake.CreateCapacityProviderRequestStub = nil
+	if fake.createCapacityProviderRequestReturnsOnCall == nil {
+		fake.createCapacityProviderRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.CreateCapacityProviderOutput
+		})
+	}
+	fake.createCapacityProviderRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.CreateCapacityProviderOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderWithContext(arg1 context.Context, arg2 *ecs.CreateCapacityProviderInput, arg3 ...request.Option) (*ecs.CreateCapacityProviderOutput, error) {
+	fake.createCapacityProviderWithContextMutex.Lock()
+	ret, specificReturn := fake.createCapacityProviderWithContextReturnsOnCall[len(fake.createCapacityProviderWithContextArgsForCall)]
+	fake.createCapacityProviderWithContextArgsForCall = append(fake.createCapacityProviderWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.CreateCapacityProviderInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("CreateCapacityProviderWithContext", []interface{}{arg1, arg2, arg3})
+	fake.createCapacityProviderWithContextMutex.Unlock()
+	if fake.CreateCapacityProviderWithContextStub != nil {
+		return fake.CreateCapacityProviderWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.createCapacityProviderWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderWithContextCallCount() int {
+	fake.createCapacityProviderWithContextMutex.RLock()
+	defer fake.createCapacityProviderWithContextMutex.RUnlock()
+	return len(fake.createCapacityProviderWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderWithContextCalls(stub func(context.Context, *ecs.CreateCapacityProviderInput, ...request.Option) (*ecs.CreateCapacityProviderOutput, error)) {
+	fake.createCapacityProviderWithContextMutex.Lock()
+	defer fake.createCapacityProviderWithContextMutex.Unlock()
+	fake.CreateCapacityProviderWithContextStub = stub
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderWithContextArgsForCall(i int) (context.Context, *ecs.CreateCapacityProviderInput, []request.Option) {
+	fake.createCapacityProviderWithContextMutex.RLock()
+	defer fake.createCapacityProviderWithContextMutex.RUnlock()
+	argsForCall := fake.createCapacityProviderWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderWithContextReturns(result1 *ecs.CreateCapacityProviderOutput, result2 error) {
+	fake.createCapacityProviderWithContextMutex.Lock()
+	defer fake.createCapacityProviderWithContextMutex.Unlock()
+	fake.CreateCapacityProviderWithContextStub = nil
+	fake.createCapacityProviderWithContextReturns = struct {
+		result1 *ecs.CreateCapacityProviderOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) CreateCapacityProviderWithContextReturnsOnCall(i int, result1 *ecs.CreateCapacityProviderOutput, result2 error) {
+	fake.createCapacityProviderWithContextMutex.Lock()
+	defer fake.createCapacityProviderWithContextMutex.Unlock()
+	fake.CreateCapacityProviderWithContextStub = nil
+	if fake.createCapacityProviderWithContextReturnsOnCall == nil {
+		fake.createCapacityProviderWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.CreateCapacityProviderOutput
+			result2 error
+		})
+	}
+	fake.createCapacityProviderWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.CreateCapacityProviderOutput
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeECSClient) CreateCluster(arg1 *ecs.CreateClusterInput) (*ecs.CreateClusterOutput, error) {
@@ -1664,11 +2686,11 @@ func (fake *FakeECSClient) CreateClusterRequestReturnsOnCall(i int, result1 *req
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) CreateClusterWithContext(arg1 aws.Context, arg2 *ecs.CreateClusterInput, arg3 ...request.Option) (*ecs.CreateClusterOutput, error) {
+func (fake *FakeECSClient) CreateClusterWithContext(arg1 context.Context, arg2 *ecs.CreateClusterInput, arg3 ...request.Option) (*ecs.CreateClusterOutput, error) {
 	fake.createClusterWithContextMutex.Lock()
 	ret, specificReturn := fake.createClusterWithContextReturnsOnCall[len(fake.createClusterWithContextArgsForCall)]
 	fake.createClusterWithContextArgsForCall = append(fake.createClusterWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.CreateClusterInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -1690,13 +2712,13 @@ func (fake *FakeECSClient) CreateClusterWithContextCallCount() int {
 	return len(fake.createClusterWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) CreateClusterWithContextCalls(stub func(aws.Context, *ecs.CreateClusterInput, ...request.Option) (*ecs.CreateClusterOutput, error)) {
+func (fake *FakeECSClient) CreateClusterWithContextCalls(stub func(context.Context, *ecs.CreateClusterInput, ...request.Option) (*ecs.CreateClusterOutput, error)) {
 	fake.createClusterWithContextMutex.Lock()
 	defer fake.createClusterWithContextMutex.Unlock()
 	fake.CreateClusterWithContextStub = stub
 }
 
-func (fake *FakeECSClient) CreateClusterWithContextArgsForCall(i int) (aws.Context, *ecs.CreateClusterInput, []request.Option) {
+func (fake *FakeECSClient) CreateClusterWithContextArgsForCall(i int) (context.Context, *ecs.CreateClusterInput, []request.Option) {
 	fake.createClusterWithContextMutex.RLock()
 	defer fake.createClusterWithContextMutex.RUnlock()
 	argsForCall := fake.createClusterWithContextArgsForCall[i]
@@ -1855,11 +2877,11 @@ func (fake *FakeECSClient) CreateServiceRequestReturnsOnCall(i int, result1 *req
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) CreateServiceWithContext(arg1 aws.Context, arg2 *ecs.CreateServiceInput, arg3 ...request.Option) (*ecs.CreateServiceOutput, error) {
+func (fake *FakeECSClient) CreateServiceWithContext(arg1 context.Context, arg2 *ecs.CreateServiceInput, arg3 ...request.Option) (*ecs.CreateServiceOutput, error) {
 	fake.createServiceWithContextMutex.Lock()
 	ret, specificReturn := fake.createServiceWithContextReturnsOnCall[len(fake.createServiceWithContextArgsForCall)]
 	fake.createServiceWithContextArgsForCall = append(fake.createServiceWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.CreateServiceInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -1881,13 +2903,13 @@ func (fake *FakeECSClient) CreateServiceWithContextCallCount() int {
 	return len(fake.createServiceWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) CreateServiceWithContextCalls(stub func(aws.Context, *ecs.CreateServiceInput, ...request.Option) (*ecs.CreateServiceOutput, error)) {
+func (fake *FakeECSClient) CreateServiceWithContextCalls(stub func(context.Context, *ecs.CreateServiceInput, ...request.Option) (*ecs.CreateServiceOutput, error)) {
 	fake.createServiceWithContextMutex.Lock()
 	defer fake.createServiceWithContextMutex.Unlock()
 	fake.CreateServiceWithContextStub = stub
 }
 
-func (fake *FakeECSClient) CreateServiceWithContextArgsForCall(i int) (aws.Context, *ecs.CreateServiceInput, []request.Option) {
+func (fake *FakeECSClient) CreateServiceWithContextArgsForCall(i int) (context.Context, *ecs.CreateServiceInput, []request.Option) {
 	fake.createServiceWithContextMutex.RLock()
 	defer fake.createServiceWithContextMutex.RUnlock()
 	argsForCall := fake.createServiceWithContextArgsForCall[i]
@@ -1916,6 +2938,388 @@ func (fake *FakeECSClient) CreateServiceWithContextReturnsOnCall(i int, result1 
 	}
 	fake.createServiceWithContextReturnsOnCall[i] = struct {
 		result1 *ecs.CreateServiceOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) CreateTaskSet(arg1 *ecs.CreateTaskSetInput) (*ecs.CreateTaskSetOutput, error) {
+	fake.createTaskSetMutex.Lock()
+	ret, specificReturn := fake.createTaskSetReturnsOnCall[len(fake.createTaskSetArgsForCall)]
+	fake.createTaskSetArgsForCall = append(fake.createTaskSetArgsForCall, struct {
+		arg1 *ecs.CreateTaskSetInput
+	}{arg1})
+	fake.recordInvocation("CreateTaskSet", []interface{}{arg1})
+	fake.createTaskSetMutex.Unlock()
+	if fake.CreateTaskSetStub != nil {
+		return fake.CreateTaskSetStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.createTaskSetReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) CreateTaskSetCallCount() int {
+	fake.createTaskSetMutex.RLock()
+	defer fake.createTaskSetMutex.RUnlock()
+	return len(fake.createTaskSetArgsForCall)
+}
+
+func (fake *FakeECSClient) CreateTaskSetCalls(stub func(*ecs.CreateTaskSetInput) (*ecs.CreateTaskSetOutput, error)) {
+	fake.createTaskSetMutex.Lock()
+	defer fake.createTaskSetMutex.Unlock()
+	fake.CreateTaskSetStub = stub
+}
+
+func (fake *FakeECSClient) CreateTaskSetArgsForCall(i int) *ecs.CreateTaskSetInput {
+	fake.createTaskSetMutex.RLock()
+	defer fake.createTaskSetMutex.RUnlock()
+	argsForCall := fake.createTaskSetArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) CreateTaskSetReturns(result1 *ecs.CreateTaskSetOutput, result2 error) {
+	fake.createTaskSetMutex.Lock()
+	defer fake.createTaskSetMutex.Unlock()
+	fake.CreateTaskSetStub = nil
+	fake.createTaskSetReturns = struct {
+		result1 *ecs.CreateTaskSetOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) CreateTaskSetReturnsOnCall(i int, result1 *ecs.CreateTaskSetOutput, result2 error) {
+	fake.createTaskSetMutex.Lock()
+	defer fake.createTaskSetMutex.Unlock()
+	fake.CreateTaskSetStub = nil
+	if fake.createTaskSetReturnsOnCall == nil {
+		fake.createTaskSetReturnsOnCall = make(map[int]struct {
+			result1 *ecs.CreateTaskSetOutput
+			result2 error
+		})
+	}
+	fake.createTaskSetReturnsOnCall[i] = struct {
+		result1 *ecs.CreateTaskSetOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) CreateTaskSetRequest(arg1 *ecs.CreateTaskSetInput) (*request.Request, *ecs.CreateTaskSetOutput) {
+	fake.createTaskSetRequestMutex.Lock()
+	ret, specificReturn := fake.createTaskSetRequestReturnsOnCall[len(fake.createTaskSetRequestArgsForCall)]
+	fake.createTaskSetRequestArgsForCall = append(fake.createTaskSetRequestArgsForCall, struct {
+		arg1 *ecs.CreateTaskSetInput
+	}{arg1})
+	fake.recordInvocation("CreateTaskSetRequest", []interface{}{arg1})
+	fake.createTaskSetRequestMutex.Unlock()
+	if fake.CreateTaskSetRequestStub != nil {
+		return fake.CreateTaskSetRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.createTaskSetRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) CreateTaskSetRequestCallCount() int {
+	fake.createTaskSetRequestMutex.RLock()
+	defer fake.createTaskSetRequestMutex.RUnlock()
+	return len(fake.createTaskSetRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) CreateTaskSetRequestCalls(stub func(*ecs.CreateTaskSetInput) (*request.Request, *ecs.CreateTaskSetOutput)) {
+	fake.createTaskSetRequestMutex.Lock()
+	defer fake.createTaskSetRequestMutex.Unlock()
+	fake.CreateTaskSetRequestStub = stub
+}
+
+func (fake *FakeECSClient) CreateTaskSetRequestArgsForCall(i int) *ecs.CreateTaskSetInput {
+	fake.createTaskSetRequestMutex.RLock()
+	defer fake.createTaskSetRequestMutex.RUnlock()
+	argsForCall := fake.createTaskSetRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) CreateTaskSetRequestReturns(result1 *request.Request, result2 *ecs.CreateTaskSetOutput) {
+	fake.createTaskSetRequestMutex.Lock()
+	defer fake.createTaskSetRequestMutex.Unlock()
+	fake.CreateTaskSetRequestStub = nil
+	fake.createTaskSetRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.CreateTaskSetOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) CreateTaskSetRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.CreateTaskSetOutput) {
+	fake.createTaskSetRequestMutex.Lock()
+	defer fake.createTaskSetRequestMutex.Unlock()
+	fake.CreateTaskSetRequestStub = nil
+	if fake.createTaskSetRequestReturnsOnCall == nil {
+		fake.createTaskSetRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.CreateTaskSetOutput
+		})
+	}
+	fake.createTaskSetRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.CreateTaskSetOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) CreateTaskSetWithContext(arg1 context.Context, arg2 *ecs.CreateTaskSetInput, arg3 ...request.Option) (*ecs.CreateTaskSetOutput, error) {
+	fake.createTaskSetWithContextMutex.Lock()
+	ret, specificReturn := fake.createTaskSetWithContextReturnsOnCall[len(fake.createTaskSetWithContextArgsForCall)]
+	fake.createTaskSetWithContextArgsForCall = append(fake.createTaskSetWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.CreateTaskSetInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("CreateTaskSetWithContext", []interface{}{arg1, arg2, arg3})
+	fake.createTaskSetWithContextMutex.Unlock()
+	if fake.CreateTaskSetWithContextStub != nil {
+		return fake.CreateTaskSetWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.createTaskSetWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) CreateTaskSetWithContextCallCount() int {
+	fake.createTaskSetWithContextMutex.RLock()
+	defer fake.createTaskSetWithContextMutex.RUnlock()
+	return len(fake.createTaskSetWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) CreateTaskSetWithContextCalls(stub func(context.Context, *ecs.CreateTaskSetInput, ...request.Option) (*ecs.CreateTaskSetOutput, error)) {
+	fake.createTaskSetWithContextMutex.Lock()
+	defer fake.createTaskSetWithContextMutex.Unlock()
+	fake.CreateTaskSetWithContextStub = stub
+}
+
+func (fake *FakeECSClient) CreateTaskSetWithContextArgsForCall(i int) (context.Context, *ecs.CreateTaskSetInput, []request.Option) {
+	fake.createTaskSetWithContextMutex.RLock()
+	defer fake.createTaskSetWithContextMutex.RUnlock()
+	argsForCall := fake.createTaskSetWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) CreateTaskSetWithContextReturns(result1 *ecs.CreateTaskSetOutput, result2 error) {
+	fake.createTaskSetWithContextMutex.Lock()
+	defer fake.createTaskSetWithContextMutex.Unlock()
+	fake.CreateTaskSetWithContextStub = nil
+	fake.createTaskSetWithContextReturns = struct {
+		result1 *ecs.CreateTaskSetOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) CreateTaskSetWithContextReturnsOnCall(i int, result1 *ecs.CreateTaskSetOutput, result2 error) {
+	fake.createTaskSetWithContextMutex.Lock()
+	defer fake.createTaskSetWithContextMutex.Unlock()
+	fake.CreateTaskSetWithContextStub = nil
+	if fake.createTaskSetWithContextReturnsOnCall == nil {
+		fake.createTaskSetWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.CreateTaskSetOutput
+			result2 error
+		})
+	}
+	fake.createTaskSetWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.CreateTaskSetOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteAccountSetting(arg1 *ecs.DeleteAccountSettingInput) (*ecs.DeleteAccountSettingOutput, error) {
+	fake.deleteAccountSettingMutex.Lock()
+	ret, specificReturn := fake.deleteAccountSettingReturnsOnCall[len(fake.deleteAccountSettingArgsForCall)]
+	fake.deleteAccountSettingArgsForCall = append(fake.deleteAccountSettingArgsForCall, struct {
+		arg1 *ecs.DeleteAccountSettingInput
+	}{arg1})
+	fake.recordInvocation("DeleteAccountSetting", []interface{}{arg1})
+	fake.deleteAccountSettingMutex.Unlock()
+	if fake.DeleteAccountSettingStub != nil {
+		return fake.DeleteAccountSettingStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.deleteAccountSettingReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingCallCount() int {
+	fake.deleteAccountSettingMutex.RLock()
+	defer fake.deleteAccountSettingMutex.RUnlock()
+	return len(fake.deleteAccountSettingArgsForCall)
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingCalls(stub func(*ecs.DeleteAccountSettingInput) (*ecs.DeleteAccountSettingOutput, error)) {
+	fake.deleteAccountSettingMutex.Lock()
+	defer fake.deleteAccountSettingMutex.Unlock()
+	fake.DeleteAccountSettingStub = stub
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingArgsForCall(i int) *ecs.DeleteAccountSettingInput {
+	fake.deleteAccountSettingMutex.RLock()
+	defer fake.deleteAccountSettingMutex.RUnlock()
+	argsForCall := fake.deleteAccountSettingArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingReturns(result1 *ecs.DeleteAccountSettingOutput, result2 error) {
+	fake.deleteAccountSettingMutex.Lock()
+	defer fake.deleteAccountSettingMutex.Unlock()
+	fake.DeleteAccountSettingStub = nil
+	fake.deleteAccountSettingReturns = struct {
+		result1 *ecs.DeleteAccountSettingOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingReturnsOnCall(i int, result1 *ecs.DeleteAccountSettingOutput, result2 error) {
+	fake.deleteAccountSettingMutex.Lock()
+	defer fake.deleteAccountSettingMutex.Unlock()
+	fake.DeleteAccountSettingStub = nil
+	if fake.deleteAccountSettingReturnsOnCall == nil {
+		fake.deleteAccountSettingReturnsOnCall = make(map[int]struct {
+			result1 *ecs.DeleteAccountSettingOutput
+			result2 error
+		})
+	}
+	fake.deleteAccountSettingReturnsOnCall[i] = struct {
+		result1 *ecs.DeleteAccountSettingOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingRequest(arg1 *ecs.DeleteAccountSettingInput) (*request.Request, *ecs.DeleteAccountSettingOutput) {
+	fake.deleteAccountSettingRequestMutex.Lock()
+	ret, specificReturn := fake.deleteAccountSettingRequestReturnsOnCall[len(fake.deleteAccountSettingRequestArgsForCall)]
+	fake.deleteAccountSettingRequestArgsForCall = append(fake.deleteAccountSettingRequestArgsForCall, struct {
+		arg1 *ecs.DeleteAccountSettingInput
+	}{arg1})
+	fake.recordInvocation("DeleteAccountSettingRequest", []interface{}{arg1})
+	fake.deleteAccountSettingRequestMutex.Unlock()
+	if fake.DeleteAccountSettingRequestStub != nil {
+		return fake.DeleteAccountSettingRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.deleteAccountSettingRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingRequestCallCount() int {
+	fake.deleteAccountSettingRequestMutex.RLock()
+	defer fake.deleteAccountSettingRequestMutex.RUnlock()
+	return len(fake.deleteAccountSettingRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingRequestCalls(stub func(*ecs.DeleteAccountSettingInput) (*request.Request, *ecs.DeleteAccountSettingOutput)) {
+	fake.deleteAccountSettingRequestMutex.Lock()
+	defer fake.deleteAccountSettingRequestMutex.Unlock()
+	fake.DeleteAccountSettingRequestStub = stub
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingRequestArgsForCall(i int) *ecs.DeleteAccountSettingInput {
+	fake.deleteAccountSettingRequestMutex.RLock()
+	defer fake.deleteAccountSettingRequestMutex.RUnlock()
+	argsForCall := fake.deleteAccountSettingRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingRequestReturns(result1 *request.Request, result2 *ecs.DeleteAccountSettingOutput) {
+	fake.deleteAccountSettingRequestMutex.Lock()
+	defer fake.deleteAccountSettingRequestMutex.Unlock()
+	fake.DeleteAccountSettingRequestStub = nil
+	fake.deleteAccountSettingRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.DeleteAccountSettingOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.DeleteAccountSettingOutput) {
+	fake.deleteAccountSettingRequestMutex.Lock()
+	defer fake.deleteAccountSettingRequestMutex.Unlock()
+	fake.DeleteAccountSettingRequestStub = nil
+	if fake.deleteAccountSettingRequestReturnsOnCall == nil {
+		fake.deleteAccountSettingRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.DeleteAccountSettingOutput
+		})
+	}
+	fake.deleteAccountSettingRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.DeleteAccountSettingOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingWithContext(arg1 context.Context, arg2 *ecs.DeleteAccountSettingInput, arg3 ...request.Option) (*ecs.DeleteAccountSettingOutput, error) {
+	fake.deleteAccountSettingWithContextMutex.Lock()
+	ret, specificReturn := fake.deleteAccountSettingWithContextReturnsOnCall[len(fake.deleteAccountSettingWithContextArgsForCall)]
+	fake.deleteAccountSettingWithContextArgsForCall = append(fake.deleteAccountSettingWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.DeleteAccountSettingInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("DeleteAccountSettingWithContext", []interface{}{arg1, arg2, arg3})
+	fake.deleteAccountSettingWithContextMutex.Unlock()
+	if fake.DeleteAccountSettingWithContextStub != nil {
+		return fake.DeleteAccountSettingWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.deleteAccountSettingWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingWithContextCallCount() int {
+	fake.deleteAccountSettingWithContextMutex.RLock()
+	defer fake.deleteAccountSettingWithContextMutex.RUnlock()
+	return len(fake.deleteAccountSettingWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingWithContextCalls(stub func(context.Context, *ecs.DeleteAccountSettingInput, ...request.Option) (*ecs.DeleteAccountSettingOutput, error)) {
+	fake.deleteAccountSettingWithContextMutex.Lock()
+	defer fake.deleteAccountSettingWithContextMutex.Unlock()
+	fake.DeleteAccountSettingWithContextStub = stub
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingWithContextArgsForCall(i int) (context.Context, *ecs.DeleteAccountSettingInput, []request.Option) {
+	fake.deleteAccountSettingWithContextMutex.RLock()
+	defer fake.deleteAccountSettingWithContextMutex.RUnlock()
+	argsForCall := fake.deleteAccountSettingWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingWithContextReturns(result1 *ecs.DeleteAccountSettingOutput, result2 error) {
+	fake.deleteAccountSettingWithContextMutex.Lock()
+	defer fake.deleteAccountSettingWithContextMutex.Unlock()
+	fake.DeleteAccountSettingWithContextStub = nil
+	fake.deleteAccountSettingWithContextReturns = struct {
+		result1 *ecs.DeleteAccountSettingOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteAccountSettingWithContextReturnsOnCall(i int, result1 *ecs.DeleteAccountSettingOutput, result2 error) {
+	fake.deleteAccountSettingWithContextMutex.Lock()
+	defer fake.deleteAccountSettingWithContextMutex.Unlock()
+	fake.DeleteAccountSettingWithContextStub = nil
+	if fake.deleteAccountSettingWithContextReturnsOnCall == nil {
+		fake.deleteAccountSettingWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.DeleteAccountSettingOutput
+			result2 error
+		})
+	}
+	fake.deleteAccountSettingWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.DeleteAccountSettingOutput
 		result2 error
 	}{result1, result2}
 }
@@ -2046,11 +3450,11 @@ func (fake *FakeECSClient) DeleteAttributesRequestReturnsOnCall(i int, result1 *
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) DeleteAttributesWithContext(arg1 aws.Context, arg2 *ecs.DeleteAttributesInput, arg3 ...request.Option) (*ecs.DeleteAttributesOutput, error) {
+func (fake *FakeECSClient) DeleteAttributesWithContext(arg1 context.Context, arg2 *ecs.DeleteAttributesInput, arg3 ...request.Option) (*ecs.DeleteAttributesOutput, error) {
 	fake.deleteAttributesWithContextMutex.Lock()
 	ret, specificReturn := fake.deleteAttributesWithContextReturnsOnCall[len(fake.deleteAttributesWithContextArgsForCall)]
 	fake.deleteAttributesWithContextArgsForCall = append(fake.deleteAttributesWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DeleteAttributesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -2072,13 +3476,13 @@ func (fake *FakeECSClient) DeleteAttributesWithContextCallCount() int {
 	return len(fake.deleteAttributesWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) DeleteAttributesWithContextCalls(stub func(aws.Context, *ecs.DeleteAttributesInput, ...request.Option) (*ecs.DeleteAttributesOutput, error)) {
+func (fake *FakeECSClient) DeleteAttributesWithContextCalls(stub func(context.Context, *ecs.DeleteAttributesInput, ...request.Option) (*ecs.DeleteAttributesOutput, error)) {
 	fake.deleteAttributesWithContextMutex.Lock()
 	defer fake.deleteAttributesWithContextMutex.Unlock()
 	fake.DeleteAttributesWithContextStub = stub
 }
 
-func (fake *FakeECSClient) DeleteAttributesWithContextArgsForCall(i int) (aws.Context, *ecs.DeleteAttributesInput, []request.Option) {
+func (fake *FakeECSClient) DeleteAttributesWithContextArgsForCall(i int) (context.Context, *ecs.DeleteAttributesInput, []request.Option) {
 	fake.deleteAttributesWithContextMutex.RLock()
 	defer fake.deleteAttributesWithContextMutex.RUnlock()
 	argsForCall := fake.deleteAttributesWithContextArgsForCall[i]
@@ -2107,6 +3511,197 @@ func (fake *FakeECSClient) DeleteAttributesWithContextReturnsOnCall(i int, resul
 	}
 	fake.deleteAttributesWithContextReturnsOnCall[i] = struct {
 		result1 *ecs.DeleteAttributesOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteCapacityProvider(arg1 *ecs.DeleteCapacityProviderInput) (*ecs.DeleteCapacityProviderOutput, error) {
+	fake.deleteCapacityProviderMutex.Lock()
+	ret, specificReturn := fake.deleteCapacityProviderReturnsOnCall[len(fake.deleteCapacityProviderArgsForCall)]
+	fake.deleteCapacityProviderArgsForCall = append(fake.deleteCapacityProviderArgsForCall, struct {
+		arg1 *ecs.DeleteCapacityProviderInput
+	}{arg1})
+	fake.recordInvocation("DeleteCapacityProvider", []interface{}{arg1})
+	fake.deleteCapacityProviderMutex.Unlock()
+	if fake.DeleteCapacityProviderStub != nil {
+		return fake.DeleteCapacityProviderStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.deleteCapacityProviderReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderCallCount() int {
+	fake.deleteCapacityProviderMutex.RLock()
+	defer fake.deleteCapacityProviderMutex.RUnlock()
+	return len(fake.deleteCapacityProviderArgsForCall)
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderCalls(stub func(*ecs.DeleteCapacityProviderInput) (*ecs.DeleteCapacityProviderOutput, error)) {
+	fake.deleteCapacityProviderMutex.Lock()
+	defer fake.deleteCapacityProviderMutex.Unlock()
+	fake.DeleteCapacityProviderStub = stub
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderArgsForCall(i int) *ecs.DeleteCapacityProviderInput {
+	fake.deleteCapacityProviderMutex.RLock()
+	defer fake.deleteCapacityProviderMutex.RUnlock()
+	argsForCall := fake.deleteCapacityProviderArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderReturns(result1 *ecs.DeleteCapacityProviderOutput, result2 error) {
+	fake.deleteCapacityProviderMutex.Lock()
+	defer fake.deleteCapacityProviderMutex.Unlock()
+	fake.DeleteCapacityProviderStub = nil
+	fake.deleteCapacityProviderReturns = struct {
+		result1 *ecs.DeleteCapacityProviderOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderReturnsOnCall(i int, result1 *ecs.DeleteCapacityProviderOutput, result2 error) {
+	fake.deleteCapacityProviderMutex.Lock()
+	defer fake.deleteCapacityProviderMutex.Unlock()
+	fake.DeleteCapacityProviderStub = nil
+	if fake.deleteCapacityProviderReturnsOnCall == nil {
+		fake.deleteCapacityProviderReturnsOnCall = make(map[int]struct {
+			result1 *ecs.DeleteCapacityProviderOutput
+			result2 error
+		})
+	}
+	fake.deleteCapacityProviderReturnsOnCall[i] = struct {
+		result1 *ecs.DeleteCapacityProviderOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderRequest(arg1 *ecs.DeleteCapacityProviderInput) (*request.Request, *ecs.DeleteCapacityProviderOutput) {
+	fake.deleteCapacityProviderRequestMutex.Lock()
+	ret, specificReturn := fake.deleteCapacityProviderRequestReturnsOnCall[len(fake.deleteCapacityProviderRequestArgsForCall)]
+	fake.deleteCapacityProviderRequestArgsForCall = append(fake.deleteCapacityProviderRequestArgsForCall, struct {
+		arg1 *ecs.DeleteCapacityProviderInput
+	}{arg1})
+	fake.recordInvocation("DeleteCapacityProviderRequest", []interface{}{arg1})
+	fake.deleteCapacityProviderRequestMutex.Unlock()
+	if fake.DeleteCapacityProviderRequestStub != nil {
+		return fake.DeleteCapacityProviderRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.deleteCapacityProviderRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderRequestCallCount() int {
+	fake.deleteCapacityProviderRequestMutex.RLock()
+	defer fake.deleteCapacityProviderRequestMutex.RUnlock()
+	return len(fake.deleteCapacityProviderRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderRequestCalls(stub func(*ecs.DeleteCapacityProviderInput) (*request.Request, *ecs.DeleteCapacityProviderOutput)) {
+	fake.deleteCapacityProviderRequestMutex.Lock()
+	defer fake.deleteCapacityProviderRequestMutex.Unlock()
+	fake.DeleteCapacityProviderRequestStub = stub
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderRequestArgsForCall(i int) *ecs.DeleteCapacityProviderInput {
+	fake.deleteCapacityProviderRequestMutex.RLock()
+	defer fake.deleteCapacityProviderRequestMutex.RUnlock()
+	argsForCall := fake.deleteCapacityProviderRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderRequestReturns(result1 *request.Request, result2 *ecs.DeleteCapacityProviderOutput) {
+	fake.deleteCapacityProviderRequestMutex.Lock()
+	defer fake.deleteCapacityProviderRequestMutex.Unlock()
+	fake.DeleteCapacityProviderRequestStub = nil
+	fake.deleteCapacityProviderRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.DeleteCapacityProviderOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.DeleteCapacityProviderOutput) {
+	fake.deleteCapacityProviderRequestMutex.Lock()
+	defer fake.deleteCapacityProviderRequestMutex.Unlock()
+	fake.DeleteCapacityProviderRequestStub = nil
+	if fake.deleteCapacityProviderRequestReturnsOnCall == nil {
+		fake.deleteCapacityProviderRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.DeleteCapacityProviderOutput
+		})
+	}
+	fake.deleteCapacityProviderRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.DeleteCapacityProviderOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderWithContext(arg1 context.Context, arg2 *ecs.DeleteCapacityProviderInput, arg3 ...request.Option) (*ecs.DeleteCapacityProviderOutput, error) {
+	fake.deleteCapacityProviderWithContextMutex.Lock()
+	ret, specificReturn := fake.deleteCapacityProviderWithContextReturnsOnCall[len(fake.deleteCapacityProviderWithContextArgsForCall)]
+	fake.deleteCapacityProviderWithContextArgsForCall = append(fake.deleteCapacityProviderWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.DeleteCapacityProviderInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("DeleteCapacityProviderWithContext", []interface{}{arg1, arg2, arg3})
+	fake.deleteCapacityProviderWithContextMutex.Unlock()
+	if fake.DeleteCapacityProviderWithContextStub != nil {
+		return fake.DeleteCapacityProviderWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.deleteCapacityProviderWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderWithContextCallCount() int {
+	fake.deleteCapacityProviderWithContextMutex.RLock()
+	defer fake.deleteCapacityProviderWithContextMutex.RUnlock()
+	return len(fake.deleteCapacityProviderWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderWithContextCalls(stub func(context.Context, *ecs.DeleteCapacityProviderInput, ...request.Option) (*ecs.DeleteCapacityProviderOutput, error)) {
+	fake.deleteCapacityProviderWithContextMutex.Lock()
+	defer fake.deleteCapacityProviderWithContextMutex.Unlock()
+	fake.DeleteCapacityProviderWithContextStub = stub
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderWithContextArgsForCall(i int) (context.Context, *ecs.DeleteCapacityProviderInput, []request.Option) {
+	fake.deleteCapacityProviderWithContextMutex.RLock()
+	defer fake.deleteCapacityProviderWithContextMutex.RUnlock()
+	argsForCall := fake.deleteCapacityProviderWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderWithContextReturns(result1 *ecs.DeleteCapacityProviderOutput, result2 error) {
+	fake.deleteCapacityProviderWithContextMutex.Lock()
+	defer fake.deleteCapacityProviderWithContextMutex.Unlock()
+	fake.DeleteCapacityProviderWithContextStub = nil
+	fake.deleteCapacityProviderWithContextReturns = struct {
+		result1 *ecs.DeleteCapacityProviderOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteCapacityProviderWithContextReturnsOnCall(i int, result1 *ecs.DeleteCapacityProviderOutput, result2 error) {
+	fake.deleteCapacityProviderWithContextMutex.Lock()
+	defer fake.deleteCapacityProviderWithContextMutex.Unlock()
+	fake.DeleteCapacityProviderWithContextStub = nil
+	if fake.deleteCapacityProviderWithContextReturnsOnCall == nil {
+		fake.deleteCapacityProviderWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.DeleteCapacityProviderOutput
+			result2 error
+		})
+	}
+	fake.deleteCapacityProviderWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.DeleteCapacityProviderOutput
 		result2 error
 	}{result1, result2}
 }
@@ -2237,11 +3832,11 @@ func (fake *FakeECSClient) DeleteClusterRequestReturnsOnCall(i int, result1 *req
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) DeleteClusterWithContext(arg1 aws.Context, arg2 *ecs.DeleteClusterInput, arg3 ...request.Option) (*ecs.DeleteClusterOutput, error) {
+func (fake *FakeECSClient) DeleteClusterWithContext(arg1 context.Context, arg2 *ecs.DeleteClusterInput, arg3 ...request.Option) (*ecs.DeleteClusterOutput, error) {
 	fake.deleteClusterWithContextMutex.Lock()
 	ret, specificReturn := fake.deleteClusterWithContextReturnsOnCall[len(fake.deleteClusterWithContextArgsForCall)]
 	fake.deleteClusterWithContextArgsForCall = append(fake.deleteClusterWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DeleteClusterInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -2263,13 +3858,13 @@ func (fake *FakeECSClient) DeleteClusterWithContextCallCount() int {
 	return len(fake.deleteClusterWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) DeleteClusterWithContextCalls(stub func(aws.Context, *ecs.DeleteClusterInput, ...request.Option) (*ecs.DeleteClusterOutput, error)) {
+func (fake *FakeECSClient) DeleteClusterWithContextCalls(stub func(context.Context, *ecs.DeleteClusterInput, ...request.Option) (*ecs.DeleteClusterOutput, error)) {
 	fake.deleteClusterWithContextMutex.Lock()
 	defer fake.deleteClusterWithContextMutex.Unlock()
 	fake.DeleteClusterWithContextStub = stub
 }
 
-func (fake *FakeECSClient) DeleteClusterWithContextArgsForCall(i int) (aws.Context, *ecs.DeleteClusterInput, []request.Option) {
+func (fake *FakeECSClient) DeleteClusterWithContextArgsForCall(i int) (context.Context, *ecs.DeleteClusterInput, []request.Option) {
 	fake.deleteClusterWithContextMutex.RLock()
 	defer fake.deleteClusterWithContextMutex.RUnlock()
 	argsForCall := fake.deleteClusterWithContextArgsForCall[i]
@@ -2428,11 +4023,11 @@ func (fake *FakeECSClient) DeleteServiceRequestReturnsOnCall(i int, result1 *req
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) DeleteServiceWithContext(arg1 aws.Context, arg2 *ecs.DeleteServiceInput, arg3 ...request.Option) (*ecs.DeleteServiceOutput, error) {
+func (fake *FakeECSClient) DeleteServiceWithContext(arg1 context.Context, arg2 *ecs.DeleteServiceInput, arg3 ...request.Option) (*ecs.DeleteServiceOutput, error) {
 	fake.deleteServiceWithContextMutex.Lock()
 	ret, specificReturn := fake.deleteServiceWithContextReturnsOnCall[len(fake.deleteServiceWithContextArgsForCall)]
 	fake.deleteServiceWithContextArgsForCall = append(fake.deleteServiceWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DeleteServiceInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -2454,13 +4049,13 @@ func (fake *FakeECSClient) DeleteServiceWithContextCallCount() int {
 	return len(fake.deleteServiceWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) DeleteServiceWithContextCalls(stub func(aws.Context, *ecs.DeleteServiceInput, ...request.Option) (*ecs.DeleteServiceOutput, error)) {
+func (fake *FakeECSClient) DeleteServiceWithContextCalls(stub func(context.Context, *ecs.DeleteServiceInput, ...request.Option) (*ecs.DeleteServiceOutput, error)) {
 	fake.deleteServiceWithContextMutex.Lock()
 	defer fake.deleteServiceWithContextMutex.Unlock()
 	fake.DeleteServiceWithContextStub = stub
 }
 
-func (fake *FakeECSClient) DeleteServiceWithContextArgsForCall(i int) (aws.Context, *ecs.DeleteServiceInput, []request.Option) {
+func (fake *FakeECSClient) DeleteServiceWithContextArgsForCall(i int) (context.Context, *ecs.DeleteServiceInput, []request.Option) {
 	fake.deleteServiceWithContextMutex.RLock()
 	defer fake.deleteServiceWithContextMutex.RUnlock()
 	argsForCall := fake.deleteServiceWithContextArgsForCall[i]
@@ -2489,6 +4084,197 @@ func (fake *FakeECSClient) DeleteServiceWithContextReturnsOnCall(i int, result1 
 	}
 	fake.deleteServiceWithContextReturnsOnCall[i] = struct {
 		result1 *ecs.DeleteServiceOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteTaskSet(arg1 *ecs.DeleteTaskSetInput) (*ecs.DeleteTaskSetOutput, error) {
+	fake.deleteTaskSetMutex.Lock()
+	ret, specificReturn := fake.deleteTaskSetReturnsOnCall[len(fake.deleteTaskSetArgsForCall)]
+	fake.deleteTaskSetArgsForCall = append(fake.deleteTaskSetArgsForCall, struct {
+		arg1 *ecs.DeleteTaskSetInput
+	}{arg1})
+	fake.recordInvocation("DeleteTaskSet", []interface{}{arg1})
+	fake.deleteTaskSetMutex.Unlock()
+	if fake.DeleteTaskSetStub != nil {
+		return fake.DeleteTaskSetStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.deleteTaskSetReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) DeleteTaskSetCallCount() int {
+	fake.deleteTaskSetMutex.RLock()
+	defer fake.deleteTaskSetMutex.RUnlock()
+	return len(fake.deleteTaskSetArgsForCall)
+}
+
+func (fake *FakeECSClient) DeleteTaskSetCalls(stub func(*ecs.DeleteTaskSetInput) (*ecs.DeleteTaskSetOutput, error)) {
+	fake.deleteTaskSetMutex.Lock()
+	defer fake.deleteTaskSetMutex.Unlock()
+	fake.DeleteTaskSetStub = stub
+}
+
+func (fake *FakeECSClient) DeleteTaskSetArgsForCall(i int) *ecs.DeleteTaskSetInput {
+	fake.deleteTaskSetMutex.RLock()
+	defer fake.deleteTaskSetMutex.RUnlock()
+	argsForCall := fake.deleteTaskSetArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) DeleteTaskSetReturns(result1 *ecs.DeleteTaskSetOutput, result2 error) {
+	fake.deleteTaskSetMutex.Lock()
+	defer fake.deleteTaskSetMutex.Unlock()
+	fake.DeleteTaskSetStub = nil
+	fake.deleteTaskSetReturns = struct {
+		result1 *ecs.DeleteTaskSetOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteTaskSetReturnsOnCall(i int, result1 *ecs.DeleteTaskSetOutput, result2 error) {
+	fake.deleteTaskSetMutex.Lock()
+	defer fake.deleteTaskSetMutex.Unlock()
+	fake.DeleteTaskSetStub = nil
+	if fake.deleteTaskSetReturnsOnCall == nil {
+		fake.deleteTaskSetReturnsOnCall = make(map[int]struct {
+			result1 *ecs.DeleteTaskSetOutput
+			result2 error
+		})
+	}
+	fake.deleteTaskSetReturnsOnCall[i] = struct {
+		result1 *ecs.DeleteTaskSetOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteTaskSetRequest(arg1 *ecs.DeleteTaskSetInput) (*request.Request, *ecs.DeleteTaskSetOutput) {
+	fake.deleteTaskSetRequestMutex.Lock()
+	ret, specificReturn := fake.deleteTaskSetRequestReturnsOnCall[len(fake.deleteTaskSetRequestArgsForCall)]
+	fake.deleteTaskSetRequestArgsForCall = append(fake.deleteTaskSetRequestArgsForCall, struct {
+		arg1 *ecs.DeleteTaskSetInput
+	}{arg1})
+	fake.recordInvocation("DeleteTaskSetRequest", []interface{}{arg1})
+	fake.deleteTaskSetRequestMutex.Unlock()
+	if fake.DeleteTaskSetRequestStub != nil {
+		return fake.DeleteTaskSetRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.deleteTaskSetRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) DeleteTaskSetRequestCallCount() int {
+	fake.deleteTaskSetRequestMutex.RLock()
+	defer fake.deleteTaskSetRequestMutex.RUnlock()
+	return len(fake.deleteTaskSetRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) DeleteTaskSetRequestCalls(stub func(*ecs.DeleteTaskSetInput) (*request.Request, *ecs.DeleteTaskSetOutput)) {
+	fake.deleteTaskSetRequestMutex.Lock()
+	defer fake.deleteTaskSetRequestMutex.Unlock()
+	fake.DeleteTaskSetRequestStub = stub
+}
+
+func (fake *FakeECSClient) DeleteTaskSetRequestArgsForCall(i int) *ecs.DeleteTaskSetInput {
+	fake.deleteTaskSetRequestMutex.RLock()
+	defer fake.deleteTaskSetRequestMutex.RUnlock()
+	argsForCall := fake.deleteTaskSetRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) DeleteTaskSetRequestReturns(result1 *request.Request, result2 *ecs.DeleteTaskSetOutput) {
+	fake.deleteTaskSetRequestMutex.Lock()
+	defer fake.deleteTaskSetRequestMutex.Unlock()
+	fake.DeleteTaskSetRequestStub = nil
+	fake.deleteTaskSetRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.DeleteTaskSetOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteTaskSetRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.DeleteTaskSetOutput) {
+	fake.deleteTaskSetRequestMutex.Lock()
+	defer fake.deleteTaskSetRequestMutex.Unlock()
+	fake.DeleteTaskSetRequestStub = nil
+	if fake.deleteTaskSetRequestReturnsOnCall == nil {
+		fake.deleteTaskSetRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.DeleteTaskSetOutput
+		})
+	}
+	fake.deleteTaskSetRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.DeleteTaskSetOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteTaskSetWithContext(arg1 context.Context, arg2 *ecs.DeleteTaskSetInput, arg3 ...request.Option) (*ecs.DeleteTaskSetOutput, error) {
+	fake.deleteTaskSetWithContextMutex.Lock()
+	ret, specificReturn := fake.deleteTaskSetWithContextReturnsOnCall[len(fake.deleteTaskSetWithContextArgsForCall)]
+	fake.deleteTaskSetWithContextArgsForCall = append(fake.deleteTaskSetWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.DeleteTaskSetInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("DeleteTaskSetWithContext", []interface{}{arg1, arg2, arg3})
+	fake.deleteTaskSetWithContextMutex.Unlock()
+	if fake.DeleteTaskSetWithContextStub != nil {
+		return fake.DeleteTaskSetWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.deleteTaskSetWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) DeleteTaskSetWithContextCallCount() int {
+	fake.deleteTaskSetWithContextMutex.RLock()
+	defer fake.deleteTaskSetWithContextMutex.RUnlock()
+	return len(fake.deleteTaskSetWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) DeleteTaskSetWithContextCalls(stub func(context.Context, *ecs.DeleteTaskSetInput, ...request.Option) (*ecs.DeleteTaskSetOutput, error)) {
+	fake.deleteTaskSetWithContextMutex.Lock()
+	defer fake.deleteTaskSetWithContextMutex.Unlock()
+	fake.DeleteTaskSetWithContextStub = stub
+}
+
+func (fake *FakeECSClient) DeleteTaskSetWithContextArgsForCall(i int) (context.Context, *ecs.DeleteTaskSetInput, []request.Option) {
+	fake.deleteTaskSetWithContextMutex.RLock()
+	defer fake.deleteTaskSetWithContextMutex.RUnlock()
+	argsForCall := fake.deleteTaskSetWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) DeleteTaskSetWithContextReturns(result1 *ecs.DeleteTaskSetOutput, result2 error) {
+	fake.deleteTaskSetWithContextMutex.Lock()
+	defer fake.deleteTaskSetWithContextMutex.Unlock()
+	fake.DeleteTaskSetWithContextStub = nil
+	fake.deleteTaskSetWithContextReturns = struct {
+		result1 *ecs.DeleteTaskSetOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DeleteTaskSetWithContextReturnsOnCall(i int, result1 *ecs.DeleteTaskSetOutput, result2 error) {
+	fake.deleteTaskSetWithContextMutex.Lock()
+	defer fake.deleteTaskSetWithContextMutex.Unlock()
+	fake.DeleteTaskSetWithContextStub = nil
+	if fake.deleteTaskSetWithContextReturnsOnCall == nil {
+		fake.deleteTaskSetWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.DeleteTaskSetOutput
+			result2 error
+		})
+	}
+	fake.deleteTaskSetWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.DeleteTaskSetOutput
 		result2 error
 	}{result1, result2}
 }
@@ -2619,11 +4405,11 @@ func (fake *FakeECSClient) DeregisterContainerInstanceRequestReturnsOnCall(i int
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) DeregisterContainerInstanceWithContext(arg1 aws.Context, arg2 *ecs.DeregisterContainerInstanceInput, arg3 ...request.Option) (*ecs.DeregisterContainerInstanceOutput, error) {
+func (fake *FakeECSClient) DeregisterContainerInstanceWithContext(arg1 context.Context, arg2 *ecs.DeregisterContainerInstanceInput, arg3 ...request.Option) (*ecs.DeregisterContainerInstanceOutput, error) {
 	fake.deregisterContainerInstanceWithContextMutex.Lock()
 	ret, specificReturn := fake.deregisterContainerInstanceWithContextReturnsOnCall[len(fake.deregisterContainerInstanceWithContextArgsForCall)]
 	fake.deregisterContainerInstanceWithContextArgsForCall = append(fake.deregisterContainerInstanceWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DeregisterContainerInstanceInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -2645,13 +4431,13 @@ func (fake *FakeECSClient) DeregisterContainerInstanceWithContextCallCount() int
 	return len(fake.deregisterContainerInstanceWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) DeregisterContainerInstanceWithContextCalls(stub func(aws.Context, *ecs.DeregisterContainerInstanceInput, ...request.Option) (*ecs.DeregisterContainerInstanceOutput, error)) {
+func (fake *FakeECSClient) DeregisterContainerInstanceWithContextCalls(stub func(context.Context, *ecs.DeregisterContainerInstanceInput, ...request.Option) (*ecs.DeregisterContainerInstanceOutput, error)) {
 	fake.deregisterContainerInstanceWithContextMutex.Lock()
 	defer fake.deregisterContainerInstanceWithContextMutex.Unlock()
 	fake.DeregisterContainerInstanceWithContextStub = stub
 }
 
-func (fake *FakeECSClient) DeregisterContainerInstanceWithContextArgsForCall(i int) (aws.Context, *ecs.DeregisterContainerInstanceInput, []request.Option) {
+func (fake *FakeECSClient) DeregisterContainerInstanceWithContextArgsForCall(i int) (context.Context, *ecs.DeregisterContainerInstanceInput, []request.Option) {
 	fake.deregisterContainerInstanceWithContextMutex.RLock()
 	defer fake.deregisterContainerInstanceWithContextMutex.RUnlock()
 	argsForCall := fake.deregisterContainerInstanceWithContextArgsForCall[i]
@@ -2810,11 +4596,11 @@ func (fake *FakeECSClient) DeregisterTaskDefinitionRequestReturnsOnCall(i int, r
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) DeregisterTaskDefinitionWithContext(arg1 aws.Context, arg2 *ecs.DeregisterTaskDefinitionInput, arg3 ...request.Option) (*ecs.DeregisterTaskDefinitionOutput, error) {
+func (fake *FakeECSClient) DeregisterTaskDefinitionWithContext(arg1 context.Context, arg2 *ecs.DeregisterTaskDefinitionInput, arg3 ...request.Option) (*ecs.DeregisterTaskDefinitionOutput, error) {
 	fake.deregisterTaskDefinitionWithContextMutex.Lock()
 	ret, specificReturn := fake.deregisterTaskDefinitionWithContextReturnsOnCall[len(fake.deregisterTaskDefinitionWithContextArgsForCall)]
 	fake.deregisterTaskDefinitionWithContextArgsForCall = append(fake.deregisterTaskDefinitionWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DeregisterTaskDefinitionInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -2836,13 +4622,13 @@ func (fake *FakeECSClient) DeregisterTaskDefinitionWithContextCallCount() int {
 	return len(fake.deregisterTaskDefinitionWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) DeregisterTaskDefinitionWithContextCalls(stub func(aws.Context, *ecs.DeregisterTaskDefinitionInput, ...request.Option) (*ecs.DeregisterTaskDefinitionOutput, error)) {
+func (fake *FakeECSClient) DeregisterTaskDefinitionWithContextCalls(stub func(context.Context, *ecs.DeregisterTaskDefinitionInput, ...request.Option) (*ecs.DeregisterTaskDefinitionOutput, error)) {
 	fake.deregisterTaskDefinitionWithContextMutex.Lock()
 	defer fake.deregisterTaskDefinitionWithContextMutex.Unlock()
 	fake.DeregisterTaskDefinitionWithContextStub = stub
 }
 
-func (fake *FakeECSClient) DeregisterTaskDefinitionWithContextArgsForCall(i int) (aws.Context, *ecs.DeregisterTaskDefinitionInput, []request.Option) {
+func (fake *FakeECSClient) DeregisterTaskDefinitionWithContextArgsForCall(i int) (context.Context, *ecs.DeregisterTaskDefinitionInput, []request.Option) {
 	fake.deregisterTaskDefinitionWithContextMutex.RLock()
 	defer fake.deregisterTaskDefinitionWithContextMutex.RUnlock()
 	argsForCall := fake.deregisterTaskDefinitionWithContextArgsForCall[i]
@@ -2871,6 +4657,197 @@ func (fake *FakeECSClient) DeregisterTaskDefinitionWithContextReturnsOnCall(i in
 	}
 	fake.deregisterTaskDefinitionWithContextReturnsOnCall[i] = struct {
 		result1 *ecs.DeregisterTaskDefinitionOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DescribeCapacityProviders(arg1 *ecs.DescribeCapacityProvidersInput) (*ecs.DescribeCapacityProvidersOutput, error) {
+	fake.describeCapacityProvidersMutex.Lock()
+	ret, specificReturn := fake.describeCapacityProvidersReturnsOnCall[len(fake.describeCapacityProvidersArgsForCall)]
+	fake.describeCapacityProvidersArgsForCall = append(fake.describeCapacityProvidersArgsForCall, struct {
+		arg1 *ecs.DescribeCapacityProvidersInput
+	}{arg1})
+	fake.recordInvocation("DescribeCapacityProviders", []interface{}{arg1})
+	fake.describeCapacityProvidersMutex.Unlock()
+	if fake.DescribeCapacityProvidersStub != nil {
+		return fake.DescribeCapacityProvidersStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.describeCapacityProvidersReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersCallCount() int {
+	fake.describeCapacityProvidersMutex.RLock()
+	defer fake.describeCapacityProvidersMutex.RUnlock()
+	return len(fake.describeCapacityProvidersArgsForCall)
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersCalls(stub func(*ecs.DescribeCapacityProvidersInput) (*ecs.DescribeCapacityProvidersOutput, error)) {
+	fake.describeCapacityProvidersMutex.Lock()
+	defer fake.describeCapacityProvidersMutex.Unlock()
+	fake.DescribeCapacityProvidersStub = stub
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersArgsForCall(i int) *ecs.DescribeCapacityProvidersInput {
+	fake.describeCapacityProvidersMutex.RLock()
+	defer fake.describeCapacityProvidersMutex.RUnlock()
+	argsForCall := fake.describeCapacityProvidersArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersReturns(result1 *ecs.DescribeCapacityProvidersOutput, result2 error) {
+	fake.describeCapacityProvidersMutex.Lock()
+	defer fake.describeCapacityProvidersMutex.Unlock()
+	fake.DescribeCapacityProvidersStub = nil
+	fake.describeCapacityProvidersReturns = struct {
+		result1 *ecs.DescribeCapacityProvidersOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersReturnsOnCall(i int, result1 *ecs.DescribeCapacityProvidersOutput, result2 error) {
+	fake.describeCapacityProvidersMutex.Lock()
+	defer fake.describeCapacityProvidersMutex.Unlock()
+	fake.DescribeCapacityProvidersStub = nil
+	if fake.describeCapacityProvidersReturnsOnCall == nil {
+		fake.describeCapacityProvidersReturnsOnCall = make(map[int]struct {
+			result1 *ecs.DescribeCapacityProvidersOutput
+			result2 error
+		})
+	}
+	fake.describeCapacityProvidersReturnsOnCall[i] = struct {
+		result1 *ecs.DescribeCapacityProvidersOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersRequest(arg1 *ecs.DescribeCapacityProvidersInput) (*request.Request, *ecs.DescribeCapacityProvidersOutput) {
+	fake.describeCapacityProvidersRequestMutex.Lock()
+	ret, specificReturn := fake.describeCapacityProvidersRequestReturnsOnCall[len(fake.describeCapacityProvidersRequestArgsForCall)]
+	fake.describeCapacityProvidersRequestArgsForCall = append(fake.describeCapacityProvidersRequestArgsForCall, struct {
+		arg1 *ecs.DescribeCapacityProvidersInput
+	}{arg1})
+	fake.recordInvocation("DescribeCapacityProvidersRequest", []interface{}{arg1})
+	fake.describeCapacityProvidersRequestMutex.Unlock()
+	if fake.DescribeCapacityProvidersRequestStub != nil {
+		return fake.DescribeCapacityProvidersRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.describeCapacityProvidersRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersRequestCallCount() int {
+	fake.describeCapacityProvidersRequestMutex.RLock()
+	defer fake.describeCapacityProvidersRequestMutex.RUnlock()
+	return len(fake.describeCapacityProvidersRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersRequestCalls(stub func(*ecs.DescribeCapacityProvidersInput) (*request.Request, *ecs.DescribeCapacityProvidersOutput)) {
+	fake.describeCapacityProvidersRequestMutex.Lock()
+	defer fake.describeCapacityProvidersRequestMutex.Unlock()
+	fake.DescribeCapacityProvidersRequestStub = stub
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersRequestArgsForCall(i int) *ecs.DescribeCapacityProvidersInput {
+	fake.describeCapacityProvidersRequestMutex.RLock()
+	defer fake.describeCapacityProvidersRequestMutex.RUnlock()
+	argsForCall := fake.describeCapacityProvidersRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersRequestReturns(result1 *request.Request, result2 *ecs.DescribeCapacityProvidersOutput) {
+	fake.describeCapacityProvidersRequestMutex.Lock()
+	defer fake.describeCapacityProvidersRequestMutex.Unlock()
+	fake.DescribeCapacityProvidersRequestStub = nil
+	fake.describeCapacityProvidersRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.DescribeCapacityProvidersOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.DescribeCapacityProvidersOutput) {
+	fake.describeCapacityProvidersRequestMutex.Lock()
+	defer fake.describeCapacityProvidersRequestMutex.Unlock()
+	fake.DescribeCapacityProvidersRequestStub = nil
+	if fake.describeCapacityProvidersRequestReturnsOnCall == nil {
+		fake.describeCapacityProvidersRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.DescribeCapacityProvidersOutput
+		})
+	}
+	fake.describeCapacityProvidersRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.DescribeCapacityProvidersOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersWithContext(arg1 context.Context, arg2 *ecs.DescribeCapacityProvidersInput, arg3 ...request.Option) (*ecs.DescribeCapacityProvidersOutput, error) {
+	fake.describeCapacityProvidersWithContextMutex.Lock()
+	ret, specificReturn := fake.describeCapacityProvidersWithContextReturnsOnCall[len(fake.describeCapacityProvidersWithContextArgsForCall)]
+	fake.describeCapacityProvidersWithContextArgsForCall = append(fake.describeCapacityProvidersWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.DescribeCapacityProvidersInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("DescribeCapacityProvidersWithContext", []interface{}{arg1, arg2, arg3})
+	fake.describeCapacityProvidersWithContextMutex.Unlock()
+	if fake.DescribeCapacityProvidersWithContextStub != nil {
+		return fake.DescribeCapacityProvidersWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.describeCapacityProvidersWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersWithContextCallCount() int {
+	fake.describeCapacityProvidersWithContextMutex.RLock()
+	defer fake.describeCapacityProvidersWithContextMutex.RUnlock()
+	return len(fake.describeCapacityProvidersWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersWithContextCalls(stub func(context.Context, *ecs.DescribeCapacityProvidersInput, ...request.Option) (*ecs.DescribeCapacityProvidersOutput, error)) {
+	fake.describeCapacityProvidersWithContextMutex.Lock()
+	defer fake.describeCapacityProvidersWithContextMutex.Unlock()
+	fake.DescribeCapacityProvidersWithContextStub = stub
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersWithContextArgsForCall(i int) (context.Context, *ecs.DescribeCapacityProvidersInput, []request.Option) {
+	fake.describeCapacityProvidersWithContextMutex.RLock()
+	defer fake.describeCapacityProvidersWithContextMutex.RUnlock()
+	argsForCall := fake.describeCapacityProvidersWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersWithContextReturns(result1 *ecs.DescribeCapacityProvidersOutput, result2 error) {
+	fake.describeCapacityProvidersWithContextMutex.Lock()
+	defer fake.describeCapacityProvidersWithContextMutex.Unlock()
+	fake.DescribeCapacityProvidersWithContextStub = nil
+	fake.describeCapacityProvidersWithContextReturns = struct {
+		result1 *ecs.DescribeCapacityProvidersOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DescribeCapacityProvidersWithContextReturnsOnCall(i int, result1 *ecs.DescribeCapacityProvidersOutput, result2 error) {
+	fake.describeCapacityProvidersWithContextMutex.Lock()
+	defer fake.describeCapacityProvidersWithContextMutex.Unlock()
+	fake.DescribeCapacityProvidersWithContextStub = nil
+	if fake.describeCapacityProvidersWithContextReturnsOnCall == nil {
+		fake.describeCapacityProvidersWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.DescribeCapacityProvidersOutput
+			result2 error
+		})
+	}
+	fake.describeCapacityProvidersWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.DescribeCapacityProvidersOutput
 		result2 error
 	}{result1, result2}
 }
@@ -3001,11 +4978,11 @@ func (fake *FakeECSClient) DescribeClustersRequestReturnsOnCall(i int, result1 *
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) DescribeClustersWithContext(arg1 aws.Context, arg2 *ecs.DescribeClustersInput, arg3 ...request.Option) (*ecs.DescribeClustersOutput, error) {
+func (fake *FakeECSClient) DescribeClustersWithContext(arg1 context.Context, arg2 *ecs.DescribeClustersInput, arg3 ...request.Option) (*ecs.DescribeClustersOutput, error) {
 	fake.describeClustersWithContextMutex.Lock()
 	ret, specificReturn := fake.describeClustersWithContextReturnsOnCall[len(fake.describeClustersWithContextArgsForCall)]
 	fake.describeClustersWithContextArgsForCall = append(fake.describeClustersWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeClustersInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -3027,13 +5004,13 @@ func (fake *FakeECSClient) DescribeClustersWithContextCallCount() int {
 	return len(fake.describeClustersWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) DescribeClustersWithContextCalls(stub func(aws.Context, *ecs.DescribeClustersInput, ...request.Option) (*ecs.DescribeClustersOutput, error)) {
+func (fake *FakeECSClient) DescribeClustersWithContextCalls(stub func(context.Context, *ecs.DescribeClustersInput, ...request.Option) (*ecs.DescribeClustersOutput, error)) {
 	fake.describeClustersWithContextMutex.Lock()
 	defer fake.describeClustersWithContextMutex.Unlock()
 	fake.DescribeClustersWithContextStub = stub
 }
 
-func (fake *FakeECSClient) DescribeClustersWithContextArgsForCall(i int) (aws.Context, *ecs.DescribeClustersInput, []request.Option) {
+func (fake *FakeECSClient) DescribeClustersWithContextArgsForCall(i int) (context.Context, *ecs.DescribeClustersInput, []request.Option) {
 	fake.describeClustersWithContextMutex.RLock()
 	defer fake.describeClustersWithContextMutex.RUnlock()
 	argsForCall := fake.describeClustersWithContextArgsForCall[i]
@@ -3192,11 +5169,11 @@ func (fake *FakeECSClient) DescribeContainerInstancesRequestReturnsOnCall(i int,
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) DescribeContainerInstancesWithContext(arg1 aws.Context, arg2 *ecs.DescribeContainerInstancesInput, arg3 ...request.Option) (*ecs.DescribeContainerInstancesOutput, error) {
+func (fake *FakeECSClient) DescribeContainerInstancesWithContext(arg1 context.Context, arg2 *ecs.DescribeContainerInstancesInput, arg3 ...request.Option) (*ecs.DescribeContainerInstancesOutput, error) {
 	fake.describeContainerInstancesWithContextMutex.Lock()
 	ret, specificReturn := fake.describeContainerInstancesWithContextReturnsOnCall[len(fake.describeContainerInstancesWithContextArgsForCall)]
 	fake.describeContainerInstancesWithContextArgsForCall = append(fake.describeContainerInstancesWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeContainerInstancesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -3218,13 +5195,13 @@ func (fake *FakeECSClient) DescribeContainerInstancesWithContextCallCount() int 
 	return len(fake.describeContainerInstancesWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) DescribeContainerInstancesWithContextCalls(stub func(aws.Context, *ecs.DescribeContainerInstancesInput, ...request.Option) (*ecs.DescribeContainerInstancesOutput, error)) {
+func (fake *FakeECSClient) DescribeContainerInstancesWithContextCalls(stub func(context.Context, *ecs.DescribeContainerInstancesInput, ...request.Option) (*ecs.DescribeContainerInstancesOutput, error)) {
 	fake.describeContainerInstancesWithContextMutex.Lock()
 	defer fake.describeContainerInstancesWithContextMutex.Unlock()
 	fake.DescribeContainerInstancesWithContextStub = stub
 }
 
-func (fake *FakeECSClient) DescribeContainerInstancesWithContextArgsForCall(i int) (aws.Context, *ecs.DescribeContainerInstancesInput, []request.Option) {
+func (fake *FakeECSClient) DescribeContainerInstancesWithContextArgsForCall(i int) (context.Context, *ecs.DescribeContainerInstancesInput, []request.Option) {
 	fake.describeContainerInstancesWithContextMutex.RLock()
 	defer fake.describeContainerInstancesWithContextMutex.RUnlock()
 	argsForCall := fake.describeContainerInstancesWithContextArgsForCall[i]
@@ -3383,11 +5360,11 @@ func (fake *FakeECSClient) DescribeServicesRequestReturnsOnCall(i int, result1 *
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) DescribeServicesWithContext(arg1 aws.Context, arg2 *ecs.DescribeServicesInput, arg3 ...request.Option) (*ecs.DescribeServicesOutput, error) {
+func (fake *FakeECSClient) DescribeServicesWithContext(arg1 context.Context, arg2 *ecs.DescribeServicesInput, arg3 ...request.Option) (*ecs.DescribeServicesOutput, error) {
 	fake.describeServicesWithContextMutex.Lock()
 	ret, specificReturn := fake.describeServicesWithContextReturnsOnCall[len(fake.describeServicesWithContextArgsForCall)]
 	fake.describeServicesWithContextArgsForCall = append(fake.describeServicesWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeServicesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -3409,13 +5386,13 @@ func (fake *FakeECSClient) DescribeServicesWithContextCallCount() int {
 	return len(fake.describeServicesWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) DescribeServicesWithContextCalls(stub func(aws.Context, *ecs.DescribeServicesInput, ...request.Option) (*ecs.DescribeServicesOutput, error)) {
+func (fake *FakeECSClient) DescribeServicesWithContextCalls(stub func(context.Context, *ecs.DescribeServicesInput, ...request.Option) (*ecs.DescribeServicesOutput, error)) {
 	fake.describeServicesWithContextMutex.Lock()
 	defer fake.describeServicesWithContextMutex.Unlock()
 	fake.DescribeServicesWithContextStub = stub
 }
 
-func (fake *FakeECSClient) DescribeServicesWithContextArgsForCall(i int) (aws.Context, *ecs.DescribeServicesInput, []request.Option) {
+func (fake *FakeECSClient) DescribeServicesWithContextArgsForCall(i int) (context.Context, *ecs.DescribeServicesInput, []request.Option) {
 	fake.describeServicesWithContextMutex.RLock()
 	defer fake.describeServicesWithContextMutex.RUnlock()
 	argsForCall := fake.describeServicesWithContextArgsForCall[i]
@@ -3574,11 +5551,11 @@ func (fake *FakeECSClient) DescribeTaskDefinitionRequestReturnsOnCall(i int, res
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) DescribeTaskDefinitionWithContext(arg1 aws.Context, arg2 *ecs.DescribeTaskDefinitionInput, arg3 ...request.Option) (*ecs.DescribeTaskDefinitionOutput, error) {
+func (fake *FakeECSClient) DescribeTaskDefinitionWithContext(arg1 context.Context, arg2 *ecs.DescribeTaskDefinitionInput, arg3 ...request.Option) (*ecs.DescribeTaskDefinitionOutput, error) {
 	fake.describeTaskDefinitionWithContextMutex.Lock()
 	ret, specificReturn := fake.describeTaskDefinitionWithContextReturnsOnCall[len(fake.describeTaskDefinitionWithContextArgsForCall)]
 	fake.describeTaskDefinitionWithContextArgsForCall = append(fake.describeTaskDefinitionWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeTaskDefinitionInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -3600,13 +5577,13 @@ func (fake *FakeECSClient) DescribeTaskDefinitionWithContextCallCount() int {
 	return len(fake.describeTaskDefinitionWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) DescribeTaskDefinitionWithContextCalls(stub func(aws.Context, *ecs.DescribeTaskDefinitionInput, ...request.Option) (*ecs.DescribeTaskDefinitionOutput, error)) {
+func (fake *FakeECSClient) DescribeTaskDefinitionWithContextCalls(stub func(context.Context, *ecs.DescribeTaskDefinitionInput, ...request.Option) (*ecs.DescribeTaskDefinitionOutput, error)) {
 	fake.describeTaskDefinitionWithContextMutex.Lock()
 	defer fake.describeTaskDefinitionWithContextMutex.Unlock()
 	fake.DescribeTaskDefinitionWithContextStub = stub
 }
 
-func (fake *FakeECSClient) DescribeTaskDefinitionWithContextArgsForCall(i int) (aws.Context, *ecs.DescribeTaskDefinitionInput, []request.Option) {
+func (fake *FakeECSClient) DescribeTaskDefinitionWithContextArgsForCall(i int) (context.Context, *ecs.DescribeTaskDefinitionInput, []request.Option) {
 	fake.describeTaskDefinitionWithContextMutex.RLock()
 	defer fake.describeTaskDefinitionWithContextMutex.RUnlock()
 	argsForCall := fake.describeTaskDefinitionWithContextArgsForCall[i]
@@ -3635,6 +5612,197 @@ func (fake *FakeECSClient) DescribeTaskDefinitionWithContextReturnsOnCall(i int,
 	}
 	fake.describeTaskDefinitionWithContextReturnsOnCall[i] = struct {
 		result1 *ecs.DescribeTaskDefinitionOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DescribeTaskSets(arg1 *ecs.DescribeTaskSetsInput) (*ecs.DescribeTaskSetsOutput, error) {
+	fake.describeTaskSetsMutex.Lock()
+	ret, specificReturn := fake.describeTaskSetsReturnsOnCall[len(fake.describeTaskSetsArgsForCall)]
+	fake.describeTaskSetsArgsForCall = append(fake.describeTaskSetsArgsForCall, struct {
+		arg1 *ecs.DescribeTaskSetsInput
+	}{arg1})
+	fake.recordInvocation("DescribeTaskSets", []interface{}{arg1})
+	fake.describeTaskSetsMutex.Unlock()
+	if fake.DescribeTaskSetsStub != nil {
+		return fake.DescribeTaskSetsStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.describeTaskSetsReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsCallCount() int {
+	fake.describeTaskSetsMutex.RLock()
+	defer fake.describeTaskSetsMutex.RUnlock()
+	return len(fake.describeTaskSetsArgsForCall)
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsCalls(stub func(*ecs.DescribeTaskSetsInput) (*ecs.DescribeTaskSetsOutput, error)) {
+	fake.describeTaskSetsMutex.Lock()
+	defer fake.describeTaskSetsMutex.Unlock()
+	fake.DescribeTaskSetsStub = stub
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsArgsForCall(i int) *ecs.DescribeTaskSetsInput {
+	fake.describeTaskSetsMutex.RLock()
+	defer fake.describeTaskSetsMutex.RUnlock()
+	argsForCall := fake.describeTaskSetsArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsReturns(result1 *ecs.DescribeTaskSetsOutput, result2 error) {
+	fake.describeTaskSetsMutex.Lock()
+	defer fake.describeTaskSetsMutex.Unlock()
+	fake.DescribeTaskSetsStub = nil
+	fake.describeTaskSetsReturns = struct {
+		result1 *ecs.DescribeTaskSetsOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsReturnsOnCall(i int, result1 *ecs.DescribeTaskSetsOutput, result2 error) {
+	fake.describeTaskSetsMutex.Lock()
+	defer fake.describeTaskSetsMutex.Unlock()
+	fake.DescribeTaskSetsStub = nil
+	if fake.describeTaskSetsReturnsOnCall == nil {
+		fake.describeTaskSetsReturnsOnCall = make(map[int]struct {
+			result1 *ecs.DescribeTaskSetsOutput
+			result2 error
+		})
+	}
+	fake.describeTaskSetsReturnsOnCall[i] = struct {
+		result1 *ecs.DescribeTaskSetsOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsRequest(arg1 *ecs.DescribeTaskSetsInput) (*request.Request, *ecs.DescribeTaskSetsOutput) {
+	fake.describeTaskSetsRequestMutex.Lock()
+	ret, specificReturn := fake.describeTaskSetsRequestReturnsOnCall[len(fake.describeTaskSetsRequestArgsForCall)]
+	fake.describeTaskSetsRequestArgsForCall = append(fake.describeTaskSetsRequestArgsForCall, struct {
+		arg1 *ecs.DescribeTaskSetsInput
+	}{arg1})
+	fake.recordInvocation("DescribeTaskSetsRequest", []interface{}{arg1})
+	fake.describeTaskSetsRequestMutex.Unlock()
+	if fake.DescribeTaskSetsRequestStub != nil {
+		return fake.DescribeTaskSetsRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.describeTaskSetsRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsRequestCallCount() int {
+	fake.describeTaskSetsRequestMutex.RLock()
+	defer fake.describeTaskSetsRequestMutex.RUnlock()
+	return len(fake.describeTaskSetsRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsRequestCalls(stub func(*ecs.DescribeTaskSetsInput) (*request.Request, *ecs.DescribeTaskSetsOutput)) {
+	fake.describeTaskSetsRequestMutex.Lock()
+	defer fake.describeTaskSetsRequestMutex.Unlock()
+	fake.DescribeTaskSetsRequestStub = stub
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsRequestArgsForCall(i int) *ecs.DescribeTaskSetsInput {
+	fake.describeTaskSetsRequestMutex.RLock()
+	defer fake.describeTaskSetsRequestMutex.RUnlock()
+	argsForCall := fake.describeTaskSetsRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsRequestReturns(result1 *request.Request, result2 *ecs.DescribeTaskSetsOutput) {
+	fake.describeTaskSetsRequestMutex.Lock()
+	defer fake.describeTaskSetsRequestMutex.Unlock()
+	fake.DescribeTaskSetsRequestStub = nil
+	fake.describeTaskSetsRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.DescribeTaskSetsOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.DescribeTaskSetsOutput) {
+	fake.describeTaskSetsRequestMutex.Lock()
+	defer fake.describeTaskSetsRequestMutex.Unlock()
+	fake.DescribeTaskSetsRequestStub = nil
+	if fake.describeTaskSetsRequestReturnsOnCall == nil {
+		fake.describeTaskSetsRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.DescribeTaskSetsOutput
+		})
+	}
+	fake.describeTaskSetsRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.DescribeTaskSetsOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsWithContext(arg1 context.Context, arg2 *ecs.DescribeTaskSetsInput, arg3 ...request.Option) (*ecs.DescribeTaskSetsOutput, error) {
+	fake.describeTaskSetsWithContextMutex.Lock()
+	ret, specificReturn := fake.describeTaskSetsWithContextReturnsOnCall[len(fake.describeTaskSetsWithContextArgsForCall)]
+	fake.describeTaskSetsWithContextArgsForCall = append(fake.describeTaskSetsWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.DescribeTaskSetsInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("DescribeTaskSetsWithContext", []interface{}{arg1, arg2, arg3})
+	fake.describeTaskSetsWithContextMutex.Unlock()
+	if fake.DescribeTaskSetsWithContextStub != nil {
+		return fake.DescribeTaskSetsWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.describeTaskSetsWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsWithContextCallCount() int {
+	fake.describeTaskSetsWithContextMutex.RLock()
+	defer fake.describeTaskSetsWithContextMutex.RUnlock()
+	return len(fake.describeTaskSetsWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsWithContextCalls(stub func(context.Context, *ecs.DescribeTaskSetsInput, ...request.Option) (*ecs.DescribeTaskSetsOutput, error)) {
+	fake.describeTaskSetsWithContextMutex.Lock()
+	defer fake.describeTaskSetsWithContextMutex.Unlock()
+	fake.DescribeTaskSetsWithContextStub = stub
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsWithContextArgsForCall(i int) (context.Context, *ecs.DescribeTaskSetsInput, []request.Option) {
+	fake.describeTaskSetsWithContextMutex.RLock()
+	defer fake.describeTaskSetsWithContextMutex.RUnlock()
+	argsForCall := fake.describeTaskSetsWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsWithContextReturns(result1 *ecs.DescribeTaskSetsOutput, result2 error) {
+	fake.describeTaskSetsWithContextMutex.Lock()
+	defer fake.describeTaskSetsWithContextMutex.Unlock()
+	fake.DescribeTaskSetsWithContextStub = nil
+	fake.describeTaskSetsWithContextReturns = struct {
+		result1 *ecs.DescribeTaskSetsOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) DescribeTaskSetsWithContextReturnsOnCall(i int, result1 *ecs.DescribeTaskSetsOutput, result2 error) {
+	fake.describeTaskSetsWithContextMutex.Lock()
+	defer fake.describeTaskSetsWithContextMutex.Unlock()
+	fake.DescribeTaskSetsWithContextStub = nil
+	if fake.describeTaskSetsWithContextReturnsOnCall == nil {
+		fake.describeTaskSetsWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.DescribeTaskSetsOutput
+			result2 error
+		})
+	}
+	fake.describeTaskSetsWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.DescribeTaskSetsOutput
 		result2 error
 	}{result1, result2}
 }
@@ -3765,11 +5933,11 @@ func (fake *FakeECSClient) DescribeTasksRequestReturnsOnCall(i int, result1 *req
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) DescribeTasksWithContext(arg1 aws.Context, arg2 *ecs.DescribeTasksInput, arg3 ...request.Option) (*ecs.DescribeTasksOutput, error) {
+func (fake *FakeECSClient) DescribeTasksWithContext(arg1 context.Context, arg2 *ecs.DescribeTasksInput, arg3 ...request.Option) (*ecs.DescribeTasksOutput, error) {
 	fake.describeTasksWithContextMutex.Lock()
 	ret, specificReturn := fake.describeTasksWithContextReturnsOnCall[len(fake.describeTasksWithContextArgsForCall)]
 	fake.describeTasksWithContextArgsForCall = append(fake.describeTasksWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeTasksInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -3791,13 +5959,13 @@ func (fake *FakeECSClient) DescribeTasksWithContextCallCount() int {
 	return len(fake.describeTasksWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) DescribeTasksWithContextCalls(stub func(aws.Context, *ecs.DescribeTasksInput, ...request.Option) (*ecs.DescribeTasksOutput, error)) {
+func (fake *FakeECSClient) DescribeTasksWithContextCalls(stub func(context.Context, *ecs.DescribeTasksInput, ...request.Option) (*ecs.DescribeTasksOutput, error)) {
 	fake.describeTasksWithContextMutex.Lock()
 	defer fake.describeTasksWithContextMutex.Unlock()
 	fake.DescribeTasksWithContextStub = stub
 }
 
-func (fake *FakeECSClient) DescribeTasksWithContextArgsForCall(i int) (aws.Context, *ecs.DescribeTasksInput, []request.Option) {
+func (fake *FakeECSClient) DescribeTasksWithContextArgsForCall(i int) (context.Context, *ecs.DescribeTasksInput, []request.Option) {
 	fake.describeTasksWithContextMutex.RLock()
 	defer fake.describeTasksWithContextMutex.RUnlock()
 	argsForCall := fake.describeTasksWithContextArgsForCall[i]
@@ -3956,11 +6124,11 @@ func (fake *FakeECSClient) DiscoverPollEndpointRequestReturnsOnCall(i int, resul
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) DiscoverPollEndpointWithContext(arg1 aws.Context, arg2 *ecs.DiscoverPollEndpointInput, arg3 ...request.Option) (*ecs.DiscoverPollEndpointOutput, error) {
+func (fake *FakeECSClient) DiscoverPollEndpointWithContext(arg1 context.Context, arg2 *ecs.DiscoverPollEndpointInput, arg3 ...request.Option) (*ecs.DiscoverPollEndpointOutput, error) {
 	fake.discoverPollEndpointWithContextMutex.Lock()
 	ret, specificReturn := fake.discoverPollEndpointWithContextReturnsOnCall[len(fake.discoverPollEndpointWithContextArgsForCall)]
 	fake.discoverPollEndpointWithContextArgsForCall = append(fake.discoverPollEndpointWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DiscoverPollEndpointInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -3982,13 +6150,13 @@ func (fake *FakeECSClient) DiscoverPollEndpointWithContextCallCount() int {
 	return len(fake.discoverPollEndpointWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) DiscoverPollEndpointWithContextCalls(stub func(aws.Context, *ecs.DiscoverPollEndpointInput, ...request.Option) (*ecs.DiscoverPollEndpointOutput, error)) {
+func (fake *FakeECSClient) DiscoverPollEndpointWithContextCalls(stub func(context.Context, *ecs.DiscoverPollEndpointInput, ...request.Option) (*ecs.DiscoverPollEndpointOutput, error)) {
 	fake.discoverPollEndpointWithContextMutex.Lock()
 	defer fake.discoverPollEndpointWithContextMutex.Unlock()
 	fake.DiscoverPollEndpointWithContextStub = stub
 }
 
-func (fake *FakeECSClient) DiscoverPollEndpointWithContextArgsForCall(i int) (aws.Context, *ecs.DiscoverPollEndpointInput, []request.Option) {
+func (fake *FakeECSClient) DiscoverPollEndpointWithContextArgsForCall(i int) (context.Context, *ecs.DiscoverPollEndpointInput, []request.Option) {
 	fake.discoverPollEndpointWithContextMutex.RLock()
 	defer fake.discoverPollEndpointWithContextMutex.RUnlock()
 	argsForCall := fake.discoverPollEndpointWithContextArgsForCall[i]
@@ -4017,6 +6185,321 @@ func (fake *FakeECSClient) DiscoverPollEndpointWithContextReturnsOnCall(i int, r
 	}
 	fake.discoverPollEndpointWithContextReturnsOnCall[i] = struct {
 		result1 *ecs.DiscoverPollEndpointOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) ListAccountSettings(arg1 *ecs.ListAccountSettingsInput) (*ecs.ListAccountSettingsOutput, error) {
+	fake.listAccountSettingsMutex.Lock()
+	ret, specificReturn := fake.listAccountSettingsReturnsOnCall[len(fake.listAccountSettingsArgsForCall)]
+	fake.listAccountSettingsArgsForCall = append(fake.listAccountSettingsArgsForCall, struct {
+		arg1 *ecs.ListAccountSettingsInput
+	}{arg1})
+	fake.recordInvocation("ListAccountSettings", []interface{}{arg1})
+	fake.listAccountSettingsMutex.Unlock()
+	if fake.ListAccountSettingsStub != nil {
+		return fake.ListAccountSettingsStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.listAccountSettingsReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) ListAccountSettingsCallCount() int {
+	fake.listAccountSettingsMutex.RLock()
+	defer fake.listAccountSettingsMutex.RUnlock()
+	return len(fake.listAccountSettingsArgsForCall)
+}
+
+func (fake *FakeECSClient) ListAccountSettingsCalls(stub func(*ecs.ListAccountSettingsInput) (*ecs.ListAccountSettingsOutput, error)) {
+	fake.listAccountSettingsMutex.Lock()
+	defer fake.listAccountSettingsMutex.Unlock()
+	fake.ListAccountSettingsStub = stub
+}
+
+func (fake *FakeECSClient) ListAccountSettingsArgsForCall(i int) *ecs.ListAccountSettingsInput {
+	fake.listAccountSettingsMutex.RLock()
+	defer fake.listAccountSettingsMutex.RUnlock()
+	argsForCall := fake.listAccountSettingsArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) ListAccountSettingsReturns(result1 *ecs.ListAccountSettingsOutput, result2 error) {
+	fake.listAccountSettingsMutex.Lock()
+	defer fake.listAccountSettingsMutex.Unlock()
+	fake.ListAccountSettingsStub = nil
+	fake.listAccountSettingsReturns = struct {
+		result1 *ecs.ListAccountSettingsOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) ListAccountSettingsReturnsOnCall(i int, result1 *ecs.ListAccountSettingsOutput, result2 error) {
+	fake.listAccountSettingsMutex.Lock()
+	defer fake.listAccountSettingsMutex.Unlock()
+	fake.ListAccountSettingsStub = nil
+	if fake.listAccountSettingsReturnsOnCall == nil {
+		fake.listAccountSettingsReturnsOnCall = make(map[int]struct {
+			result1 *ecs.ListAccountSettingsOutput
+			result2 error
+		})
+	}
+	fake.listAccountSettingsReturnsOnCall[i] = struct {
+		result1 *ecs.ListAccountSettingsOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) ListAccountSettingsPages(arg1 *ecs.ListAccountSettingsInput, arg2 func(*ecs.ListAccountSettingsOutput, bool) bool) error {
+	fake.listAccountSettingsPagesMutex.Lock()
+	ret, specificReturn := fake.listAccountSettingsPagesReturnsOnCall[len(fake.listAccountSettingsPagesArgsForCall)]
+	fake.listAccountSettingsPagesArgsForCall = append(fake.listAccountSettingsPagesArgsForCall, struct {
+		arg1 *ecs.ListAccountSettingsInput
+		arg2 func(*ecs.ListAccountSettingsOutput, bool) bool
+	}{arg1, arg2})
+	fake.recordInvocation("ListAccountSettingsPages", []interface{}{arg1, arg2})
+	fake.listAccountSettingsPagesMutex.Unlock()
+	if fake.ListAccountSettingsPagesStub != nil {
+		return fake.ListAccountSettingsPagesStub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.listAccountSettingsPagesReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeECSClient) ListAccountSettingsPagesCallCount() int {
+	fake.listAccountSettingsPagesMutex.RLock()
+	defer fake.listAccountSettingsPagesMutex.RUnlock()
+	return len(fake.listAccountSettingsPagesArgsForCall)
+}
+
+func (fake *FakeECSClient) ListAccountSettingsPagesCalls(stub func(*ecs.ListAccountSettingsInput, func(*ecs.ListAccountSettingsOutput, bool) bool) error) {
+	fake.listAccountSettingsPagesMutex.Lock()
+	defer fake.listAccountSettingsPagesMutex.Unlock()
+	fake.ListAccountSettingsPagesStub = stub
+}
+
+func (fake *FakeECSClient) ListAccountSettingsPagesArgsForCall(i int) (*ecs.ListAccountSettingsInput, func(*ecs.ListAccountSettingsOutput, bool) bool) {
+	fake.listAccountSettingsPagesMutex.RLock()
+	defer fake.listAccountSettingsPagesMutex.RUnlock()
+	argsForCall := fake.listAccountSettingsPagesArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeECSClient) ListAccountSettingsPagesReturns(result1 error) {
+	fake.listAccountSettingsPagesMutex.Lock()
+	defer fake.listAccountSettingsPagesMutex.Unlock()
+	fake.ListAccountSettingsPagesStub = nil
+	fake.listAccountSettingsPagesReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeECSClient) ListAccountSettingsPagesReturnsOnCall(i int, result1 error) {
+	fake.listAccountSettingsPagesMutex.Lock()
+	defer fake.listAccountSettingsPagesMutex.Unlock()
+	fake.ListAccountSettingsPagesStub = nil
+	if fake.listAccountSettingsPagesReturnsOnCall == nil {
+		fake.listAccountSettingsPagesReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.listAccountSettingsPagesReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeECSClient) ListAccountSettingsPagesWithContext(arg1 context.Context, arg2 *ecs.ListAccountSettingsInput, arg3 func(*ecs.ListAccountSettingsOutput, bool) bool, arg4 ...request.Option) error {
+	fake.listAccountSettingsPagesWithContextMutex.Lock()
+	ret, specificReturn := fake.listAccountSettingsPagesWithContextReturnsOnCall[len(fake.listAccountSettingsPagesWithContextArgsForCall)]
+	fake.listAccountSettingsPagesWithContextArgsForCall = append(fake.listAccountSettingsPagesWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.ListAccountSettingsInput
+		arg3 func(*ecs.ListAccountSettingsOutput, bool) bool
+		arg4 []request.Option
+	}{arg1, arg2, arg3, arg4})
+	fake.recordInvocation("ListAccountSettingsPagesWithContext", []interface{}{arg1, arg2, arg3, arg4})
+	fake.listAccountSettingsPagesWithContextMutex.Unlock()
+	if fake.ListAccountSettingsPagesWithContextStub != nil {
+		return fake.ListAccountSettingsPagesWithContextStub(arg1, arg2, arg3, arg4...)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.listAccountSettingsPagesWithContextReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeECSClient) ListAccountSettingsPagesWithContextCallCount() int {
+	fake.listAccountSettingsPagesWithContextMutex.RLock()
+	defer fake.listAccountSettingsPagesWithContextMutex.RUnlock()
+	return len(fake.listAccountSettingsPagesWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) ListAccountSettingsPagesWithContextCalls(stub func(context.Context, *ecs.ListAccountSettingsInput, func(*ecs.ListAccountSettingsOutput, bool) bool, ...request.Option) error) {
+	fake.listAccountSettingsPagesWithContextMutex.Lock()
+	defer fake.listAccountSettingsPagesWithContextMutex.Unlock()
+	fake.ListAccountSettingsPagesWithContextStub = stub
+}
+
+func (fake *FakeECSClient) ListAccountSettingsPagesWithContextArgsForCall(i int) (context.Context, *ecs.ListAccountSettingsInput, func(*ecs.ListAccountSettingsOutput, bool) bool, []request.Option) {
+	fake.listAccountSettingsPagesWithContextMutex.RLock()
+	defer fake.listAccountSettingsPagesWithContextMutex.RUnlock()
+	argsForCall := fake.listAccountSettingsPagesWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4
+}
+
+func (fake *FakeECSClient) ListAccountSettingsPagesWithContextReturns(result1 error) {
+	fake.listAccountSettingsPagesWithContextMutex.Lock()
+	defer fake.listAccountSettingsPagesWithContextMutex.Unlock()
+	fake.ListAccountSettingsPagesWithContextStub = nil
+	fake.listAccountSettingsPagesWithContextReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeECSClient) ListAccountSettingsPagesWithContextReturnsOnCall(i int, result1 error) {
+	fake.listAccountSettingsPagesWithContextMutex.Lock()
+	defer fake.listAccountSettingsPagesWithContextMutex.Unlock()
+	fake.ListAccountSettingsPagesWithContextStub = nil
+	if fake.listAccountSettingsPagesWithContextReturnsOnCall == nil {
+		fake.listAccountSettingsPagesWithContextReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.listAccountSettingsPagesWithContextReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeECSClient) ListAccountSettingsRequest(arg1 *ecs.ListAccountSettingsInput) (*request.Request, *ecs.ListAccountSettingsOutput) {
+	fake.listAccountSettingsRequestMutex.Lock()
+	ret, specificReturn := fake.listAccountSettingsRequestReturnsOnCall[len(fake.listAccountSettingsRequestArgsForCall)]
+	fake.listAccountSettingsRequestArgsForCall = append(fake.listAccountSettingsRequestArgsForCall, struct {
+		arg1 *ecs.ListAccountSettingsInput
+	}{arg1})
+	fake.recordInvocation("ListAccountSettingsRequest", []interface{}{arg1})
+	fake.listAccountSettingsRequestMutex.Unlock()
+	if fake.ListAccountSettingsRequestStub != nil {
+		return fake.ListAccountSettingsRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.listAccountSettingsRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) ListAccountSettingsRequestCallCount() int {
+	fake.listAccountSettingsRequestMutex.RLock()
+	defer fake.listAccountSettingsRequestMutex.RUnlock()
+	return len(fake.listAccountSettingsRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) ListAccountSettingsRequestCalls(stub func(*ecs.ListAccountSettingsInput) (*request.Request, *ecs.ListAccountSettingsOutput)) {
+	fake.listAccountSettingsRequestMutex.Lock()
+	defer fake.listAccountSettingsRequestMutex.Unlock()
+	fake.ListAccountSettingsRequestStub = stub
+}
+
+func (fake *FakeECSClient) ListAccountSettingsRequestArgsForCall(i int) *ecs.ListAccountSettingsInput {
+	fake.listAccountSettingsRequestMutex.RLock()
+	defer fake.listAccountSettingsRequestMutex.RUnlock()
+	argsForCall := fake.listAccountSettingsRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) ListAccountSettingsRequestReturns(result1 *request.Request, result2 *ecs.ListAccountSettingsOutput) {
+	fake.listAccountSettingsRequestMutex.Lock()
+	defer fake.listAccountSettingsRequestMutex.Unlock()
+	fake.ListAccountSettingsRequestStub = nil
+	fake.listAccountSettingsRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.ListAccountSettingsOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) ListAccountSettingsRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.ListAccountSettingsOutput) {
+	fake.listAccountSettingsRequestMutex.Lock()
+	defer fake.listAccountSettingsRequestMutex.Unlock()
+	fake.ListAccountSettingsRequestStub = nil
+	if fake.listAccountSettingsRequestReturnsOnCall == nil {
+		fake.listAccountSettingsRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.ListAccountSettingsOutput
+		})
+	}
+	fake.listAccountSettingsRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.ListAccountSettingsOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) ListAccountSettingsWithContext(arg1 context.Context, arg2 *ecs.ListAccountSettingsInput, arg3 ...request.Option) (*ecs.ListAccountSettingsOutput, error) {
+	fake.listAccountSettingsWithContextMutex.Lock()
+	ret, specificReturn := fake.listAccountSettingsWithContextReturnsOnCall[len(fake.listAccountSettingsWithContextArgsForCall)]
+	fake.listAccountSettingsWithContextArgsForCall = append(fake.listAccountSettingsWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.ListAccountSettingsInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("ListAccountSettingsWithContext", []interface{}{arg1, arg2, arg3})
+	fake.listAccountSettingsWithContextMutex.Unlock()
+	if fake.ListAccountSettingsWithContextStub != nil {
+		return fake.ListAccountSettingsWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.listAccountSettingsWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) ListAccountSettingsWithContextCallCount() int {
+	fake.listAccountSettingsWithContextMutex.RLock()
+	defer fake.listAccountSettingsWithContextMutex.RUnlock()
+	return len(fake.listAccountSettingsWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) ListAccountSettingsWithContextCalls(stub func(context.Context, *ecs.ListAccountSettingsInput, ...request.Option) (*ecs.ListAccountSettingsOutput, error)) {
+	fake.listAccountSettingsWithContextMutex.Lock()
+	defer fake.listAccountSettingsWithContextMutex.Unlock()
+	fake.ListAccountSettingsWithContextStub = stub
+}
+
+func (fake *FakeECSClient) ListAccountSettingsWithContextArgsForCall(i int) (context.Context, *ecs.ListAccountSettingsInput, []request.Option) {
+	fake.listAccountSettingsWithContextMutex.RLock()
+	defer fake.listAccountSettingsWithContextMutex.RUnlock()
+	argsForCall := fake.listAccountSettingsWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) ListAccountSettingsWithContextReturns(result1 *ecs.ListAccountSettingsOutput, result2 error) {
+	fake.listAccountSettingsWithContextMutex.Lock()
+	defer fake.listAccountSettingsWithContextMutex.Unlock()
+	fake.ListAccountSettingsWithContextStub = nil
+	fake.listAccountSettingsWithContextReturns = struct {
+		result1 *ecs.ListAccountSettingsOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) ListAccountSettingsWithContextReturnsOnCall(i int, result1 *ecs.ListAccountSettingsOutput, result2 error) {
+	fake.listAccountSettingsWithContextMutex.Lock()
+	defer fake.listAccountSettingsWithContextMutex.Unlock()
+	fake.ListAccountSettingsWithContextStub = nil
+	if fake.listAccountSettingsWithContextReturnsOnCall == nil {
+		fake.listAccountSettingsWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.ListAccountSettingsOutput
+			result2 error
+		})
+	}
+	fake.listAccountSettingsWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.ListAccountSettingsOutput
 		result2 error
 	}{result1, result2}
 }
@@ -4084,6 +6567,130 @@ func (fake *FakeECSClient) ListAttributesReturnsOnCall(i int, result1 *ecs.ListA
 	}{result1, result2}
 }
 
+func (fake *FakeECSClient) ListAttributesPages(arg1 *ecs.ListAttributesInput, arg2 func(*ecs.ListAttributesOutput, bool) bool) error {
+	fake.listAttributesPagesMutex.Lock()
+	ret, specificReturn := fake.listAttributesPagesReturnsOnCall[len(fake.listAttributesPagesArgsForCall)]
+	fake.listAttributesPagesArgsForCall = append(fake.listAttributesPagesArgsForCall, struct {
+		arg1 *ecs.ListAttributesInput
+		arg2 func(*ecs.ListAttributesOutput, bool) bool
+	}{arg1, arg2})
+	fake.recordInvocation("ListAttributesPages", []interface{}{arg1, arg2})
+	fake.listAttributesPagesMutex.Unlock()
+	if fake.ListAttributesPagesStub != nil {
+		return fake.ListAttributesPagesStub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.listAttributesPagesReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeECSClient) ListAttributesPagesCallCount() int {
+	fake.listAttributesPagesMutex.RLock()
+	defer fake.listAttributesPagesMutex.RUnlock()
+	return len(fake.listAttributesPagesArgsForCall)
+}
+
+func (fake *FakeECSClient) ListAttributesPagesCalls(stub func(*ecs.ListAttributesInput, func(*ecs.ListAttributesOutput, bool) bool) error) {
+	fake.listAttributesPagesMutex.Lock()
+	defer fake.listAttributesPagesMutex.Unlock()
+	fake.ListAttributesPagesStub = stub
+}
+
+func (fake *FakeECSClient) ListAttributesPagesArgsForCall(i int) (*ecs.ListAttributesInput, func(*ecs.ListAttributesOutput, bool) bool) {
+	fake.listAttributesPagesMutex.RLock()
+	defer fake.listAttributesPagesMutex.RUnlock()
+	argsForCall := fake.listAttributesPagesArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeECSClient) ListAttributesPagesReturns(result1 error) {
+	fake.listAttributesPagesMutex.Lock()
+	defer fake.listAttributesPagesMutex.Unlock()
+	fake.ListAttributesPagesStub = nil
+	fake.listAttributesPagesReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeECSClient) ListAttributesPagesReturnsOnCall(i int, result1 error) {
+	fake.listAttributesPagesMutex.Lock()
+	defer fake.listAttributesPagesMutex.Unlock()
+	fake.ListAttributesPagesStub = nil
+	if fake.listAttributesPagesReturnsOnCall == nil {
+		fake.listAttributesPagesReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.listAttributesPagesReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeECSClient) ListAttributesPagesWithContext(arg1 context.Context, arg2 *ecs.ListAttributesInput, arg3 func(*ecs.ListAttributesOutput, bool) bool, arg4 ...request.Option) error {
+	fake.listAttributesPagesWithContextMutex.Lock()
+	ret, specificReturn := fake.listAttributesPagesWithContextReturnsOnCall[len(fake.listAttributesPagesWithContextArgsForCall)]
+	fake.listAttributesPagesWithContextArgsForCall = append(fake.listAttributesPagesWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.ListAttributesInput
+		arg3 func(*ecs.ListAttributesOutput, bool) bool
+		arg4 []request.Option
+	}{arg1, arg2, arg3, arg4})
+	fake.recordInvocation("ListAttributesPagesWithContext", []interface{}{arg1, arg2, arg3, arg4})
+	fake.listAttributesPagesWithContextMutex.Unlock()
+	if fake.ListAttributesPagesWithContextStub != nil {
+		return fake.ListAttributesPagesWithContextStub(arg1, arg2, arg3, arg4...)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	fakeReturns := fake.listAttributesPagesWithContextReturns
+	return fakeReturns.result1
+}
+
+func (fake *FakeECSClient) ListAttributesPagesWithContextCallCount() int {
+	fake.listAttributesPagesWithContextMutex.RLock()
+	defer fake.listAttributesPagesWithContextMutex.RUnlock()
+	return len(fake.listAttributesPagesWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) ListAttributesPagesWithContextCalls(stub func(context.Context, *ecs.ListAttributesInput, func(*ecs.ListAttributesOutput, bool) bool, ...request.Option) error) {
+	fake.listAttributesPagesWithContextMutex.Lock()
+	defer fake.listAttributesPagesWithContextMutex.Unlock()
+	fake.ListAttributesPagesWithContextStub = stub
+}
+
+func (fake *FakeECSClient) ListAttributesPagesWithContextArgsForCall(i int) (context.Context, *ecs.ListAttributesInput, func(*ecs.ListAttributesOutput, bool) bool, []request.Option) {
+	fake.listAttributesPagesWithContextMutex.RLock()
+	defer fake.listAttributesPagesWithContextMutex.RUnlock()
+	argsForCall := fake.listAttributesPagesWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4
+}
+
+func (fake *FakeECSClient) ListAttributesPagesWithContextReturns(result1 error) {
+	fake.listAttributesPagesWithContextMutex.Lock()
+	defer fake.listAttributesPagesWithContextMutex.Unlock()
+	fake.ListAttributesPagesWithContextStub = nil
+	fake.listAttributesPagesWithContextReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeECSClient) ListAttributesPagesWithContextReturnsOnCall(i int, result1 error) {
+	fake.listAttributesPagesWithContextMutex.Lock()
+	defer fake.listAttributesPagesWithContextMutex.Unlock()
+	fake.ListAttributesPagesWithContextStub = nil
+	if fake.listAttributesPagesWithContextReturnsOnCall == nil {
+		fake.listAttributesPagesWithContextReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.listAttributesPagesWithContextReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeECSClient) ListAttributesRequest(arg1 *ecs.ListAttributesInput) (*request.Request, *ecs.ListAttributesOutput) {
 	fake.listAttributesRequestMutex.Lock()
 	ret, specificReturn := fake.listAttributesRequestReturnsOnCall[len(fake.listAttributesRequestArgsForCall)]
@@ -4147,11 +6754,11 @@ func (fake *FakeECSClient) ListAttributesRequestReturnsOnCall(i int, result1 *re
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) ListAttributesWithContext(arg1 aws.Context, arg2 *ecs.ListAttributesInput, arg3 ...request.Option) (*ecs.ListAttributesOutput, error) {
+func (fake *FakeECSClient) ListAttributesWithContext(arg1 context.Context, arg2 *ecs.ListAttributesInput, arg3 ...request.Option) (*ecs.ListAttributesOutput, error) {
 	fake.listAttributesWithContextMutex.Lock()
 	ret, specificReturn := fake.listAttributesWithContextReturnsOnCall[len(fake.listAttributesWithContextArgsForCall)]
 	fake.listAttributesWithContextArgsForCall = append(fake.listAttributesWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListAttributesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -4173,13 +6780,13 @@ func (fake *FakeECSClient) ListAttributesWithContextCallCount() int {
 	return len(fake.listAttributesWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) ListAttributesWithContextCalls(stub func(aws.Context, *ecs.ListAttributesInput, ...request.Option) (*ecs.ListAttributesOutput, error)) {
+func (fake *FakeECSClient) ListAttributesWithContextCalls(stub func(context.Context, *ecs.ListAttributesInput, ...request.Option) (*ecs.ListAttributesOutput, error)) {
 	fake.listAttributesWithContextMutex.Lock()
 	defer fake.listAttributesWithContextMutex.Unlock()
 	fake.ListAttributesWithContextStub = stub
 }
 
-func (fake *FakeECSClient) ListAttributesWithContextArgsForCall(i int) (aws.Context, *ecs.ListAttributesInput, []request.Option) {
+func (fake *FakeECSClient) ListAttributesWithContextArgsForCall(i int) (context.Context, *ecs.ListAttributesInput, []request.Option) {
 	fake.listAttributesWithContextMutex.RLock()
 	defer fake.listAttributesWithContextMutex.RUnlock()
 	argsForCall := fake.listAttributesWithContextArgsForCall[i]
@@ -4336,11 +6943,11 @@ func (fake *FakeECSClient) ListClustersPagesReturnsOnCall(i int, result1 error) 
 	}{result1}
 }
 
-func (fake *FakeECSClient) ListClustersPagesWithContext(arg1 aws.Context, arg2 *ecs.ListClustersInput, arg3 func(*ecs.ListClustersOutput, bool) bool, arg4 ...request.Option) error {
+func (fake *FakeECSClient) ListClustersPagesWithContext(arg1 context.Context, arg2 *ecs.ListClustersInput, arg3 func(*ecs.ListClustersOutput, bool) bool, arg4 ...request.Option) error {
 	fake.listClustersPagesWithContextMutex.Lock()
 	ret, specificReturn := fake.listClustersPagesWithContextReturnsOnCall[len(fake.listClustersPagesWithContextArgsForCall)]
 	fake.listClustersPagesWithContextArgsForCall = append(fake.listClustersPagesWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListClustersInput
 		arg3 func(*ecs.ListClustersOutput, bool) bool
 		arg4 []request.Option
@@ -4363,13 +6970,13 @@ func (fake *FakeECSClient) ListClustersPagesWithContextCallCount() int {
 	return len(fake.listClustersPagesWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) ListClustersPagesWithContextCalls(stub func(aws.Context, *ecs.ListClustersInput, func(*ecs.ListClustersOutput, bool) bool, ...request.Option) error) {
+func (fake *FakeECSClient) ListClustersPagesWithContextCalls(stub func(context.Context, *ecs.ListClustersInput, func(*ecs.ListClustersOutput, bool) bool, ...request.Option) error) {
 	fake.listClustersPagesWithContextMutex.Lock()
 	defer fake.listClustersPagesWithContextMutex.Unlock()
 	fake.ListClustersPagesWithContextStub = stub
 }
 
-func (fake *FakeECSClient) ListClustersPagesWithContextArgsForCall(i int) (aws.Context, *ecs.ListClustersInput, func(*ecs.ListClustersOutput, bool) bool, []request.Option) {
+func (fake *FakeECSClient) ListClustersPagesWithContextArgsForCall(i int) (context.Context, *ecs.ListClustersInput, func(*ecs.ListClustersOutput, bool) bool, []request.Option) {
 	fake.listClustersPagesWithContextMutex.RLock()
 	defer fake.listClustersPagesWithContextMutex.RUnlock()
 	argsForCall := fake.listClustersPagesWithContextArgsForCall[i]
@@ -4462,11 +7069,11 @@ func (fake *FakeECSClient) ListClustersRequestReturnsOnCall(i int, result1 *requ
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) ListClustersWithContext(arg1 aws.Context, arg2 *ecs.ListClustersInput, arg3 ...request.Option) (*ecs.ListClustersOutput, error) {
+func (fake *FakeECSClient) ListClustersWithContext(arg1 context.Context, arg2 *ecs.ListClustersInput, arg3 ...request.Option) (*ecs.ListClustersOutput, error) {
 	fake.listClustersWithContextMutex.Lock()
 	ret, specificReturn := fake.listClustersWithContextReturnsOnCall[len(fake.listClustersWithContextArgsForCall)]
 	fake.listClustersWithContextArgsForCall = append(fake.listClustersWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListClustersInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -4488,13 +7095,13 @@ func (fake *FakeECSClient) ListClustersWithContextCallCount() int {
 	return len(fake.listClustersWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) ListClustersWithContextCalls(stub func(aws.Context, *ecs.ListClustersInput, ...request.Option) (*ecs.ListClustersOutput, error)) {
+func (fake *FakeECSClient) ListClustersWithContextCalls(stub func(context.Context, *ecs.ListClustersInput, ...request.Option) (*ecs.ListClustersOutput, error)) {
 	fake.listClustersWithContextMutex.Lock()
 	defer fake.listClustersWithContextMutex.Unlock()
 	fake.ListClustersWithContextStub = stub
 }
 
-func (fake *FakeECSClient) ListClustersWithContextArgsForCall(i int) (aws.Context, *ecs.ListClustersInput, []request.Option) {
+func (fake *FakeECSClient) ListClustersWithContextArgsForCall(i int) (context.Context, *ecs.ListClustersInput, []request.Option) {
 	fake.listClustersWithContextMutex.RLock()
 	defer fake.listClustersWithContextMutex.RUnlock()
 	argsForCall := fake.listClustersWithContextArgsForCall[i]
@@ -4651,11 +7258,11 @@ func (fake *FakeECSClient) ListContainerInstancesPagesReturnsOnCall(i int, resul
 	}{result1}
 }
 
-func (fake *FakeECSClient) ListContainerInstancesPagesWithContext(arg1 aws.Context, arg2 *ecs.ListContainerInstancesInput, arg3 func(*ecs.ListContainerInstancesOutput, bool) bool, arg4 ...request.Option) error {
+func (fake *FakeECSClient) ListContainerInstancesPagesWithContext(arg1 context.Context, arg2 *ecs.ListContainerInstancesInput, arg3 func(*ecs.ListContainerInstancesOutput, bool) bool, arg4 ...request.Option) error {
 	fake.listContainerInstancesPagesWithContextMutex.Lock()
 	ret, specificReturn := fake.listContainerInstancesPagesWithContextReturnsOnCall[len(fake.listContainerInstancesPagesWithContextArgsForCall)]
 	fake.listContainerInstancesPagesWithContextArgsForCall = append(fake.listContainerInstancesPagesWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListContainerInstancesInput
 		arg3 func(*ecs.ListContainerInstancesOutput, bool) bool
 		arg4 []request.Option
@@ -4678,13 +7285,13 @@ func (fake *FakeECSClient) ListContainerInstancesPagesWithContextCallCount() int
 	return len(fake.listContainerInstancesPagesWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) ListContainerInstancesPagesWithContextCalls(stub func(aws.Context, *ecs.ListContainerInstancesInput, func(*ecs.ListContainerInstancesOutput, bool) bool, ...request.Option) error) {
+func (fake *FakeECSClient) ListContainerInstancesPagesWithContextCalls(stub func(context.Context, *ecs.ListContainerInstancesInput, func(*ecs.ListContainerInstancesOutput, bool) bool, ...request.Option) error) {
 	fake.listContainerInstancesPagesWithContextMutex.Lock()
 	defer fake.listContainerInstancesPagesWithContextMutex.Unlock()
 	fake.ListContainerInstancesPagesWithContextStub = stub
 }
 
-func (fake *FakeECSClient) ListContainerInstancesPagesWithContextArgsForCall(i int) (aws.Context, *ecs.ListContainerInstancesInput, func(*ecs.ListContainerInstancesOutput, bool) bool, []request.Option) {
+func (fake *FakeECSClient) ListContainerInstancesPagesWithContextArgsForCall(i int) (context.Context, *ecs.ListContainerInstancesInput, func(*ecs.ListContainerInstancesOutput, bool) bool, []request.Option) {
 	fake.listContainerInstancesPagesWithContextMutex.RLock()
 	defer fake.listContainerInstancesPagesWithContextMutex.RUnlock()
 	argsForCall := fake.listContainerInstancesPagesWithContextArgsForCall[i]
@@ -4777,11 +7384,11 @@ func (fake *FakeECSClient) ListContainerInstancesRequestReturnsOnCall(i int, res
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) ListContainerInstancesWithContext(arg1 aws.Context, arg2 *ecs.ListContainerInstancesInput, arg3 ...request.Option) (*ecs.ListContainerInstancesOutput, error) {
+func (fake *FakeECSClient) ListContainerInstancesWithContext(arg1 context.Context, arg2 *ecs.ListContainerInstancesInput, arg3 ...request.Option) (*ecs.ListContainerInstancesOutput, error) {
 	fake.listContainerInstancesWithContextMutex.Lock()
 	ret, specificReturn := fake.listContainerInstancesWithContextReturnsOnCall[len(fake.listContainerInstancesWithContextArgsForCall)]
 	fake.listContainerInstancesWithContextArgsForCall = append(fake.listContainerInstancesWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListContainerInstancesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -4803,13 +7410,13 @@ func (fake *FakeECSClient) ListContainerInstancesWithContextCallCount() int {
 	return len(fake.listContainerInstancesWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) ListContainerInstancesWithContextCalls(stub func(aws.Context, *ecs.ListContainerInstancesInput, ...request.Option) (*ecs.ListContainerInstancesOutput, error)) {
+func (fake *FakeECSClient) ListContainerInstancesWithContextCalls(stub func(context.Context, *ecs.ListContainerInstancesInput, ...request.Option) (*ecs.ListContainerInstancesOutput, error)) {
 	fake.listContainerInstancesWithContextMutex.Lock()
 	defer fake.listContainerInstancesWithContextMutex.Unlock()
 	fake.ListContainerInstancesWithContextStub = stub
 }
 
-func (fake *FakeECSClient) ListContainerInstancesWithContextArgsForCall(i int) (aws.Context, *ecs.ListContainerInstancesInput, []request.Option) {
+func (fake *FakeECSClient) ListContainerInstancesWithContextArgsForCall(i int) (context.Context, *ecs.ListContainerInstancesInput, []request.Option) {
 	fake.listContainerInstancesWithContextMutex.RLock()
 	defer fake.listContainerInstancesWithContextMutex.RUnlock()
 	argsForCall := fake.listContainerInstancesWithContextArgsForCall[i]
@@ -4966,11 +7573,11 @@ func (fake *FakeECSClient) ListServicesPagesReturnsOnCall(i int, result1 error) 
 	}{result1}
 }
 
-func (fake *FakeECSClient) ListServicesPagesWithContext(arg1 aws.Context, arg2 *ecs.ListServicesInput, arg3 func(*ecs.ListServicesOutput, bool) bool, arg4 ...request.Option) error {
+func (fake *FakeECSClient) ListServicesPagesWithContext(arg1 context.Context, arg2 *ecs.ListServicesInput, arg3 func(*ecs.ListServicesOutput, bool) bool, arg4 ...request.Option) error {
 	fake.listServicesPagesWithContextMutex.Lock()
 	ret, specificReturn := fake.listServicesPagesWithContextReturnsOnCall[len(fake.listServicesPagesWithContextArgsForCall)]
 	fake.listServicesPagesWithContextArgsForCall = append(fake.listServicesPagesWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListServicesInput
 		arg3 func(*ecs.ListServicesOutput, bool) bool
 		arg4 []request.Option
@@ -4993,13 +7600,13 @@ func (fake *FakeECSClient) ListServicesPagesWithContextCallCount() int {
 	return len(fake.listServicesPagesWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) ListServicesPagesWithContextCalls(stub func(aws.Context, *ecs.ListServicesInput, func(*ecs.ListServicesOutput, bool) bool, ...request.Option) error) {
+func (fake *FakeECSClient) ListServicesPagesWithContextCalls(stub func(context.Context, *ecs.ListServicesInput, func(*ecs.ListServicesOutput, bool) bool, ...request.Option) error) {
 	fake.listServicesPagesWithContextMutex.Lock()
 	defer fake.listServicesPagesWithContextMutex.Unlock()
 	fake.ListServicesPagesWithContextStub = stub
 }
 
-func (fake *FakeECSClient) ListServicesPagesWithContextArgsForCall(i int) (aws.Context, *ecs.ListServicesInput, func(*ecs.ListServicesOutput, bool) bool, []request.Option) {
+func (fake *FakeECSClient) ListServicesPagesWithContextArgsForCall(i int) (context.Context, *ecs.ListServicesInput, func(*ecs.ListServicesOutput, bool) bool, []request.Option) {
 	fake.listServicesPagesWithContextMutex.RLock()
 	defer fake.listServicesPagesWithContextMutex.RUnlock()
 	argsForCall := fake.listServicesPagesWithContextArgsForCall[i]
@@ -5092,11 +7699,11 @@ func (fake *FakeECSClient) ListServicesRequestReturnsOnCall(i int, result1 *requ
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) ListServicesWithContext(arg1 aws.Context, arg2 *ecs.ListServicesInput, arg3 ...request.Option) (*ecs.ListServicesOutput, error) {
+func (fake *FakeECSClient) ListServicesWithContext(arg1 context.Context, arg2 *ecs.ListServicesInput, arg3 ...request.Option) (*ecs.ListServicesOutput, error) {
 	fake.listServicesWithContextMutex.Lock()
 	ret, specificReturn := fake.listServicesWithContextReturnsOnCall[len(fake.listServicesWithContextArgsForCall)]
 	fake.listServicesWithContextArgsForCall = append(fake.listServicesWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListServicesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -5118,13 +7725,13 @@ func (fake *FakeECSClient) ListServicesWithContextCallCount() int {
 	return len(fake.listServicesWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) ListServicesWithContextCalls(stub func(aws.Context, *ecs.ListServicesInput, ...request.Option) (*ecs.ListServicesOutput, error)) {
+func (fake *FakeECSClient) ListServicesWithContextCalls(stub func(context.Context, *ecs.ListServicesInput, ...request.Option) (*ecs.ListServicesOutput, error)) {
 	fake.listServicesWithContextMutex.Lock()
 	defer fake.listServicesWithContextMutex.Unlock()
 	fake.ListServicesWithContextStub = stub
 }
 
-func (fake *FakeECSClient) ListServicesWithContextArgsForCall(i int) (aws.Context, *ecs.ListServicesInput, []request.Option) {
+func (fake *FakeECSClient) ListServicesWithContextArgsForCall(i int) (context.Context, *ecs.ListServicesInput, []request.Option) {
 	fake.listServicesWithContextMutex.RLock()
 	defer fake.listServicesWithContextMutex.RUnlock()
 	argsForCall := fake.listServicesWithContextArgsForCall[i]
@@ -5153,6 +7760,197 @@ func (fake *FakeECSClient) ListServicesWithContextReturnsOnCall(i int, result1 *
 	}
 	fake.listServicesWithContextReturnsOnCall[i] = struct {
 		result1 *ecs.ListServicesOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) ListTagsForResource(arg1 *ecs.ListTagsForResourceInput) (*ecs.ListTagsForResourceOutput, error) {
+	fake.listTagsForResourceMutex.Lock()
+	ret, specificReturn := fake.listTagsForResourceReturnsOnCall[len(fake.listTagsForResourceArgsForCall)]
+	fake.listTagsForResourceArgsForCall = append(fake.listTagsForResourceArgsForCall, struct {
+		arg1 *ecs.ListTagsForResourceInput
+	}{arg1})
+	fake.recordInvocation("ListTagsForResource", []interface{}{arg1})
+	fake.listTagsForResourceMutex.Unlock()
+	if fake.ListTagsForResourceStub != nil {
+		return fake.ListTagsForResourceStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.listTagsForResourceReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) ListTagsForResourceCallCount() int {
+	fake.listTagsForResourceMutex.RLock()
+	defer fake.listTagsForResourceMutex.RUnlock()
+	return len(fake.listTagsForResourceArgsForCall)
+}
+
+func (fake *FakeECSClient) ListTagsForResourceCalls(stub func(*ecs.ListTagsForResourceInput) (*ecs.ListTagsForResourceOutput, error)) {
+	fake.listTagsForResourceMutex.Lock()
+	defer fake.listTagsForResourceMutex.Unlock()
+	fake.ListTagsForResourceStub = stub
+}
+
+func (fake *FakeECSClient) ListTagsForResourceArgsForCall(i int) *ecs.ListTagsForResourceInput {
+	fake.listTagsForResourceMutex.RLock()
+	defer fake.listTagsForResourceMutex.RUnlock()
+	argsForCall := fake.listTagsForResourceArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) ListTagsForResourceReturns(result1 *ecs.ListTagsForResourceOutput, result2 error) {
+	fake.listTagsForResourceMutex.Lock()
+	defer fake.listTagsForResourceMutex.Unlock()
+	fake.ListTagsForResourceStub = nil
+	fake.listTagsForResourceReturns = struct {
+		result1 *ecs.ListTagsForResourceOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) ListTagsForResourceReturnsOnCall(i int, result1 *ecs.ListTagsForResourceOutput, result2 error) {
+	fake.listTagsForResourceMutex.Lock()
+	defer fake.listTagsForResourceMutex.Unlock()
+	fake.ListTagsForResourceStub = nil
+	if fake.listTagsForResourceReturnsOnCall == nil {
+		fake.listTagsForResourceReturnsOnCall = make(map[int]struct {
+			result1 *ecs.ListTagsForResourceOutput
+			result2 error
+		})
+	}
+	fake.listTagsForResourceReturnsOnCall[i] = struct {
+		result1 *ecs.ListTagsForResourceOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) ListTagsForResourceRequest(arg1 *ecs.ListTagsForResourceInput) (*request.Request, *ecs.ListTagsForResourceOutput) {
+	fake.listTagsForResourceRequestMutex.Lock()
+	ret, specificReturn := fake.listTagsForResourceRequestReturnsOnCall[len(fake.listTagsForResourceRequestArgsForCall)]
+	fake.listTagsForResourceRequestArgsForCall = append(fake.listTagsForResourceRequestArgsForCall, struct {
+		arg1 *ecs.ListTagsForResourceInput
+	}{arg1})
+	fake.recordInvocation("ListTagsForResourceRequest", []interface{}{arg1})
+	fake.listTagsForResourceRequestMutex.Unlock()
+	if fake.ListTagsForResourceRequestStub != nil {
+		return fake.ListTagsForResourceRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.listTagsForResourceRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) ListTagsForResourceRequestCallCount() int {
+	fake.listTagsForResourceRequestMutex.RLock()
+	defer fake.listTagsForResourceRequestMutex.RUnlock()
+	return len(fake.listTagsForResourceRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) ListTagsForResourceRequestCalls(stub func(*ecs.ListTagsForResourceInput) (*request.Request, *ecs.ListTagsForResourceOutput)) {
+	fake.listTagsForResourceRequestMutex.Lock()
+	defer fake.listTagsForResourceRequestMutex.Unlock()
+	fake.ListTagsForResourceRequestStub = stub
+}
+
+func (fake *FakeECSClient) ListTagsForResourceRequestArgsForCall(i int) *ecs.ListTagsForResourceInput {
+	fake.listTagsForResourceRequestMutex.RLock()
+	defer fake.listTagsForResourceRequestMutex.RUnlock()
+	argsForCall := fake.listTagsForResourceRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) ListTagsForResourceRequestReturns(result1 *request.Request, result2 *ecs.ListTagsForResourceOutput) {
+	fake.listTagsForResourceRequestMutex.Lock()
+	defer fake.listTagsForResourceRequestMutex.Unlock()
+	fake.ListTagsForResourceRequestStub = nil
+	fake.listTagsForResourceRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.ListTagsForResourceOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) ListTagsForResourceRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.ListTagsForResourceOutput) {
+	fake.listTagsForResourceRequestMutex.Lock()
+	defer fake.listTagsForResourceRequestMutex.Unlock()
+	fake.ListTagsForResourceRequestStub = nil
+	if fake.listTagsForResourceRequestReturnsOnCall == nil {
+		fake.listTagsForResourceRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.ListTagsForResourceOutput
+		})
+	}
+	fake.listTagsForResourceRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.ListTagsForResourceOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) ListTagsForResourceWithContext(arg1 context.Context, arg2 *ecs.ListTagsForResourceInput, arg3 ...request.Option) (*ecs.ListTagsForResourceOutput, error) {
+	fake.listTagsForResourceWithContextMutex.Lock()
+	ret, specificReturn := fake.listTagsForResourceWithContextReturnsOnCall[len(fake.listTagsForResourceWithContextArgsForCall)]
+	fake.listTagsForResourceWithContextArgsForCall = append(fake.listTagsForResourceWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.ListTagsForResourceInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("ListTagsForResourceWithContext", []interface{}{arg1, arg2, arg3})
+	fake.listTagsForResourceWithContextMutex.Unlock()
+	if fake.ListTagsForResourceWithContextStub != nil {
+		return fake.ListTagsForResourceWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.listTagsForResourceWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) ListTagsForResourceWithContextCallCount() int {
+	fake.listTagsForResourceWithContextMutex.RLock()
+	defer fake.listTagsForResourceWithContextMutex.RUnlock()
+	return len(fake.listTagsForResourceWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) ListTagsForResourceWithContextCalls(stub func(context.Context, *ecs.ListTagsForResourceInput, ...request.Option) (*ecs.ListTagsForResourceOutput, error)) {
+	fake.listTagsForResourceWithContextMutex.Lock()
+	defer fake.listTagsForResourceWithContextMutex.Unlock()
+	fake.ListTagsForResourceWithContextStub = stub
+}
+
+func (fake *FakeECSClient) ListTagsForResourceWithContextArgsForCall(i int) (context.Context, *ecs.ListTagsForResourceInput, []request.Option) {
+	fake.listTagsForResourceWithContextMutex.RLock()
+	defer fake.listTagsForResourceWithContextMutex.RUnlock()
+	argsForCall := fake.listTagsForResourceWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) ListTagsForResourceWithContextReturns(result1 *ecs.ListTagsForResourceOutput, result2 error) {
+	fake.listTagsForResourceWithContextMutex.Lock()
+	defer fake.listTagsForResourceWithContextMutex.Unlock()
+	fake.ListTagsForResourceWithContextStub = nil
+	fake.listTagsForResourceWithContextReturns = struct {
+		result1 *ecs.ListTagsForResourceOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) ListTagsForResourceWithContextReturnsOnCall(i int, result1 *ecs.ListTagsForResourceOutput, result2 error) {
+	fake.listTagsForResourceWithContextMutex.Lock()
+	defer fake.listTagsForResourceWithContextMutex.Unlock()
+	fake.ListTagsForResourceWithContextStub = nil
+	if fake.listTagsForResourceWithContextReturnsOnCall == nil {
+		fake.listTagsForResourceWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.ListTagsForResourceOutput
+			result2 error
+		})
+	}
+	fake.listTagsForResourceWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.ListTagsForResourceOutput
 		result2 error
 	}{result1, result2}
 }
@@ -5281,11 +8079,11 @@ func (fake *FakeECSClient) ListTaskDefinitionFamiliesPagesReturnsOnCall(i int, r
 	}{result1}
 }
 
-func (fake *FakeECSClient) ListTaskDefinitionFamiliesPagesWithContext(arg1 aws.Context, arg2 *ecs.ListTaskDefinitionFamiliesInput, arg3 func(*ecs.ListTaskDefinitionFamiliesOutput, bool) bool, arg4 ...request.Option) error {
+func (fake *FakeECSClient) ListTaskDefinitionFamiliesPagesWithContext(arg1 context.Context, arg2 *ecs.ListTaskDefinitionFamiliesInput, arg3 func(*ecs.ListTaskDefinitionFamiliesOutput, bool) bool, arg4 ...request.Option) error {
 	fake.listTaskDefinitionFamiliesPagesWithContextMutex.Lock()
 	ret, specificReturn := fake.listTaskDefinitionFamiliesPagesWithContextReturnsOnCall[len(fake.listTaskDefinitionFamiliesPagesWithContextArgsForCall)]
 	fake.listTaskDefinitionFamiliesPagesWithContextArgsForCall = append(fake.listTaskDefinitionFamiliesPagesWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListTaskDefinitionFamiliesInput
 		arg3 func(*ecs.ListTaskDefinitionFamiliesOutput, bool) bool
 		arg4 []request.Option
@@ -5308,13 +8106,13 @@ func (fake *FakeECSClient) ListTaskDefinitionFamiliesPagesWithContextCallCount()
 	return len(fake.listTaskDefinitionFamiliesPagesWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) ListTaskDefinitionFamiliesPagesWithContextCalls(stub func(aws.Context, *ecs.ListTaskDefinitionFamiliesInput, func(*ecs.ListTaskDefinitionFamiliesOutput, bool) bool, ...request.Option) error) {
+func (fake *FakeECSClient) ListTaskDefinitionFamiliesPagesWithContextCalls(stub func(context.Context, *ecs.ListTaskDefinitionFamiliesInput, func(*ecs.ListTaskDefinitionFamiliesOutput, bool) bool, ...request.Option) error) {
 	fake.listTaskDefinitionFamiliesPagesWithContextMutex.Lock()
 	defer fake.listTaskDefinitionFamiliesPagesWithContextMutex.Unlock()
 	fake.ListTaskDefinitionFamiliesPagesWithContextStub = stub
 }
 
-func (fake *FakeECSClient) ListTaskDefinitionFamiliesPagesWithContextArgsForCall(i int) (aws.Context, *ecs.ListTaskDefinitionFamiliesInput, func(*ecs.ListTaskDefinitionFamiliesOutput, bool) bool, []request.Option) {
+func (fake *FakeECSClient) ListTaskDefinitionFamiliesPagesWithContextArgsForCall(i int) (context.Context, *ecs.ListTaskDefinitionFamiliesInput, func(*ecs.ListTaskDefinitionFamiliesOutput, bool) bool, []request.Option) {
 	fake.listTaskDefinitionFamiliesPagesWithContextMutex.RLock()
 	defer fake.listTaskDefinitionFamiliesPagesWithContextMutex.RUnlock()
 	argsForCall := fake.listTaskDefinitionFamiliesPagesWithContextArgsForCall[i]
@@ -5407,11 +8205,11 @@ func (fake *FakeECSClient) ListTaskDefinitionFamiliesRequestReturnsOnCall(i int,
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) ListTaskDefinitionFamiliesWithContext(arg1 aws.Context, arg2 *ecs.ListTaskDefinitionFamiliesInput, arg3 ...request.Option) (*ecs.ListTaskDefinitionFamiliesOutput, error) {
+func (fake *FakeECSClient) ListTaskDefinitionFamiliesWithContext(arg1 context.Context, arg2 *ecs.ListTaskDefinitionFamiliesInput, arg3 ...request.Option) (*ecs.ListTaskDefinitionFamiliesOutput, error) {
 	fake.listTaskDefinitionFamiliesWithContextMutex.Lock()
 	ret, specificReturn := fake.listTaskDefinitionFamiliesWithContextReturnsOnCall[len(fake.listTaskDefinitionFamiliesWithContextArgsForCall)]
 	fake.listTaskDefinitionFamiliesWithContextArgsForCall = append(fake.listTaskDefinitionFamiliesWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListTaskDefinitionFamiliesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -5433,13 +8231,13 @@ func (fake *FakeECSClient) ListTaskDefinitionFamiliesWithContextCallCount() int 
 	return len(fake.listTaskDefinitionFamiliesWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) ListTaskDefinitionFamiliesWithContextCalls(stub func(aws.Context, *ecs.ListTaskDefinitionFamiliesInput, ...request.Option) (*ecs.ListTaskDefinitionFamiliesOutput, error)) {
+func (fake *FakeECSClient) ListTaskDefinitionFamiliesWithContextCalls(stub func(context.Context, *ecs.ListTaskDefinitionFamiliesInput, ...request.Option) (*ecs.ListTaskDefinitionFamiliesOutput, error)) {
 	fake.listTaskDefinitionFamiliesWithContextMutex.Lock()
 	defer fake.listTaskDefinitionFamiliesWithContextMutex.Unlock()
 	fake.ListTaskDefinitionFamiliesWithContextStub = stub
 }
 
-func (fake *FakeECSClient) ListTaskDefinitionFamiliesWithContextArgsForCall(i int) (aws.Context, *ecs.ListTaskDefinitionFamiliesInput, []request.Option) {
+func (fake *FakeECSClient) ListTaskDefinitionFamiliesWithContextArgsForCall(i int) (context.Context, *ecs.ListTaskDefinitionFamiliesInput, []request.Option) {
 	fake.listTaskDefinitionFamiliesWithContextMutex.RLock()
 	defer fake.listTaskDefinitionFamiliesWithContextMutex.RUnlock()
 	argsForCall := fake.listTaskDefinitionFamiliesWithContextArgsForCall[i]
@@ -5596,11 +8394,11 @@ func (fake *FakeECSClient) ListTaskDefinitionsPagesReturnsOnCall(i int, result1 
 	}{result1}
 }
 
-func (fake *FakeECSClient) ListTaskDefinitionsPagesWithContext(arg1 aws.Context, arg2 *ecs.ListTaskDefinitionsInput, arg3 func(*ecs.ListTaskDefinitionsOutput, bool) bool, arg4 ...request.Option) error {
+func (fake *FakeECSClient) ListTaskDefinitionsPagesWithContext(arg1 context.Context, arg2 *ecs.ListTaskDefinitionsInput, arg3 func(*ecs.ListTaskDefinitionsOutput, bool) bool, arg4 ...request.Option) error {
 	fake.listTaskDefinitionsPagesWithContextMutex.Lock()
 	ret, specificReturn := fake.listTaskDefinitionsPagesWithContextReturnsOnCall[len(fake.listTaskDefinitionsPagesWithContextArgsForCall)]
 	fake.listTaskDefinitionsPagesWithContextArgsForCall = append(fake.listTaskDefinitionsPagesWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListTaskDefinitionsInput
 		arg3 func(*ecs.ListTaskDefinitionsOutput, bool) bool
 		arg4 []request.Option
@@ -5623,13 +8421,13 @@ func (fake *FakeECSClient) ListTaskDefinitionsPagesWithContextCallCount() int {
 	return len(fake.listTaskDefinitionsPagesWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) ListTaskDefinitionsPagesWithContextCalls(stub func(aws.Context, *ecs.ListTaskDefinitionsInput, func(*ecs.ListTaskDefinitionsOutput, bool) bool, ...request.Option) error) {
+func (fake *FakeECSClient) ListTaskDefinitionsPagesWithContextCalls(stub func(context.Context, *ecs.ListTaskDefinitionsInput, func(*ecs.ListTaskDefinitionsOutput, bool) bool, ...request.Option) error) {
 	fake.listTaskDefinitionsPagesWithContextMutex.Lock()
 	defer fake.listTaskDefinitionsPagesWithContextMutex.Unlock()
 	fake.ListTaskDefinitionsPagesWithContextStub = stub
 }
 
-func (fake *FakeECSClient) ListTaskDefinitionsPagesWithContextArgsForCall(i int) (aws.Context, *ecs.ListTaskDefinitionsInput, func(*ecs.ListTaskDefinitionsOutput, bool) bool, []request.Option) {
+func (fake *FakeECSClient) ListTaskDefinitionsPagesWithContextArgsForCall(i int) (context.Context, *ecs.ListTaskDefinitionsInput, func(*ecs.ListTaskDefinitionsOutput, bool) bool, []request.Option) {
 	fake.listTaskDefinitionsPagesWithContextMutex.RLock()
 	defer fake.listTaskDefinitionsPagesWithContextMutex.RUnlock()
 	argsForCall := fake.listTaskDefinitionsPagesWithContextArgsForCall[i]
@@ -5722,11 +8520,11 @@ func (fake *FakeECSClient) ListTaskDefinitionsRequestReturnsOnCall(i int, result
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) ListTaskDefinitionsWithContext(arg1 aws.Context, arg2 *ecs.ListTaskDefinitionsInput, arg3 ...request.Option) (*ecs.ListTaskDefinitionsOutput, error) {
+func (fake *FakeECSClient) ListTaskDefinitionsWithContext(arg1 context.Context, arg2 *ecs.ListTaskDefinitionsInput, arg3 ...request.Option) (*ecs.ListTaskDefinitionsOutput, error) {
 	fake.listTaskDefinitionsWithContextMutex.Lock()
 	ret, specificReturn := fake.listTaskDefinitionsWithContextReturnsOnCall[len(fake.listTaskDefinitionsWithContextArgsForCall)]
 	fake.listTaskDefinitionsWithContextArgsForCall = append(fake.listTaskDefinitionsWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListTaskDefinitionsInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -5748,13 +8546,13 @@ func (fake *FakeECSClient) ListTaskDefinitionsWithContextCallCount() int {
 	return len(fake.listTaskDefinitionsWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) ListTaskDefinitionsWithContextCalls(stub func(aws.Context, *ecs.ListTaskDefinitionsInput, ...request.Option) (*ecs.ListTaskDefinitionsOutput, error)) {
+func (fake *FakeECSClient) ListTaskDefinitionsWithContextCalls(stub func(context.Context, *ecs.ListTaskDefinitionsInput, ...request.Option) (*ecs.ListTaskDefinitionsOutput, error)) {
 	fake.listTaskDefinitionsWithContextMutex.Lock()
 	defer fake.listTaskDefinitionsWithContextMutex.Unlock()
 	fake.ListTaskDefinitionsWithContextStub = stub
 }
 
-func (fake *FakeECSClient) ListTaskDefinitionsWithContextArgsForCall(i int) (aws.Context, *ecs.ListTaskDefinitionsInput, []request.Option) {
+func (fake *FakeECSClient) ListTaskDefinitionsWithContextArgsForCall(i int) (context.Context, *ecs.ListTaskDefinitionsInput, []request.Option) {
 	fake.listTaskDefinitionsWithContextMutex.RLock()
 	defer fake.listTaskDefinitionsWithContextMutex.RUnlock()
 	argsForCall := fake.listTaskDefinitionsWithContextArgsForCall[i]
@@ -5911,11 +8709,11 @@ func (fake *FakeECSClient) ListTasksPagesReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeECSClient) ListTasksPagesWithContext(arg1 aws.Context, arg2 *ecs.ListTasksInput, arg3 func(*ecs.ListTasksOutput, bool) bool, arg4 ...request.Option) error {
+func (fake *FakeECSClient) ListTasksPagesWithContext(arg1 context.Context, arg2 *ecs.ListTasksInput, arg3 func(*ecs.ListTasksOutput, bool) bool, arg4 ...request.Option) error {
 	fake.listTasksPagesWithContextMutex.Lock()
 	ret, specificReturn := fake.listTasksPagesWithContextReturnsOnCall[len(fake.listTasksPagesWithContextArgsForCall)]
 	fake.listTasksPagesWithContextArgsForCall = append(fake.listTasksPagesWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListTasksInput
 		arg3 func(*ecs.ListTasksOutput, bool) bool
 		arg4 []request.Option
@@ -5938,13 +8736,13 @@ func (fake *FakeECSClient) ListTasksPagesWithContextCallCount() int {
 	return len(fake.listTasksPagesWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) ListTasksPagesWithContextCalls(stub func(aws.Context, *ecs.ListTasksInput, func(*ecs.ListTasksOutput, bool) bool, ...request.Option) error) {
+func (fake *FakeECSClient) ListTasksPagesWithContextCalls(stub func(context.Context, *ecs.ListTasksInput, func(*ecs.ListTasksOutput, bool) bool, ...request.Option) error) {
 	fake.listTasksPagesWithContextMutex.Lock()
 	defer fake.listTasksPagesWithContextMutex.Unlock()
 	fake.ListTasksPagesWithContextStub = stub
 }
 
-func (fake *FakeECSClient) ListTasksPagesWithContextArgsForCall(i int) (aws.Context, *ecs.ListTasksInput, func(*ecs.ListTasksOutput, bool) bool, []request.Option) {
+func (fake *FakeECSClient) ListTasksPagesWithContextArgsForCall(i int) (context.Context, *ecs.ListTasksInput, func(*ecs.ListTasksOutput, bool) bool, []request.Option) {
 	fake.listTasksPagesWithContextMutex.RLock()
 	defer fake.listTasksPagesWithContextMutex.RUnlock()
 	argsForCall := fake.listTasksPagesWithContextArgsForCall[i]
@@ -6037,11 +8835,11 @@ func (fake *FakeECSClient) ListTasksRequestReturnsOnCall(i int, result1 *request
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) ListTasksWithContext(arg1 aws.Context, arg2 *ecs.ListTasksInput, arg3 ...request.Option) (*ecs.ListTasksOutput, error) {
+func (fake *FakeECSClient) ListTasksWithContext(arg1 context.Context, arg2 *ecs.ListTasksInput, arg3 ...request.Option) (*ecs.ListTasksOutput, error) {
 	fake.listTasksWithContextMutex.Lock()
 	ret, specificReturn := fake.listTasksWithContextReturnsOnCall[len(fake.listTasksWithContextArgsForCall)]
 	fake.listTasksWithContextArgsForCall = append(fake.listTasksWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.ListTasksInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -6063,13 +8861,13 @@ func (fake *FakeECSClient) ListTasksWithContextCallCount() int {
 	return len(fake.listTasksWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) ListTasksWithContextCalls(stub func(aws.Context, *ecs.ListTasksInput, ...request.Option) (*ecs.ListTasksOutput, error)) {
+func (fake *FakeECSClient) ListTasksWithContextCalls(stub func(context.Context, *ecs.ListTasksInput, ...request.Option) (*ecs.ListTasksOutput, error)) {
 	fake.listTasksWithContextMutex.Lock()
 	defer fake.listTasksWithContextMutex.Unlock()
 	fake.ListTasksWithContextStub = stub
 }
 
-func (fake *FakeECSClient) ListTasksWithContextArgsForCall(i int) (aws.Context, *ecs.ListTasksInput, []request.Option) {
+func (fake *FakeECSClient) ListTasksWithContextArgsForCall(i int) (context.Context, *ecs.ListTasksInput, []request.Option) {
 	fake.listTasksWithContextMutex.RLock()
 	defer fake.listTasksWithContextMutex.RUnlock()
 	argsForCall := fake.listTasksWithContextArgsForCall[i]
@@ -6098,6 +8896,388 @@ func (fake *FakeECSClient) ListTasksWithContextReturnsOnCall(i int, result1 *ecs
 	}
 	fake.listTasksWithContextReturnsOnCall[i] = struct {
 		result1 *ecs.ListTasksOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutAccountSetting(arg1 *ecs.PutAccountSettingInput) (*ecs.PutAccountSettingOutput, error) {
+	fake.putAccountSettingMutex.Lock()
+	ret, specificReturn := fake.putAccountSettingReturnsOnCall[len(fake.putAccountSettingArgsForCall)]
+	fake.putAccountSettingArgsForCall = append(fake.putAccountSettingArgsForCall, struct {
+		arg1 *ecs.PutAccountSettingInput
+	}{arg1})
+	fake.recordInvocation("PutAccountSetting", []interface{}{arg1})
+	fake.putAccountSettingMutex.Unlock()
+	if fake.PutAccountSettingStub != nil {
+		return fake.PutAccountSettingStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.putAccountSettingReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) PutAccountSettingCallCount() int {
+	fake.putAccountSettingMutex.RLock()
+	defer fake.putAccountSettingMutex.RUnlock()
+	return len(fake.putAccountSettingArgsForCall)
+}
+
+func (fake *FakeECSClient) PutAccountSettingCalls(stub func(*ecs.PutAccountSettingInput) (*ecs.PutAccountSettingOutput, error)) {
+	fake.putAccountSettingMutex.Lock()
+	defer fake.putAccountSettingMutex.Unlock()
+	fake.PutAccountSettingStub = stub
+}
+
+func (fake *FakeECSClient) PutAccountSettingArgsForCall(i int) *ecs.PutAccountSettingInput {
+	fake.putAccountSettingMutex.RLock()
+	defer fake.putAccountSettingMutex.RUnlock()
+	argsForCall := fake.putAccountSettingArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) PutAccountSettingReturns(result1 *ecs.PutAccountSettingOutput, result2 error) {
+	fake.putAccountSettingMutex.Lock()
+	defer fake.putAccountSettingMutex.Unlock()
+	fake.PutAccountSettingStub = nil
+	fake.putAccountSettingReturns = struct {
+		result1 *ecs.PutAccountSettingOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutAccountSettingReturnsOnCall(i int, result1 *ecs.PutAccountSettingOutput, result2 error) {
+	fake.putAccountSettingMutex.Lock()
+	defer fake.putAccountSettingMutex.Unlock()
+	fake.PutAccountSettingStub = nil
+	if fake.putAccountSettingReturnsOnCall == nil {
+		fake.putAccountSettingReturnsOnCall = make(map[int]struct {
+			result1 *ecs.PutAccountSettingOutput
+			result2 error
+		})
+	}
+	fake.putAccountSettingReturnsOnCall[i] = struct {
+		result1 *ecs.PutAccountSettingOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefault(arg1 *ecs.PutAccountSettingDefaultInput) (*ecs.PutAccountSettingDefaultOutput, error) {
+	fake.putAccountSettingDefaultMutex.Lock()
+	ret, specificReturn := fake.putAccountSettingDefaultReturnsOnCall[len(fake.putAccountSettingDefaultArgsForCall)]
+	fake.putAccountSettingDefaultArgsForCall = append(fake.putAccountSettingDefaultArgsForCall, struct {
+		arg1 *ecs.PutAccountSettingDefaultInput
+	}{arg1})
+	fake.recordInvocation("PutAccountSettingDefault", []interface{}{arg1})
+	fake.putAccountSettingDefaultMutex.Unlock()
+	if fake.PutAccountSettingDefaultStub != nil {
+		return fake.PutAccountSettingDefaultStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.putAccountSettingDefaultReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultCallCount() int {
+	fake.putAccountSettingDefaultMutex.RLock()
+	defer fake.putAccountSettingDefaultMutex.RUnlock()
+	return len(fake.putAccountSettingDefaultArgsForCall)
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultCalls(stub func(*ecs.PutAccountSettingDefaultInput) (*ecs.PutAccountSettingDefaultOutput, error)) {
+	fake.putAccountSettingDefaultMutex.Lock()
+	defer fake.putAccountSettingDefaultMutex.Unlock()
+	fake.PutAccountSettingDefaultStub = stub
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultArgsForCall(i int) *ecs.PutAccountSettingDefaultInput {
+	fake.putAccountSettingDefaultMutex.RLock()
+	defer fake.putAccountSettingDefaultMutex.RUnlock()
+	argsForCall := fake.putAccountSettingDefaultArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultReturns(result1 *ecs.PutAccountSettingDefaultOutput, result2 error) {
+	fake.putAccountSettingDefaultMutex.Lock()
+	defer fake.putAccountSettingDefaultMutex.Unlock()
+	fake.PutAccountSettingDefaultStub = nil
+	fake.putAccountSettingDefaultReturns = struct {
+		result1 *ecs.PutAccountSettingDefaultOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultReturnsOnCall(i int, result1 *ecs.PutAccountSettingDefaultOutput, result2 error) {
+	fake.putAccountSettingDefaultMutex.Lock()
+	defer fake.putAccountSettingDefaultMutex.Unlock()
+	fake.PutAccountSettingDefaultStub = nil
+	if fake.putAccountSettingDefaultReturnsOnCall == nil {
+		fake.putAccountSettingDefaultReturnsOnCall = make(map[int]struct {
+			result1 *ecs.PutAccountSettingDefaultOutput
+			result2 error
+		})
+	}
+	fake.putAccountSettingDefaultReturnsOnCall[i] = struct {
+		result1 *ecs.PutAccountSettingDefaultOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultRequest(arg1 *ecs.PutAccountSettingDefaultInput) (*request.Request, *ecs.PutAccountSettingDefaultOutput) {
+	fake.putAccountSettingDefaultRequestMutex.Lock()
+	ret, specificReturn := fake.putAccountSettingDefaultRequestReturnsOnCall[len(fake.putAccountSettingDefaultRequestArgsForCall)]
+	fake.putAccountSettingDefaultRequestArgsForCall = append(fake.putAccountSettingDefaultRequestArgsForCall, struct {
+		arg1 *ecs.PutAccountSettingDefaultInput
+	}{arg1})
+	fake.recordInvocation("PutAccountSettingDefaultRequest", []interface{}{arg1})
+	fake.putAccountSettingDefaultRequestMutex.Unlock()
+	if fake.PutAccountSettingDefaultRequestStub != nil {
+		return fake.PutAccountSettingDefaultRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.putAccountSettingDefaultRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultRequestCallCount() int {
+	fake.putAccountSettingDefaultRequestMutex.RLock()
+	defer fake.putAccountSettingDefaultRequestMutex.RUnlock()
+	return len(fake.putAccountSettingDefaultRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultRequestCalls(stub func(*ecs.PutAccountSettingDefaultInput) (*request.Request, *ecs.PutAccountSettingDefaultOutput)) {
+	fake.putAccountSettingDefaultRequestMutex.Lock()
+	defer fake.putAccountSettingDefaultRequestMutex.Unlock()
+	fake.PutAccountSettingDefaultRequestStub = stub
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultRequestArgsForCall(i int) *ecs.PutAccountSettingDefaultInput {
+	fake.putAccountSettingDefaultRequestMutex.RLock()
+	defer fake.putAccountSettingDefaultRequestMutex.RUnlock()
+	argsForCall := fake.putAccountSettingDefaultRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultRequestReturns(result1 *request.Request, result2 *ecs.PutAccountSettingDefaultOutput) {
+	fake.putAccountSettingDefaultRequestMutex.Lock()
+	defer fake.putAccountSettingDefaultRequestMutex.Unlock()
+	fake.PutAccountSettingDefaultRequestStub = nil
+	fake.putAccountSettingDefaultRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.PutAccountSettingDefaultOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.PutAccountSettingDefaultOutput) {
+	fake.putAccountSettingDefaultRequestMutex.Lock()
+	defer fake.putAccountSettingDefaultRequestMutex.Unlock()
+	fake.PutAccountSettingDefaultRequestStub = nil
+	if fake.putAccountSettingDefaultRequestReturnsOnCall == nil {
+		fake.putAccountSettingDefaultRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.PutAccountSettingDefaultOutput
+		})
+	}
+	fake.putAccountSettingDefaultRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.PutAccountSettingDefaultOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultWithContext(arg1 context.Context, arg2 *ecs.PutAccountSettingDefaultInput, arg3 ...request.Option) (*ecs.PutAccountSettingDefaultOutput, error) {
+	fake.putAccountSettingDefaultWithContextMutex.Lock()
+	ret, specificReturn := fake.putAccountSettingDefaultWithContextReturnsOnCall[len(fake.putAccountSettingDefaultWithContextArgsForCall)]
+	fake.putAccountSettingDefaultWithContextArgsForCall = append(fake.putAccountSettingDefaultWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.PutAccountSettingDefaultInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("PutAccountSettingDefaultWithContext", []interface{}{arg1, arg2, arg3})
+	fake.putAccountSettingDefaultWithContextMutex.Unlock()
+	if fake.PutAccountSettingDefaultWithContextStub != nil {
+		return fake.PutAccountSettingDefaultWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.putAccountSettingDefaultWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultWithContextCallCount() int {
+	fake.putAccountSettingDefaultWithContextMutex.RLock()
+	defer fake.putAccountSettingDefaultWithContextMutex.RUnlock()
+	return len(fake.putAccountSettingDefaultWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultWithContextCalls(stub func(context.Context, *ecs.PutAccountSettingDefaultInput, ...request.Option) (*ecs.PutAccountSettingDefaultOutput, error)) {
+	fake.putAccountSettingDefaultWithContextMutex.Lock()
+	defer fake.putAccountSettingDefaultWithContextMutex.Unlock()
+	fake.PutAccountSettingDefaultWithContextStub = stub
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultWithContextArgsForCall(i int) (context.Context, *ecs.PutAccountSettingDefaultInput, []request.Option) {
+	fake.putAccountSettingDefaultWithContextMutex.RLock()
+	defer fake.putAccountSettingDefaultWithContextMutex.RUnlock()
+	argsForCall := fake.putAccountSettingDefaultWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultWithContextReturns(result1 *ecs.PutAccountSettingDefaultOutput, result2 error) {
+	fake.putAccountSettingDefaultWithContextMutex.Lock()
+	defer fake.putAccountSettingDefaultWithContextMutex.Unlock()
+	fake.PutAccountSettingDefaultWithContextStub = nil
+	fake.putAccountSettingDefaultWithContextReturns = struct {
+		result1 *ecs.PutAccountSettingDefaultOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutAccountSettingDefaultWithContextReturnsOnCall(i int, result1 *ecs.PutAccountSettingDefaultOutput, result2 error) {
+	fake.putAccountSettingDefaultWithContextMutex.Lock()
+	defer fake.putAccountSettingDefaultWithContextMutex.Unlock()
+	fake.PutAccountSettingDefaultWithContextStub = nil
+	if fake.putAccountSettingDefaultWithContextReturnsOnCall == nil {
+		fake.putAccountSettingDefaultWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.PutAccountSettingDefaultOutput
+			result2 error
+		})
+	}
+	fake.putAccountSettingDefaultWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.PutAccountSettingDefaultOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutAccountSettingRequest(arg1 *ecs.PutAccountSettingInput) (*request.Request, *ecs.PutAccountSettingOutput) {
+	fake.putAccountSettingRequestMutex.Lock()
+	ret, specificReturn := fake.putAccountSettingRequestReturnsOnCall[len(fake.putAccountSettingRequestArgsForCall)]
+	fake.putAccountSettingRequestArgsForCall = append(fake.putAccountSettingRequestArgsForCall, struct {
+		arg1 *ecs.PutAccountSettingInput
+	}{arg1})
+	fake.recordInvocation("PutAccountSettingRequest", []interface{}{arg1})
+	fake.putAccountSettingRequestMutex.Unlock()
+	if fake.PutAccountSettingRequestStub != nil {
+		return fake.PutAccountSettingRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.putAccountSettingRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) PutAccountSettingRequestCallCount() int {
+	fake.putAccountSettingRequestMutex.RLock()
+	defer fake.putAccountSettingRequestMutex.RUnlock()
+	return len(fake.putAccountSettingRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) PutAccountSettingRequestCalls(stub func(*ecs.PutAccountSettingInput) (*request.Request, *ecs.PutAccountSettingOutput)) {
+	fake.putAccountSettingRequestMutex.Lock()
+	defer fake.putAccountSettingRequestMutex.Unlock()
+	fake.PutAccountSettingRequestStub = stub
+}
+
+func (fake *FakeECSClient) PutAccountSettingRequestArgsForCall(i int) *ecs.PutAccountSettingInput {
+	fake.putAccountSettingRequestMutex.RLock()
+	defer fake.putAccountSettingRequestMutex.RUnlock()
+	argsForCall := fake.putAccountSettingRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) PutAccountSettingRequestReturns(result1 *request.Request, result2 *ecs.PutAccountSettingOutput) {
+	fake.putAccountSettingRequestMutex.Lock()
+	defer fake.putAccountSettingRequestMutex.Unlock()
+	fake.PutAccountSettingRequestStub = nil
+	fake.putAccountSettingRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.PutAccountSettingOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutAccountSettingRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.PutAccountSettingOutput) {
+	fake.putAccountSettingRequestMutex.Lock()
+	defer fake.putAccountSettingRequestMutex.Unlock()
+	fake.PutAccountSettingRequestStub = nil
+	if fake.putAccountSettingRequestReturnsOnCall == nil {
+		fake.putAccountSettingRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.PutAccountSettingOutput
+		})
+	}
+	fake.putAccountSettingRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.PutAccountSettingOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutAccountSettingWithContext(arg1 context.Context, arg2 *ecs.PutAccountSettingInput, arg3 ...request.Option) (*ecs.PutAccountSettingOutput, error) {
+	fake.putAccountSettingWithContextMutex.Lock()
+	ret, specificReturn := fake.putAccountSettingWithContextReturnsOnCall[len(fake.putAccountSettingWithContextArgsForCall)]
+	fake.putAccountSettingWithContextArgsForCall = append(fake.putAccountSettingWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.PutAccountSettingInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("PutAccountSettingWithContext", []interface{}{arg1, arg2, arg3})
+	fake.putAccountSettingWithContextMutex.Unlock()
+	if fake.PutAccountSettingWithContextStub != nil {
+		return fake.PutAccountSettingWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.putAccountSettingWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) PutAccountSettingWithContextCallCount() int {
+	fake.putAccountSettingWithContextMutex.RLock()
+	defer fake.putAccountSettingWithContextMutex.RUnlock()
+	return len(fake.putAccountSettingWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) PutAccountSettingWithContextCalls(stub func(context.Context, *ecs.PutAccountSettingInput, ...request.Option) (*ecs.PutAccountSettingOutput, error)) {
+	fake.putAccountSettingWithContextMutex.Lock()
+	defer fake.putAccountSettingWithContextMutex.Unlock()
+	fake.PutAccountSettingWithContextStub = stub
+}
+
+func (fake *FakeECSClient) PutAccountSettingWithContextArgsForCall(i int) (context.Context, *ecs.PutAccountSettingInput, []request.Option) {
+	fake.putAccountSettingWithContextMutex.RLock()
+	defer fake.putAccountSettingWithContextMutex.RUnlock()
+	argsForCall := fake.putAccountSettingWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) PutAccountSettingWithContextReturns(result1 *ecs.PutAccountSettingOutput, result2 error) {
+	fake.putAccountSettingWithContextMutex.Lock()
+	defer fake.putAccountSettingWithContextMutex.Unlock()
+	fake.PutAccountSettingWithContextStub = nil
+	fake.putAccountSettingWithContextReturns = struct {
+		result1 *ecs.PutAccountSettingOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutAccountSettingWithContextReturnsOnCall(i int, result1 *ecs.PutAccountSettingOutput, result2 error) {
+	fake.putAccountSettingWithContextMutex.Lock()
+	defer fake.putAccountSettingWithContextMutex.Unlock()
+	fake.PutAccountSettingWithContextStub = nil
+	if fake.putAccountSettingWithContextReturnsOnCall == nil {
+		fake.putAccountSettingWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.PutAccountSettingOutput
+			result2 error
+		})
+	}
+	fake.putAccountSettingWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.PutAccountSettingOutput
 		result2 error
 	}{result1, result2}
 }
@@ -6228,11 +9408,11 @@ func (fake *FakeECSClient) PutAttributesRequestReturnsOnCall(i int, result1 *req
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) PutAttributesWithContext(arg1 aws.Context, arg2 *ecs.PutAttributesInput, arg3 ...request.Option) (*ecs.PutAttributesOutput, error) {
+func (fake *FakeECSClient) PutAttributesWithContext(arg1 context.Context, arg2 *ecs.PutAttributesInput, arg3 ...request.Option) (*ecs.PutAttributesOutput, error) {
 	fake.putAttributesWithContextMutex.Lock()
 	ret, specificReturn := fake.putAttributesWithContextReturnsOnCall[len(fake.putAttributesWithContextArgsForCall)]
 	fake.putAttributesWithContextArgsForCall = append(fake.putAttributesWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.PutAttributesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -6254,13 +9434,13 @@ func (fake *FakeECSClient) PutAttributesWithContextCallCount() int {
 	return len(fake.putAttributesWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) PutAttributesWithContextCalls(stub func(aws.Context, *ecs.PutAttributesInput, ...request.Option) (*ecs.PutAttributesOutput, error)) {
+func (fake *FakeECSClient) PutAttributesWithContextCalls(stub func(context.Context, *ecs.PutAttributesInput, ...request.Option) (*ecs.PutAttributesOutput, error)) {
 	fake.putAttributesWithContextMutex.Lock()
 	defer fake.putAttributesWithContextMutex.Unlock()
 	fake.PutAttributesWithContextStub = stub
 }
 
-func (fake *FakeECSClient) PutAttributesWithContextArgsForCall(i int) (aws.Context, *ecs.PutAttributesInput, []request.Option) {
+func (fake *FakeECSClient) PutAttributesWithContextArgsForCall(i int) (context.Context, *ecs.PutAttributesInput, []request.Option) {
 	fake.putAttributesWithContextMutex.RLock()
 	defer fake.putAttributesWithContextMutex.RUnlock()
 	argsForCall := fake.putAttributesWithContextArgsForCall[i]
@@ -6289,6 +9469,197 @@ func (fake *FakeECSClient) PutAttributesWithContextReturnsOnCall(i int, result1 
 	}
 	fake.putAttributesWithContextReturnsOnCall[i] = struct {
 		result1 *ecs.PutAttributesOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProviders(arg1 *ecs.PutClusterCapacityProvidersInput) (*ecs.PutClusterCapacityProvidersOutput, error) {
+	fake.putClusterCapacityProvidersMutex.Lock()
+	ret, specificReturn := fake.putClusterCapacityProvidersReturnsOnCall[len(fake.putClusterCapacityProvidersArgsForCall)]
+	fake.putClusterCapacityProvidersArgsForCall = append(fake.putClusterCapacityProvidersArgsForCall, struct {
+		arg1 *ecs.PutClusterCapacityProvidersInput
+	}{arg1})
+	fake.recordInvocation("PutClusterCapacityProviders", []interface{}{arg1})
+	fake.putClusterCapacityProvidersMutex.Unlock()
+	if fake.PutClusterCapacityProvidersStub != nil {
+		return fake.PutClusterCapacityProvidersStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.putClusterCapacityProvidersReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersCallCount() int {
+	fake.putClusterCapacityProvidersMutex.RLock()
+	defer fake.putClusterCapacityProvidersMutex.RUnlock()
+	return len(fake.putClusterCapacityProvidersArgsForCall)
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersCalls(stub func(*ecs.PutClusterCapacityProvidersInput) (*ecs.PutClusterCapacityProvidersOutput, error)) {
+	fake.putClusterCapacityProvidersMutex.Lock()
+	defer fake.putClusterCapacityProvidersMutex.Unlock()
+	fake.PutClusterCapacityProvidersStub = stub
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersArgsForCall(i int) *ecs.PutClusterCapacityProvidersInput {
+	fake.putClusterCapacityProvidersMutex.RLock()
+	defer fake.putClusterCapacityProvidersMutex.RUnlock()
+	argsForCall := fake.putClusterCapacityProvidersArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersReturns(result1 *ecs.PutClusterCapacityProvidersOutput, result2 error) {
+	fake.putClusterCapacityProvidersMutex.Lock()
+	defer fake.putClusterCapacityProvidersMutex.Unlock()
+	fake.PutClusterCapacityProvidersStub = nil
+	fake.putClusterCapacityProvidersReturns = struct {
+		result1 *ecs.PutClusterCapacityProvidersOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersReturnsOnCall(i int, result1 *ecs.PutClusterCapacityProvidersOutput, result2 error) {
+	fake.putClusterCapacityProvidersMutex.Lock()
+	defer fake.putClusterCapacityProvidersMutex.Unlock()
+	fake.PutClusterCapacityProvidersStub = nil
+	if fake.putClusterCapacityProvidersReturnsOnCall == nil {
+		fake.putClusterCapacityProvidersReturnsOnCall = make(map[int]struct {
+			result1 *ecs.PutClusterCapacityProvidersOutput
+			result2 error
+		})
+	}
+	fake.putClusterCapacityProvidersReturnsOnCall[i] = struct {
+		result1 *ecs.PutClusterCapacityProvidersOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersRequest(arg1 *ecs.PutClusterCapacityProvidersInput) (*request.Request, *ecs.PutClusterCapacityProvidersOutput) {
+	fake.putClusterCapacityProvidersRequestMutex.Lock()
+	ret, specificReturn := fake.putClusterCapacityProvidersRequestReturnsOnCall[len(fake.putClusterCapacityProvidersRequestArgsForCall)]
+	fake.putClusterCapacityProvidersRequestArgsForCall = append(fake.putClusterCapacityProvidersRequestArgsForCall, struct {
+		arg1 *ecs.PutClusterCapacityProvidersInput
+	}{arg1})
+	fake.recordInvocation("PutClusterCapacityProvidersRequest", []interface{}{arg1})
+	fake.putClusterCapacityProvidersRequestMutex.Unlock()
+	if fake.PutClusterCapacityProvidersRequestStub != nil {
+		return fake.PutClusterCapacityProvidersRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.putClusterCapacityProvidersRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersRequestCallCount() int {
+	fake.putClusterCapacityProvidersRequestMutex.RLock()
+	defer fake.putClusterCapacityProvidersRequestMutex.RUnlock()
+	return len(fake.putClusterCapacityProvidersRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersRequestCalls(stub func(*ecs.PutClusterCapacityProvidersInput) (*request.Request, *ecs.PutClusterCapacityProvidersOutput)) {
+	fake.putClusterCapacityProvidersRequestMutex.Lock()
+	defer fake.putClusterCapacityProvidersRequestMutex.Unlock()
+	fake.PutClusterCapacityProvidersRequestStub = stub
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersRequestArgsForCall(i int) *ecs.PutClusterCapacityProvidersInput {
+	fake.putClusterCapacityProvidersRequestMutex.RLock()
+	defer fake.putClusterCapacityProvidersRequestMutex.RUnlock()
+	argsForCall := fake.putClusterCapacityProvidersRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersRequestReturns(result1 *request.Request, result2 *ecs.PutClusterCapacityProvidersOutput) {
+	fake.putClusterCapacityProvidersRequestMutex.Lock()
+	defer fake.putClusterCapacityProvidersRequestMutex.Unlock()
+	fake.PutClusterCapacityProvidersRequestStub = nil
+	fake.putClusterCapacityProvidersRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.PutClusterCapacityProvidersOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.PutClusterCapacityProvidersOutput) {
+	fake.putClusterCapacityProvidersRequestMutex.Lock()
+	defer fake.putClusterCapacityProvidersRequestMutex.Unlock()
+	fake.PutClusterCapacityProvidersRequestStub = nil
+	if fake.putClusterCapacityProvidersRequestReturnsOnCall == nil {
+		fake.putClusterCapacityProvidersRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.PutClusterCapacityProvidersOutput
+		})
+	}
+	fake.putClusterCapacityProvidersRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.PutClusterCapacityProvidersOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersWithContext(arg1 context.Context, arg2 *ecs.PutClusterCapacityProvidersInput, arg3 ...request.Option) (*ecs.PutClusterCapacityProvidersOutput, error) {
+	fake.putClusterCapacityProvidersWithContextMutex.Lock()
+	ret, specificReturn := fake.putClusterCapacityProvidersWithContextReturnsOnCall[len(fake.putClusterCapacityProvidersWithContextArgsForCall)]
+	fake.putClusterCapacityProvidersWithContextArgsForCall = append(fake.putClusterCapacityProvidersWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.PutClusterCapacityProvidersInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("PutClusterCapacityProvidersWithContext", []interface{}{arg1, arg2, arg3})
+	fake.putClusterCapacityProvidersWithContextMutex.Unlock()
+	if fake.PutClusterCapacityProvidersWithContextStub != nil {
+		return fake.PutClusterCapacityProvidersWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.putClusterCapacityProvidersWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersWithContextCallCount() int {
+	fake.putClusterCapacityProvidersWithContextMutex.RLock()
+	defer fake.putClusterCapacityProvidersWithContextMutex.RUnlock()
+	return len(fake.putClusterCapacityProvidersWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersWithContextCalls(stub func(context.Context, *ecs.PutClusterCapacityProvidersInput, ...request.Option) (*ecs.PutClusterCapacityProvidersOutput, error)) {
+	fake.putClusterCapacityProvidersWithContextMutex.Lock()
+	defer fake.putClusterCapacityProvidersWithContextMutex.Unlock()
+	fake.PutClusterCapacityProvidersWithContextStub = stub
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersWithContextArgsForCall(i int) (context.Context, *ecs.PutClusterCapacityProvidersInput, []request.Option) {
+	fake.putClusterCapacityProvidersWithContextMutex.RLock()
+	defer fake.putClusterCapacityProvidersWithContextMutex.RUnlock()
+	argsForCall := fake.putClusterCapacityProvidersWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersWithContextReturns(result1 *ecs.PutClusterCapacityProvidersOutput, result2 error) {
+	fake.putClusterCapacityProvidersWithContextMutex.Lock()
+	defer fake.putClusterCapacityProvidersWithContextMutex.Unlock()
+	fake.PutClusterCapacityProvidersWithContextStub = nil
+	fake.putClusterCapacityProvidersWithContextReturns = struct {
+		result1 *ecs.PutClusterCapacityProvidersOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) PutClusterCapacityProvidersWithContextReturnsOnCall(i int, result1 *ecs.PutClusterCapacityProvidersOutput, result2 error) {
+	fake.putClusterCapacityProvidersWithContextMutex.Lock()
+	defer fake.putClusterCapacityProvidersWithContextMutex.Unlock()
+	fake.PutClusterCapacityProvidersWithContextStub = nil
+	if fake.putClusterCapacityProvidersWithContextReturnsOnCall == nil {
+		fake.putClusterCapacityProvidersWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.PutClusterCapacityProvidersOutput
+			result2 error
+		})
+	}
+	fake.putClusterCapacityProvidersWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.PutClusterCapacityProvidersOutput
 		result2 error
 	}{result1, result2}
 }
@@ -6419,11 +9790,11 @@ func (fake *FakeECSClient) RegisterContainerInstanceRequestReturnsOnCall(i int, 
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) RegisterContainerInstanceWithContext(arg1 aws.Context, arg2 *ecs.RegisterContainerInstanceInput, arg3 ...request.Option) (*ecs.RegisterContainerInstanceOutput, error) {
+func (fake *FakeECSClient) RegisterContainerInstanceWithContext(arg1 context.Context, arg2 *ecs.RegisterContainerInstanceInput, arg3 ...request.Option) (*ecs.RegisterContainerInstanceOutput, error) {
 	fake.registerContainerInstanceWithContextMutex.Lock()
 	ret, specificReturn := fake.registerContainerInstanceWithContextReturnsOnCall[len(fake.registerContainerInstanceWithContextArgsForCall)]
 	fake.registerContainerInstanceWithContextArgsForCall = append(fake.registerContainerInstanceWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.RegisterContainerInstanceInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -6445,13 +9816,13 @@ func (fake *FakeECSClient) RegisterContainerInstanceWithContextCallCount() int {
 	return len(fake.registerContainerInstanceWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) RegisterContainerInstanceWithContextCalls(stub func(aws.Context, *ecs.RegisterContainerInstanceInput, ...request.Option) (*ecs.RegisterContainerInstanceOutput, error)) {
+func (fake *FakeECSClient) RegisterContainerInstanceWithContextCalls(stub func(context.Context, *ecs.RegisterContainerInstanceInput, ...request.Option) (*ecs.RegisterContainerInstanceOutput, error)) {
 	fake.registerContainerInstanceWithContextMutex.Lock()
 	defer fake.registerContainerInstanceWithContextMutex.Unlock()
 	fake.RegisterContainerInstanceWithContextStub = stub
 }
 
-func (fake *FakeECSClient) RegisterContainerInstanceWithContextArgsForCall(i int) (aws.Context, *ecs.RegisterContainerInstanceInput, []request.Option) {
+func (fake *FakeECSClient) RegisterContainerInstanceWithContextArgsForCall(i int) (context.Context, *ecs.RegisterContainerInstanceInput, []request.Option) {
 	fake.registerContainerInstanceWithContextMutex.RLock()
 	defer fake.registerContainerInstanceWithContextMutex.RUnlock()
 	argsForCall := fake.registerContainerInstanceWithContextArgsForCall[i]
@@ -6610,11 +9981,11 @@ func (fake *FakeECSClient) RegisterTaskDefinitionRequestReturnsOnCall(i int, res
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) RegisterTaskDefinitionWithContext(arg1 aws.Context, arg2 *ecs.RegisterTaskDefinitionInput, arg3 ...request.Option) (*ecs.RegisterTaskDefinitionOutput, error) {
+func (fake *FakeECSClient) RegisterTaskDefinitionWithContext(arg1 context.Context, arg2 *ecs.RegisterTaskDefinitionInput, arg3 ...request.Option) (*ecs.RegisterTaskDefinitionOutput, error) {
 	fake.registerTaskDefinitionWithContextMutex.Lock()
 	ret, specificReturn := fake.registerTaskDefinitionWithContextReturnsOnCall[len(fake.registerTaskDefinitionWithContextArgsForCall)]
 	fake.registerTaskDefinitionWithContextArgsForCall = append(fake.registerTaskDefinitionWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.RegisterTaskDefinitionInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -6636,13 +10007,13 @@ func (fake *FakeECSClient) RegisterTaskDefinitionWithContextCallCount() int {
 	return len(fake.registerTaskDefinitionWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) RegisterTaskDefinitionWithContextCalls(stub func(aws.Context, *ecs.RegisterTaskDefinitionInput, ...request.Option) (*ecs.RegisterTaskDefinitionOutput, error)) {
+func (fake *FakeECSClient) RegisterTaskDefinitionWithContextCalls(stub func(context.Context, *ecs.RegisterTaskDefinitionInput, ...request.Option) (*ecs.RegisterTaskDefinitionOutput, error)) {
 	fake.registerTaskDefinitionWithContextMutex.Lock()
 	defer fake.registerTaskDefinitionWithContextMutex.Unlock()
 	fake.RegisterTaskDefinitionWithContextStub = stub
 }
 
-func (fake *FakeECSClient) RegisterTaskDefinitionWithContextArgsForCall(i int) (aws.Context, *ecs.RegisterTaskDefinitionInput, []request.Option) {
+func (fake *FakeECSClient) RegisterTaskDefinitionWithContextArgsForCall(i int) (context.Context, *ecs.RegisterTaskDefinitionInput, []request.Option) {
 	fake.registerTaskDefinitionWithContextMutex.RLock()
 	defer fake.registerTaskDefinitionWithContextMutex.RUnlock()
 	argsForCall := fake.registerTaskDefinitionWithContextArgsForCall[i]
@@ -6801,11 +10172,11 @@ func (fake *FakeECSClient) RunTaskRequestReturnsOnCall(i int, result1 *request.R
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) RunTaskWithContext(arg1 aws.Context, arg2 *ecs.RunTaskInput, arg3 ...request.Option) (*ecs.RunTaskOutput, error) {
+func (fake *FakeECSClient) RunTaskWithContext(arg1 context.Context, arg2 *ecs.RunTaskInput, arg3 ...request.Option) (*ecs.RunTaskOutput, error) {
 	fake.runTaskWithContextMutex.Lock()
 	ret, specificReturn := fake.runTaskWithContextReturnsOnCall[len(fake.runTaskWithContextArgsForCall)]
 	fake.runTaskWithContextArgsForCall = append(fake.runTaskWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.RunTaskInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -6827,13 +10198,13 @@ func (fake *FakeECSClient) RunTaskWithContextCallCount() int {
 	return len(fake.runTaskWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) RunTaskWithContextCalls(stub func(aws.Context, *ecs.RunTaskInput, ...request.Option) (*ecs.RunTaskOutput, error)) {
+func (fake *FakeECSClient) RunTaskWithContextCalls(stub func(context.Context, *ecs.RunTaskInput, ...request.Option) (*ecs.RunTaskOutput, error)) {
 	fake.runTaskWithContextMutex.Lock()
 	defer fake.runTaskWithContextMutex.Unlock()
 	fake.RunTaskWithContextStub = stub
 }
 
-func (fake *FakeECSClient) RunTaskWithContextArgsForCall(i int) (aws.Context, *ecs.RunTaskInput, []request.Option) {
+func (fake *FakeECSClient) RunTaskWithContextArgsForCall(i int) (context.Context, *ecs.RunTaskInput, []request.Option) {
 	fake.runTaskWithContextMutex.RLock()
 	defer fake.runTaskWithContextMutex.RUnlock()
 	argsForCall := fake.runTaskWithContextArgsForCall[i]
@@ -6992,11 +10363,11 @@ func (fake *FakeECSClient) StartTaskRequestReturnsOnCall(i int, result1 *request
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) StartTaskWithContext(arg1 aws.Context, arg2 *ecs.StartTaskInput, arg3 ...request.Option) (*ecs.StartTaskOutput, error) {
+func (fake *FakeECSClient) StartTaskWithContext(arg1 context.Context, arg2 *ecs.StartTaskInput, arg3 ...request.Option) (*ecs.StartTaskOutput, error) {
 	fake.startTaskWithContextMutex.Lock()
 	ret, specificReturn := fake.startTaskWithContextReturnsOnCall[len(fake.startTaskWithContextArgsForCall)]
 	fake.startTaskWithContextArgsForCall = append(fake.startTaskWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.StartTaskInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -7018,13 +10389,13 @@ func (fake *FakeECSClient) StartTaskWithContextCallCount() int {
 	return len(fake.startTaskWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) StartTaskWithContextCalls(stub func(aws.Context, *ecs.StartTaskInput, ...request.Option) (*ecs.StartTaskOutput, error)) {
+func (fake *FakeECSClient) StartTaskWithContextCalls(stub func(context.Context, *ecs.StartTaskInput, ...request.Option) (*ecs.StartTaskOutput, error)) {
 	fake.startTaskWithContextMutex.Lock()
 	defer fake.startTaskWithContextMutex.Unlock()
 	fake.StartTaskWithContextStub = stub
 }
 
-func (fake *FakeECSClient) StartTaskWithContextArgsForCall(i int) (aws.Context, *ecs.StartTaskInput, []request.Option) {
+func (fake *FakeECSClient) StartTaskWithContextArgsForCall(i int) (context.Context, *ecs.StartTaskInput, []request.Option) {
 	fake.startTaskWithContextMutex.RLock()
 	defer fake.startTaskWithContextMutex.RUnlock()
 	argsForCall := fake.startTaskWithContextArgsForCall[i]
@@ -7183,11 +10554,11 @@ func (fake *FakeECSClient) StopTaskRequestReturnsOnCall(i int, result1 *request.
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) StopTaskWithContext(arg1 aws.Context, arg2 *ecs.StopTaskInput, arg3 ...request.Option) (*ecs.StopTaskOutput, error) {
+func (fake *FakeECSClient) StopTaskWithContext(arg1 context.Context, arg2 *ecs.StopTaskInput, arg3 ...request.Option) (*ecs.StopTaskOutput, error) {
 	fake.stopTaskWithContextMutex.Lock()
 	ret, specificReturn := fake.stopTaskWithContextReturnsOnCall[len(fake.stopTaskWithContextArgsForCall)]
 	fake.stopTaskWithContextArgsForCall = append(fake.stopTaskWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.StopTaskInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -7209,13 +10580,13 @@ func (fake *FakeECSClient) StopTaskWithContextCallCount() int {
 	return len(fake.stopTaskWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) StopTaskWithContextCalls(stub func(aws.Context, *ecs.StopTaskInput, ...request.Option) (*ecs.StopTaskOutput, error)) {
+func (fake *FakeECSClient) StopTaskWithContextCalls(stub func(context.Context, *ecs.StopTaskInput, ...request.Option) (*ecs.StopTaskOutput, error)) {
 	fake.stopTaskWithContextMutex.Lock()
 	defer fake.stopTaskWithContextMutex.Unlock()
 	fake.StopTaskWithContextStub = stub
 }
 
-func (fake *FakeECSClient) StopTaskWithContextArgsForCall(i int) (aws.Context, *ecs.StopTaskInput, []request.Option) {
+func (fake *FakeECSClient) StopTaskWithContextArgsForCall(i int) (context.Context, *ecs.StopTaskInput, []request.Option) {
 	fake.stopTaskWithContextMutex.RLock()
 	defer fake.stopTaskWithContextMutex.RUnlock()
 	argsForCall := fake.stopTaskWithContextArgsForCall[i]
@@ -7244,6 +10615,197 @@ func (fake *FakeECSClient) StopTaskWithContextReturnsOnCall(i int, result1 *ecs.
 	}
 	fake.stopTaskWithContextReturnsOnCall[i] = struct {
 		result1 *ecs.StopTaskOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChanges(arg1 *ecs.SubmitAttachmentStateChangesInput) (*ecs.SubmitAttachmentStateChangesOutput, error) {
+	fake.submitAttachmentStateChangesMutex.Lock()
+	ret, specificReturn := fake.submitAttachmentStateChangesReturnsOnCall[len(fake.submitAttachmentStateChangesArgsForCall)]
+	fake.submitAttachmentStateChangesArgsForCall = append(fake.submitAttachmentStateChangesArgsForCall, struct {
+		arg1 *ecs.SubmitAttachmentStateChangesInput
+	}{arg1})
+	fake.recordInvocation("SubmitAttachmentStateChanges", []interface{}{arg1})
+	fake.submitAttachmentStateChangesMutex.Unlock()
+	if fake.SubmitAttachmentStateChangesStub != nil {
+		return fake.SubmitAttachmentStateChangesStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.submitAttachmentStateChangesReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesCallCount() int {
+	fake.submitAttachmentStateChangesMutex.RLock()
+	defer fake.submitAttachmentStateChangesMutex.RUnlock()
+	return len(fake.submitAttachmentStateChangesArgsForCall)
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesCalls(stub func(*ecs.SubmitAttachmentStateChangesInput) (*ecs.SubmitAttachmentStateChangesOutput, error)) {
+	fake.submitAttachmentStateChangesMutex.Lock()
+	defer fake.submitAttachmentStateChangesMutex.Unlock()
+	fake.SubmitAttachmentStateChangesStub = stub
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesArgsForCall(i int) *ecs.SubmitAttachmentStateChangesInput {
+	fake.submitAttachmentStateChangesMutex.RLock()
+	defer fake.submitAttachmentStateChangesMutex.RUnlock()
+	argsForCall := fake.submitAttachmentStateChangesArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesReturns(result1 *ecs.SubmitAttachmentStateChangesOutput, result2 error) {
+	fake.submitAttachmentStateChangesMutex.Lock()
+	defer fake.submitAttachmentStateChangesMutex.Unlock()
+	fake.SubmitAttachmentStateChangesStub = nil
+	fake.submitAttachmentStateChangesReturns = struct {
+		result1 *ecs.SubmitAttachmentStateChangesOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesReturnsOnCall(i int, result1 *ecs.SubmitAttachmentStateChangesOutput, result2 error) {
+	fake.submitAttachmentStateChangesMutex.Lock()
+	defer fake.submitAttachmentStateChangesMutex.Unlock()
+	fake.SubmitAttachmentStateChangesStub = nil
+	if fake.submitAttachmentStateChangesReturnsOnCall == nil {
+		fake.submitAttachmentStateChangesReturnsOnCall = make(map[int]struct {
+			result1 *ecs.SubmitAttachmentStateChangesOutput
+			result2 error
+		})
+	}
+	fake.submitAttachmentStateChangesReturnsOnCall[i] = struct {
+		result1 *ecs.SubmitAttachmentStateChangesOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesRequest(arg1 *ecs.SubmitAttachmentStateChangesInput) (*request.Request, *ecs.SubmitAttachmentStateChangesOutput) {
+	fake.submitAttachmentStateChangesRequestMutex.Lock()
+	ret, specificReturn := fake.submitAttachmentStateChangesRequestReturnsOnCall[len(fake.submitAttachmentStateChangesRequestArgsForCall)]
+	fake.submitAttachmentStateChangesRequestArgsForCall = append(fake.submitAttachmentStateChangesRequestArgsForCall, struct {
+		arg1 *ecs.SubmitAttachmentStateChangesInput
+	}{arg1})
+	fake.recordInvocation("SubmitAttachmentStateChangesRequest", []interface{}{arg1})
+	fake.submitAttachmentStateChangesRequestMutex.Unlock()
+	if fake.SubmitAttachmentStateChangesRequestStub != nil {
+		return fake.SubmitAttachmentStateChangesRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.submitAttachmentStateChangesRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesRequestCallCount() int {
+	fake.submitAttachmentStateChangesRequestMutex.RLock()
+	defer fake.submitAttachmentStateChangesRequestMutex.RUnlock()
+	return len(fake.submitAttachmentStateChangesRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesRequestCalls(stub func(*ecs.SubmitAttachmentStateChangesInput) (*request.Request, *ecs.SubmitAttachmentStateChangesOutput)) {
+	fake.submitAttachmentStateChangesRequestMutex.Lock()
+	defer fake.submitAttachmentStateChangesRequestMutex.Unlock()
+	fake.SubmitAttachmentStateChangesRequestStub = stub
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesRequestArgsForCall(i int) *ecs.SubmitAttachmentStateChangesInput {
+	fake.submitAttachmentStateChangesRequestMutex.RLock()
+	defer fake.submitAttachmentStateChangesRequestMutex.RUnlock()
+	argsForCall := fake.submitAttachmentStateChangesRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesRequestReturns(result1 *request.Request, result2 *ecs.SubmitAttachmentStateChangesOutput) {
+	fake.submitAttachmentStateChangesRequestMutex.Lock()
+	defer fake.submitAttachmentStateChangesRequestMutex.Unlock()
+	fake.SubmitAttachmentStateChangesRequestStub = nil
+	fake.submitAttachmentStateChangesRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.SubmitAttachmentStateChangesOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.SubmitAttachmentStateChangesOutput) {
+	fake.submitAttachmentStateChangesRequestMutex.Lock()
+	defer fake.submitAttachmentStateChangesRequestMutex.Unlock()
+	fake.SubmitAttachmentStateChangesRequestStub = nil
+	if fake.submitAttachmentStateChangesRequestReturnsOnCall == nil {
+		fake.submitAttachmentStateChangesRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.SubmitAttachmentStateChangesOutput
+		})
+	}
+	fake.submitAttachmentStateChangesRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.SubmitAttachmentStateChangesOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesWithContext(arg1 context.Context, arg2 *ecs.SubmitAttachmentStateChangesInput, arg3 ...request.Option) (*ecs.SubmitAttachmentStateChangesOutput, error) {
+	fake.submitAttachmentStateChangesWithContextMutex.Lock()
+	ret, specificReturn := fake.submitAttachmentStateChangesWithContextReturnsOnCall[len(fake.submitAttachmentStateChangesWithContextArgsForCall)]
+	fake.submitAttachmentStateChangesWithContextArgsForCall = append(fake.submitAttachmentStateChangesWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.SubmitAttachmentStateChangesInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("SubmitAttachmentStateChangesWithContext", []interface{}{arg1, arg2, arg3})
+	fake.submitAttachmentStateChangesWithContextMutex.Unlock()
+	if fake.SubmitAttachmentStateChangesWithContextStub != nil {
+		return fake.SubmitAttachmentStateChangesWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.submitAttachmentStateChangesWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesWithContextCallCount() int {
+	fake.submitAttachmentStateChangesWithContextMutex.RLock()
+	defer fake.submitAttachmentStateChangesWithContextMutex.RUnlock()
+	return len(fake.submitAttachmentStateChangesWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesWithContextCalls(stub func(context.Context, *ecs.SubmitAttachmentStateChangesInput, ...request.Option) (*ecs.SubmitAttachmentStateChangesOutput, error)) {
+	fake.submitAttachmentStateChangesWithContextMutex.Lock()
+	defer fake.submitAttachmentStateChangesWithContextMutex.Unlock()
+	fake.SubmitAttachmentStateChangesWithContextStub = stub
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesWithContextArgsForCall(i int) (context.Context, *ecs.SubmitAttachmentStateChangesInput, []request.Option) {
+	fake.submitAttachmentStateChangesWithContextMutex.RLock()
+	defer fake.submitAttachmentStateChangesWithContextMutex.RUnlock()
+	argsForCall := fake.submitAttachmentStateChangesWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesWithContextReturns(result1 *ecs.SubmitAttachmentStateChangesOutput, result2 error) {
+	fake.submitAttachmentStateChangesWithContextMutex.Lock()
+	defer fake.submitAttachmentStateChangesWithContextMutex.Unlock()
+	fake.SubmitAttachmentStateChangesWithContextStub = nil
+	fake.submitAttachmentStateChangesWithContextReturns = struct {
+		result1 *ecs.SubmitAttachmentStateChangesOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) SubmitAttachmentStateChangesWithContextReturnsOnCall(i int, result1 *ecs.SubmitAttachmentStateChangesOutput, result2 error) {
+	fake.submitAttachmentStateChangesWithContextMutex.Lock()
+	defer fake.submitAttachmentStateChangesWithContextMutex.Unlock()
+	fake.SubmitAttachmentStateChangesWithContextStub = nil
+	if fake.submitAttachmentStateChangesWithContextReturnsOnCall == nil {
+		fake.submitAttachmentStateChangesWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.SubmitAttachmentStateChangesOutput
+			result2 error
+		})
+	}
+	fake.submitAttachmentStateChangesWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.SubmitAttachmentStateChangesOutput
 		result2 error
 	}{result1, result2}
 }
@@ -7374,11 +10936,11 @@ func (fake *FakeECSClient) SubmitContainerStateChangeRequestReturnsOnCall(i int,
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) SubmitContainerStateChangeWithContext(arg1 aws.Context, arg2 *ecs.SubmitContainerStateChangeInput, arg3 ...request.Option) (*ecs.SubmitContainerStateChangeOutput, error) {
+func (fake *FakeECSClient) SubmitContainerStateChangeWithContext(arg1 context.Context, arg2 *ecs.SubmitContainerStateChangeInput, arg3 ...request.Option) (*ecs.SubmitContainerStateChangeOutput, error) {
 	fake.submitContainerStateChangeWithContextMutex.Lock()
 	ret, specificReturn := fake.submitContainerStateChangeWithContextReturnsOnCall[len(fake.submitContainerStateChangeWithContextArgsForCall)]
 	fake.submitContainerStateChangeWithContextArgsForCall = append(fake.submitContainerStateChangeWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.SubmitContainerStateChangeInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -7400,13 +10962,13 @@ func (fake *FakeECSClient) SubmitContainerStateChangeWithContextCallCount() int 
 	return len(fake.submitContainerStateChangeWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) SubmitContainerStateChangeWithContextCalls(stub func(aws.Context, *ecs.SubmitContainerStateChangeInput, ...request.Option) (*ecs.SubmitContainerStateChangeOutput, error)) {
+func (fake *FakeECSClient) SubmitContainerStateChangeWithContextCalls(stub func(context.Context, *ecs.SubmitContainerStateChangeInput, ...request.Option) (*ecs.SubmitContainerStateChangeOutput, error)) {
 	fake.submitContainerStateChangeWithContextMutex.Lock()
 	defer fake.submitContainerStateChangeWithContextMutex.Unlock()
 	fake.SubmitContainerStateChangeWithContextStub = stub
 }
 
-func (fake *FakeECSClient) SubmitContainerStateChangeWithContextArgsForCall(i int) (aws.Context, *ecs.SubmitContainerStateChangeInput, []request.Option) {
+func (fake *FakeECSClient) SubmitContainerStateChangeWithContextArgsForCall(i int) (context.Context, *ecs.SubmitContainerStateChangeInput, []request.Option) {
 	fake.submitContainerStateChangeWithContextMutex.RLock()
 	defer fake.submitContainerStateChangeWithContextMutex.RUnlock()
 	argsForCall := fake.submitContainerStateChangeWithContextArgsForCall[i]
@@ -7565,11 +11127,11 @@ func (fake *FakeECSClient) SubmitTaskStateChangeRequestReturnsOnCall(i int, resu
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) SubmitTaskStateChangeWithContext(arg1 aws.Context, arg2 *ecs.SubmitTaskStateChangeInput, arg3 ...request.Option) (*ecs.SubmitTaskStateChangeOutput, error) {
+func (fake *FakeECSClient) SubmitTaskStateChangeWithContext(arg1 context.Context, arg2 *ecs.SubmitTaskStateChangeInput, arg3 ...request.Option) (*ecs.SubmitTaskStateChangeOutput, error) {
 	fake.submitTaskStateChangeWithContextMutex.Lock()
 	ret, specificReturn := fake.submitTaskStateChangeWithContextReturnsOnCall[len(fake.submitTaskStateChangeWithContextArgsForCall)]
 	fake.submitTaskStateChangeWithContextArgsForCall = append(fake.submitTaskStateChangeWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.SubmitTaskStateChangeInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -7591,13 +11153,13 @@ func (fake *FakeECSClient) SubmitTaskStateChangeWithContextCallCount() int {
 	return len(fake.submitTaskStateChangeWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) SubmitTaskStateChangeWithContextCalls(stub func(aws.Context, *ecs.SubmitTaskStateChangeInput, ...request.Option) (*ecs.SubmitTaskStateChangeOutput, error)) {
+func (fake *FakeECSClient) SubmitTaskStateChangeWithContextCalls(stub func(context.Context, *ecs.SubmitTaskStateChangeInput, ...request.Option) (*ecs.SubmitTaskStateChangeOutput, error)) {
 	fake.submitTaskStateChangeWithContextMutex.Lock()
 	defer fake.submitTaskStateChangeWithContextMutex.Unlock()
 	fake.SubmitTaskStateChangeWithContextStub = stub
 }
 
-func (fake *FakeECSClient) SubmitTaskStateChangeWithContextArgsForCall(i int) (aws.Context, *ecs.SubmitTaskStateChangeInput, []request.Option) {
+func (fake *FakeECSClient) SubmitTaskStateChangeWithContextArgsForCall(i int) (context.Context, *ecs.SubmitTaskStateChangeInput, []request.Option) {
 	fake.submitTaskStateChangeWithContextMutex.RLock()
 	defer fake.submitTaskStateChangeWithContextMutex.RUnlock()
 	argsForCall := fake.submitTaskStateChangeWithContextArgsForCall[i]
@@ -7626,6 +11188,770 @@ func (fake *FakeECSClient) SubmitTaskStateChangeWithContextReturnsOnCall(i int, 
 	}
 	fake.submitTaskStateChangeWithContextReturnsOnCall[i] = struct {
 		result1 *ecs.SubmitTaskStateChangeOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) TagResource(arg1 *ecs.TagResourceInput) (*ecs.TagResourceOutput, error) {
+	fake.tagResourceMutex.Lock()
+	ret, specificReturn := fake.tagResourceReturnsOnCall[len(fake.tagResourceArgsForCall)]
+	fake.tagResourceArgsForCall = append(fake.tagResourceArgsForCall, struct {
+		arg1 *ecs.TagResourceInput
+	}{arg1})
+	fake.recordInvocation("TagResource", []interface{}{arg1})
+	fake.tagResourceMutex.Unlock()
+	if fake.TagResourceStub != nil {
+		return fake.TagResourceStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.tagResourceReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) TagResourceCallCount() int {
+	fake.tagResourceMutex.RLock()
+	defer fake.tagResourceMutex.RUnlock()
+	return len(fake.tagResourceArgsForCall)
+}
+
+func (fake *FakeECSClient) TagResourceCalls(stub func(*ecs.TagResourceInput) (*ecs.TagResourceOutput, error)) {
+	fake.tagResourceMutex.Lock()
+	defer fake.tagResourceMutex.Unlock()
+	fake.TagResourceStub = stub
+}
+
+func (fake *FakeECSClient) TagResourceArgsForCall(i int) *ecs.TagResourceInput {
+	fake.tagResourceMutex.RLock()
+	defer fake.tagResourceMutex.RUnlock()
+	argsForCall := fake.tagResourceArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) TagResourceReturns(result1 *ecs.TagResourceOutput, result2 error) {
+	fake.tagResourceMutex.Lock()
+	defer fake.tagResourceMutex.Unlock()
+	fake.TagResourceStub = nil
+	fake.tagResourceReturns = struct {
+		result1 *ecs.TagResourceOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) TagResourceReturnsOnCall(i int, result1 *ecs.TagResourceOutput, result2 error) {
+	fake.tagResourceMutex.Lock()
+	defer fake.tagResourceMutex.Unlock()
+	fake.TagResourceStub = nil
+	if fake.tagResourceReturnsOnCall == nil {
+		fake.tagResourceReturnsOnCall = make(map[int]struct {
+			result1 *ecs.TagResourceOutput
+			result2 error
+		})
+	}
+	fake.tagResourceReturnsOnCall[i] = struct {
+		result1 *ecs.TagResourceOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) TagResourceRequest(arg1 *ecs.TagResourceInput) (*request.Request, *ecs.TagResourceOutput) {
+	fake.tagResourceRequestMutex.Lock()
+	ret, specificReturn := fake.tagResourceRequestReturnsOnCall[len(fake.tagResourceRequestArgsForCall)]
+	fake.tagResourceRequestArgsForCall = append(fake.tagResourceRequestArgsForCall, struct {
+		arg1 *ecs.TagResourceInput
+	}{arg1})
+	fake.recordInvocation("TagResourceRequest", []interface{}{arg1})
+	fake.tagResourceRequestMutex.Unlock()
+	if fake.TagResourceRequestStub != nil {
+		return fake.TagResourceRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.tagResourceRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) TagResourceRequestCallCount() int {
+	fake.tagResourceRequestMutex.RLock()
+	defer fake.tagResourceRequestMutex.RUnlock()
+	return len(fake.tagResourceRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) TagResourceRequestCalls(stub func(*ecs.TagResourceInput) (*request.Request, *ecs.TagResourceOutput)) {
+	fake.tagResourceRequestMutex.Lock()
+	defer fake.tagResourceRequestMutex.Unlock()
+	fake.TagResourceRequestStub = stub
+}
+
+func (fake *FakeECSClient) TagResourceRequestArgsForCall(i int) *ecs.TagResourceInput {
+	fake.tagResourceRequestMutex.RLock()
+	defer fake.tagResourceRequestMutex.RUnlock()
+	argsForCall := fake.tagResourceRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) TagResourceRequestReturns(result1 *request.Request, result2 *ecs.TagResourceOutput) {
+	fake.tagResourceRequestMutex.Lock()
+	defer fake.tagResourceRequestMutex.Unlock()
+	fake.TagResourceRequestStub = nil
+	fake.tagResourceRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.TagResourceOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) TagResourceRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.TagResourceOutput) {
+	fake.tagResourceRequestMutex.Lock()
+	defer fake.tagResourceRequestMutex.Unlock()
+	fake.TagResourceRequestStub = nil
+	if fake.tagResourceRequestReturnsOnCall == nil {
+		fake.tagResourceRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.TagResourceOutput
+		})
+	}
+	fake.tagResourceRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.TagResourceOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) TagResourceWithContext(arg1 context.Context, arg2 *ecs.TagResourceInput, arg3 ...request.Option) (*ecs.TagResourceOutput, error) {
+	fake.tagResourceWithContextMutex.Lock()
+	ret, specificReturn := fake.tagResourceWithContextReturnsOnCall[len(fake.tagResourceWithContextArgsForCall)]
+	fake.tagResourceWithContextArgsForCall = append(fake.tagResourceWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.TagResourceInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("TagResourceWithContext", []interface{}{arg1, arg2, arg3})
+	fake.tagResourceWithContextMutex.Unlock()
+	if fake.TagResourceWithContextStub != nil {
+		return fake.TagResourceWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.tagResourceWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) TagResourceWithContextCallCount() int {
+	fake.tagResourceWithContextMutex.RLock()
+	defer fake.tagResourceWithContextMutex.RUnlock()
+	return len(fake.tagResourceWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) TagResourceWithContextCalls(stub func(context.Context, *ecs.TagResourceInput, ...request.Option) (*ecs.TagResourceOutput, error)) {
+	fake.tagResourceWithContextMutex.Lock()
+	defer fake.tagResourceWithContextMutex.Unlock()
+	fake.TagResourceWithContextStub = stub
+}
+
+func (fake *FakeECSClient) TagResourceWithContextArgsForCall(i int) (context.Context, *ecs.TagResourceInput, []request.Option) {
+	fake.tagResourceWithContextMutex.RLock()
+	defer fake.tagResourceWithContextMutex.RUnlock()
+	argsForCall := fake.tagResourceWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) TagResourceWithContextReturns(result1 *ecs.TagResourceOutput, result2 error) {
+	fake.tagResourceWithContextMutex.Lock()
+	defer fake.tagResourceWithContextMutex.Unlock()
+	fake.TagResourceWithContextStub = nil
+	fake.tagResourceWithContextReturns = struct {
+		result1 *ecs.TagResourceOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) TagResourceWithContextReturnsOnCall(i int, result1 *ecs.TagResourceOutput, result2 error) {
+	fake.tagResourceWithContextMutex.Lock()
+	defer fake.tagResourceWithContextMutex.Unlock()
+	fake.TagResourceWithContextStub = nil
+	if fake.tagResourceWithContextReturnsOnCall == nil {
+		fake.tagResourceWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.TagResourceOutput
+			result2 error
+		})
+	}
+	fake.tagResourceWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.TagResourceOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UntagResource(arg1 *ecs.UntagResourceInput) (*ecs.UntagResourceOutput, error) {
+	fake.untagResourceMutex.Lock()
+	ret, specificReturn := fake.untagResourceReturnsOnCall[len(fake.untagResourceArgsForCall)]
+	fake.untagResourceArgsForCall = append(fake.untagResourceArgsForCall, struct {
+		arg1 *ecs.UntagResourceInput
+	}{arg1})
+	fake.recordInvocation("UntagResource", []interface{}{arg1})
+	fake.untagResourceMutex.Unlock()
+	if fake.UntagResourceStub != nil {
+		return fake.UntagResourceStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.untagResourceReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) UntagResourceCallCount() int {
+	fake.untagResourceMutex.RLock()
+	defer fake.untagResourceMutex.RUnlock()
+	return len(fake.untagResourceArgsForCall)
+}
+
+func (fake *FakeECSClient) UntagResourceCalls(stub func(*ecs.UntagResourceInput) (*ecs.UntagResourceOutput, error)) {
+	fake.untagResourceMutex.Lock()
+	defer fake.untagResourceMutex.Unlock()
+	fake.UntagResourceStub = stub
+}
+
+func (fake *FakeECSClient) UntagResourceArgsForCall(i int) *ecs.UntagResourceInput {
+	fake.untagResourceMutex.RLock()
+	defer fake.untagResourceMutex.RUnlock()
+	argsForCall := fake.untagResourceArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) UntagResourceReturns(result1 *ecs.UntagResourceOutput, result2 error) {
+	fake.untagResourceMutex.Lock()
+	defer fake.untagResourceMutex.Unlock()
+	fake.UntagResourceStub = nil
+	fake.untagResourceReturns = struct {
+		result1 *ecs.UntagResourceOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UntagResourceReturnsOnCall(i int, result1 *ecs.UntagResourceOutput, result2 error) {
+	fake.untagResourceMutex.Lock()
+	defer fake.untagResourceMutex.Unlock()
+	fake.UntagResourceStub = nil
+	if fake.untagResourceReturnsOnCall == nil {
+		fake.untagResourceReturnsOnCall = make(map[int]struct {
+			result1 *ecs.UntagResourceOutput
+			result2 error
+		})
+	}
+	fake.untagResourceReturnsOnCall[i] = struct {
+		result1 *ecs.UntagResourceOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UntagResourceRequest(arg1 *ecs.UntagResourceInput) (*request.Request, *ecs.UntagResourceOutput) {
+	fake.untagResourceRequestMutex.Lock()
+	ret, specificReturn := fake.untagResourceRequestReturnsOnCall[len(fake.untagResourceRequestArgsForCall)]
+	fake.untagResourceRequestArgsForCall = append(fake.untagResourceRequestArgsForCall, struct {
+		arg1 *ecs.UntagResourceInput
+	}{arg1})
+	fake.recordInvocation("UntagResourceRequest", []interface{}{arg1})
+	fake.untagResourceRequestMutex.Unlock()
+	if fake.UntagResourceRequestStub != nil {
+		return fake.UntagResourceRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.untagResourceRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) UntagResourceRequestCallCount() int {
+	fake.untagResourceRequestMutex.RLock()
+	defer fake.untagResourceRequestMutex.RUnlock()
+	return len(fake.untagResourceRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) UntagResourceRequestCalls(stub func(*ecs.UntagResourceInput) (*request.Request, *ecs.UntagResourceOutput)) {
+	fake.untagResourceRequestMutex.Lock()
+	defer fake.untagResourceRequestMutex.Unlock()
+	fake.UntagResourceRequestStub = stub
+}
+
+func (fake *FakeECSClient) UntagResourceRequestArgsForCall(i int) *ecs.UntagResourceInput {
+	fake.untagResourceRequestMutex.RLock()
+	defer fake.untagResourceRequestMutex.RUnlock()
+	argsForCall := fake.untagResourceRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) UntagResourceRequestReturns(result1 *request.Request, result2 *ecs.UntagResourceOutput) {
+	fake.untagResourceRequestMutex.Lock()
+	defer fake.untagResourceRequestMutex.Unlock()
+	fake.UntagResourceRequestStub = nil
+	fake.untagResourceRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.UntagResourceOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UntagResourceRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.UntagResourceOutput) {
+	fake.untagResourceRequestMutex.Lock()
+	defer fake.untagResourceRequestMutex.Unlock()
+	fake.UntagResourceRequestStub = nil
+	if fake.untagResourceRequestReturnsOnCall == nil {
+		fake.untagResourceRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.UntagResourceOutput
+		})
+	}
+	fake.untagResourceRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.UntagResourceOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UntagResourceWithContext(arg1 context.Context, arg2 *ecs.UntagResourceInput, arg3 ...request.Option) (*ecs.UntagResourceOutput, error) {
+	fake.untagResourceWithContextMutex.Lock()
+	ret, specificReturn := fake.untagResourceWithContextReturnsOnCall[len(fake.untagResourceWithContextArgsForCall)]
+	fake.untagResourceWithContextArgsForCall = append(fake.untagResourceWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.UntagResourceInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("UntagResourceWithContext", []interface{}{arg1, arg2, arg3})
+	fake.untagResourceWithContextMutex.Unlock()
+	if fake.UntagResourceWithContextStub != nil {
+		return fake.UntagResourceWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.untagResourceWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) UntagResourceWithContextCallCount() int {
+	fake.untagResourceWithContextMutex.RLock()
+	defer fake.untagResourceWithContextMutex.RUnlock()
+	return len(fake.untagResourceWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) UntagResourceWithContextCalls(stub func(context.Context, *ecs.UntagResourceInput, ...request.Option) (*ecs.UntagResourceOutput, error)) {
+	fake.untagResourceWithContextMutex.Lock()
+	defer fake.untagResourceWithContextMutex.Unlock()
+	fake.UntagResourceWithContextStub = stub
+}
+
+func (fake *FakeECSClient) UntagResourceWithContextArgsForCall(i int) (context.Context, *ecs.UntagResourceInput, []request.Option) {
+	fake.untagResourceWithContextMutex.RLock()
+	defer fake.untagResourceWithContextMutex.RUnlock()
+	argsForCall := fake.untagResourceWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) UntagResourceWithContextReturns(result1 *ecs.UntagResourceOutput, result2 error) {
+	fake.untagResourceWithContextMutex.Lock()
+	defer fake.untagResourceWithContextMutex.Unlock()
+	fake.UntagResourceWithContextStub = nil
+	fake.untagResourceWithContextReturns = struct {
+		result1 *ecs.UntagResourceOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UntagResourceWithContextReturnsOnCall(i int, result1 *ecs.UntagResourceOutput, result2 error) {
+	fake.untagResourceWithContextMutex.Lock()
+	defer fake.untagResourceWithContextMutex.Unlock()
+	fake.UntagResourceWithContextStub = nil
+	if fake.untagResourceWithContextReturnsOnCall == nil {
+		fake.untagResourceWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.UntagResourceOutput
+			result2 error
+		})
+	}
+	fake.untagResourceWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.UntagResourceOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateCapacityProvider(arg1 *ecs.UpdateCapacityProviderInput) (*ecs.UpdateCapacityProviderOutput, error) {
+	fake.updateCapacityProviderMutex.Lock()
+	ret, specificReturn := fake.updateCapacityProviderReturnsOnCall[len(fake.updateCapacityProviderArgsForCall)]
+	fake.updateCapacityProviderArgsForCall = append(fake.updateCapacityProviderArgsForCall, struct {
+		arg1 *ecs.UpdateCapacityProviderInput
+	}{arg1})
+	fake.recordInvocation("UpdateCapacityProvider", []interface{}{arg1})
+	fake.updateCapacityProviderMutex.Unlock()
+	if fake.UpdateCapacityProviderStub != nil {
+		return fake.UpdateCapacityProviderStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.updateCapacityProviderReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderCallCount() int {
+	fake.updateCapacityProviderMutex.RLock()
+	defer fake.updateCapacityProviderMutex.RUnlock()
+	return len(fake.updateCapacityProviderArgsForCall)
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderCalls(stub func(*ecs.UpdateCapacityProviderInput) (*ecs.UpdateCapacityProviderOutput, error)) {
+	fake.updateCapacityProviderMutex.Lock()
+	defer fake.updateCapacityProviderMutex.Unlock()
+	fake.UpdateCapacityProviderStub = stub
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderArgsForCall(i int) *ecs.UpdateCapacityProviderInput {
+	fake.updateCapacityProviderMutex.RLock()
+	defer fake.updateCapacityProviderMutex.RUnlock()
+	argsForCall := fake.updateCapacityProviderArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderReturns(result1 *ecs.UpdateCapacityProviderOutput, result2 error) {
+	fake.updateCapacityProviderMutex.Lock()
+	defer fake.updateCapacityProviderMutex.Unlock()
+	fake.UpdateCapacityProviderStub = nil
+	fake.updateCapacityProviderReturns = struct {
+		result1 *ecs.UpdateCapacityProviderOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderReturnsOnCall(i int, result1 *ecs.UpdateCapacityProviderOutput, result2 error) {
+	fake.updateCapacityProviderMutex.Lock()
+	defer fake.updateCapacityProviderMutex.Unlock()
+	fake.UpdateCapacityProviderStub = nil
+	if fake.updateCapacityProviderReturnsOnCall == nil {
+		fake.updateCapacityProviderReturnsOnCall = make(map[int]struct {
+			result1 *ecs.UpdateCapacityProviderOutput
+			result2 error
+		})
+	}
+	fake.updateCapacityProviderReturnsOnCall[i] = struct {
+		result1 *ecs.UpdateCapacityProviderOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderRequest(arg1 *ecs.UpdateCapacityProviderInput) (*request.Request, *ecs.UpdateCapacityProviderOutput) {
+	fake.updateCapacityProviderRequestMutex.Lock()
+	ret, specificReturn := fake.updateCapacityProviderRequestReturnsOnCall[len(fake.updateCapacityProviderRequestArgsForCall)]
+	fake.updateCapacityProviderRequestArgsForCall = append(fake.updateCapacityProviderRequestArgsForCall, struct {
+		arg1 *ecs.UpdateCapacityProviderInput
+	}{arg1})
+	fake.recordInvocation("UpdateCapacityProviderRequest", []interface{}{arg1})
+	fake.updateCapacityProviderRequestMutex.Unlock()
+	if fake.UpdateCapacityProviderRequestStub != nil {
+		return fake.UpdateCapacityProviderRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.updateCapacityProviderRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderRequestCallCount() int {
+	fake.updateCapacityProviderRequestMutex.RLock()
+	defer fake.updateCapacityProviderRequestMutex.RUnlock()
+	return len(fake.updateCapacityProviderRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderRequestCalls(stub func(*ecs.UpdateCapacityProviderInput) (*request.Request, *ecs.UpdateCapacityProviderOutput)) {
+	fake.updateCapacityProviderRequestMutex.Lock()
+	defer fake.updateCapacityProviderRequestMutex.Unlock()
+	fake.UpdateCapacityProviderRequestStub = stub
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderRequestArgsForCall(i int) *ecs.UpdateCapacityProviderInput {
+	fake.updateCapacityProviderRequestMutex.RLock()
+	defer fake.updateCapacityProviderRequestMutex.RUnlock()
+	argsForCall := fake.updateCapacityProviderRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderRequestReturns(result1 *request.Request, result2 *ecs.UpdateCapacityProviderOutput) {
+	fake.updateCapacityProviderRequestMutex.Lock()
+	defer fake.updateCapacityProviderRequestMutex.Unlock()
+	fake.UpdateCapacityProviderRequestStub = nil
+	fake.updateCapacityProviderRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.UpdateCapacityProviderOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.UpdateCapacityProviderOutput) {
+	fake.updateCapacityProviderRequestMutex.Lock()
+	defer fake.updateCapacityProviderRequestMutex.Unlock()
+	fake.UpdateCapacityProviderRequestStub = nil
+	if fake.updateCapacityProviderRequestReturnsOnCall == nil {
+		fake.updateCapacityProviderRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.UpdateCapacityProviderOutput
+		})
+	}
+	fake.updateCapacityProviderRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.UpdateCapacityProviderOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderWithContext(arg1 context.Context, arg2 *ecs.UpdateCapacityProviderInput, arg3 ...request.Option) (*ecs.UpdateCapacityProviderOutput, error) {
+	fake.updateCapacityProviderWithContextMutex.Lock()
+	ret, specificReturn := fake.updateCapacityProviderWithContextReturnsOnCall[len(fake.updateCapacityProviderWithContextArgsForCall)]
+	fake.updateCapacityProviderWithContextArgsForCall = append(fake.updateCapacityProviderWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.UpdateCapacityProviderInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("UpdateCapacityProviderWithContext", []interface{}{arg1, arg2, arg3})
+	fake.updateCapacityProviderWithContextMutex.Unlock()
+	if fake.UpdateCapacityProviderWithContextStub != nil {
+		return fake.UpdateCapacityProviderWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.updateCapacityProviderWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderWithContextCallCount() int {
+	fake.updateCapacityProviderWithContextMutex.RLock()
+	defer fake.updateCapacityProviderWithContextMutex.RUnlock()
+	return len(fake.updateCapacityProviderWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderWithContextCalls(stub func(context.Context, *ecs.UpdateCapacityProviderInput, ...request.Option) (*ecs.UpdateCapacityProviderOutput, error)) {
+	fake.updateCapacityProviderWithContextMutex.Lock()
+	defer fake.updateCapacityProviderWithContextMutex.Unlock()
+	fake.UpdateCapacityProviderWithContextStub = stub
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderWithContextArgsForCall(i int) (context.Context, *ecs.UpdateCapacityProviderInput, []request.Option) {
+	fake.updateCapacityProviderWithContextMutex.RLock()
+	defer fake.updateCapacityProviderWithContextMutex.RUnlock()
+	argsForCall := fake.updateCapacityProviderWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderWithContextReturns(result1 *ecs.UpdateCapacityProviderOutput, result2 error) {
+	fake.updateCapacityProviderWithContextMutex.Lock()
+	defer fake.updateCapacityProviderWithContextMutex.Unlock()
+	fake.UpdateCapacityProviderWithContextStub = nil
+	fake.updateCapacityProviderWithContextReturns = struct {
+		result1 *ecs.UpdateCapacityProviderOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateCapacityProviderWithContextReturnsOnCall(i int, result1 *ecs.UpdateCapacityProviderOutput, result2 error) {
+	fake.updateCapacityProviderWithContextMutex.Lock()
+	defer fake.updateCapacityProviderWithContextMutex.Unlock()
+	fake.UpdateCapacityProviderWithContextStub = nil
+	if fake.updateCapacityProviderWithContextReturnsOnCall == nil {
+		fake.updateCapacityProviderWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.UpdateCapacityProviderOutput
+			result2 error
+		})
+	}
+	fake.updateCapacityProviderWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.UpdateCapacityProviderOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateClusterSettings(arg1 *ecs.UpdateClusterSettingsInput) (*ecs.UpdateClusterSettingsOutput, error) {
+	fake.updateClusterSettingsMutex.Lock()
+	ret, specificReturn := fake.updateClusterSettingsReturnsOnCall[len(fake.updateClusterSettingsArgsForCall)]
+	fake.updateClusterSettingsArgsForCall = append(fake.updateClusterSettingsArgsForCall, struct {
+		arg1 *ecs.UpdateClusterSettingsInput
+	}{arg1})
+	fake.recordInvocation("UpdateClusterSettings", []interface{}{arg1})
+	fake.updateClusterSettingsMutex.Unlock()
+	if fake.UpdateClusterSettingsStub != nil {
+		return fake.UpdateClusterSettingsStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.updateClusterSettingsReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsCallCount() int {
+	fake.updateClusterSettingsMutex.RLock()
+	defer fake.updateClusterSettingsMutex.RUnlock()
+	return len(fake.updateClusterSettingsArgsForCall)
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsCalls(stub func(*ecs.UpdateClusterSettingsInput) (*ecs.UpdateClusterSettingsOutput, error)) {
+	fake.updateClusterSettingsMutex.Lock()
+	defer fake.updateClusterSettingsMutex.Unlock()
+	fake.UpdateClusterSettingsStub = stub
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsArgsForCall(i int) *ecs.UpdateClusterSettingsInput {
+	fake.updateClusterSettingsMutex.RLock()
+	defer fake.updateClusterSettingsMutex.RUnlock()
+	argsForCall := fake.updateClusterSettingsArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsReturns(result1 *ecs.UpdateClusterSettingsOutput, result2 error) {
+	fake.updateClusterSettingsMutex.Lock()
+	defer fake.updateClusterSettingsMutex.Unlock()
+	fake.UpdateClusterSettingsStub = nil
+	fake.updateClusterSettingsReturns = struct {
+		result1 *ecs.UpdateClusterSettingsOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsReturnsOnCall(i int, result1 *ecs.UpdateClusterSettingsOutput, result2 error) {
+	fake.updateClusterSettingsMutex.Lock()
+	defer fake.updateClusterSettingsMutex.Unlock()
+	fake.UpdateClusterSettingsStub = nil
+	if fake.updateClusterSettingsReturnsOnCall == nil {
+		fake.updateClusterSettingsReturnsOnCall = make(map[int]struct {
+			result1 *ecs.UpdateClusterSettingsOutput
+			result2 error
+		})
+	}
+	fake.updateClusterSettingsReturnsOnCall[i] = struct {
+		result1 *ecs.UpdateClusterSettingsOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsRequest(arg1 *ecs.UpdateClusterSettingsInput) (*request.Request, *ecs.UpdateClusterSettingsOutput) {
+	fake.updateClusterSettingsRequestMutex.Lock()
+	ret, specificReturn := fake.updateClusterSettingsRequestReturnsOnCall[len(fake.updateClusterSettingsRequestArgsForCall)]
+	fake.updateClusterSettingsRequestArgsForCall = append(fake.updateClusterSettingsRequestArgsForCall, struct {
+		arg1 *ecs.UpdateClusterSettingsInput
+	}{arg1})
+	fake.recordInvocation("UpdateClusterSettingsRequest", []interface{}{arg1})
+	fake.updateClusterSettingsRequestMutex.Unlock()
+	if fake.UpdateClusterSettingsRequestStub != nil {
+		return fake.UpdateClusterSettingsRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.updateClusterSettingsRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsRequestCallCount() int {
+	fake.updateClusterSettingsRequestMutex.RLock()
+	defer fake.updateClusterSettingsRequestMutex.RUnlock()
+	return len(fake.updateClusterSettingsRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsRequestCalls(stub func(*ecs.UpdateClusterSettingsInput) (*request.Request, *ecs.UpdateClusterSettingsOutput)) {
+	fake.updateClusterSettingsRequestMutex.Lock()
+	defer fake.updateClusterSettingsRequestMutex.Unlock()
+	fake.UpdateClusterSettingsRequestStub = stub
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsRequestArgsForCall(i int) *ecs.UpdateClusterSettingsInput {
+	fake.updateClusterSettingsRequestMutex.RLock()
+	defer fake.updateClusterSettingsRequestMutex.RUnlock()
+	argsForCall := fake.updateClusterSettingsRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsRequestReturns(result1 *request.Request, result2 *ecs.UpdateClusterSettingsOutput) {
+	fake.updateClusterSettingsRequestMutex.Lock()
+	defer fake.updateClusterSettingsRequestMutex.Unlock()
+	fake.UpdateClusterSettingsRequestStub = nil
+	fake.updateClusterSettingsRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.UpdateClusterSettingsOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.UpdateClusterSettingsOutput) {
+	fake.updateClusterSettingsRequestMutex.Lock()
+	defer fake.updateClusterSettingsRequestMutex.Unlock()
+	fake.UpdateClusterSettingsRequestStub = nil
+	if fake.updateClusterSettingsRequestReturnsOnCall == nil {
+		fake.updateClusterSettingsRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.UpdateClusterSettingsOutput
+		})
+	}
+	fake.updateClusterSettingsRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.UpdateClusterSettingsOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsWithContext(arg1 context.Context, arg2 *ecs.UpdateClusterSettingsInput, arg3 ...request.Option) (*ecs.UpdateClusterSettingsOutput, error) {
+	fake.updateClusterSettingsWithContextMutex.Lock()
+	ret, specificReturn := fake.updateClusterSettingsWithContextReturnsOnCall[len(fake.updateClusterSettingsWithContextArgsForCall)]
+	fake.updateClusterSettingsWithContextArgsForCall = append(fake.updateClusterSettingsWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.UpdateClusterSettingsInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("UpdateClusterSettingsWithContext", []interface{}{arg1, arg2, arg3})
+	fake.updateClusterSettingsWithContextMutex.Unlock()
+	if fake.UpdateClusterSettingsWithContextStub != nil {
+		return fake.UpdateClusterSettingsWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.updateClusterSettingsWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsWithContextCallCount() int {
+	fake.updateClusterSettingsWithContextMutex.RLock()
+	defer fake.updateClusterSettingsWithContextMutex.RUnlock()
+	return len(fake.updateClusterSettingsWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsWithContextCalls(stub func(context.Context, *ecs.UpdateClusterSettingsInput, ...request.Option) (*ecs.UpdateClusterSettingsOutput, error)) {
+	fake.updateClusterSettingsWithContextMutex.Lock()
+	defer fake.updateClusterSettingsWithContextMutex.Unlock()
+	fake.UpdateClusterSettingsWithContextStub = stub
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsWithContextArgsForCall(i int) (context.Context, *ecs.UpdateClusterSettingsInput, []request.Option) {
+	fake.updateClusterSettingsWithContextMutex.RLock()
+	defer fake.updateClusterSettingsWithContextMutex.RUnlock()
+	argsForCall := fake.updateClusterSettingsWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsWithContextReturns(result1 *ecs.UpdateClusterSettingsOutput, result2 error) {
+	fake.updateClusterSettingsWithContextMutex.Lock()
+	defer fake.updateClusterSettingsWithContextMutex.Unlock()
+	fake.UpdateClusterSettingsWithContextStub = nil
+	fake.updateClusterSettingsWithContextReturns = struct {
+		result1 *ecs.UpdateClusterSettingsOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateClusterSettingsWithContextReturnsOnCall(i int, result1 *ecs.UpdateClusterSettingsOutput, result2 error) {
+	fake.updateClusterSettingsWithContextMutex.Lock()
+	defer fake.updateClusterSettingsWithContextMutex.Unlock()
+	fake.UpdateClusterSettingsWithContextStub = nil
+	if fake.updateClusterSettingsWithContextReturnsOnCall == nil {
+		fake.updateClusterSettingsWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.UpdateClusterSettingsOutput
+			result2 error
+		})
+	}
+	fake.updateClusterSettingsWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.UpdateClusterSettingsOutput
 		result2 error
 	}{result1, result2}
 }
@@ -7756,11 +12082,11 @@ func (fake *FakeECSClient) UpdateContainerAgentRequestReturnsOnCall(i int, resul
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) UpdateContainerAgentWithContext(arg1 aws.Context, arg2 *ecs.UpdateContainerAgentInput, arg3 ...request.Option) (*ecs.UpdateContainerAgentOutput, error) {
+func (fake *FakeECSClient) UpdateContainerAgentWithContext(arg1 context.Context, arg2 *ecs.UpdateContainerAgentInput, arg3 ...request.Option) (*ecs.UpdateContainerAgentOutput, error) {
 	fake.updateContainerAgentWithContextMutex.Lock()
 	ret, specificReturn := fake.updateContainerAgentWithContextReturnsOnCall[len(fake.updateContainerAgentWithContextArgsForCall)]
 	fake.updateContainerAgentWithContextArgsForCall = append(fake.updateContainerAgentWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.UpdateContainerAgentInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -7782,13 +12108,13 @@ func (fake *FakeECSClient) UpdateContainerAgentWithContextCallCount() int {
 	return len(fake.updateContainerAgentWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) UpdateContainerAgentWithContextCalls(stub func(aws.Context, *ecs.UpdateContainerAgentInput, ...request.Option) (*ecs.UpdateContainerAgentOutput, error)) {
+func (fake *FakeECSClient) UpdateContainerAgentWithContextCalls(stub func(context.Context, *ecs.UpdateContainerAgentInput, ...request.Option) (*ecs.UpdateContainerAgentOutput, error)) {
 	fake.updateContainerAgentWithContextMutex.Lock()
 	defer fake.updateContainerAgentWithContextMutex.Unlock()
 	fake.UpdateContainerAgentWithContextStub = stub
 }
 
-func (fake *FakeECSClient) UpdateContainerAgentWithContextArgsForCall(i int) (aws.Context, *ecs.UpdateContainerAgentInput, []request.Option) {
+func (fake *FakeECSClient) UpdateContainerAgentWithContextArgsForCall(i int) (context.Context, *ecs.UpdateContainerAgentInput, []request.Option) {
 	fake.updateContainerAgentWithContextMutex.RLock()
 	defer fake.updateContainerAgentWithContextMutex.RUnlock()
 	argsForCall := fake.updateContainerAgentWithContextArgsForCall[i]
@@ -7947,11 +12273,11 @@ func (fake *FakeECSClient) UpdateContainerInstancesStateRequestReturnsOnCall(i i
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) UpdateContainerInstancesStateWithContext(arg1 aws.Context, arg2 *ecs.UpdateContainerInstancesStateInput, arg3 ...request.Option) (*ecs.UpdateContainerInstancesStateOutput, error) {
+func (fake *FakeECSClient) UpdateContainerInstancesStateWithContext(arg1 context.Context, arg2 *ecs.UpdateContainerInstancesStateInput, arg3 ...request.Option) (*ecs.UpdateContainerInstancesStateOutput, error) {
 	fake.updateContainerInstancesStateWithContextMutex.Lock()
 	ret, specificReturn := fake.updateContainerInstancesStateWithContextReturnsOnCall[len(fake.updateContainerInstancesStateWithContextArgsForCall)]
 	fake.updateContainerInstancesStateWithContextArgsForCall = append(fake.updateContainerInstancesStateWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.UpdateContainerInstancesStateInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -7973,13 +12299,13 @@ func (fake *FakeECSClient) UpdateContainerInstancesStateWithContextCallCount() i
 	return len(fake.updateContainerInstancesStateWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) UpdateContainerInstancesStateWithContextCalls(stub func(aws.Context, *ecs.UpdateContainerInstancesStateInput, ...request.Option) (*ecs.UpdateContainerInstancesStateOutput, error)) {
+func (fake *FakeECSClient) UpdateContainerInstancesStateWithContextCalls(stub func(context.Context, *ecs.UpdateContainerInstancesStateInput, ...request.Option) (*ecs.UpdateContainerInstancesStateOutput, error)) {
 	fake.updateContainerInstancesStateWithContextMutex.Lock()
 	defer fake.updateContainerInstancesStateWithContextMutex.Unlock()
 	fake.UpdateContainerInstancesStateWithContextStub = stub
 }
 
-func (fake *FakeECSClient) UpdateContainerInstancesStateWithContextArgsForCall(i int) (aws.Context, *ecs.UpdateContainerInstancesStateInput, []request.Option) {
+func (fake *FakeECSClient) UpdateContainerInstancesStateWithContextArgsForCall(i int) (context.Context, *ecs.UpdateContainerInstancesStateInput, []request.Option) {
 	fake.updateContainerInstancesStateWithContextMutex.RLock()
 	defer fake.updateContainerInstancesStateWithContextMutex.RUnlock()
 	argsForCall := fake.updateContainerInstancesStateWithContextArgsForCall[i]
@@ -8075,6 +12401,197 @@ func (fake *FakeECSClient) UpdateServiceReturnsOnCall(i int, result1 *ecs.Update
 	}{result1, result2}
 }
 
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSet(arg1 *ecs.UpdateServicePrimaryTaskSetInput) (*ecs.UpdateServicePrimaryTaskSetOutput, error) {
+	fake.updateServicePrimaryTaskSetMutex.Lock()
+	ret, specificReturn := fake.updateServicePrimaryTaskSetReturnsOnCall[len(fake.updateServicePrimaryTaskSetArgsForCall)]
+	fake.updateServicePrimaryTaskSetArgsForCall = append(fake.updateServicePrimaryTaskSetArgsForCall, struct {
+		arg1 *ecs.UpdateServicePrimaryTaskSetInput
+	}{arg1})
+	fake.recordInvocation("UpdateServicePrimaryTaskSet", []interface{}{arg1})
+	fake.updateServicePrimaryTaskSetMutex.Unlock()
+	if fake.UpdateServicePrimaryTaskSetStub != nil {
+		return fake.UpdateServicePrimaryTaskSetStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.updateServicePrimaryTaskSetReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetCallCount() int {
+	fake.updateServicePrimaryTaskSetMutex.RLock()
+	defer fake.updateServicePrimaryTaskSetMutex.RUnlock()
+	return len(fake.updateServicePrimaryTaskSetArgsForCall)
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetCalls(stub func(*ecs.UpdateServicePrimaryTaskSetInput) (*ecs.UpdateServicePrimaryTaskSetOutput, error)) {
+	fake.updateServicePrimaryTaskSetMutex.Lock()
+	defer fake.updateServicePrimaryTaskSetMutex.Unlock()
+	fake.UpdateServicePrimaryTaskSetStub = stub
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetArgsForCall(i int) *ecs.UpdateServicePrimaryTaskSetInput {
+	fake.updateServicePrimaryTaskSetMutex.RLock()
+	defer fake.updateServicePrimaryTaskSetMutex.RUnlock()
+	argsForCall := fake.updateServicePrimaryTaskSetArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetReturns(result1 *ecs.UpdateServicePrimaryTaskSetOutput, result2 error) {
+	fake.updateServicePrimaryTaskSetMutex.Lock()
+	defer fake.updateServicePrimaryTaskSetMutex.Unlock()
+	fake.UpdateServicePrimaryTaskSetStub = nil
+	fake.updateServicePrimaryTaskSetReturns = struct {
+		result1 *ecs.UpdateServicePrimaryTaskSetOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetReturnsOnCall(i int, result1 *ecs.UpdateServicePrimaryTaskSetOutput, result2 error) {
+	fake.updateServicePrimaryTaskSetMutex.Lock()
+	defer fake.updateServicePrimaryTaskSetMutex.Unlock()
+	fake.UpdateServicePrimaryTaskSetStub = nil
+	if fake.updateServicePrimaryTaskSetReturnsOnCall == nil {
+		fake.updateServicePrimaryTaskSetReturnsOnCall = make(map[int]struct {
+			result1 *ecs.UpdateServicePrimaryTaskSetOutput
+			result2 error
+		})
+	}
+	fake.updateServicePrimaryTaskSetReturnsOnCall[i] = struct {
+		result1 *ecs.UpdateServicePrimaryTaskSetOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetRequest(arg1 *ecs.UpdateServicePrimaryTaskSetInput) (*request.Request, *ecs.UpdateServicePrimaryTaskSetOutput) {
+	fake.updateServicePrimaryTaskSetRequestMutex.Lock()
+	ret, specificReturn := fake.updateServicePrimaryTaskSetRequestReturnsOnCall[len(fake.updateServicePrimaryTaskSetRequestArgsForCall)]
+	fake.updateServicePrimaryTaskSetRequestArgsForCall = append(fake.updateServicePrimaryTaskSetRequestArgsForCall, struct {
+		arg1 *ecs.UpdateServicePrimaryTaskSetInput
+	}{arg1})
+	fake.recordInvocation("UpdateServicePrimaryTaskSetRequest", []interface{}{arg1})
+	fake.updateServicePrimaryTaskSetRequestMutex.Unlock()
+	if fake.UpdateServicePrimaryTaskSetRequestStub != nil {
+		return fake.UpdateServicePrimaryTaskSetRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.updateServicePrimaryTaskSetRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetRequestCallCount() int {
+	fake.updateServicePrimaryTaskSetRequestMutex.RLock()
+	defer fake.updateServicePrimaryTaskSetRequestMutex.RUnlock()
+	return len(fake.updateServicePrimaryTaskSetRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetRequestCalls(stub func(*ecs.UpdateServicePrimaryTaskSetInput) (*request.Request, *ecs.UpdateServicePrimaryTaskSetOutput)) {
+	fake.updateServicePrimaryTaskSetRequestMutex.Lock()
+	defer fake.updateServicePrimaryTaskSetRequestMutex.Unlock()
+	fake.UpdateServicePrimaryTaskSetRequestStub = stub
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetRequestArgsForCall(i int) *ecs.UpdateServicePrimaryTaskSetInput {
+	fake.updateServicePrimaryTaskSetRequestMutex.RLock()
+	defer fake.updateServicePrimaryTaskSetRequestMutex.RUnlock()
+	argsForCall := fake.updateServicePrimaryTaskSetRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetRequestReturns(result1 *request.Request, result2 *ecs.UpdateServicePrimaryTaskSetOutput) {
+	fake.updateServicePrimaryTaskSetRequestMutex.Lock()
+	defer fake.updateServicePrimaryTaskSetRequestMutex.Unlock()
+	fake.UpdateServicePrimaryTaskSetRequestStub = nil
+	fake.updateServicePrimaryTaskSetRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.UpdateServicePrimaryTaskSetOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.UpdateServicePrimaryTaskSetOutput) {
+	fake.updateServicePrimaryTaskSetRequestMutex.Lock()
+	defer fake.updateServicePrimaryTaskSetRequestMutex.Unlock()
+	fake.UpdateServicePrimaryTaskSetRequestStub = nil
+	if fake.updateServicePrimaryTaskSetRequestReturnsOnCall == nil {
+		fake.updateServicePrimaryTaskSetRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.UpdateServicePrimaryTaskSetOutput
+		})
+	}
+	fake.updateServicePrimaryTaskSetRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.UpdateServicePrimaryTaskSetOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetWithContext(arg1 context.Context, arg2 *ecs.UpdateServicePrimaryTaskSetInput, arg3 ...request.Option) (*ecs.UpdateServicePrimaryTaskSetOutput, error) {
+	fake.updateServicePrimaryTaskSetWithContextMutex.Lock()
+	ret, specificReturn := fake.updateServicePrimaryTaskSetWithContextReturnsOnCall[len(fake.updateServicePrimaryTaskSetWithContextArgsForCall)]
+	fake.updateServicePrimaryTaskSetWithContextArgsForCall = append(fake.updateServicePrimaryTaskSetWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.UpdateServicePrimaryTaskSetInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("UpdateServicePrimaryTaskSetWithContext", []interface{}{arg1, arg2, arg3})
+	fake.updateServicePrimaryTaskSetWithContextMutex.Unlock()
+	if fake.UpdateServicePrimaryTaskSetWithContextStub != nil {
+		return fake.UpdateServicePrimaryTaskSetWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.updateServicePrimaryTaskSetWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetWithContextCallCount() int {
+	fake.updateServicePrimaryTaskSetWithContextMutex.RLock()
+	defer fake.updateServicePrimaryTaskSetWithContextMutex.RUnlock()
+	return len(fake.updateServicePrimaryTaskSetWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetWithContextCalls(stub func(context.Context, *ecs.UpdateServicePrimaryTaskSetInput, ...request.Option) (*ecs.UpdateServicePrimaryTaskSetOutput, error)) {
+	fake.updateServicePrimaryTaskSetWithContextMutex.Lock()
+	defer fake.updateServicePrimaryTaskSetWithContextMutex.Unlock()
+	fake.UpdateServicePrimaryTaskSetWithContextStub = stub
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetWithContextArgsForCall(i int) (context.Context, *ecs.UpdateServicePrimaryTaskSetInput, []request.Option) {
+	fake.updateServicePrimaryTaskSetWithContextMutex.RLock()
+	defer fake.updateServicePrimaryTaskSetWithContextMutex.RUnlock()
+	argsForCall := fake.updateServicePrimaryTaskSetWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetWithContextReturns(result1 *ecs.UpdateServicePrimaryTaskSetOutput, result2 error) {
+	fake.updateServicePrimaryTaskSetWithContextMutex.Lock()
+	defer fake.updateServicePrimaryTaskSetWithContextMutex.Unlock()
+	fake.UpdateServicePrimaryTaskSetWithContextStub = nil
+	fake.updateServicePrimaryTaskSetWithContextReturns = struct {
+		result1 *ecs.UpdateServicePrimaryTaskSetOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateServicePrimaryTaskSetWithContextReturnsOnCall(i int, result1 *ecs.UpdateServicePrimaryTaskSetOutput, result2 error) {
+	fake.updateServicePrimaryTaskSetWithContextMutex.Lock()
+	defer fake.updateServicePrimaryTaskSetWithContextMutex.Unlock()
+	fake.UpdateServicePrimaryTaskSetWithContextStub = nil
+	if fake.updateServicePrimaryTaskSetWithContextReturnsOnCall == nil {
+		fake.updateServicePrimaryTaskSetWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.UpdateServicePrimaryTaskSetOutput
+			result2 error
+		})
+	}
+	fake.updateServicePrimaryTaskSetWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.UpdateServicePrimaryTaskSetOutput
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeECSClient) UpdateServiceRequest(arg1 *ecs.UpdateServiceInput) (*request.Request, *ecs.UpdateServiceOutput) {
 	fake.updateServiceRequestMutex.Lock()
 	ret, specificReturn := fake.updateServiceRequestReturnsOnCall[len(fake.updateServiceRequestArgsForCall)]
@@ -8138,11 +12655,11 @@ func (fake *FakeECSClient) UpdateServiceRequestReturnsOnCall(i int, result1 *req
 	}{result1, result2}
 }
 
-func (fake *FakeECSClient) UpdateServiceWithContext(arg1 aws.Context, arg2 *ecs.UpdateServiceInput, arg3 ...request.Option) (*ecs.UpdateServiceOutput, error) {
+func (fake *FakeECSClient) UpdateServiceWithContext(arg1 context.Context, arg2 *ecs.UpdateServiceInput, arg3 ...request.Option) (*ecs.UpdateServiceOutput, error) {
 	fake.updateServiceWithContextMutex.Lock()
 	ret, specificReturn := fake.updateServiceWithContextReturnsOnCall[len(fake.updateServiceWithContextArgsForCall)]
 	fake.updateServiceWithContextArgsForCall = append(fake.updateServiceWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.UpdateServiceInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
@@ -8164,13 +12681,13 @@ func (fake *FakeECSClient) UpdateServiceWithContextCallCount() int {
 	return len(fake.updateServiceWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) UpdateServiceWithContextCalls(stub func(aws.Context, *ecs.UpdateServiceInput, ...request.Option) (*ecs.UpdateServiceOutput, error)) {
+func (fake *FakeECSClient) UpdateServiceWithContextCalls(stub func(context.Context, *ecs.UpdateServiceInput, ...request.Option) (*ecs.UpdateServiceOutput, error)) {
 	fake.updateServiceWithContextMutex.Lock()
 	defer fake.updateServiceWithContextMutex.Unlock()
 	fake.UpdateServiceWithContextStub = stub
 }
 
-func (fake *FakeECSClient) UpdateServiceWithContextArgsForCall(i int) (aws.Context, *ecs.UpdateServiceInput, []request.Option) {
+func (fake *FakeECSClient) UpdateServiceWithContextArgsForCall(i int) (context.Context, *ecs.UpdateServiceInput, []request.Option) {
 	fake.updateServiceWithContextMutex.RLock()
 	defer fake.updateServiceWithContextMutex.RUnlock()
 	argsForCall := fake.updateServiceWithContextArgsForCall[i]
@@ -8199,6 +12716,197 @@ func (fake *FakeECSClient) UpdateServiceWithContextReturnsOnCall(i int, result1 
 	}
 	fake.updateServiceWithContextReturnsOnCall[i] = struct {
 		result1 *ecs.UpdateServiceOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateTaskSet(arg1 *ecs.UpdateTaskSetInput) (*ecs.UpdateTaskSetOutput, error) {
+	fake.updateTaskSetMutex.Lock()
+	ret, specificReturn := fake.updateTaskSetReturnsOnCall[len(fake.updateTaskSetArgsForCall)]
+	fake.updateTaskSetArgsForCall = append(fake.updateTaskSetArgsForCall, struct {
+		arg1 *ecs.UpdateTaskSetInput
+	}{arg1})
+	fake.recordInvocation("UpdateTaskSet", []interface{}{arg1})
+	fake.updateTaskSetMutex.Unlock()
+	if fake.UpdateTaskSetStub != nil {
+		return fake.UpdateTaskSetStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.updateTaskSetReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) UpdateTaskSetCallCount() int {
+	fake.updateTaskSetMutex.RLock()
+	defer fake.updateTaskSetMutex.RUnlock()
+	return len(fake.updateTaskSetArgsForCall)
+}
+
+func (fake *FakeECSClient) UpdateTaskSetCalls(stub func(*ecs.UpdateTaskSetInput) (*ecs.UpdateTaskSetOutput, error)) {
+	fake.updateTaskSetMutex.Lock()
+	defer fake.updateTaskSetMutex.Unlock()
+	fake.UpdateTaskSetStub = stub
+}
+
+func (fake *FakeECSClient) UpdateTaskSetArgsForCall(i int) *ecs.UpdateTaskSetInput {
+	fake.updateTaskSetMutex.RLock()
+	defer fake.updateTaskSetMutex.RUnlock()
+	argsForCall := fake.updateTaskSetArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) UpdateTaskSetReturns(result1 *ecs.UpdateTaskSetOutput, result2 error) {
+	fake.updateTaskSetMutex.Lock()
+	defer fake.updateTaskSetMutex.Unlock()
+	fake.UpdateTaskSetStub = nil
+	fake.updateTaskSetReturns = struct {
+		result1 *ecs.UpdateTaskSetOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateTaskSetReturnsOnCall(i int, result1 *ecs.UpdateTaskSetOutput, result2 error) {
+	fake.updateTaskSetMutex.Lock()
+	defer fake.updateTaskSetMutex.Unlock()
+	fake.UpdateTaskSetStub = nil
+	if fake.updateTaskSetReturnsOnCall == nil {
+		fake.updateTaskSetReturnsOnCall = make(map[int]struct {
+			result1 *ecs.UpdateTaskSetOutput
+			result2 error
+		})
+	}
+	fake.updateTaskSetReturnsOnCall[i] = struct {
+		result1 *ecs.UpdateTaskSetOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateTaskSetRequest(arg1 *ecs.UpdateTaskSetInput) (*request.Request, *ecs.UpdateTaskSetOutput) {
+	fake.updateTaskSetRequestMutex.Lock()
+	ret, specificReturn := fake.updateTaskSetRequestReturnsOnCall[len(fake.updateTaskSetRequestArgsForCall)]
+	fake.updateTaskSetRequestArgsForCall = append(fake.updateTaskSetRequestArgsForCall, struct {
+		arg1 *ecs.UpdateTaskSetInput
+	}{arg1})
+	fake.recordInvocation("UpdateTaskSetRequest", []interface{}{arg1})
+	fake.updateTaskSetRequestMutex.Unlock()
+	if fake.UpdateTaskSetRequestStub != nil {
+		return fake.UpdateTaskSetRequestStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.updateTaskSetRequestReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) UpdateTaskSetRequestCallCount() int {
+	fake.updateTaskSetRequestMutex.RLock()
+	defer fake.updateTaskSetRequestMutex.RUnlock()
+	return len(fake.updateTaskSetRequestArgsForCall)
+}
+
+func (fake *FakeECSClient) UpdateTaskSetRequestCalls(stub func(*ecs.UpdateTaskSetInput) (*request.Request, *ecs.UpdateTaskSetOutput)) {
+	fake.updateTaskSetRequestMutex.Lock()
+	defer fake.updateTaskSetRequestMutex.Unlock()
+	fake.UpdateTaskSetRequestStub = stub
+}
+
+func (fake *FakeECSClient) UpdateTaskSetRequestArgsForCall(i int) *ecs.UpdateTaskSetInput {
+	fake.updateTaskSetRequestMutex.RLock()
+	defer fake.updateTaskSetRequestMutex.RUnlock()
+	argsForCall := fake.updateTaskSetRequestArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeECSClient) UpdateTaskSetRequestReturns(result1 *request.Request, result2 *ecs.UpdateTaskSetOutput) {
+	fake.updateTaskSetRequestMutex.Lock()
+	defer fake.updateTaskSetRequestMutex.Unlock()
+	fake.UpdateTaskSetRequestStub = nil
+	fake.updateTaskSetRequestReturns = struct {
+		result1 *request.Request
+		result2 *ecs.UpdateTaskSetOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateTaskSetRequestReturnsOnCall(i int, result1 *request.Request, result2 *ecs.UpdateTaskSetOutput) {
+	fake.updateTaskSetRequestMutex.Lock()
+	defer fake.updateTaskSetRequestMutex.Unlock()
+	fake.UpdateTaskSetRequestStub = nil
+	if fake.updateTaskSetRequestReturnsOnCall == nil {
+		fake.updateTaskSetRequestReturnsOnCall = make(map[int]struct {
+			result1 *request.Request
+			result2 *ecs.UpdateTaskSetOutput
+		})
+	}
+	fake.updateTaskSetRequestReturnsOnCall[i] = struct {
+		result1 *request.Request
+		result2 *ecs.UpdateTaskSetOutput
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateTaskSetWithContext(arg1 context.Context, arg2 *ecs.UpdateTaskSetInput, arg3 ...request.Option) (*ecs.UpdateTaskSetOutput, error) {
+	fake.updateTaskSetWithContextMutex.Lock()
+	ret, specificReturn := fake.updateTaskSetWithContextReturnsOnCall[len(fake.updateTaskSetWithContextArgsForCall)]
+	fake.updateTaskSetWithContextArgsForCall = append(fake.updateTaskSetWithContextArgsForCall, struct {
+		arg1 context.Context
+		arg2 *ecs.UpdateTaskSetInput
+		arg3 []request.Option
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("UpdateTaskSetWithContext", []interface{}{arg1, arg2, arg3})
+	fake.updateTaskSetWithContextMutex.Unlock()
+	if fake.UpdateTaskSetWithContextStub != nil {
+		return fake.UpdateTaskSetWithContextStub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.updateTaskSetWithContextReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeECSClient) UpdateTaskSetWithContextCallCount() int {
+	fake.updateTaskSetWithContextMutex.RLock()
+	defer fake.updateTaskSetWithContextMutex.RUnlock()
+	return len(fake.updateTaskSetWithContextArgsForCall)
+}
+
+func (fake *FakeECSClient) UpdateTaskSetWithContextCalls(stub func(context.Context, *ecs.UpdateTaskSetInput, ...request.Option) (*ecs.UpdateTaskSetOutput, error)) {
+	fake.updateTaskSetWithContextMutex.Lock()
+	defer fake.updateTaskSetWithContextMutex.Unlock()
+	fake.UpdateTaskSetWithContextStub = stub
+}
+
+func (fake *FakeECSClient) UpdateTaskSetWithContextArgsForCall(i int) (context.Context, *ecs.UpdateTaskSetInput, []request.Option) {
+	fake.updateTaskSetWithContextMutex.RLock()
+	defer fake.updateTaskSetWithContextMutex.RUnlock()
+	argsForCall := fake.updateTaskSetWithContextArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeECSClient) UpdateTaskSetWithContextReturns(result1 *ecs.UpdateTaskSetOutput, result2 error) {
+	fake.updateTaskSetWithContextMutex.Lock()
+	defer fake.updateTaskSetWithContextMutex.Unlock()
+	fake.UpdateTaskSetWithContextStub = nil
+	fake.updateTaskSetWithContextReturns = struct {
+		result1 *ecs.UpdateTaskSetOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeECSClient) UpdateTaskSetWithContextReturnsOnCall(i int, result1 *ecs.UpdateTaskSetOutput, result2 error) {
+	fake.updateTaskSetWithContextMutex.Lock()
+	defer fake.updateTaskSetWithContextMutex.Unlock()
+	fake.UpdateTaskSetWithContextStub = nil
+	if fake.updateTaskSetWithContextReturnsOnCall == nil {
+		fake.updateTaskSetWithContextReturnsOnCall = make(map[int]struct {
+			result1 *ecs.UpdateTaskSetOutput
+			result2 error
+		})
+	}
+	fake.updateTaskSetWithContextReturnsOnCall[i] = struct {
+		result1 *ecs.UpdateTaskSetOutput
 		result2 error
 	}{result1, result2}
 }
@@ -8263,11 +12971,11 @@ func (fake *FakeECSClient) WaitUntilServicesInactiveReturnsOnCall(i int, result1
 	}{result1}
 }
 
-func (fake *FakeECSClient) WaitUntilServicesInactiveWithContext(arg1 aws.Context, arg2 *ecs.DescribeServicesInput, arg3 ...request.WaiterOption) error {
+func (fake *FakeECSClient) WaitUntilServicesInactiveWithContext(arg1 context.Context, arg2 *ecs.DescribeServicesInput, arg3 ...request.WaiterOption) error {
 	fake.waitUntilServicesInactiveWithContextMutex.Lock()
 	ret, specificReturn := fake.waitUntilServicesInactiveWithContextReturnsOnCall[len(fake.waitUntilServicesInactiveWithContextArgsForCall)]
 	fake.waitUntilServicesInactiveWithContextArgsForCall = append(fake.waitUntilServicesInactiveWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeServicesInput
 		arg3 []request.WaiterOption
 	}{arg1, arg2, arg3})
@@ -8289,13 +12997,13 @@ func (fake *FakeECSClient) WaitUntilServicesInactiveWithContextCallCount() int {
 	return len(fake.waitUntilServicesInactiveWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) WaitUntilServicesInactiveWithContextCalls(stub func(aws.Context, *ecs.DescribeServicesInput, ...request.WaiterOption) error) {
+func (fake *FakeECSClient) WaitUntilServicesInactiveWithContextCalls(stub func(context.Context, *ecs.DescribeServicesInput, ...request.WaiterOption) error) {
 	fake.waitUntilServicesInactiveWithContextMutex.Lock()
 	defer fake.waitUntilServicesInactiveWithContextMutex.Unlock()
 	fake.WaitUntilServicesInactiveWithContextStub = stub
 }
 
-func (fake *FakeECSClient) WaitUntilServicesInactiveWithContextArgsForCall(i int) (aws.Context, *ecs.DescribeServicesInput, []request.WaiterOption) {
+func (fake *FakeECSClient) WaitUntilServicesInactiveWithContextArgsForCall(i int) (context.Context, *ecs.DescribeServicesInput, []request.WaiterOption) {
 	fake.waitUntilServicesInactiveWithContextMutex.RLock()
 	defer fake.waitUntilServicesInactiveWithContextMutex.RUnlock()
 	argsForCall := fake.waitUntilServicesInactiveWithContextArgsForCall[i]
@@ -8385,11 +13093,11 @@ func (fake *FakeECSClient) WaitUntilServicesStableReturnsOnCall(i int, result1 e
 	}{result1}
 }
 
-func (fake *FakeECSClient) WaitUntilServicesStableWithContext(arg1 aws.Context, arg2 *ecs.DescribeServicesInput, arg3 ...request.WaiterOption) error {
+func (fake *FakeECSClient) WaitUntilServicesStableWithContext(arg1 context.Context, arg2 *ecs.DescribeServicesInput, arg3 ...request.WaiterOption) error {
 	fake.waitUntilServicesStableWithContextMutex.Lock()
 	ret, specificReturn := fake.waitUntilServicesStableWithContextReturnsOnCall[len(fake.waitUntilServicesStableWithContextArgsForCall)]
 	fake.waitUntilServicesStableWithContextArgsForCall = append(fake.waitUntilServicesStableWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeServicesInput
 		arg3 []request.WaiterOption
 	}{arg1, arg2, arg3})
@@ -8411,13 +13119,13 @@ func (fake *FakeECSClient) WaitUntilServicesStableWithContextCallCount() int {
 	return len(fake.waitUntilServicesStableWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) WaitUntilServicesStableWithContextCalls(stub func(aws.Context, *ecs.DescribeServicesInput, ...request.WaiterOption) error) {
+func (fake *FakeECSClient) WaitUntilServicesStableWithContextCalls(stub func(context.Context, *ecs.DescribeServicesInput, ...request.WaiterOption) error) {
 	fake.waitUntilServicesStableWithContextMutex.Lock()
 	defer fake.waitUntilServicesStableWithContextMutex.Unlock()
 	fake.WaitUntilServicesStableWithContextStub = stub
 }
 
-func (fake *FakeECSClient) WaitUntilServicesStableWithContextArgsForCall(i int) (aws.Context, *ecs.DescribeServicesInput, []request.WaiterOption) {
+func (fake *FakeECSClient) WaitUntilServicesStableWithContextArgsForCall(i int) (context.Context, *ecs.DescribeServicesInput, []request.WaiterOption) {
 	fake.waitUntilServicesStableWithContextMutex.RLock()
 	defer fake.waitUntilServicesStableWithContextMutex.RUnlock()
 	argsForCall := fake.waitUntilServicesStableWithContextArgsForCall[i]
@@ -8507,11 +13215,11 @@ func (fake *FakeECSClient) WaitUntilTasksRunningReturnsOnCall(i int, result1 err
 	}{result1}
 }
 
-func (fake *FakeECSClient) WaitUntilTasksRunningWithContext(arg1 aws.Context, arg2 *ecs.DescribeTasksInput, arg3 ...request.WaiterOption) error {
+func (fake *FakeECSClient) WaitUntilTasksRunningWithContext(arg1 context.Context, arg2 *ecs.DescribeTasksInput, arg3 ...request.WaiterOption) error {
 	fake.waitUntilTasksRunningWithContextMutex.Lock()
 	ret, specificReturn := fake.waitUntilTasksRunningWithContextReturnsOnCall[len(fake.waitUntilTasksRunningWithContextArgsForCall)]
 	fake.waitUntilTasksRunningWithContextArgsForCall = append(fake.waitUntilTasksRunningWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeTasksInput
 		arg3 []request.WaiterOption
 	}{arg1, arg2, arg3})
@@ -8533,13 +13241,13 @@ func (fake *FakeECSClient) WaitUntilTasksRunningWithContextCallCount() int {
 	return len(fake.waitUntilTasksRunningWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) WaitUntilTasksRunningWithContextCalls(stub func(aws.Context, *ecs.DescribeTasksInput, ...request.WaiterOption) error) {
+func (fake *FakeECSClient) WaitUntilTasksRunningWithContextCalls(stub func(context.Context, *ecs.DescribeTasksInput, ...request.WaiterOption) error) {
 	fake.waitUntilTasksRunningWithContextMutex.Lock()
 	defer fake.waitUntilTasksRunningWithContextMutex.Unlock()
 	fake.WaitUntilTasksRunningWithContextStub = stub
 }
 
-func (fake *FakeECSClient) WaitUntilTasksRunningWithContextArgsForCall(i int) (aws.Context, *ecs.DescribeTasksInput, []request.WaiterOption) {
+func (fake *FakeECSClient) WaitUntilTasksRunningWithContextArgsForCall(i int) (context.Context, *ecs.DescribeTasksInput, []request.WaiterOption) {
 	fake.waitUntilTasksRunningWithContextMutex.RLock()
 	defer fake.waitUntilTasksRunningWithContextMutex.RUnlock()
 	argsForCall := fake.waitUntilTasksRunningWithContextArgsForCall[i]
@@ -8629,11 +13337,11 @@ func (fake *FakeECSClient) WaitUntilTasksStoppedReturnsOnCall(i int, result1 err
 	}{result1}
 }
 
-func (fake *FakeECSClient) WaitUntilTasksStoppedWithContext(arg1 aws.Context, arg2 *ecs.DescribeTasksInput, arg3 ...request.WaiterOption) error {
+func (fake *FakeECSClient) WaitUntilTasksStoppedWithContext(arg1 context.Context, arg2 *ecs.DescribeTasksInput, arg3 ...request.WaiterOption) error {
 	fake.waitUntilTasksStoppedWithContextMutex.Lock()
 	ret, specificReturn := fake.waitUntilTasksStoppedWithContextReturnsOnCall[len(fake.waitUntilTasksStoppedWithContextArgsForCall)]
 	fake.waitUntilTasksStoppedWithContextArgsForCall = append(fake.waitUntilTasksStoppedWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *ecs.DescribeTasksInput
 		arg3 []request.WaiterOption
 	}{arg1, arg2, arg3})
@@ -8655,13 +13363,13 @@ func (fake *FakeECSClient) WaitUntilTasksStoppedWithContextCallCount() int {
 	return len(fake.waitUntilTasksStoppedWithContextArgsForCall)
 }
 
-func (fake *FakeECSClient) WaitUntilTasksStoppedWithContextCalls(stub func(aws.Context, *ecs.DescribeTasksInput, ...request.WaiterOption) error) {
+func (fake *FakeECSClient) WaitUntilTasksStoppedWithContextCalls(stub func(context.Context, *ecs.DescribeTasksInput, ...request.WaiterOption) error) {
 	fake.waitUntilTasksStoppedWithContextMutex.Lock()
 	defer fake.waitUntilTasksStoppedWithContextMutex.Unlock()
 	fake.WaitUntilTasksStoppedWithContextStub = stub
 }
 
-func (fake *FakeECSClient) WaitUntilTasksStoppedWithContextArgsForCall(i int) (aws.Context, *ecs.DescribeTasksInput, []request.WaiterOption) {
+func (fake *FakeECSClient) WaitUntilTasksStoppedWithContextArgsForCall(i int) (context.Context, *ecs.DescribeTasksInput, []request.WaiterOption) {
 	fake.waitUntilTasksStoppedWithContextMutex.RLock()
 	defer fake.waitUntilTasksStoppedWithContextMutex.RUnlock()
 	argsForCall := fake.waitUntilTasksStoppedWithContextArgsForCall[i]
@@ -8694,6 +13402,12 @@ func (fake *FakeECSClient) WaitUntilTasksStoppedWithContextReturnsOnCall(i int, 
 func (fake *FakeECSClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
+	fake.createCapacityProviderMutex.RLock()
+	defer fake.createCapacityProviderMutex.RUnlock()
+	fake.createCapacityProviderRequestMutex.RLock()
+	defer fake.createCapacityProviderRequestMutex.RUnlock()
+	fake.createCapacityProviderWithContextMutex.RLock()
+	defer fake.createCapacityProviderWithContextMutex.RUnlock()
 	fake.createClusterMutex.RLock()
 	defer fake.createClusterMutex.RUnlock()
 	fake.createClusterRequestMutex.RLock()
@@ -8706,12 +13420,30 @@ func (fake *FakeECSClient) Invocations() map[string][][]interface{} {
 	defer fake.createServiceRequestMutex.RUnlock()
 	fake.createServiceWithContextMutex.RLock()
 	defer fake.createServiceWithContextMutex.RUnlock()
+	fake.createTaskSetMutex.RLock()
+	defer fake.createTaskSetMutex.RUnlock()
+	fake.createTaskSetRequestMutex.RLock()
+	defer fake.createTaskSetRequestMutex.RUnlock()
+	fake.createTaskSetWithContextMutex.RLock()
+	defer fake.createTaskSetWithContextMutex.RUnlock()
+	fake.deleteAccountSettingMutex.RLock()
+	defer fake.deleteAccountSettingMutex.RUnlock()
+	fake.deleteAccountSettingRequestMutex.RLock()
+	defer fake.deleteAccountSettingRequestMutex.RUnlock()
+	fake.deleteAccountSettingWithContextMutex.RLock()
+	defer fake.deleteAccountSettingWithContextMutex.RUnlock()
 	fake.deleteAttributesMutex.RLock()
 	defer fake.deleteAttributesMutex.RUnlock()
 	fake.deleteAttributesRequestMutex.RLock()
 	defer fake.deleteAttributesRequestMutex.RUnlock()
 	fake.deleteAttributesWithContextMutex.RLock()
 	defer fake.deleteAttributesWithContextMutex.RUnlock()
+	fake.deleteCapacityProviderMutex.RLock()
+	defer fake.deleteCapacityProviderMutex.RUnlock()
+	fake.deleteCapacityProviderRequestMutex.RLock()
+	defer fake.deleteCapacityProviderRequestMutex.RUnlock()
+	fake.deleteCapacityProviderWithContextMutex.RLock()
+	defer fake.deleteCapacityProviderWithContextMutex.RUnlock()
 	fake.deleteClusterMutex.RLock()
 	defer fake.deleteClusterMutex.RUnlock()
 	fake.deleteClusterRequestMutex.RLock()
@@ -8724,6 +13456,12 @@ func (fake *FakeECSClient) Invocations() map[string][][]interface{} {
 	defer fake.deleteServiceRequestMutex.RUnlock()
 	fake.deleteServiceWithContextMutex.RLock()
 	defer fake.deleteServiceWithContextMutex.RUnlock()
+	fake.deleteTaskSetMutex.RLock()
+	defer fake.deleteTaskSetMutex.RUnlock()
+	fake.deleteTaskSetRequestMutex.RLock()
+	defer fake.deleteTaskSetRequestMutex.RUnlock()
+	fake.deleteTaskSetWithContextMutex.RLock()
+	defer fake.deleteTaskSetWithContextMutex.RUnlock()
 	fake.deregisterContainerInstanceMutex.RLock()
 	defer fake.deregisterContainerInstanceMutex.RUnlock()
 	fake.deregisterContainerInstanceRequestMutex.RLock()
@@ -8736,6 +13474,12 @@ func (fake *FakeECSClient) Invocations() map[string][][]interface{} {
 	defer fake.deregisterTaskDefinitionRequestMutex.RUnlock()
 	fake.deregisterTaskDefinitionWithContextMutex.RLock()
 	defer fake.deregisterTaskDefinitionWithContextMutex.RUnlock()
+	fake.describeCapacityProvidersMutex.RLock()
+	defer fake.describeCapacityProvidersMutex.RUnlock()
+	fake.describeCapacityProvidersRequestMutex.RLock()
+	defer fake.describeCapacityProvidersRequestMutex.RUnlock()
+	fake.describeCapacityProvidersWithContextMutex.RLock()
+	defer fake.describeCapacityProvidersWithContextMutex.RUnlock()
 	fake.describeClustersMutex.RLock()
 	defer fake.describeClustersMutex.RUnlock()
 	fake.describeClustersRequestMutex.RLock()
@@ -8760,6 +13504,12 @@ func (fake *FakeECSClient) Invocations() map[string][][]interface{} {
 	defer fake.describeTaskDefinitionRequestMutex.RUnlock()
 	fake.describeTaskDefinitionWithContextMutex.RLock()
 	defer fake.describeTaskDefinitionWithContextMutex.RUnlock()
+	fake.describeTaskSetsMutex.RLock()
+	defer fake.describeTaskSetsMutex.RUnlock()
+	fake.describeTaskSetsRequestMutex.RLock()
+	defer fake.describeTaskSetsRequestMutex.RUnlock()
+	fake.describeTaskSetsWithContextMutex.RLock()
+	defer fake.describeTaskSetsWithContextMutex.RUnlock()
 	fake.describeTasksMutex.RLock()
 	defer fake.describeTasksMutex.RUnlock()
 	fake.describeTasksRequestMutex.RLock()
@@ -8772,8 +13522,22 @@ func (fake *FakeECSClient) Invocations() map[string][][]interface{} {
 	defer fake.discoverPollEndpointRequestMutex.RUnlock()
 	fake.discoverPollEndpointWithContextMutex.RLock()
 	defer fake.discoverPollEndpointWithContextMutex.RUnlock()
+	fake.listAccountSettingsMutex.RLock()
+	defer fake.listAccountSettingsMutex.RUnlock()
+	fake.listAccountSettingsPagesMutex.RLock()
+	defer fake.listAccountSettingsPagesMutex.RUnlock()
+	fake.listAccountSettingsPagesWithContextMutex.RLock()
+	defer fake.listAccountSettingsPagesWithContextMutex.RUnlock()
+	fake.listAccountSettingsRequestMutex.RLock()
+	defer fake.listAccountSettingsRequestMutex.RUnlock()
+	fake.listAccountSettingsWithContextMutex.RLock()
+	defer fake.listAccountSettingsWithContextMutex.RUnlock()
 	fake.listAttributesMutex.RLock()
 	defer fake.listAttributesMutex.RUnlock()
+	fake.listAttributesPagesMutex.RLock()
+	defer fake.listAttributesPagesMutex.RUnlock()
+	fake.listAttributesPagesWithContextMutex.RLock()
+	defer fake.listAttributesPagesWithContextMutex.RUnlock()
 	fake.listAttributesRequestMutex.RLock()
 	defer fake.listAttributesRequestMutex.RUnlock()
 	fake.listAttributesWithContextMutex.RLock()
@@ -8808,6 +13572,12 @@ func (fake *FakeECSClient) Invocations() map[string][][]interface{} {
 	defer fake.listServicesRequestMutex.RUnlock()
 	fake.listServicesWithContextMutex.RLock()
 	defer fake.listServicesWithContextMutex.RUnlock()
+	fake.listTagsForResourceMutex.RLock()
+	defer fake.listTagsForResourceMutex.RUnlock()
+	fake.listTagsForResourceRequestMutex.RLock()
+	defer fake.listTagsForResourceRequestMutex.RUnlock()
+	fake.listTagsForResourceWithContextMutex.RLock()
+	defer fake.listTagsForResourceWithContextMutex.RUnlock()
 	fake.listTaskDefinitionFamiliesMutex.RLock()
 	defer fake.listTaskDefinitionFamiliesMutex.RUnlock()
 	fake.listTaskDefinitionFamiliesPagesMutex.RLock()
@@ -8838,12 +13608,30 @@ func (fake *FakeECSClient) Invocations() map[string][][]interface{} {
 	defer fake.listTasksRequestMutex.RUnlock()
 	fake.listTasksWithContextMutex.RLock()
 	defer fake.listTasksWithContextMutex.RUnlock()
+	fake.putAccountSettingMutex.RLock()
+	defer fake.putAccountSettingMutex.RUnlock()
+	fake.putAccountSettingDefaultMutex.RLock()
+	defer fake.putAccountSettingDefaultMutex.RUnlock()
+	fake.putAccountSettingDefaultRequestMutex.RLock()
+	defer fake.putAccountSettingDefaultRequestMutex.RUnlock()
+	fake.putAccountSettingDefaultWithContextMutex.RLock()
+	defer fake.putAccountSettingDefaultWithContextMutex.RUnlock()
+	fake.putAccountSettingRequestMutex.RLock()
+	defer fake.putAccountSettingRequestMutex.RUnlock()
+	fake.putAccountSettingWithContextMutex.RLock()
+	defer fake.putAccountSettingWithContextMutex.RUnlock()
 	fake.putAttributesMutex.RLock()
 	defer fake.putAttributesMutex.RUnlock()
 	fake.putAttributesRequestMutex.RLock()
 	defer fake.putAttributesRequestMutex.RUnlock()
 	fake.putAttributesWithContextMutex.RLock()
 	defer fake.putAttributesWithContextMutex.RUnlock()
+	fake.putClusterCapacityProvidersMutex.RLock()
+	defer fake.putClusterCapacityProvidersMutex.RUnlock()
+	fake.putClusterCapacityProvidersRequestMutex.RLock()
+	defer fake.putClusterCapacityProvidersRequestMutex.RUnlock()
+	fake.putClusterCapacityProvidersWithContextMutex.RLock()
+	defer fake.putClusterCapacityProvidersWithContextMutex.RUnlock()
 	fake.registerContainerInstanceMutex.RLock()
 	defer fake.registerContainerInstanceMutex.RUnlock()
 	fake.registerContainerInstanceRequestMutex.RLock()
@@ -8874,6 +13662,12 @@ func (fake *FakeECSClient) Invocations() map[string][][]interface{} {
 	defer fake.stopTaskRequestMutex.RUnlock()
 	fake.stopTaskWithContextMutex.RLock()
 	defer fake.stopTaskWithContextMutex.RUnlock()
+	fake.submitAttachmentStateChangesMutex.RLock()
+	defer fake.submitAttachmentStateChangesMutex.RUnlock()
+	fake.submitAttachmentStateChangesRequestMutex.RLock()
+	defer fake.submitAttachmentStateChangesRequestMutex.RUnlock()
+	fake.submitAttachmentStateChangesWithContextMutex.RLock()
+	defer fake.submitAttachmentStateChangesWithContextMutex.RUnlock()
 	fake.submitContainerStateChangeMutex.RLock()
 	defer fake.submitContainerStateChangeMutex.RUnlock()
 	fake.submitContainerStateChangeRequestMutex.RLock()
@@ -8886,6 +13680,30 @@ func (fake *FakeECSClient) Invocations() map[string][][]interface{} {
 	defer fake.submitTaskStateChangeRequestMutex.RUnlock()
 	fake.submitTaskStateChangeWithContextMutex.RLock()
 	defer fake.submitTaskStateChangeWithContextMutex.RUnlock()
+	fake.tagResourceMutex.RLock()
+	defer fake.tagResourceMutex.RUnlock()
+	fake.tagResourceRequestMutex.RLock()
+	defer fake.tagResourceRequestMutex.RUnlock()
+	fake.tagResourceWithContextMutex.RLock()
+	defer fake.tagResourceWithContextMutex.RUnlock()
+	fake.untagResourceMutex.RLock()
+	defer fake.untagResourceMutex.RUnlock()
+	fake.untagResourceRequestMutex.RLock()
+	defer fake.untagResourceRequestMutex.RUnlock()
+	fake.untagResourceWithContextMutex.RLock()
+	defer fake.untagResourceWithContextMutex.RUnlock()
+	fake.updateCapacityProviderMutex.RLock()
+	defer fake.updateCapacityProviderMutex.RUnlock()
+	fake.updateCapacityProviderRequestMutex.RLock()
+	defer fake.updateCapacityProviderRequestMutex.RUnlock()
+	fake.updateCapacityProviderWithContextMutex.RLock()
+	defer fake.updateCapacityProviderWithContextMutex.RUnlock()
+	fake.updateClusterSettingsMutex.RLock()
+	defer fake.updateClusterSettingsMutex.RUnlock()
+	fake.updateClusterSettingsRequestMutex.RLock()
+	defer fake.updateClusterSettingsRequestMutex.RUnlock()
+	fake.updateClusterSettingsWithContextMutex.RLock()
+	defer fake.updateClusterSettingsWithContextMutex.RUnlock()
 	fake.updateContainerAgentMutex.RLock()
 	defer fake.updateContainerAgentMutex.RUnlock()
 	fake.updateContainerAgentRequestMutex.RLock()
@@ -8900,10 +13718,22 @@ func (fake *FakeECSClient) Invocations() map[string][][]interface{} {
 	defer fake.updateContainerInstancesStateWithContextMutex.RUnlock()
 	fake.updateServiceMutex.RLock()
 	defer fake.updateServiceMutex.RUnlock()
+	fake.updateServicePrimaryTaskSetMutex.RLock()
+	defer fake.updateServicePrimaryTaskSetMutex.RUnlock()
+	fake.updateServicePrimaryTaskSetRequestMutex.RLock()
+	defer fake.updateServicePrimaryTaskSetRequestMutex.RUnlock()
+	fake.updateServicePrimaryTaskSetWithContextMutex.RLock()
+	defer fake.updateServicePrimaryTaskSetWithContextMutex.RUnlock()
 	fake.updateServiceRequestMutex.RLock()
 	defer fake.updateServiceRequestMutex.RUnlock()
 	fake.updateServiceWithContextMutex.RLock()
 	defer fake.updateServiceWithContextMutex.RUnlock()
+	fake.updateTaskSetMutex.RLock()
+	defer fake.updateTaskSetMutex.RUnlock()
+	fake.updateTaskSetRequestMutex.RLock()
+	defer fake.updateTaskSetRequestMutex.RUnlock()
+	fake.updateTaskSetWithContextMutex.RLock()
+	defer fake.updateTaskSetWithContextMutex.RUnlock()
 	fake.waitUntilServicesInactiveMutex.RLock()
 	defer fake.waitUntilServicesInactiveMutex.RUnlock()
 	fake.waitUntilServicesInactiveWithContextMutex.RLock()
