@@ -2,11 +2,11 @@
 package fakes
 
 import (
-	sync "sync"
+	"context"
+	"sync"
 
-	aws "github.com/aws/aws-sdk-go/aws"
-	s3manager "github.com/aws/aws-sdk-go/service/s3/s3manager"
-	supervisor "github.com/segmentio/ctlstore/pkg/supervisor"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/segmentio/ctlstore/pkg/supervisor"
 )
 
 type FakeS3Uploader struct {
@@ -24,10 +24,10 @@ type FakeS3Uploader struct {
 		result1 *s3manager.UploadOutput
 		result2 error
 	}
-	UploadWithContextStub        func(aws.Context, *s3manager.UploadInput, ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error)
+	UploadWithContextStub        func(context.Context, *s3manager.UploadInput, ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error)
 	uploadWithContextMutex       sync.RWMutex
 	uploadWithContextArgsForCall []struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *s3manager.UploadInput
 		arg3 []func(*s3manager.Uploader)
 	}
@@ -107,11 +107,11 @@ func (fake *FakeS3Uploader) UploadReturnsOnCall(i int, result1 *s3manager.Upload
 	}{result1, result2}
 }
 
-func (fake *FakeS3Uploader) UploadWithContext(arg1 aws.Context, arg2 *s3manager.UploadInput, arg3 ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
+func (fake *FakeS3Uploader) UploadWithContext(arg1 context.Context, arg2 *s3manager.UploadInput, arg3 ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
 	fake.uploadWithContextMutex.Lock()
 	ret, specificReturn := fake.uploadWithContextReturnsOnCall[len(fake.uploadWithContextArgsForCall)]
 	fake.uploadWithContextArgsForCall = append(fake.uploadWithContextArgsForCall, struct {
-		arg1 aws.Context
+		arg1 context.Context
 		arg2 *s3manager.UploadInput
 		arg3 []func(*s3manager.Uploader)
 	}{arg1, arg2, arg3})
@@ -133,13 +133,13 @@ func (fake *FakeS3Uploader) UploadWithContextCallCount() int {
 	return len(fake.uploadWithContextArgsForCall)
 }
 
-func (fake *FakeS3Uploader) UploadWithContextCalls(stub func(aws.Context, *s3manager.UploadInput, ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error)) {
+func (fake *FakeS3Uploader) UploadWithContextCalls(stub func(context.Context, *s3manager.UploadInput, ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error)) {
 	fake.uploadWithContextMutex.Lock()
 	defer fake.uploadWithContextMutex.Unlock()
 	fake.UploadWithContextStub = stub
 }
 
-func (fake *FakeS3Uploader) UploadWithContextArgsForCall(i int) (aws.Context, *s3manager.UploadInput, []func(*s3manager.Uploader)) {
+func (fake *FakeS3Uploader) UploadWithContextArgsForCall(i int) (context.Context, *s3manager.UploadInput, []func(*s3manager.Uploader)) {
 	fake.uploadWithContextMutex.RLock()
 	defer fake.uploadWithContextMutex.RUnlock()
 	argsForCall := fake.uploadWithContextArgsForCall[i]
