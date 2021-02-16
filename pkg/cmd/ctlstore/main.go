@@ -54,7 +54,7 @@ type reflectorCliConfig struct {
 	UpstreamDSN           string             `conf:"upstream-dsn" help:"Upstream DSN (e.g. path to file if sqlite3)" validate:"nonzero"`
 	UpstreamLedgerTable   string             `conf:"upstream-ledger-table" help:"Table on the upstream to look for statement ledger"`
 	BootstrapURL          string             `conf:"bootstrap-url" help:"Bootstraps LDB from an S3 URL"`
-	BootstrapRegion       string             `conf:"boostrap-region" help:"If specified, indicates which region in which the S3 bucket lives"`
+	BootstrapRegion       string             `conf:"bootstrap-region" help:"If specified, indicates which region in which the S3 bucket lives"`
 	PollInterval          time.Duration      `conf:"poll-interval" help:"How often to pull the upstream" validate:"nonzero"`
 	PollJitterCoefficient float64            `conf:"poll-jitter-coefficient" help:"Coefficient for poll jittering"`
 	QueryBlockSize        int                `conf:"query-block-size" help:"Number of ledger entries to get at once"`
