@@ -21,6 +21,7 @@ type downloadTo interface {
 }
 
 type S3Downloader struct {
+	Region              string // optional
 	Bucket              string
 	Key                 string
 	S3Client            S3Client
@@ -70,7 +71,13 @@ func (d *S3Downloader) getS3Client() (S3Client, error) {
 	if d.S3Client != nil {
 		return d.S3Client, nil
 	}
-	sess := session.Must(session.NewSession())
+	configs := []*aws.Config{}
+	if d.Region != "" {
+		configs = append(configs, &aws.Config{
+			Region: aws.String(d.Region),
+		})
+	}
+	sess := session.Must(session.NewSession(configs...))
 	client := s3.New(sess)
 	return client, nil
 }
