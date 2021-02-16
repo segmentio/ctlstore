@@ -144,7 +144,7 @@ func (t *MetaTable) AsCreateTableDDL() (string, error) {
 	for _, field := range t.Fields {
 		sqlType, ok := fieldTypeToSQLMap[field.FieldType][t.DriverName]
 		if !ok {
-			return "", errors.New("Invalid driver+type combo")
+			return "", fmt.Errorf("Invalid driver+type combo %s:%s", schema.FieldTypeStringsByFieldType[field.FieldType], t.DriverName)
 		}
 
 		line := SqlSprintf("$1 $2", dblquote(field.Name.Name), sqlType)
@@ -165,7 +165,7 @@ func (t *MetaTable) AsCreateTableDDL() (string, error) {
 func (t *MetaTable) AddColumnDDL(fn schema.FieldName, ft schema.FieldType) (string, error) {
 	ftString, ok := fieldTypeToSQLMap[ft][t.DriverName]
 	if !ok {
-		return "", errors.New("Invalid driver+type combo")
+		return "", fmt.Errorf("Invalid driver+type combo %s:%s", schema.FieldTypeStringsByFieldType[ft], t.DriverName)
 	}
 
 	tableName := schema.LDBTableName(t.FamilyName, t.TableName)
