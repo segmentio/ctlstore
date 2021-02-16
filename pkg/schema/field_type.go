@@ -9,6 +9,14 @@ func (ft FieldType) CanBeKey() bool {
 	return ft == FTString || ft == FTInteger || ft == FTByteString
 }
 
+func (ft FieldType) String() string {
+	if s, ok := FieldTypeStringsByFieldType[ft]; ok {
+		return s
+	}
+
+	return "unknown"
+}
+
 const (
 	_ FieldType = iota
 	FTString
