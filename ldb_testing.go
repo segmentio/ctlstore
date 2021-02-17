@@ -16,8 +16,9 @@ import (
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
 )
 
-// SetupLDBForTest changes the global default LDB path to the specified
-// path. A temporary directory should be passed here.
+// NewLDBTestUtil changes the global default LDB path to a temporary path.
+//
+// This function is NOT concurrency safe.
 func NewLDBTestUtil(t testing.TB) (*LDBTestUtil, func()) {
 	tmpDir, err := ioutil.TempDir("", "ldb_test")
 	if err != nil {
