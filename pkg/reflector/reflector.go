@@ -61,6 +61,7 @@ type ReflectorConfig struct {
 	LedgerHealth     ledger.HealthConfig
 	IsSupervisor     bool
 	LDBWriteCallback ldbwriter.LDBWriteCallback // optional
+	BootstrapRegion  string                     // optional
 }
 
 // Printable returns a "pretty" stringified version of the config
@@ -91,6 +92,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 					url:                 config.BootstrapURL,
 					path:                config.LDBPath,
 					restartOnS3NotFound: config.IsSupervisor, // allow supervisor to restart ldb
+					region:              config.BootstrapRegion,
 				})
 				if err != nil {
 					return nil, err
@@ -309,6 +311,7 @@ func (r *Reflector) Close() error {
 type ldbBootstrapConfig struct {
 	url                 string
 	path                string
+	region              string        // optional
 	downloadTo          downloadTo    // for testing
 	retryDelay          time.Duration // for testing
 	restartOnS3NotFound bool          // whether or not to recreate the ldb if no snapshot exists
@@ -320,7 +323,7 @@ func bootstrapLDB(cfg ldbBootstrapConfig) error {
 		shortURL = shortURL[:256]
 	}
 
-	events.Log("Bootstrap: %{url}s to %{path}s", shortURL, cfg.path)
+	events.Log("Bootstrap: %{url}s (region:%{region}q) to %{path}s", shortURL, cfg.region, cfg.path)
 
 	parsed, err := url.Parse(cfg.url)
 	if err != nil {
@@ -338,6 +341,7 @@ func bootstrapLDB(cfg ldbBootstrapConfig) error {
 		bucket := parsed.Host
 		key := parsed.Path
 		dler = &S3Downloader{
+			Region:              cfg.region,
 			Bucket:              bucket,
 			Key:                 key,
 			StartOverOnNotFound: cfg.restartOnS3NotFound,

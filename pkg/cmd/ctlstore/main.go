@@ -54,6 +54,7 @@ type reflectorCliConfig struct {
 	UpstreamDSN           string             `conf:"upstream-dsn" help:"Upstream DSN (e.g. path to file if sqlite3)" validate:"nonzero"`
 	UpstreamLedgerTable   string             `conf:"upstream-ledger-table" help:"Table on the upstream to look for statement ledger"`
 	BootstrapURL          string             `conf:"bootstrap-url" help:"Bootstraps LDB from an S3 URL"`
+	BootstrapRegion       string             `conf:"bootstrap-region" help:"If specified, indicates which region in which the S3 bucket lives"`
 	PollInterval          time.Duration      `conf:"poll-interval" help:"How often to pull the upstream" validate:"nonzero"`
 	PollJitterCoefficient float64            `conf:"poll-jitter-coefficient" help:"Coefficient for poll jittering"`
 	QueryBlockSize        int                `conf:"query-block-size" help:"Number of ledger entries to get at once"`
@@ -552,11 +553,12 @@ func newReflector(cliCfg reflectorCliConfig, isSupervisor bool) (*reflectorpkg.R
 		events.Log("DEPRECATION NOTICE: use --disable-ecs-behavior instead of --disable to control this ledger monitor behavior")
 	}
 	return reflectorpkg.ReflectorFromConfig(reflectorpkg.ReflectorConfig{
-		LDBPath:       cliCfg.LDBPath,
-		ChangelogPath: cliCfg.ChangelogPath,
-		ChangelogSize: cliCfg.ChangelogSize,
-		BootstrapURL:  cliCfg.BootstrapURL,
-		IsSupervisor:  isSupervisor,
+		LDBPath:         cliCfg.LDBPath,
+		ChangelogPath:   cliCfg.ChangelogPath,
+		ChangelogSize:   cliCfg.ChangelogSize,
+		BootstrapURL:    cliCfg.BootstrapURL,
+		BootstrapRegion: cliCfg.BootstrapRegion,
+		IsSupervisor:    isSupervisor,
 		LedgerHealth: ledger.HealthConfig{
 			DisableECSBehavior:      cliCfg.LedgerHealth.Disable || cliCfg.LedgerHealth.DisableECSBehavior,
 			MaxHealthyLatency:       cliCfg.LedgerHealth.MaxHealthyLatency,
