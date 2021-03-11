@@ -134,6 +134,9 @@ github.com/segmentio/objconv v1.0.1 h1:QjfLzwriJj40JibCV3MGSEiAoXixbp4ybhwfTB8RX
 github.com/segmentio/objconv v1.0.1/go.mod h1:auayaH5k3137Cl4SoXTgrzQcuQDmvuVtZgS0fb1Ahys=
 github.com/segmentio/stats/v4 v4.5.2 h1:9uPA7f+OsnLWaTKlCgDS2qswzS9k1Yljf1Spxbvg/OQ=
 github.com/segmentio/stats/v4 v4.5.2/go.mod h1:LsaahUJR7iiSs8mnkvQvdQ/RLHAS5adGLxuntg0ydGo=
+github.com/segmentio/stats/v4 v4.6.2 h1:++YfKPTOPTZxE1DvavnpeBvB3hlDIm7IM+ULFzbCxCU=
+github.com/segmentio/stats/v4 v4.6.2/go.mod h1:gycE91tyiQw6xg3MT674cVi+CfQ69qHsoNNhXG0C7YQ=
+github.com/segmentio/vpcinfo v0.1.10/go.mod h1:KEIWiWRE/KLh90mOzOY0QkFWT7ObUYLp978tICtquqU=
 github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d h1:zE9ykElWQ6/NYmHa3jpm/yHnI4xSofP+UP6SpjHcSeM=
 github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d/go.mod h1:OnSkiWE9lh6wB0YB77sQom3nweQdgAjqCqsofrRNTgc=
