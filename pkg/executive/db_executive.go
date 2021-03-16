@@ -124,17 +124,17 @@ func (e *dbExecutive) CreateTable(familyName string, tableName string, fieldName
 	}
 	defer dlw.Close()
 
+	seq, err := dlw.Add(ctx, logDDL)
+	if err != nil {
+		return err
+	}
+
 	_, err = tx.ExecContext(ctx, ddl)
 	if err != nil {
 		if strings.Index(err.Error(), "Error 1050:") == 0 ||
 			strings.Contains(err.Error(), "already exists") {
 			return &errs.ConflictError{Err: "Table already exists"}
 		}
-		return err
-	}
-
-	seq, err := dlw.Add(ctx, logDDL)
-	if err != nil {
 		return err
 	}
 
