@@ -120,6 +120,11 @@ func (e *dbExecutive) CreateTable(familyName string, tableName string, fieldName
 	}
 	defer tx.Rollback()
 
+	err = e.takeLedgerLock(ctx, tx)
+	if err != nil {
+		return errors.Wrap(err, "take ledger lock")
+	}
+
 	dlw := dmlLedgerWriter{
 		Tx:        tx,
 		TableName: dmlLedgerTableName,
@@ -220,6 +225,11 @@ func (e *dbExecutive) AddFields(familyName string, tableName string, fieldNames 
 				return err
 			}
 			defer tx.Rollback()
+
+			err = e.takeLedgerLock(ctx, tx)
+			if err != nil {
+				return errors.Wrap(err, "take ledger lock")
+			}
 
 			// We first write the column modification to the DML ledger within the transaction.
 			// It's important that this is done befored the DDL is applied to the ctldb, as
