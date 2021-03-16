@@ -385,7 +385,7 @@ func executive(ctx context.Context, args []string) {
 	cliCfg := executiveCliConfig{
 		Bind:                           "",
 		CtlDBDSN:                       "",
-		HandlerTimeout:                 5 * time.Second,
+		HandlerTimeout:                 30 * time.Second,
 		Dogstatsd:                      defaultDogstatsdConfig(),
 		WriterLimitPeriod:              time.Minute,
 		WriterLimit:                    1000,

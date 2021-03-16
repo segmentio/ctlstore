@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/ldb"
@@ -15,6 +16,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
 	"github.com/segmentio/events/v2"
+	"github.com/segmentio/go-sqlite3"
 )
 
 const dmlLedgerTableName = "ctlstore_dml_ledger"
@@ -124,18 +126,18 @@ func (e *dbExecutive) CreateTable(familyName string, tableName string, fieldName
 	}
 	defer dlw.Close()
 
-	_, err = tx.ExecContext(ctx, ddl)
+	seq, err := dlw.Add(ctx, logDDL)
+	if err != nil {
+		return errors.Wrap(err, "apply dml")
+	}
+
+	_, err = e.applyDDL(ctx, tx, ddl)
 	if err != nil {
 		if strings.Index(err.Error(), "Error 1050:") == 0 ||
 			strings.Contains(err.Error(), "already exists") {
 			return &errs.ConflictError{Err: "Table already exists"}
 		}
-		return err
-	}
-
-	seq, err := dlw.Add(ctx, logDDL)
-	if err != nil {
-		return err
+		return errors.Wrap(err, "apply ddl")
 	}
 
 	err = tx.Commit()
@@ -146,6 +148,26 @@ func (e *dbExecutive) CreateTable(familyName string, tableName string, fieldName
 	events.Log("Successfully created new table `%{tableName}s` at seq %{seq}v", tableName, seq)
 
 	return nil
+}
+
+// applyDDL executes the DDL in the tx if the backing store is sqlite, and outside of the
+// tx if the backing store is mysql. The reason for this is that sqlite treats ddl transactionally,
+// while mysql does not. When DDL is executed as part of an ongoing tx, mysql implicitly commits
+// the transaction, preventing the ability to roll back any statements previously applied as
+// part of the transaction.
+func (e *dbExecutive) applyDDL(ctx context.Context, tx *sql.Tx, ddl string) (sql.Result, error) {
+	switch e.DB.Driver().(type) {
+	case *mysql.MySQLDriver:
+		// mysql does not support transactional ddl, so we must execute this
+		// statement outside of the current tx to prevent it from being implicitly
+		// committed by the ddl
+		return e.DB.ExecContext(ctx, ddl)
+	case *sqlite3.SQLiteDriver:
+		// sqlite supports transactional ddl
+		return tx.ExecContext(ctx, ddl)
+	default:
+		return nil, errors.Errorf("Unknown driver: %T", e.DB.Driver())
+	}
 }
 
 func (e *dbExecutive) AddFields(familyName string, tableName string, fieldNames []string, fieldTypes []schema.FieldType) error {
@@ -198,26 +220,33 @@ func (e *dbExecutive) AddFields(familyName string, tableName string, fieldNames 
 				return err
 			}
 			defer tx.Rollback()
-			dlw := dmlLedgerWriter{
-				Tx:        tx,
-				TableName: dmlLedgerTableName,
-			}
+
+			// We first write the column modification to the DML ledger within the transaction.
+			// It's important that this is done befored the DDL is applied to the ctldb, as
+			// the DDL is not able to be rolled back. In this way, if the DDL fails, the DML
+			// can be rolled back.
+			dlw := dmlLedgerWriter{Tx: tx, TableName: dmlLedgerTableName}
 			defer dlw.Close()
-			_, err = tx.ExecContext(ctx, ddl)
+			seq, err := dlw.Add(ctx, logDDL)
+			if err != nil {
+				return errors.Wrap(err, "add dml")
+			}
+
+			// Next, apply the DDL to the ctldb. If the DDL fails, return the err, which will
+			// roll back the transaction under which the DML was written to the ledger.
+			_, err = e.applyDDL(ctx, tx, ddl)
 			if err != nil {
 				if strings.Index(err.Error(), "Error 1060:") == 0 || // mysql
 					strings.Contains(err.Error(), "duplicate column name") { // sqlite
 					return &errs.ConflictError{Err: "Column already exists"}
 				}
-				return err
+				return errors.Wrap(err, "apply ddl")
 			}
-			seq, err := dlw.Add(ctx, logDDL)
-			if err != nil {
-				return err
-			}
+
+			// if the DDL succeeds, commit the transaction
 			err = tx.Commit()
 			if err != nil {
-				return err
+				return errors.Wrap(err, "commit tx")
 			}
 			events.Log("Successfully created new field `%{fieldName}s %{fieldType}v` on table %{tableName}s at seq %{seq}v", fieldName, fieldType, tableName, seq)
 			return nil

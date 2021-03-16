@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -292,11 +293,44 @@ func testDBExecutiveRegisterWriter(t *testing.T, dbType string) {
 	require.Equal(t, err, ErrWriterAlreadyExists)
 }
 
+func queryDMLTable(t *testing.T, db *sql.DB, limit int) []string {
+	sql := "select statement from ctlstore_dml_ledger order by seq desc"
+	if limit > 0 {
+		sql += " limit " + strconv.Itoa(limit)
+	}
+	stRows, err := db.Query("select statement from ctlstore_dml_ledger order by seq desc limit 6")
+	require.NoError(t, err)
+	var statements []string
+	for stRows.Next() {
+		var statement string
+		err := stRows.Scan(&statement)
+		require.NoError(t, err)
+		statements = append(statements, statement)
+	}
+	require.NoError(t, stRows.Err())
+	return statements
+}
+
 func testDBExecutiveAddFields(t *testing.T, dbType string) {
 	u := newDbExecTestUtil(t, dbType)
 	defer u.Close()
 
-	err := u.e.CreateTable("family1",
+	addFields := func() error {
+		return u.e.AddFields("family1",
+			"table2",
+			[]string{"field7", "field8", "field9", "field10", "field11", "field12"},
+			[]schema.FieldType{schema.FTString, schema.FTInteger, schema.FTByteString, schema.FTDecimal, schema.FTText, schema.FTBinary},
+		)
+	}
+
+	// first verify that we cannot add to the table if it does not already exist.
+	err := addFields()
+	require.Error(t, err)
+	// also verify that no DML exists
+	dmls := queryDMLTable(t, u.db, -1)
+	require.Empty(t, dmls)
+
+	err = u.e.CreateTable("family1",
 		"table2",
 		[]string{"field1", "field2", "field3", "field4", "field5", "field6"},
 		[]schema.FieldType{schema.FTString, schema.FTInteger, schema.FTByteString, schema.FTDecimal, schema.FTText, schema.FTBinary},
@@ -306,14 +340,12 @@ func testDBExecutiveAddFields(t *testing.T, dbType string) {
 		t.Fatalf("Unexpected error calling CreateTable: %+v", err)
 	}
 
-	err = u.e.AddFields("family1",
-		"table2",
-		[]string{"field7", "field8", "field9", "field10", "field11", "field12"},
-		[]schema.FieldType{schema.FTString, schema.FTInteger, schema.FTByteString, schema.FTDecimal, schema.FTText, schema.FTBinary},
-	)
+	err = addFields()
 	if err != nil {
 		t.Fatalf("Unexpected error calling UpdateTable: %+v", err)
 	}
+
+	// ensure that the table was modified correctly in the ctldb
 
 	res, err := u.db.Exec(`INSERT into family1___table2
 		(field1,field2,field3,field4,field5,field6,field7,field8,field9,field10,field11,field12)
@@ -328,6 +360,18 @@ func testDBExecutiveAddFields(t *testing.T, dbType string) {
 	if rows != int64(1) {
 		t.Fatal(rows)
 	}
+
+	// ensure that the DML was added to the ledger
+	statements := queryDMLTable(t, u.db, 6)
+	require.EqualValues(t, []string{
+		"ALTER TABLE family1___table2 ADD COLUMN \"field12\" BLOB",
+		"ALTER TABLE family1___table2 ADD COLUMN \"field11\" TEXT",
+		"ALTER TABLE family1___table2 ADD COLUMN \"field10\" REAL",
+		"ALTER TABLE family1___table2 ADD COLUMN \"field9\" BLOB(255)",
+		"ALTER TABLE family1___table2 ADD COLUMN \"field8\" INTEGER",
+		"ALTER TABLE family1___table2 ADD COLUMN \"field7\" VARCHAR(191)",
+	}, statements)
+
 	err = u.e.AddFields("family1",
 		"table2",
 		[]string{"field7", "field8", "field9", "field10", "field11", "field12"},
@@ -342,15 +386,24 @@ func testDBExecutiveCreateTable(t *testing.T, dbType string) {
 	u := newDbExecTestUtil(t, dbType)
 	defer u.Close()
 
-	err := u.e.CreateTable("family1",
-		"table2",
-		[]string{"field1", "field2", "field3", "field4", "field5", "field6"},
-		[]schema.FieldType{schema.FTString, schema.FTInteger, schema.FTByteString, schema.FTDecimal, schema.FTText, schema.FTBinary},
-		[]string{"field1", "field2", "field3"},
-	)
-	if err != nil {
-		t.Fatalf("Unexpected error calling CreateTable: %+v", err)
+	createTable := func() error {
+		return u.e.CreateTable("family1",
+			"table2",
+			[]string{"field1", "field2", "field3", "field4", "field5", "field6"},
+			[]schema.FieldType{schema.FTString, schema.FTInteger, schema.FTByteString, schema.FTDecimal, schema.FTText, schema.FTBinary},
+			[]string{"field1", "field2", "field3"},
+		)
 	}
+	err := createTable()
+	require.NoError(t, err)
+	dmls := queryDMLTable(t, u.db, -1)
+	require.Len(t, dmls, 1) // one DML should exist to create the table
+
+	// try to create the table again, verify it fails, and verify that the ledger is correct
+	err = createTable()
+	require.Error(t, err)
+	dmls = queryDMLTable(t, u.db, -1)
+	require.Len(t, dmls, 1) // there should still only be one DML
 
 	// Just check that an empty table exists at all, because the field
 	// creation logic gets checked by sqlgen unit tests
