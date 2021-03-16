@@ -965,6 +965,11 @@ func (e *dbExecutive) DropTable(table schema.FamilyTable) error {
 	}
 	defer tx.Rollback()
 
+	err = e.takeLedgerLock(ctx, tx)
+	if err != nil {
+		return errors.Wrap(err, "take ledger lock")
+	}
+
 	dlw := dmlLedgerWriter{
 		Tx:        tx,
 		TableName: dmlLedgerTableName,
@@ -1031,6 +1036,11 @@ func (e *dbExecutive) ClearTable(table schema.FamilyTable) error {
 		return errors.Wrap(err, "error beginning transaction")
 	}
 	defer tx.Rollback()
+
+	err = e.takeLedgerLock(ctx, tx)
+	if err != nil {
+		return errors.Wrap(err, "take ledger lock")
+	}
 
 	dlw := dmlLedgerWriter{
 		Tx:        tx,
