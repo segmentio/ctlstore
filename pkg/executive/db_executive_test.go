@@ -116,23 +116,24 @@ var (
 func TestAllDBExecutive(t *testing.T) {
 	dbTypes := []string{"mysql", "sqlite3"}
 	testFns := map[string]dbExecTestFn{
-		"testDBExecutiveCreateFamily":         testDBExecutiveCreateFamily,
-		"testDBExecutiveCreateTable":          testDBExecutiveCreateTable,
-		"testDBExecutiveAddFields":            testDBExecutiveAddFields,
-		"testDBExecutiveAddFieldsLocksLedger": testDBExecutiveAddFieldsLocksLedger,
-		"testDBExecutiveFetchFamilyByName":    testDBExecutiveFetchFamilyByName,
-		"testDBExecutiveMutate":               testDBExecutiveMutate,
-		"testDBExecutiveGetWriterCookie":      testDBExecutiveGetWriterCookie,
-		"testDBExecutiveSetWriterCookie":      testDBExecutiveSetWriterCookie,
-		"testFetchMetaTableByName":            testFetchMetaTableByName,
-		"testDBExecutiveRegisterWriter":       testDBExecutiveRegisterWriter,
-		"testDBExecutiveReadRow":              testDBExecutiveReadRow,
-		"testDBLimiter":                       testDBLimiter,
-		"testDBExecutiveWriterRates":          testDBExecutiveWriterRates,
-		"testDBExecutiveTableLimits":          testDBExecutiveTableLimits,
-		"testDBExecutiveClearTable":           testDBExecutiveClearTable,
-		"testDBExecutiveDropTable":            testDBExecutiveDropTable,
-		"testDBExecutiveReadFamilyTableNames": testDBExecutiveReadFamilyTableNames,
+		"testDBExecutiveCreateFamily":           testDBExecutiveCreateFamily,
+		"testDBExecutiveCreateTable":            testDBExecutiveCreateTable,
+		"testDBExecutiveCreateTableLocksLedger": testDBExecutiveCreateTableLocksLedger,
+		"testDBExecutiveAddFields":              testDBExecutiveAddFields,
+		"testDBExecutiveAddFieldsLocksLedger":   testDBExecutiveAddFieldsLocksLedger,
+		"testDBExecutiveFetchFamilyByName":      testDBExecutiveFetchFamilyByName,
+		"testDBExecutiveMutate":                 testDBExecutiveMutate,
+		"testDBExecutiveGetWriterCookie":        testDBExecutiveGetWriterCookie,
+		"testDBExecutiveSetWriterCookie":        testDBExecutiveSetWriterCookie,
+		"testFetchMetaTableByName":              testFetchMetaTableByName,
+		"testDBExecutiveRegisterWriter":         testDBExecutiveRegisterWriter,
+		"testDBExecutiveReadRow":                testDBExecutiveReadRow,
+		"testDBLimiter":                         testDBLimiter,
+		"testDBExecutiveWriterRates":            testDBExecutiveWriterRates,
+		"testDBExecutiveTableLimits":            testDBExecutiveTableLimits,
+		"testDBExecutiveClearTable":             testDBExecutiveClearTable,
+		"testDBExecutiveDropTable":              testDBExecutiveDropTable,
+		"testDBExecutiveReadFamilyTableNames":   testDBExecutiveReadFamilyTableNames,
 	}
 
 	for _, dbType := range dbTypes {
@@ -460,6 +461,92 @@ func testDBExecutiveAddFields(t *testing.T, dbType string) {
 	)
 	if err == nil || !strings.Contains(err.Error(), "Column already exists") {
 		t.Fatalf("Unexpected error calling UpdateTable: %+v", err)
+	}
+}
+
+// multiple goroutine will attempt to create a number of tables in the same
+// DB concurrently. this test verifies that the ledger sequences do not
+// skip from the perspective of a reader repeatedly querying the dml ledger
+// table.
+func testDBExecutiveCreateTableLocksLedger(t *testing.T, dbType string) {
+	u := newDbExecTestUtil(t, dbType)
+	defer u.Close()
+
+	err := u.e.CreateTable("family1",
+		"table2",
+		[]string{"field1"},
+		[]schema.FieldType{schema.FTString},
+		[]string{"field1"},
+	)
+	require.NoError(t, err)
+
+	var numGoroutines = 10
+	const numTables = 5
+	errs := make(chan error, numGoroutines+1)
+	for i := 0; i < numGoroutines; i++ {
+		prefix := fmt.Sprintf("prefix_%d", i)
+		go func(prefix string) {
+			err := func() error {
+				for i := 0; i < numTables; i++ {
+					err := u.e.CreateTable("family1",
+						fmt.Sprintf("%s_table_%d", prefix, i),
+						[]string{"field1"},
+						[]schema.FieldType{schema.FTString},
+						[]string{"field1"},
+					)
+					if err != nil {
+						return err
+					}
+				}
+				return nil
+			}()
+			errs <- err
+		}(prefix)
+	}
+	// fetch dml repeatedly, detecting gaps in the ledger.
+	go func() {
+		err := func() error {
+			lastSeq := int64(-1)
+			for {
+				if lastSeq == int64(numGoroutines*numTables+1) {
+					// yay we're done
+					return nil
+				}
+				sql := "SELECT seq FROM ctlstore_dml_ledger WHERE seq > ? ORDER BY seq LIMIT 10"
+				rows, err := u.db.QueryContext(u.ctx, sql, lastSeq)
+				if err != nil {
+					return errors.Wrap(err, "fetch")
+				}
+				for rows.Next() {
+					var seq int64
+					err := rows.Scan(&seq)
+					if err != nil {
+						return errors.Wrap(err, "scan")
+					}
+					if lastSeq == -1 {
+						if seq != 1 {
+							return fmt.Errorf("first sequence was %d", seq)
+						}
+					} else {
+						if seq != lastSeq+1 {
+							return fmt.Errorf("detected gap seq=%d lastSeq=%d", seq, lastSeq)
+						}
+					}
+					lastSeq = seq
+					t.Logf("seq: %d", lastSeq)
+				}
+				err = rows.Err()
+				if err != nil {
+					return err
+				}
+				time.Sleep(10 * time.Millisecond)
+			}
+		}()
+		errs <- errors.Wrap(err, "reader")
+	}()
+	for i := 0; i < numGoroutines+1; i++ {
+		err := <-errs
+		require.NoError(t, err)
 	}
 }
 
