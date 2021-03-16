@@ -285,6 +285,33 @@ func (e *dbExecutive) GetWriterCookie(writerName string, writerSecret string) ([
 	return cookie, nil
 }
 
+// For the ledger to behave as we expect, an exclusive lock needs to be held
+// to prevent anomalies from occurring. There are two primary anomalies that
+// this prevents:
+//
+// 1) Transaction bodies that overlap eachother in the ledger. If more than
+// one mutate batch is being committed to the log at once, without a lock,
+// they will be ordered in such a way that they will overlap in the ledger.
+//
+// 2) Gaps in the transaction log. If Tx1 has taken Seq1 and Tx2 has taken
+// Seq2, and Tx2 commits first, there is a brief point in time where Seq2
+// will exist in the log and Seq1 will not. The Reflector depends on reading
+// the log in sequence order, so rows can't suddenly appear at a previous
+// sequence number AFTER the reflector has already read through that range
+// of the sequence.
+//
+// This statement causes a row-write lock to be held by the database,
+// preventing other writers from interfering, and forcing a linearized
+// order of transactions. This is done in leiu of table locks, which are
+// not part of the SQL standard.
+func (e *dbExecutive) takeLedgerLock(ctx context.Context, tx *sql.Tx) error {
+	_, err := tx.ExecContext(ctx, "UPDATE locks SET clock = clock + 1 WHERE id = 'ledger'")
+	if err != nil {
+		return errors.Wrap(err, "update locks")
+	}
+	return nil
+}
+
 func (e *dbExecutive) SetWriterCookie(writerName string, writerSecret string, cookie []byte) error {
 	ctx, cancel := e.ctx()
 	defer cancel()
@@ -384,26 +411,9 @@ func (e *dbExecutive) Mutate(
 		return &errs.RateLimitExceededErr{Err: "rate limit exceeded"}
 	}
 
-	// For the ledger to behave as we expect, an exclusive lock needs to be held
-	// to prevent anomalies from occurring. There are two primary anomalies that
-	// this prevents:
-	//
-	// 1) Transaction bodies that overlap eachother in the ledger. If more than
-	// one mutate batch is being committed to the log at once, without a lock,
-	// they will be ordered in such a way that they will overlap in the ledger.
-	//
-	// 2) Gaps in the transaction log. If Tx1 has taken Seq1 and Tx2 has taken
-	// Seq2, and Tx2 commits first, there is a brief point in time where Seq2
-	// will exist in the log and Seq1 will not. The Reflector depends on reading
-	// the log in sequence order, so rows can't suddenly appear at a previous
-	// sequence number AFTER the reflector has already read through that range
-	// of the sequence.
-	//
-	// This statement causes a row-write lock to be held by the database,
-	// preventing other writers from interfering, and forcing a linearized
-	// order of transactions. This is done in leiu of table locks, which are
-	// not part of the SQL standard.
-	_, err = tx.ExecContext(ctx, "UPDATE locks SET clock = clock + 1 WHERE id = 'ledger'")
+	// We must first take the ledger lock in order to prevent ledger anomalies.
+	// See the method documentation for more information.
+	err = e.takeLedgerLock(ctx, tx)
 	if err != nil {
 		return errors.Wrap(err, "taking ledger lock")
 	}
