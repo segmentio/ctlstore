@@ -126,7 +126,7 @@ func (e *dbExecutive) CreateTable(familyName string, tableName string, fieldName
 
 	seq, err := dlw.Add(ctx, logDDL)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "apply dml")
 	}
 
 	_, err = tx.ExecContext(ctx, ddl)
@@ -135,7 +135,7 @@ func (e *dbExecutive) CreateTable(familyName string, tableName string, fieldName
 			strings.Contains(err.Error(), "already exists") {
 			return &errs.ConflictError{Err: "Table already exists"}
 		}
-		return err
+		return errors.Wrap(err, "apply ddl")
 	}
 
 	err = tx.Commit()
