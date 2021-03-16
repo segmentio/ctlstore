@@ -198,26 +198,33 @@ func (e *dbExecutive) AddFields(familyName string, tableName string, fieldNames 
 				return err
 			}
 			defer tx.Rollback()
-			dlw := dmlLedgerWriter{
-				Tx:        tx,
-				TableName: dmlLedgerTableName,
-			}
+
+			// We first write the column modification to the DML ledger within the transaction.
+			// It's important that this is done befored the DDL is applied to the ctldb, as
+			// the DDL is not able to be rolled back. In this way, if the DDL fails, the DML
+			// can be rolled back.
+			dlw := dmlLedgerWriter{Tx: tx, TableName: dmlLedgerTableName}
 			defer dlw.Close()
+			seq, err := dlw.Add(ctx, logDDL)
+			if err != nil {
+				return errors.Wrap(err, "add dml")
+			}
+
+			// Next, apply the DDL to the ctldb. If the DDL fails, return the err, which will
+			// roll back the transaction under which the DML was written to the ledger.
 			_, err = tx.ExecContext(ctx, ddl)
 			if err != nil {
 				if strings.Index(err.Error(), "Error 1060:") == 0 || // mysql
 					strings.Contains(err.Error(), "duplicate column name") { // sqlite
 					return &errs.ConflictError{Err: "Column already exists"}
 				}
-				return err
+				return errors.Wrap(err, "apply ddl")
 			}
-			seq, err := dlw.Add(ctx, logDDL)
-			if err != nil {
-				return err
-			}
+
+			// the DDL implicitly commits the transaction, but we go ahead and commit here anyways.
 			err = tx.Commit()
 			if err != nil {
-				return err
+				return errors.Wrap(err, "commit tx")
 			}
 			events.Log("Successfully created new field `%{fieldName}s %{fieldType}v` on table %{tableName}s at seq %{seq}v", fieldName, fieldType, tableName, seq)
 			return nil
