@@ -138,6 +138,30 @@ func (ee *ExecutiveEndpoint) handleCookieRoute(w http.ResponseWriter, r *http.Re
 	w.WriteHeader(http.StatusMethodNotAllowed)
 }
 
+func (ee *ExecutiveEndpoint) handleTableSchemaRoute(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	familyName := vars["familyName"]
+	tableName := vars["tableName"]
+	schema, err := ee.Exec.TableSchema(familyName, tableName)
+	switch {
+	case err == nil:
+		// do nothing, no error
+	case errors.Cause(err) == ErrTableDoesNotExist:
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	default:
+		writeErrorResponse(err, w)
+		return
+	}
+	bs, err := json.Marshal(schema)
+	if err != nil {
+		writeErrorResponse(err, w)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(bs)
+}
+
 func (ee *ExecutiveEndpoint) handleWritersRoute(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
@@ -286,6 +310,8 @@ func (ee *ExecutiveEndpoint) Handler() http.Handler {
 	r.HandleFunc("/sleep", ee.handleSleepRoute).Methods("GET")
 	r.HandleFunc("/status", ee.handleStatusRoute).Methods("GET")
 	r.HandleFunc("/writers/{writerName}", ee.handleWritersRoute).Methods("POST")
+
+	r.HandleFunc("/schema/table/{familyName}/{tableName}", ee.handleTableSchemaRoute).Methods(http.MethodGet)
 
 	r.HandleFunc("/limits/tables", ee.handleTableLimitsRead).Methods("GET")
 	r.HandleFunc("/limits/tables/{familyName}/{tableName}", ee.handleTableLimitsUpdate).Methods("POST")

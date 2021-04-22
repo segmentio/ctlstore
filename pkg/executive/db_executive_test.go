@@ -134,6 +134,7 @@ func TestAllDBExecutive(t *testing.T) {
 		"testDBExecutiveClearTable":             testDBExecutiveClearTable,
 		"testDBExecutiveDropTable":              testDBExecutiveDropTable,
 		"testDBExecutiveReadFamilyTableNames":   testDBExecutiveReadFamilyTableNames,
+		"testDBExecutiveTableSchema":            testDBExecutiveTableSchema,
 	}
 
 	for _, dbType := range dbTypes {
@@ -311,6 +312,47 @@ func queryDMLTable(t *testing.T, db *sql.DB, limit int) []string {
 	}
 	require.NoError(t, stRows.Err())
 	return statements
+}
+
+func testDBExecutiveTableSchema(t *testing.T, dbType string) {
+	u := newDbExecTestUtil(t, dbType)
+	defer u.Close()
+	err := u.e.CreateFamily("schematest1")
+	require.NoError(t, err)
+	err = u.e.CreateTable("schematest1",
+		"table1",
+		[]string{"field1", "field2", "field3", "field4", "field5", "field6"},
+		[]schema.FieldType{
+			schema.FTString,
+			schema.FTInteger,
+			schema.FTDecimal,
+			schema.FTText,
+			schema.FTBinary,
+			schema.FTByteString,
+		},
+		[]string{"field1", "field2", "field6"},
+	)
+	require.NoError(t, err)
+	tableSchema, err := u.e.TableSchema("schematest1", "table1")
+	require.NoError(t, err)
+	expected := &schema.Table{
+		Family: "schematest1",
+		Name:   "table1",
+		Fields: [][]string{
+			{"field1", "string"},
+			{"field2", "integer"},
+			{"field3", "decimal"},
+			{"field4", "text"},
+			{"field5", "binary"},
+			{"field6", "bytestring"},
+		},
+		KeyFields: []string{
+			"field1",
+			"field2",
+			"field6",
+		},
+	}
+	require.EqualValues(t, expected, tableSchema)
 }
 
 // multiple goroutine will attempt to add a number of fields to the same
