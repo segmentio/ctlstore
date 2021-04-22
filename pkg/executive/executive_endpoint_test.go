@@ -3,7 +3,7 @@ package executive_test
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
+	"github.com/pkg/errors"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -883,6 +883,52 @@ func TestExecEndpointHandler(_t *testing.T) {
 					Family: "myfamily",
 					Table:  "mytable",
 				}, ft)
+			},
+		},
+
+		{
+			Desc:               "Get Table Schema Success",
+			Path:               "/schema/table/foofamily/bartable",
+			Method:             http.MethodGet,
+			ExpectedStatusCode: http.StatusOK,
+			PreFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
+				ret := &schema.Table{
+					Family: "foofamily",
+					Name:   "bartable",
+					Fields:    [][]string{
+						{"field1", "string"},
+					},
+					KeyFields: []string{"field1"},
+				}
+				atom.ei.TableSchemaReturns(ret, nil)
+			},
+			PostFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
+				require.EqualValues(t, 1, atom.ei.TableSchemaCallCount())
+				ret := &schema.Table{
+					Family: "foofamily",
+					Name:   "bartable",
+					Fields:    [][]string{
+						{"field1", "string"},
+					},
+					KeyFields: []string{"field1"},
+				}
+				bs, err := json.Marshal(ret)
+				require.NoError(t, err)
+				require.True(t, bytes.Equal(bs, atom.rr.Body.Bytes()))
+			},
+		},
+
+		{
+			Desc:               "Get Table Schema Error",
+			Path:               "/schema/table/foofamily/bartable",
+			Method:             http.MethodGet,
+			ExpectedStatusCode: http.StatusNotFound,
+			PreFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
+				atom.ei.TableSchemaReturns(nil, errors.Wrap(executive.ErrTableDoesNotExist, "boom"))
+			},
+			PostFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
+				require.EqualValues(t, 1, atom.ei.TableSchemaCallCount())
+				require.Equal(t, "boom: table does not exist\n", atom.rr.Body.String())
 			},
 		},
 	}
