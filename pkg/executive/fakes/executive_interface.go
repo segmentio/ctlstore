@@ -201,6 +201,20 @@ type FakeExecutiveInterface struct {
 	setWriterCookieReturnsOnCall map[int]struct {
 		result1 error
 	}
+	TableSchemaStub        func(string, string) (*schema.Table, error)
+	tableSchemaMutex       sync.RWMutex
+	tableSchemaArgsForCall []struct {
+		arg1 string
+		arg2 string
+	}
+	tableSchemaReturns struct {
+		result1 *schema.Table
+		result2 error
+	}
+	tableSchemaReturnsOnCall map[int]struct {
+		result1 *schema.Table
+		result2 error
+	}
 	UpdateTableSizeLimitStub        func(limits.TableSizeLimit) error
 	updateTableSizeLimitMutex       sync.RWMutex
 	updateTableSizeLimitArgsForCall []struct {
@@ -1189,6 +1203,70 @@ func (fake *FakeExecutiveInterface) SetWriterCookieReturnsOnCall(i int, result1 
 	}{result1}
 }
 
+func (fake *FakeExecutiveInterface) TableSchema(arg1 string, arg2 string) (*schema.Table, error) {
+	fake.tableSchemaMutex.Lock()
+	ret, specificReturn := fake.tableSchemaReturnsOnCall[len(fake.tableSchemaArgsForCall)]
+	fake.tableSchemaArgsForCall = append(fake.tableSchemaArgsForCall, struct {
+		arg1 string
+		arg2 string
+	}{arg1, arg2})
+	fake.recordInvocation("TableSchema", []interface{}{arg1, arg2})
+	fake.tableSchemaMutex.Unlock()
+	if fake.TableSchemaStub != nil {
+		return fake.TableSchemaStub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.tableSchemaReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeExecutiveInterface) TableSchemaCallCount() int {
+	fake.tableSchemaMutex.RLock()
+	defer fake.tableSchemaMutex.RUnlock()
+	return len(fake.tableSchemaArgsForCall)
+}
+
+func (fake *FakeExecutiveInterface) TableSchemaCalls(stub func(string, string) (*schema.Table, error)) {
+	fake.tableSchemaMutex.Lock()
+	defer fake.tableSchemaMutex.Unlock()
+	fake.TableSchemaStub = stub
+}
+
+func (fake *FakeExecutiveInterface) TableSchemaArgsForCall(i int) (string, string) {
+	fake.tableSchemaMutex.RLock()
+	defer fake.tableSchemaMutex.RUnlock()
+	argsForCall := fake.tableSchemaArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeExecutiveInterface) TableSchemaReturns(result1 *schema.Table, result2 error) {
+	fake.tableSchemaMutex.Lock()
+	defer fake.tableSchemaMutex.Unlock()
+	fake.TableSchemaStub = nil
+	fake.tableSchemaReturns = struct {
+		result1 *schema.Table
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeExecutiveInterface) TableSchemaReturnsOnCall(i int, result1 *schema.Table, result2 error) {
+	fake.tableSchemaMutex.Lock()
+	defer fake.tableSchemaMutex.Unlock()
+	fake.TableSchemaStub = nil
+	if fake.tableSchemaReturnsOnCall == nil {
+		fake.tableSchemaReturnsOnCall = make(map[int]struct {
+			result1 *schema.Table
+			result2 error
+		})
+	}
+	fake.tableSchemaReturnsOnCall[i] = struct {
+		result1 *schema.Table
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeExecutiveInterface) UpdateTableSizeLimit(arg1 limits.TableSizeLimit) error {
 	fake.updateTableSizeLimitMutex.Lock()
 	ret, specificReturn := fake.updateTableSizeLimitReturnsOnCall[len(fake.updateTableSizeLimitArgsForCall)]
@@ -1342,6 +1420,8 @@ func (fake *FakeExecutiveInterface) Invocations() map[string][][]interface{} {
 	defer fake.registerWriterMutex.RUnlock()
 	fake.setWriterCookieMutex.RLock()
 	defer fake.setWriterCookieMutex.RUnlock()
+	fake.tableSchemaMutex.RLock()
+	defer fake.tableSchemaMutex.RUnlock()
 	fake.updateTableSizeLimitMutex.RLock()
 	defer fake.updateTableSizeLimitMutex.RUnlock()
 	fake.updateWriterRateLimitMutex.RLock()
