@@ -29,6 +29,56 @@ type dbExecutive struct {
 	Ctx     context.Context
 }
 
+var ErrTableDoesNotExist = errors.New("table does not exist")
+
+func (e *dbExecutive) TableSchema(family, table string) (*schema.Table, error) {
+	familyName, err := schema.NewFamilyName(family)
+	if err != nil {
+		return nil, errors.Wrap(err, "family name")
+	}
+	if normalized := familyName.String(); normalized != family {
+		return nil, errors.Wrapf(err, "passed in family name does not match normalized family name: %q", normalized)
+	}
+	tableName, err := schema.NewTableName(table)
+	if err != nil {
+		return nil, errors.Wrap(err, "table name")
+	}
+	if normalized := tableName.String(); normalized != table {
+		return nil, errors.Wrapf(err, "passed in table name does not match normalized table name: %q", normalized)
+	}
+	tbl, ok, err := e.fetchMetaTableByName(familyName, tableName)
+	if err != nil {
+		return nil, errors.Wrap(err, "fetch meta table")
+	}
+	if !ok {
+		return nil, errors.Wrapf(ErrTableDoesNotExist, "%s___%s", family, table)
+	}
+	res := &schema.Table{
+		Family: familyName.Name,
+		Name:   tableName.Name,
+	}
+	for _, field := range tbl.Fields {
+		switch field.FieldType {
+		case schema.FTString:
+		case schema.FTInteger:
+		case schema.FTDecimal:
+		case schema.FTText:
+		case schema.FTBinary:
+		case schema.FTByteString:
+		default:
+			return nil, errors.Errorf("unsupported field type: %q", field.FieldType)
+		}
+		res.Fields = append(res.Fields, []string{
+			field.Name.Name, field.FieldType.String(),
+		})
+	}
+	for _, field := range tbl.KeyFields.Fields {
+		res.KeyFields = append(res.KeyFields, field.Name)
+	}
+
+	return res, nil
+}
+
 // TODO: check CancelFuncs everywhere for leakin
 
 // Called to "fork" the context from the original, for internal use

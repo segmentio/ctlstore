@@ -28,6 +28,8 @@ type ExecutiveInterface interface {
 	SetWriterCookie(writerName string, writerSecret string, cookie []byte) error
 	RegisterWriter(writerName string, writerSecret string) error
 
+	TableSchema(familyName string, tableName string) (*schema.Table, error)
+
 	ReadRow(familyName string, tableName string, where map[string]interface{}) (map[string]interface{}, error)
 
 	ReadTableSizeLimits() (limits.TableSizeLimits, error)
