@@ -3,12 +3,13 @@ package executive_test
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/pkg/errors"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/segmentio/ctlstore/pkg/errs"
@@ -885,7 +886,6 @@ func TestExecEndpointHandler(_t *testing.T) {
 				}, ft)
 			},
 		},
-
 		{
 			Desc:               "Get Table Schema Success",
 			Path:               "/schema/table/foofamily/bartable",
@@ -895,7 +895,7 @@ func TestExecEndpointHandler(_t *testing.T) {
 				ret := &schema.Table{
 					Family: "foofamily",
 					Name:   "bartable",
-					Fields:    [][]string{
+					Fields: [][]string{
 						{"field1", "string"},
 					},
 					KeyFields: []string{"field1"},
@@ -907,7 +907,7 @@ func TestExecEndpointHandler(_t *testing.T) {
 				ret := &schema.Table{
 					Family: "foofamily",
 					Name:   "bartable",
-					Fields:    [][]string{
+					Fields: [][]string{
 						{"field1", "string"},
 					},
 					KeyFields: []string{"field1"},
@@ -917,7 +917,6 @@ func TestExecEndpointHandler(_t *testing.T) {
 				require.True(t, bytes.Equal(bs, atom.rr.Body.Bytes()))
 			},
 		},
-
 		{
 			Desc:               "Get Table Schema Error",
 			Path:               "/schema/table/foofamily/bartable",
@@ -929,6 +928,60 @@ func TestExecEndpointHandler(_t *testing.T) {
 			PostFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
 				require.EqualValues(t, 1, atom.ei.TableSchemaCallCount())
 				require.Equal(t, "boom: table does not exist\n", atom.rr.Body.String())
+			},
+		},
+		{
+			Desc:               "Get Family Schema Success",
+			Path:               "/schema/family/foofamily",
+			Method:             http.MethodGet,
+			ExpectedStatusCode: http.StatusOK,
+			PreFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
+				ret := []schema.Table{
+					{
+						Family: "foofamily",
+						Name:   "bartable",
+						Fields: [][]string{
+							{"field1", "string"},
+						},
+						KeyFields: []string{"field1"},
+					},
+					{
+						Family: "foofamily",
+						Name:   "bartable2",
+						Fields: [][]string{
+							{"field1", "string"},
+							{"field2", "integer"},
+						},
+						KeyFields: []string{"field1"},
+					},
+				}
+				atom.ei.FamilySchemasReturns(ret, nil)
+			},
+			PostFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
+				require.EqualValues(t, 0, atom.ei.TableSchemaCallCount())
+				require.EqualValues(t, 1, atom.ei.FamilySchemasCallCount())
+				ret := []schema.Table{
+					{
+						Family: "foofamily",
+						Name:   "bartable",
+						Fields: [][]string{
+							{"field1", "string"},
+						},
+						KeyFields: []string{"field1"},
+					},
+					{
+						Family: "foofamily",
+						Name:   "bartable2",
+						Fields: [][]string{
+							{"field1", "string"},
+							{"field2", "integer"},
+						},
+						KeyFields: []string{"field1"},
+					},
+				}
+				bs, err := json.Marshal(ret)
+				require.NoError(t, err)
+				require.EqualValues(t, string(bs), atom.rr.Body.String())
 			},
 		},
 	}
