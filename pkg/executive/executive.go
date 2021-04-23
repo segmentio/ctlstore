@@ -29,6 +29,7 @@ type ExecutiveInterface interface {
 	RegisterWriter(writerName string, writerSecret string) error
 
 	TableSchema(familyName string, tableName string) (*schema.Table, error)
+	FamilySchemas(familyName string) ([]schema.Table, error)
 
 	ReadRow(familyName string, tableName string, where map[string]interface{}) (map[string]interface{}, error)
 

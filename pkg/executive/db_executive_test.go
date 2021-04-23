@@ -135,6 +135,7 @@ func TestAllDBExecutive(t *testing.T) {
 		"testDBExecutiveDropTable":              testDBExecutiveDropTable,
 		"testDBExecutiveReadFamilyTableNames":   testDBExecutiveReadFamilyTableNames,
 		"testDBExecutiveTableSchema":            testDBExecutiveTableSchema,
+		"testDBExecutiveFamilySchemas":          testDBExecutiveFamilySchemas,
 	}
 
 	for _, dbType := range dbTypes {
@@ -312,6 +313,83 @@ func queryDMLTable(t *testing.T, db *sql.DB, limit int) []string {
 	}
 	require.NoError(t, stRows.Err())
 	return statements
+}
+
+func testDBExecutiveFamilySchemas(t *testing.T, dbType string) {
+	u := newDbExecTestUtil(t, dbType)
+	defer u.Close()
+	err := u.e.CreateFamily("schematest2")
+	require.NoError(t, err)
+	err = u.e.CreateTable("schematest2",
+		"table1",
+		[]string{"field1", "field2", "field3", "field4", "field5", "field6"},
+		[]schema.FieldType{
+			schema.FTString,
+			schema.FTInteger,
+			schema.FTDecimal,
+			schema.FTText,
+			schema.FTBinary,
+			schema.FTByteString,
+		},
+		[]string{"field1", "field2", "field6"},
+	)
+	require.NoError(t, err)
+	err = u.e.CreateTable("schematest2",
+		"table2",
+		[]string{"field1", "field2"},
+		[]schema.FieldType{
+			schema.FTInteger,
+			schema.FTBinary,
+		},
+		[]string{"field1"},
+	)
+	require.NoError(t, err)
+
+	err = u.e.CreateFamily("schematest_other")
+	require.NoError(t, err)
+	err = u.e.CreateTable("schematest_other",
+		"table3",
+		[]string{"field1"},
+		[]schema.FieldType{
+			schema.FTInteger,
+		},
+		[]string{"field1"},
+	)
+	require.NoError(t, err)
+
+	schemas, err := u.e.FamilySchemas("schematest2")
+	require.NoError(t, err)
+	expected := []schema.Table{
+		{
+			Family: "schematest2",
+			Name:   "table1",
+			Fields: [][]string{
+				{"field1", "string"},
+				{"field2", "integer"},
+				{"field3", "decimal"},
+				{"field4", "text"},
+				{"field5", "binary"},
+				{"field6", "bytestring"},
+			},
+			KeyFields: []string{
+				"field1",
+				"field2",
+				"field6",
+			},
+		},
+		{
+			Family: "schematest2",
+			Name:   "table2",
+			Fields: [][]string{
+				{"field1", "integer"},
+				{"field2", "binary"},
+			},
+			KeyFields: []string{
+				"field1",
+			},
+		},
+	}
+	require.EqualValues(t, expected, schemas)
 }
 
 func testDBExecutiveTableSchema(t *testing.T, dbType string) {

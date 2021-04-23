@@ -94,6 +94,19 @@ type FakeExecutiveInterface struct {
 	dropTableReturnsOnCall map[int]struct {
 		result1 error
 	}
+	FamilySchemasStub        func(string) ([]schema.Table, error)
+	familySchemasMutex       sync.RWMutex
+	familySchemasArgsForCall []struct {
+		arg1 string
+	}
+	familySchemasReturns struct {
+		result1 []schema.Table
+		result2 error
+	}
+	familySchemasReturnsOnCall map[int]struct {
+		result1 []schema.Table
+		result2 error
+	}
 	GetWriterCookieStub        func(string, string) ([]byte, error)
 	getWriterCookieMutex       sync.RWMutex
 	getWriterCookieArgsForCall []struct {
@@ -691,6 +704,69 @@ func (fake *FakeExecutiveInterface) DropTableReturnsOnCall(i int, result1 error)
 	fake.dropTableReturnsOnCall[i] = struct {
 		result1 error
 	}{result1}
+}
+
+func (fake *FakeExecutiveInterface) FamilySchemas(arg1 string) ([]schema.Table, error) {
+	fake.familySchemasMutex.Lock()
+	ret, specificReturn := fake.familySchemasReturnsOnCall[len(fake.familySchemasArgsForCall)]
+	fake.familySchemasArgsForCall = append(fake.familySchemasArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	fake.recordInvocation("FamilySchemas", []interface{}{arg1})
+	fake.familySchemasMutex.Unlock()
+	if fake.FamilySchemasStub != nil {
+		return fake.FamilySchemasStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.familySchemasReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeExecutiveInterface) FamilySchemasCallCount() int {
+	fake.familySchemasMutex.RLock()
+	defer fake.familySchemasMutex.RUnlock()
+	return len(fake.familySchemasArgsForCall)
+}
+
+func (fake *FakeExecutiveInterface) FamilySchemasCalls(stub func(string) ([]schema.Table, error)) {
+	fake.familySchemasMutex.Lock()
+	defer fake.familySchemasMutex.Unlock()
+	fake.FamilySchemasStub = stub
+}
+
+func (fake *FakeExecutiveInterface) FamilySchemasArgsForCall(i int) string {
+	fake.familySchemasMutex.RLock()
+	defer fake.familySchemasMutex.RUnlock()
+	argsForCall := fake.familySchemasArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeExecutiveInterface) FamilySchemasReturns(result1 []schema.Table, result2 error) {
+	fake.familySchemasMutex.Lock()
+	defer fake.familySchemasMutex.Unlock()
+	fake.FamilySchemasStub = nil
+	fake.familySchemasReturns = struct {
+		result1 []schema.Table
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeExecutiveInterface) FamilySchemasReturnsOnCall(i int, result1 []schema.Table, result2 error) {
+	fake.familySchemasMutex.Lock()
+	defer fake.familySchemasMutex.Unlock()
+	fake.FamilySchemasStub = nil
+	if fake.familySchemasReturnsOnCall == nil {
+		fake.familySchemasReturnsOnCall = make(map[int]struct {
+			result1 []schema.Table
+			result2 error
+		})
+	}
+	fake.familySchemasReturnsOnCall[i] = struct {
+		result1 []schema.Table
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeExecutiveInterface) GetWriterCookie(arg1 string, arg2 string) ([]byte, error) {
@@ -1404,6 +1480,8 @@ func (fake *FakeExecutiveInterface) Invocations() map[string][][]interface{} {
 	defer fake.deleteWriterRateLimitMutex.RUnlock()
 	fake.dropTableMutex.RLock()
 	defer fake.dropTableMutex.RUnlock()
+	fake.familySchemasMutex.RLock()
+	defer fake.familySchemasMutex.RUnlock()
 	fake.getWriterCookieMutex.RLock()
 	defer fake.getWriterCookieMutex.RUnlock()
 	fake.mutateMutex.RLock()

@@ -31,6 +31,29 @@ type dbExecutive struct {
 
 var ErrTableDoesNotExist = errors.New("table does not exist")
 
+func (e *dbExecutive) FamilySchemas(family string) ([]schema.Table, error) {
+	familyName, err := schema.NewFamilyName(family)
+	if err != nil {
+		return nil, errors.Wrap(err, "family name")
+	}
+	dbInfo := getDBInfo(e.DB)
+	tables, err := dbInfo.GetAllTables(context.TODO())
+	if err != nil {
+		return nil, errors.Wrap(err, "get table names")
+	}
+	var res []schema.Table
+	for _, table := range tables {
+		if table.Family == familyName.String() {
+			ts, err := e.TableSchema(familyName.Name, table.Table)
+			if err != nil {
+				return nil, errors.Wrap(err, "get table schema")
+			}
+			res = append(res, *ts)
+		}
+	}
+	return res, nil
+}
+
 func (e *dbExecutive) TableSchema(family, table string) (*schema.Table, error) {
 	familyName, err := schema.NewFamilyName(family)
 	if err != nil {
