@@ -138,6 +138,25 @@ func (ee *ExecutiveEndpoint) handleCookieRoute(w http.ResponseWriter, r *http.Re
 	w.WriteHeader(http.StatusMethodNotAllowed)
 }
 
+func (ee *ExecutiveEndpoint) handleFamilySchemasRoute(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	familyName := vars["familyName"]
+	schemas, err := ee.Exec.FamilySchemas(familyName)
+	switch {
+	case err == nil:
+	default:
+		writeErrorResponse(err, w)
+		return
+	}
+	bs, err := json.Marshal(schemas)
+	if err != nil {
+		writeErrorResponse(err, w)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(bs)
+}
+
 func (ee *ExecutiveEndpoint) handleTableSchemaRoute(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	familyName := vars["familyName"]
@@ -312,6 +331,7 @@ func (ee *ExecutiveEndpoint) Handler() http.Handler {
 	r.HandleFunc("/writers/{writerName}", ee.handleWritersRoute).Methods("POST")
 
 	r.HandleFunc("/schema/table/{familyName}/{tableName}", ee.handleTableSchemaRoute).Methods(http.MethodGet)
+	r.HandleFunc("/schema/family/{familyName}", ee.handleFamilySchemasRoute).Methods(http.MethodGet)
 
 	r.HandleFunc("/limits/tables", ee.handleTableLimitsRead).Methods("GET")
 	r.HandleFunc("/limits/tables/{familyName}/{tableName}", ee.handleTableLimitsUpdate).Methods("POST")
