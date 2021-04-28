@@ -62,6 +62,12 @@ first:
 $ make vendor
 ```
 
+Many of ctlstore's unit tests use mocks. To regenerate the mocks using [counterfeiter](https://github.com/maxbrunsfeld/counterfeiter):
+
+```
+$ make generate
+```
+
 ## Tying the Pieces Together
 
 This project includes a docker-compose file `docker-compose-example.yml`.  This initializes and runs
