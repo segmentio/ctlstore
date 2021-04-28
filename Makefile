@@ -56,6 +56,10 @@ release-stable: docker
 vet:
 	$Qgo vet ./...
 
+.PHONY: generate
+generate:
+	$Qgo generate ./...
+
 .PHONY: fmtcheck
 fmtchk:
 	$Qexit $(shell gofmt -l . | grep -v '^vendor' | wc -l)

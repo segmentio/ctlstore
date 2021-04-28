@@ -17,10 +17,11 @@ type ExecutiveMutationRequest struct {
 	Values    map[string]interface{}
 }
 
-//go:generate counterfeiter -o fakes/executive_interface.go . ExecutiveInterface
+//counterfeiter:generate -o fakes/executive_interface.go . ExecutiveInterface
 type ExecutiveInterface interface {
 	CreateFamily(familyName string) error
 	CreateTable(familyName string, tableName string, fieldNames []string, fieldTypes []schema.FieldType, keyFields []string) error
+	CreateTables([]schema.Table) error
 	AddFields(familyName string, tableName string, fieldNames []string, fieldTypes []schema.FieldType) error
 
 	Mutate(writerName string, writerSecret string, familyName string, cookie []byte, checkCookie []byte, requests []ExecutiveMutationRequest) error
