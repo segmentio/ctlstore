@@ -228,6 +228,20 @@ func (e *dbExecutive) CreateTable(familyName string, tableName string, fieldName
 	return nil
 }
 
+func (e *dbExecutive) CreateTables(tables []schema.Table) error {
+	for _, table := range tables {
+		fieldNames, fieldTypes, err := schema.UnzipFieldsParam(table.Fields)
+		if err != nil {
+			return errors.Wrap(err, fmt.Sprintf("unzipping fields param for family %q table %q", table.Family, table.Name))
+		}
+		err = e.CreateTable(table.Family, table.Name, fieldNames, fieldTypes, table.KeyFields)
+		if err != nil {
+			return errors.Wrap(err, fmt.Sprintf("creating table for family %q table %q", table.Family, table.Name))
+		}
+	}
+	return nil
+}
+
 // applyDDL executes the DDL in the tx if the backing store is sqlite, and outside of the
 // tx if the backing store is mysql. The reason for this is that sqlite treats ddl transactionally,
 // while mysql does not. When DDL is executed as part of an ongoing tx, mysql implicitly commits

@@ -41,6 +41,27 @@ func (ee *ExecutiveEndpoint) handleFamilyRoute(w http.ResponseWriter, r *http.Re
 	return
 }
 
+func (ee *ExecutiveEndpoint) handleTablesRoute(w http.ResponseWriter, r *http.Request) {
+	rawBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		writeErrorResponse(err, w)
+		return
+	}
+
+	var payload []schema.Table
+	err = json.Unmarshal(rawBody, &payload)
+	if err != nil {
+		writeErrorResponse(&errs.BadRequestError{Err: "JSON Error: " + err.Error()}, w)
+		return
+	}
+
+	err = ee.Exec.CreateTables(payload)
+	if err != nil {
+		writeErrorResponse(err, w)
+		return
+	}
+}
+
 func (ee *ExecutiveEndpoint) handleTableRoute(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	// if these panic, Mux is broken and nothing is sacred anymore
@@ -326,6 +347,7 @@ func (ee *ExecutiveEndpoint) Handler() http.Handler {
 	r.HandleFunc("/families/{familyName}", ee.handleFamilyRoute).Methods("POST")
 	r.HandleFunc("/families/{familyName}/tables/{tableName}", ee.handleTableRoute).Methods("POST", "PUT")
 	r.HandleFunc("/families/{familyName}/mutations", ee.handleMutationsRoute).Methods("POST")
+	r.HandleFunc("/tables", ee.handleTablesRoute).Methods("POST")
 	r.HandleFunc("/sleep", ee.handleSleepRoute).Methods("GET")
 	r.HandleFunc("/status", ee.handleStatusRoute).Methods("GET")
 	r.HandleFunc("/writers/{writerName}", ee.handleWritersRoute).Methods("POST")

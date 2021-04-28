@@ -984,6 +984,62 @@ func TestExecEndpointHandler(_t *testing.T) {
 				require.EqualValues(t, string(bs), atom.rr.Body.String())
 			},
 		},
+		{
+			Desc:               "Create Tables Success",
+			Path:               "/tables",
+			Method:             http.MethodPost,
+			ExpectedStatusCode: http.StatusOK,
+			JSONBody: []map[string]interface{}{
+				{
+					"family": "foofamily",
+					"name":   "bartable",
+					"fields": [][]interface{}{
+						{"field1", "string"},
+					},
+					"keyFields": []string{"field1"},
+				},
+				{
+					"family": "foofamily",
+					"name":   "bartable2",
+					"fields": [][]interface{}{
+						{"field2", "integer"},
+						{"field1", "string"},
+					},
+					"keyFields": []string{"field1"},
+				},
+			},
+			PreFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
+				atom.ei.CreateTablesReturns(nil)
+			},
+			PostFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
+				require.EqualValues(t, 1, atom.ei.CreateTablesCallCount())
+
+				tables := atom.ei.CreateTablesArgsForCall(0)
+				for i, table := range tables {
+					var expectedTableName string
+					var expectedFields [][]string
+					var expectedKeyFields []string
+					switch i {
+					case 0:
+						expectedTableName = "bartable"
+						expectedFields = [][]string{{"field1", "string"}}
+						expectedKeyFields = []string{"field1"}
+					case 1:
+						expectedTableName = "bartable2"
+						expectedFields = [][]string{{"field2", "integer"}, {"field1", "string"}}
+						expectedKeyFields = []string{"field1"}
+					}
+					require.EqualValues(t, "foofamily", table.Family)
+					require.EqualValues(t, expectedTableName, table.Name)
+					if want, got := expectedFields, table.Fields; !reflect.DeepEqual(want, got) {
+						t.Errorf("Expected CreateTableSchemas Fields to be %v, was %v", want, got)
+					}
+					if want, got := expectedKeyFields, table.KeyFields; !reflect.DeepEqual(want, got) {
+						t.Errorf("Expected CreateTableSchemas KeyFields to be %v, was %v", want, got)
+					}
+				}
+			},
+		},
 	}
 
 	///////////////////////////////////////////////////
