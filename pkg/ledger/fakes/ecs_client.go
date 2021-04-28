@@ -2375,15 +2375,16 @@ func (fake *FakeECSClient) CreateCapacityProvider(arg1 *ecs.CreateCapacityProvid
 	fake.createCapacityProviderArgsForCall = append(fake.createCapacityProviderArgsForCall, struct {
 		arg1 *ecs.CreateCapacityProviderInput
 	}{arg1})
+	stub := fake.CreateCapacityProviderStub
+	fakeReturns := fake.createCapacityProviderReturns
 	fake.recordInvocation("CreateCapacityProvider", []interface{}{arg1})
 	fake.createCapacityProviderMutex.Unlock()
-	if fake.CreateCapacityProviderStub != nil {
-		return fake.CreateCapacityProviderStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.createCapacityProviderReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -2438,15 +2439,16 @@ func (fake *FakeECSClient) CreateCapacityProviderRequest(arg1 *ecs.CreateCapacit
 	fake.createCapacityProviderRequestArgsForCall = append(fake.createCapacityProviderRequestArgsForCall, struct {
 		arg1 *ecs.CreateCapacityProviderInput
 	}{arg1})
+	stub := fake.CreateCapacityProviderRequestStub
+	fakeReturns := fake.createCapacityProviderRequestReturns
 	fake.recordInvocation("CreateCapacityProviderRequest", []interface{}{arg1})
 	fake.createCapacityProviderRequestMutex.Unlock()
-	if fake.CreateCapacityProviderRequestStub != nil {
-		return fake.CreateCapacityProviderRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.createCapacityProviderRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -2503,15 +2505,16 @@ func (fake *FakeECSClient) CreateCapacityProviderWithContext(arg1 context.Contex
 		arg2 *ecs.CreateCapacityProviderInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.CreateCapacityProviderWithContextStub
+	fakeReturns := fake.createCapacityProviderWithContextReturns
 	fake.recordInvocation("CreateCapacityProviderWithContext", []interface{}{arg1, arg2, arg3})
 	fake.createCapacityProviderWithContextMutex.Unlock()
-	if fake.CreateCapacityProviderWithContextStub != nil {
-		return fake.CreateCapacityProviderWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.createCapacityProviderWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -2566,15 +2569,16 @@ func (fake *FakeECSClient) CreateCluster(arg1 *ecs.CreateClusterInput) (*ecs.Cre
 	fake.createClusterArgsForCall = append(fake.createClusterArgsForCall, struct {
 		arg1 *ecs.CreateClusterInput
 	}{arg1})
+	stub := fake.CreateClusterStub
+	fakeReturns := fake.createClusterReturns
 	fake.recordInvocation("CreateCluster", []interface{}{arg1})
 	fake.createClusterMutex.Unlock()
-	if fake.CreateClusterStub != nil {
-		return fake.CreateClusterStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.createClusterReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -2629,15 +2633,16 @@ func (fake *FakeECSClient) CreateClusterRequest(arg1 *ecs.CreateClusterInput) (*
 	fake.createClusterRequestArgsForCall = append(fake.createClusterRequestArgsForCall, struct {
 		arg1 *ecs.CreateClusterInput
 	}{arg1})
+	stub := fake.CreateClusterRequestStub
+	fakeReturns := fake.createClusterRequestReturns
 	fake.recordInvocation("CreateClusterRequest", []interface{}{arg1})
 	fake.createClusterRequestMutex.Unlock()
-	if fake.CreateClusterRequestStub != nil {
-		return fake.CreateClusterRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.createClusterRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -2694,15 +2699,16 @@ func (fake *FakeECSClient) CreateClusterWithContext(arg1 context.Context, arg2 *
 		arg2 *ecs.CreateClusterInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.CreateClusterWithContextStub
+	fakeReturns := fake.createClusterWithContextReturns
 	fake.recordInvocation("CreateClusterWithContext", []interface{}{arg1, arg2, arg3})
 	fake.createClusterWithContextMutex.Unlock()
-	if fake.CreateClusterWithContextStub != nil {
-		return fake.CreateClusterWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.createClusterWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -2757,15 +2763,16 @@ func (fake *FakeECSClient) CreateService(arg1 *ecs.CreateServiceInput) (*ecs.Cre
 	fake.createServiceArgsForCall = append(fake.createServiceArgsForCall, struct {
 		arg1 *ecs.CreateServiceInput
 	}{arg1})
+	stub := fake.CreateServiceStub
+	fakeReturns := fake.createServiceReturns
 	fake.recordInvocation("CreateService", []interface{}{arg1})
 	fake.createServiceMutex.Unlock()
-	if fake.CreateServiceStub != nil {
-		return fake.CreateServiceStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.createServiceReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -2820,15 +2827,16 @@ func (fake *FakeECSClient) CreateServiceRequest(arg1 *ecs.CreateServiceInput) (*
 	fake.createServiceRequestArgsForCall = append(fake.createServiceRequestArgsForCall, struct {
 		arg1 *ecs.CreateServiceInput
 	}{arg1})
+	stub := fake.CreateServiceRequestStub
+	fakeReturns := fake.createServiceRequestReturns
 	fake.recordInvocation("CreateServiceRequest", []interface{}{arg1})
 	fake.createServiceRequestMutex.Unlock()
-	if fake.CreateServiceRequestStub != nil {
-		return fake.CreateServiceRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.createServiceRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -2885,15 +2893,16 @@ func (fake *FakeECSClient) CreateServiceWithContext(arg1 context.Context, arg2 *
 		arg2 *ecs.CreateServiceInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.CreateServiceWithContextStub
+	fakeReturns := fake.createServiceWithContextReturns
 	fake.recordInvocation("CreateServiceWithContext", []interface{}{arg1, arg2, arg3})
 	fake.createServiceWithContextMutex.Unlock()
-	if fake.CreateServiceWithContextStub != nil {
-		return fake.CreateServiceWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.createServiceWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -2948,15 +2957,16 @@ func (fake *FakeECSClient) CreateTaskSet(arg1 *ecs.CreateTaskSetInput) (*ecs.Cre
 	fake.createTaskSetArgsForCall = append(fake.createTaskSetArgsForCall, struct {
 		arg1 *ecs.CreateTaskSetInput
 	}{arg1})
+	stub := fake.CreateTaskSetStub
+	fakeReturns := fake.createTaskSetReturns
 	fake.recordInvocation("CreateTaskSet", []interface{}{arg1})
 	fake.createTaskSetMutex.Unlock()
-	if fake.CreateTaskSetStub != nil {
-		return fake.CreateTaskSetStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.createTaskSetReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -3011,15 +3021,16 @@ func (fake *FakeECSClient) CreateTaskSetRequest(arg1 *ecs.CreateTaskSetInput) (*
 	fake.createTaskSetRequestArgsForCall = append(fake.createTaskSetRequestArgsForCall, struct {
 		arg1 *ecs.CreateTaskSetInput
 	}{arg1})
+	stub := fake.CreateTaskSetRequestStub
+	fakeReturns := fake.createTaskSetRequestReturns
 	fake.recordInvocation("CreateTaskSetRequest", []interface{}{arg1})
 	fake.createTaskSetRequestMutex.Unlock()
-	if fake.CreateTaskSetRequestStub != nil {
-		return fake.CreateTaskSetRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.createTaskSetRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -3076,15 +3087,16 @@ func (fake *FakeECSClient) CreateTaskSetWithContext(arg1 context.Context, arg2 *
 		arg2 *ecs.CreateTaskSetInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.CreateTaskSetWithContextStub
+	fakeReturns := fake.createTaskSetWithContextReturns
 	fake.recordInvocation("CreateTaskSetWithContext", []interface{}{arg1, arg2, arg3})
 	fake.createTaskSetWithContextMutex.Unlock()
-	if fake.CreateTaskSetWithContextStub != nil {
-		return fake.CreateTaskSetWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.createTaskSetWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -3139,15 +3151,16 @@ func (fake *FakeECSClient) DeleteAccountSetting(arg1 *ecs.DeleteAccountSettingIn
 	fake.deleteAccountSettingArgsForCall = append(fake.deleteAccountSettingArgsForCall, struct {
 		arg1 *ecs.DeleteAccountSettingInput
 	}{arg1})
+	stub := fake.DeleteAccountSettingStub
+	fakeReturns := fake.deleteAccountSettingReturns
 	fake.recordInvocation("DeleteAccountSetting", []interface{}{arg1})
 	fake.deleteAccountSettingMutex.Unlock()
-	if fake.DeleteAccountSettingStub != nil {
-		return fake.DeleteAccountSettingStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteAccountSettingReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -3202,15 +3215,16 @@ func (fake *FakeECSClient) DeleteAccountSettingRequest(arg1 *ecs.DeleteAccountSe
 	fake.deleteAccountSettingRequestArgsForCall = append(fake.deleteAccountSettingRequestArgsForCall, struct {
 		arg1 *ecs.DeleteAccountSettingInput
 	}{arg1})
+	stub := fake.DeleteAccountSettingRequestStub
+	fakeReturns := fake.deleteAccountSettingRequestReturns
 	fake.recordInvocation("DeleteAccountSettingRequest", []interface{}{arg1})
 	fake.deleteAccountSettingRequestMutex.Unlock()
-	if fake.DeleteAccountSettingRequestStub != nil {
-		return fake.DeleteAccountSettingRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteAccountSettingRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -3267,15 +3281,16 @@ func (fake *FakeECSClient) DeleteAccountSettingWithContext(arg1 context.Context,
 		arg2 *ecs.DeleteAccountSettingInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.DeleteAccountSettingWithContextStub
+	fakeReturns := fake.deleteAccountSettingWithContextReturns
 	fake.recordInvocation("DeleteAccountSettingWithContext", []interface{}{arg1, arg2, arg3})
 	fake.deleteAccountSettingWithContextMutex.Unlock()
-	if fake.DeleteAccountSettingWithContextStub != nil {
-		return fake.DeleteAccountSettingWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteAccountSettingWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -3330,15 +3345,16 @@ func (fake *FakeECSClient) DeleteAttributes(arg1 *ecs.DeleteAttributesInput) (*e
 	fake.deleteAttributesArgsForCall = append(fake.deleteAttributesArgsForCall, struct {
 		arg1 *ecs.DeleteAttributesInput
 	}{arg1})
+	stub := fake.DeleteAttributesStub
+	fakeReturns := fake.deleteAttributesReturns
 	fake.recordInvocation("DeleteAttributes", []interface{}{arg1})
 	fake.deleteAttributesMutex.Unlock()
-	if fake.DeleteAttributesStub != nil {
-		return fake.DeleteAttributesStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteAttributesReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -3393,15 +3409,16 @@ func (fake *FakeECSClient) DeleteAttributesRequest(arg1 *ecs.DeleteAttributesInp
 	fake.deleteAttributesRequestArgsForCall = append(fake.deleteAttributesRequestArgsForCall, struct {
 		arg1 *ecs.DeleteAttributesInput
 	}{arg1})
+	stub := fake.DeleteAttributesRequestStub
+	fakeReturns := fake.deleteAttributesRequestReturns
 	fake.recordInvocation("DeleteAttributesRequest", []interface{}{arg1})
 	fake.deleteAttributesRequestMutex.Unlock()
-	if fake.DeleteAttributesRequestStub != nil {
-		return fake.DeleteAttributesRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteAttributesRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -3458,15 +3475,16 @@ func (fake *FakeECSClient) DeleteAttributesWithContext(arg1 context.Context, arg
 		arg2 *ecs.DeleteAttributesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.DeleteAttributesWithContextStub
+	fakeReturns := fake.deleteAttributesWithContextReturns
 	fake.recordInvocation("DeleteAttributesWithContext", []interface{}{arg1, arg2, arg3})
 	fake.deleteAttributesWithContextMutex.Unlock()
-	if fake.DeleteAttributesWithContextStub != nil {
-		return fake.DeleteAttributesWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteAttributesWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -3521,15 +3539,16 @@ func (fake *FakeECSClient) DeleteCapacityProvider(arg1 *ecs.DeleteCapacityProvid
 	fake.deleteCapacityProviderArgsForCall = append(fake.deleteCapacityProviderArgsForCall, struct {
 		arg1 *ecs.DeleteCapacityProviderInput
 	}{arg1})
+	stub := fake.DeleteCapacityProviderStub
+	fakeReturns := fake.deleteCapacityProviderReturns
 	fake.recordInvocation("DeleteCapacityProvider", []interface{}{arg1})
 	fake.deleteCapacityProviderMutex.Unlock()
-	if fake.DeleteCapacityProviderStub != nil {
-		return fake.DeleteCapacityProviderStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteCapacityProviderReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -3584,15 +3603,16 @@ func (fake *FakeECSClient) DeleteCapacityProviderRequest(arg1 *ecs.DeleteCapacit
 	fake.deleteCapacityProviderRequestArgsForCall = append(fake.deleteCapacityProviderRequestArgsForCall, struct {
 		arg1 *ecs.DeleteCapacityProviderInput
 	}{arg1})
+	stub := fake.DeleteCapacityProviderRequestStub
+	fakeReturns := fake.deleteCapacityProviderRequestReturns
 	fake.recordInvocation("DeleteCapacityProviderRequest", []interface{}{arg1})
 	fake.deleteCapacityProviderRequestMutex.Unlock()
-	if fake.DeleteCapacityProviderRequestStub != nil {
-		return fake.DeleteCapacityProviderRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteCapacityProviderRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -3649,15 +3669,16 @@ func (fake *FakeECSClient) DeleteCapacityProviderWithContext(arg1 context.Contex
 		arg2 *ecs.DeleteCapacityProviderInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.DeleteCapacityProviderWithContextStub
+	fakeReturns := fake.deleteCapacityProviderWithContextReturns
 	fake.recordInvocation("DeleteCapacityProviderWithContext", []interface{}{arg1, arg2, arg3})
 	fake.deleteCapacityProviderWithContextMutex.Unlock()
-	if fake.DeleteCapacityProviderWithContextStub != nil {
-		return fake.DeleteCapacityProviderWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteCapacityProviderWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -3712,15 +3733,16 @@ func (fake *FakeECSClient) DeleteCluster(arg1 *ecs.DeleteClusterInput) (*ecs.Del
 	fake.deleteClusterArgsForCall = append(fake.deleteClusterArgsForCall, struct {
 		arg1 *ecs.DeleteClusterInput
 	}{arg1})
+	stub := fake.DeleteClusterStub
+	fakeReturns := fake.deleteClusterReturns
 	fake.recordInvocation("DeleteCluster", []interface{}{arg1})
 	fake.deleteClusterMutex.Unlock()
-	if fake.DeleteClusterStub != nil {
-		return fake.DeleteClusterStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteClusterReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -3775,15 +3797,16 @@ func (fake *FakeECSClient) DeleteClusterRequest(arg1 *ecs.DeleteClusterInput) (*
 	fake.deleteClusterRequestArgsForCall = append(fake.deleteClusterRequestArgsForCall, struct {
 		arg1 *ecs.DeleteClusterInput
 	}{arg1})
+	stub := fake.DeleteClusterRequestStub
+	fakeReturns := fake.deleteClusterRequestReturns
 	fake.recordInvocation("DeleteClusterRequest", []interface{}{arg1})
 	fake.deleteClusterRequestMutex.Unlock()
-	if fake.DeleteClusterRequestStub != nil {
-		return fake.DeleteClusterRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteClusterRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -3840,15 +3863,16 @@ func (fake *FakeECSClient) DeleteClusterWithContext(arg1 context.Context, arg2 *
 		arg2 *ecs.DeleteClusterInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.DeleteClusterWithContextStub
+	fakeReturns := fake.deleteClusterWithContextReturns
 	fake.recordInvocation("DeleteClusterWithContext", []interface{}{arg1, arg2, arg3})
 	fake.deleteClusterWithContextMutex.Unlock()
-	if fake.DeleteClusterWithContextStub != nil {
-		return fake.DeleteClusterWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteClusterWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -3903,15 +3927,16 @@ func (fake *FakeECSClient) DeleteService(arg1 *ecs.DeleteServiceInput) (*ecs.Del
 	fake.deleteServiceArgsForCall = append(fake.deleteServiceArgsForCall, struct {
 		arg1 *ecs.DeleteServiceInput
 	}{arg1})
+	stub := fake.DeleteServiceStub
+	fakeReturns := fake.deleteServiceReturns
 	fake.recordInvocation("DeleteService", []interface{}{arg1})
 	fake.deleteServiceMutex.Unlock()
-	if fake.DeleteServiceStub != nil {
-		return fake.DeleteServiceStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteServiceReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -3966,15 +3991,16 @@ func (fake *FakeECSClient) DeleteServiceRequest(arg1 *ecs.DeleteServiceInput) (*
 	fake.deleteServiceRequestArgsForCall = append(fake.deleteServiceRequestArgsForCall, struct {
 		arg1 *ecs.DeleteServiceInput
 	}{arg1})
+	stub := fake.DeleteServiceRequestStub
+	fakeReturns := fake.deleteServiceRequestReturns
 	fake.recordInvocation("DeleteServiceRequest", []interface{}{arg1})
 	fake.deleteServiceRequestMutex.Unlock()
-	if fake.DeleteServiceRequestStub != nil {
-		return fake.DeleteServiceRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteServiceRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -4031,15 +4057,16 @@ func (fake *FakeECSClient) DeleteServiceWithContext(arg1 context.Context, arg2 *
 		arg2 *ecs.DeleteServiceInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.DeleteServiceWithContextStub
+	fakeReturns := fake.deleteServiceWithContextReturns
 	fake.recordInvocation("DeleteServiceWithContext", []interface{}{arg1, arg2, arg3})
 	fake.deleteServiceWithContextMutex.Unlock()
-	if fake.DeleteServiceWithContextStub != nil {
-		return fake.DeleteServiceWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteServiceWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -4094,15 +4121,16 @@ func (fake *FakeECSClient) DeleteTaskSet(arg1 *ecs.DeleteTaskSetInput) (*ecs.Del
 	fake.deleteTaskSetArgsForCall = append(fake.deleteTaskSetArgsForCall, struct {
 		arg1 *ecs.DeleteTaskSetInput
 	}{arg1})
+	stub := fake.DeleteTaskSetStub
+	fakeReturns := fake.deleteTaskSetReturns
 	fake.recordInvocation("DeleteTaskSet", []interface{}{arg1})
 	fake.deleteTaskSetMutex.Unlock()
-	if fake.DeleteTaskSetStub != nil {
-		return fake.DeleteTaskSetStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteTaskSetReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -4157,15 +4185,16 @@ func (fake *FakeECSClient) DeleteTaskSetRequest(arg1 *ecs.DeleteTaskSetInput) (*
 	fake.deleteTaskSetRequestArgsForCall = append(fake.deleteTaskSetRequestArgsForCall, struct {
 		arg1 *ecs.DeleteTaskSetInput
 	}{arg1})
+	stub := fake.DeleteTaskSetRequestStub
+	fakeReturns := fake.deleteTaskSetRequestReturns
 	fake.recordInvocation("DeleteTaskSetRequest", []interface{}{arg1})
 	fake.deleteTaskSetRequestMutex.Unlock()
-	if fake.DeleteTaskSetRequestStub != nil {
-		return fake.DeleteTaskSetRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteTaskSetRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -4222,15 +4251,16 @@ func (fake *FakeECSClient) DeleteTaskSetWithContext(arg1 context.Context, arg2 *
 		arg2 *ecs.DeleteTaskSetInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.DeleteTaskSetWithContextStub
+	fakeReturns := fake.deleteTaskSetWithContextReturns
 	fake.recordInvocation("DeleteTaskSetWithContext", []interface{}{arg1, arg2, arg3})
 	fake.deleteTaskSetWithContextMutex.Unlock()
-	if fake.DeleteTaskSetWithContextStub != nil {
-		return fake.DeleteTaskSetWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deleteTaskSetWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -4285,15 +4315,16 @@ func (fake *FakeECSClient) DeregisterContainerInstance(arg1 *ecs.DeregisterConta
 	fake.deregisterContainerInstanceArgsForCall = append(fake.deregisterContainerInstanceArgsForCall, struct {
 		arg1 *ecs.DeregisterContainerInstanceInput
 	}{arg1})
+	stub := fake.DeregisterContainerInstanceStub
+	fakeReturns := fake.deregisterContainerInstanceReturns
 	fake.recordInvocation("DeregisterContainerInstance", []interface{}{arg1})
 	fake.deregisterContainerInstanceMutex.Unlock()
-	if fake.DeregisterContainerInstanceStub != nil {
-		return fake.DeregisterContainerInstanceStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deregisterContainerInstanceReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -4348,15 +4379,16 @@ func (fake *FakeECSClient) DeregisterContainerInstanceRequest(arg1 *ecs.Deregist
 	fake.deregisterContainerInstanceRequestArgsForCall = append(fake.deregisterContainerInstanceRequestArgsForCall, struct {
 		arg1 *ecs.DeregisterContainerInstanceInput
 	}{arg1})
+	stub := fake.DeregisterContainerInstanceRequestStub
+	fakeReturns := fake.deregisterContainerInstanceRequestReturns
 	fake.recordInvocation("DeregisterContainerInstanceRequest", []interface{}{arg1})
 	fake.deregisterContainerInstanceRequestMutex.Unlock()
-	if fake.DeregisterContainerInstanceRequestStub != nil {
-		return fake.DeregisterContainerInstanceRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deregisterContainerInstanceRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -4413,15 +4445,16 @@ func (fake *FakeECSClient) DeregisterContainerInstanceWithContext(arg1 context.C
 		arg2 *ecs.DeregisterContainerInstanceInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.DeregisterContainerInstanceWithContextStub
+	fakeReturns := fake.deregisterContainerInstanceWithContextReturns
 	fake.recordInvocation("DeregisterContainerInstanceWithContext", []interface{}{arg1, arg2, arg3})
 	fake.deregisterContainerInstanceWithContextMutex.Unlock()
-	if fake.DeregisterContainerInstanceWithContextStub != nil {
-		return fake.DeregisterContainerInstanceWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deregisterContainerInstanceWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -4476,15 +4509,16 @@ func (fake *FakeECSClient) DeregisterTaskDefinition(arg1 *ecs.DeregisterTaskDefi
 	fake.deregisterTaskDefinitionArgsForCall = append(fake.deregisterTaskDefinitionArgsForCall, struct {
 		arg1 *ecs.DeregisterTaskDefinitionInput
 	}{arg1})
+	stub := fake.DeregisterTaskDefinitionStub
+	fakeReturns := fake.deregisterTaskDefinitionReturns
 	fake.recordInvocation("DeregisterTaskDefinition", []interface{}{arg1})
 	fake.deregisterTaskDefinitionMutex.Unlock()
-	if fake.DeregisterTaskDefinitionStub != nil {
-		return fake.DeregisterTaskDefinitionStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deregisterTaskDefinitionReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -4539,15 +4573,16 @@ func (fake *FakeECSClient) DeregisterTaskDefinitionRequest(arg1 *ecs.DeregisterT
 	fake.deregisterTaskDefinitionRequestArgsForCall = append(fake.deregisterTaskDefinitionRequestArgsForCall, struct {
 		arg1 *ecs.DeregisterTaskDefinitionInput
 	}{arg1})
+	stub := fake.DeregisterTaskDefinitionRequestStub
+	fakeReturns := fake.deregisterTaskDefinitionRequestReturns
 	fake.recordInvocation("DeregisterTaskDefinitionRequest", []interface{}{arg1})
 	fake.deregisterTaskDefinitionRequestMutex.Unlock()
-	if fake.DeregisterTaskDefinitionRequestStub != nil {
-		return fake.DeregisterTaskDefinitionRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deregisterTaskDefinitionRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -4604,15 +4639,16 @@ func (fake *FakeECSClient) DeregisterTaskDefinitionWithContext(arg1 context.Cont
 		arg2 *ecs.DeregisterTaskDefinitionInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.DeregisterTaskDefinitionWithContextStub
+	fakeReturns := fake.deregisterTaskDefinitionWithContextReturns
 	fake.recordInvocation("DeregisterTaskDefinitionWithContext", []interface{}{arg1, arg2, arg3})
 	fake.deregisterTaskDefinitionWithContextMutex.Unlock()
-	if fake.DeregisterTaskDefinitionWithContextStub != nil {
-		return fake.DeregisterTaskDefinitionWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.deregisterTaskDefinitionWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -4667,15 +4703,16 @@ func (fake *FakeECSClient) DescribeCapacityProviders(arg1 *ecs.DescribeCapacityP
 	fake.describeCapacityProvidersArgsForCall = append(fake.describeCapacityProvidersArgsForCall, struct {
 		arg1 *ecs.DescribeCapacityProvidersInput
 	}{arg1})
+	stub := fake.DescribeCapacityProvidersStub
+	fakeReturns := fake.describeCapacityProvidersReturns
 	fake.recordInvocation("DescribeCapacityProviders", []interface{}{arg1})
 	fake.describeCapacityProvidersMutex.Unlock()
-	if fake.DescribeCapacityProvidersStub != nil {
-		return fake.DescribeCapacityProvidersStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeCapacityProvidersReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -4730,15 +4767,16 @@ func (fake *FakeECSClient) DescribeCapacityProvidersRequest(arg1 *ecs.DescribeCa
 	fake.describeCapacityProvidersRequestArgsForCall = append(fake.describeCapacityProvidersRequestArgsForCall, struct {
 		arg1 *ecs.DescribeCapacityProvidersInput
 	}{arg1})
+	stub := fake.DescribeCapacityProvidersRequestStub
+	fakeReturns := fake.describeCapacityProvidersRequestReturns
 	fake.recordInvocation("DescribeCapacityProvidersRequest", []interface{}{arg1})
 	fake.describeCapacityProvidersRequestMutex.Unlock()
-	if fake.DescribeCapacityProvidersRequestStub != nil {
-		return fake.DescribeCapacityProvidersRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeCapacityProvidersRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -4795,15 +4833,16 @@ func (fake *FakeECSClient) DescribeCapacityProvidersWithContext(arg1 context.Con
 		arg2 *ecs.DescribeCapacityProvidersInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.DescribeCapacityProvidersWithContextStub
+	fakeReturns := fake.describeCapacityProvidersWithContextReturns
 	fake.recordInvocation("DescribeCapacityProvidersWithContext", []interface{}{arg1, arg2, arg3})
 	fake.describeCapacityProvidersWithContextMutex.Unlock()
-	if fake.DescribeCapacityProvidersWithContextStub != nil {
-		return fake.DescribeCapacityProvidersWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeCapacityProvidersWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -4858,15 +4897,16 @@ func (fake *FakeECSClient) DescribeClusters(arg1 *ecs.DescribeClustersInput) (*e
 	fake.describeClustersArgsForCall = append(fake.describeClustersArgsForCall, struct {
 		arg1 *ecs.DescribeClustersInput
 	}{arg1})
+	stub := fake.DescribeClustersStub
+	fakeReturns := fake.describeClustersReturns
 	fake.recordInvocation("DescribeClusters", []interface{}{arg1})
 	fake.describeClustersMutex.Unlock()
-	if fake.DescribeClustersStub != nil {
-		return fake.DescribeClustersStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeClustersReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -4921,15 +4961,16 @@ func (fake *FakeECSClient) DescribeClustersRequest(arg1 *ecs.DescribeClustersInp
 	fake.describeClustersRequestArgsForCall = append(fake.describeClustersRequestArgsForCall, struct {
 		arg1 *ecs.DescribeClustersInput
 	}{arg1})
+	stub := fake.DescribeClustersRequestStub
+	fakeReturns := fake.describeClustersRequestReturns
 	fake.recordInvocation("DescribeClustersRequest", []interface{}{arg1})
 	fake.describeClustersRequestMutex.Unlock()
-	if fake.DescribeClustersRequestStub != nil {
-		return fake.DescribeClustersRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeClustersRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -4986,15 +5027,16 @@ func (fake *FakeECSClient) DescribeClustersWithContext(arg1 context.Context, arg
 		arg2 *ecs.DescribeClustersInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.DescribeClustersWithContextStub
+	fakeReturns := fake.describeClustersWithContextReturns
 	fake.recordInvocation("DescribeClustersWithContext", []interface{}{arg1, arg2, arg3})
 	fake.describeClustersWithContextMutex.Unlock()
-	if fake.DescribeClustersWithContextStub != nil {
-		return fake.DescribeClustersWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeClustersWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -5049,15 +5091,16 @@ func (fake *FakeECSClient) DescribeContainerInstances(arg1 *ecs.DescribeContaine
 	fake.describeContainerInstancesArgsForCall = append(fake.describeContainerInstancesArgsForCall, struct {
 		arg1 *ecs.DescribeContainerInstancesInput
 	}{arg1})
+	stub := fake.DescribeContainerInstancesStub
+	fakeReturns := fake.describeContainerInstancesReturns
 	fake.recordInvocation("DescribeContainerInstances", []interface{}{arg1})
 	fake.describeContainerInstancesMutex.Unlock()
-	if fake.DescribeContainerInstancesStub != nil {
-		return fake.DescribeContainerInstancesStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeContainerInstancesReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -5112,15 +5155,16 @@ func (fake *FakeECSClient) DescribeContainerInstancesRequest(arg1 *ecs.DescribeC
 	fake.describeContainerInstancesRequestArgsForCall = append(fake.describeContainerInstancesRequestArgsForCall, struct {
 		arg1 *ecs.DescribeContainerInstancesInput
 	}{arg1})
+	stub := fake.DescribeContainerInstancesRequestStub
+	fakeReturns := fake.describeContainerInstancesRequestReturns
 	fake.recordInvocation("DescribeContainerInstancesRequest", []interface{}{arg1})
 	fake.describeContainerInstancesRequestMutex.Unlock()
-	if fake.DescribeContainerInstancesRequestStub != nil {
-		return fake.DescribeContainerInstancesRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeContainerInstancesRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -5177,15 +5221,16 @@ func (fake *FakeECSClient) DescribeContainerInstancesWithContext(arg1 context.Co
 		arg2 *ecs.DescribeContainerInstancesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.DescribeContainerInstancesWithContextStub
+	fakeReturns := fake.describeContainerInstancesWithContextReturns
 	fake.recordInvocation("DescribeContainerInstancesWithContext", []interface{}{arg1, arg2, arg3})
 	fake.describeContainerInstancesWithContextMutex.Unlock()
-	if fake.DescribeContainerInstancesWithContextStub != nil {
-		return fake.DescribeContainerInstancesWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeContainerInstancesWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -5240,15 +5285,16 @@ func (fake *FakeECSClient) DescribeServices(arg1 *ecs.DescribeServicesInput) (*e
 	fake.describeServicesArgsForCall = append(fake.describeServicesArgsForCall, struct {
 		arg1 *ecs.DescribeServicesInput
 	}{arg1})
+	stub := fake.DescribeServicesStub
+	fakeReturns := fake.describeServicesReturns
 	fake.recordInvocation("DescribeServices", []interface{}{arg1})
 	fake.describeServicesMutex.Unlock()
-	if fake.DescribeServicesStub != nil {
-		return fake.DescribeServicesStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeServicesReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -5303,15 +5349,16 @@ func (fake *FakeECSClient) DescribeServicesRequest(arg1 *ecs.DescribeServicesInp
 	fake.describeServicesRequestArgsForCall = append(fake.describeServicesRequestArgsForCall, struct {
 		arg1 *ecs.DescribeServicesInput
 	}{arg1})
+	stub := fake.DescribeServicesRequestStub
+	fakeReturns := fake.describeServicesRequestReturns
 	fake.recordInvocation("DescribeServicesRequest", []interface{}{arg1})
 	fake.describeServicesRequestMutex.Unlock()
-	if fake.DescribeServicesRequestStub != nil {
-		return fake.DescribeServicesRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeServicesRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -5368,15 +5415,16 @@ func (fake *FakeECSClient) DescribeServicesWithContext(arg1 context.Context, arg
 		arg2 *ecs.DescribeServicesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.DescribeServicesWithContextStub
+	fakeReturns := fake.describeServicesWithContextReturns
 	fake.recordInvocation("DescribeServicesWithContext", []interface{}{arg1, arg2, arg3})
 	fake.describeServicesWithContextMutex.Unlock()
-	if fake.DescribeServicesWithContextStub != nil {
-		return fake.DescribeServicesWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeServicesWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -5431,15 +5479,16 @@ func (fake *FakeECSClient) DescribeTaskDefinition(arg1 *ecs.DescribeTaskDefiniti
 	fake.describeTaskDefinitionArgsForCall = append(fake.describeTaskDefinitionArgsForCall, struct {
 		arg1 *ecs.DescribeTaskDefinitionInput
 	}{arg1})
+	stub := fake.DescribeTaskDefinitionStub
+	fakeReturns := fake.describeTaskDefinitionReturns
 	fake.recordInvocation("DescribeTaskDefinition", []interface{}{arg1})
 	fake.describeTaskDefinitionMutex.Unlock()
-	if fake.DescribeTaskDefinitionStub != nil {
-		return fake.DescribeTaskDefinitionStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeTaskDefinitionReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -5494,15 +5543,16 @@ func (fake *FakeECSClient) DescribeTaskDefinitionRequest(arg1 *ecs.DescribeTaskD
 	fake.describeTaskDefinitionRequestArgsForCall = append(fake.describeTaskDefinitionRequestArgsForCall, struct {
 		arg1 *ecs.DescribeTaskDefinitionInput
 	}{arg1})
+	stub := fake.DescribeTaskDefinitionRequestStub
+	fakeReturns := fake.describeTaskDefinitionRequestReturns
 	fake.recordInvocation("DescribeTaskDefinitionRequest", []interface{}{arg1})
 	fake.describeTaskDefinitionRequestMutex.Unlock()
-	if fake.DescribeTaskDefinitionRequestStub != nil {
-		return fake.DescribeTaskDefinitionRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeTaskDefinitionRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -5559,15 +5609,16 @@ func (fake *FakeECSClient) DescribeTaskDefinitionWithContext(arg1 context.Contex
 		arg2 *ecs.DescribeTaskDefinitionInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.DescribeTaskDefinitionWithContextStub
+	fakeReturns := fake.describeTaskDefinitionWithContextReturns
 	fake.recordInvocation("DescribeTaskDefinitionWithContext", []interface{}{arg1, arg2, arg3})
 	fake.describeTaskDefinitionWithContextMutex.Unlock()
-	if fake.DescribeTaskDefinitionWithContextStub != nil {
-		return fake.DescribeTaskDefinitionWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeTaskDefinitionWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -5622,15 +5673,16 @@ func (fake *FakeECSClient) DescribeTaskSets(arg1 *ecs.DescribeTaskSetsInput) (*e
 	fake.describeTaskSetsArgsForCall = append(fake.describeTaskSetsArgsForCall, struct {
 		arg1 *ecs.DescribeTaskSetsInput
 	}{arg1})
+	stub := fake.DescribeTaskSetsStub
+	fakeReturns := fake.describeTaskSetsReturns
 	fake.recordInvocation("DescribeTaskSets", []interface{}{arg1})
 	fake.describeTaskSetsMutex.Unlock()
-	if fake.DescribeTaskSetsStub != nil {
-		return fake.DescribeTaskSetsStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeTaskSetsReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -5685,15 +5737,16 @@ func (fake *FakeECSClient) DescribeTaskSetsRequest(arg1 *ecs.DescribeTaskSetsInp
 	fake.describeTaskSetsRequestArgsForCall = append(fake.describeTaskSetsRequestArgsForCall, struct {
 		arg1 *ecs.DescribeTaskSetsInput
 	}{arg1})
+	stub := fake.DescribeTaskSetsRequestStub
+	fakeReturns := fake.describeTaskSetsRequestReturns
 	fake.recordInvocation("DescribeTaskSetsRequest", []interface{}{arg1})
 	fake.describeTaskSetsRequestMutex.Unlock()
-	if fake.DescribeTaskSetsRequestStub != nil {
-		return fake.DescribeTaskSetsRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeTaskSetsRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -5750,15 +5803,16 @@ func (fake *FakeECSClient) DescribeTaskSetsWithContext(arg1 context.Context, arg
 		arg2 *ecs.DescribeTaskSetsInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.DescribeTaskSetsWithContextStub
+	fakeReturns := fake.describeTaskSetsWithContextReturns
 	fake.recordInvocation("DescribeTaskSetsWithContext", []interface{}{arg1, arg2, arg3})
 	fake.describeTaskSetsWithContextMutex.Unlock()
-	if fake.DescribeTaskSetsWithContextStub != nil {
-		return fake.DescribeTaskSetsWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeTaskSetsWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -5813,15 +5867,16 @@ func (fake *FakeECSClient) DescribeTasks(arg1 *ecs.DescribeTasksInput) (*ecs.Des
 	fake.describeTasksArgsForCall = append(fake.describeTasksArgsForCall, struct {
 		arg1 *ecs.DescribeTasksInput
 	}{arg1})
+	stub := fake.DescribeTasksStub
+	fakeReturns := fake.describeTasksReturns
 	fake.recordInvocation("DescribeTasks", []interface{}{arg1})
 	fake.describeTasksMutex.Unlock()
-	if fake.DescribeTasksStub != nil {
-		return fake.DescribeTasksStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeTasksReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -5876,15 +5931,16 @@ func (fake *FakeECSClient) DescribeTasksRequest(arg1 *ecs.DescribeTasksInput) (*
 	fake.describeTasksRequestArgsForCall = append(fake.describeTasksRequestArgsForCall, struct {
 		arg1 *ecs.DescribeTasksInput
 	}{arg1})
+	stub := fake.DescribeTasksRequestStub
+	fakeReturns := fake.describeTasksRequestReturns
 	fake.recordInvocation("DescribeTasksRequest", []interface{}{arg1})
 	fake.describeTasksRequestMutex.Unlock()
-	if fake.DescribeTasksRequestStub != nil {
-		return fake.DescribeTasksRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeTasksRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -5941,15 +5997,16 @@ func (fake *FakeECSClient) DescribeTasksWithContext(arg1 context.Context, arg2 *
 		arg2 *ecs.DescribeTasksInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.DescribeTasksWithContextStub
+	fakeReturns := fake.describeTasksWithContextReturns
 	fake.recordInvocation("DescribeTasksWithContext", []interface{}{arg1, arg2, arg3})
 	fake.describeTasksWithContextMutex.Unlock()
-	if fake.DescribeTasksWithContextStub != nil {
-		return fake.DescribeTasksWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.describeTasksWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -6004,15 +6061,16 @@ func (fake *FakeECSClient) DiscoverPollEndpoint(arg1 *ecs.DiscoverPollEndpointIn
 	fake.discoverPollEndpointArgsForCall = append(fake.discoverPollEndpointArgsForCall, struct {
 		arg1 *ecs.DiscoverPollEndpointInput
 	}{arg1})
+	stub := fake.DiscoverPollEndpointStub
+	fakeReturns := fake.discoverPollEndpointReturns
 	fake.recordInvocation("DiscoverPollEndpoint", []interface{}{arg1})
 	fake.discoverPollEndpointMutex.Unlock()
-	if fake.DiscoverPollEndpointStub != nil {
-		return fake.DiscoverPollEndpointStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.discoverPollEndpointReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -6067,15 +6125,16 @@ func (fake *FakeECSClient) DiscoverPollEndpointRequest(arg1 *ecs.DiscoverPollEnd
 	fake.discoverPollEndpointRequestArgsForCall = append(fake.discoverPollEndpointRequestArgsForCall, struct {
 		arg1 *ecs.DiscoverPollEndpointInput
 	}{arg1})
+	stub := fake.DiscoverPollEndpointRequestStub
+	fakeReturns := fake.discoverPollEndpointRequestReturns
 	fake.recordInvocation("DiscoverPollEndpointRequest", []interface{}{arg1})
 	fake.discoverPollEndpointRequestMutex.Unlock()
-	if fake.DiscoverPollEndpointRequestStub != nil {
-		return fake.DiscoverPollEndpointRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.discoverPollEndpointRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -6132,15 +6191,16 @@ func (fake *FakeECSClient) DiscoverPollEndpointWithContext(arg1 context.Context,
 		arg2 *ecs.DiscoverPollEndpointInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.DiscoverPollEndpointWithContextStub
+	fakeReturns := fake.discoverPollEndpointWithContextReturns
 	fake.recordInvocation("DiscoverPollEndpointWithContext", []interface{}{arg1, arg2, arg3})
 	fake.discoverPollEndpointWithContextMutex.Unlock()
-	if fake.DiscoverPollEndpointWithContextStub != nil {
-		return fake.DiscoverPollEndpointWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.discoverPollEndpointWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -6195,15 +6255,16 @@ func (fake *FakeECSClient) ListAccountSettings(arg1 *ecs.ListAccountSettingsInpu
 	fake.listAccountSettingsArgsForCall = append(fake.listAccountSettingsArgsForCall, struct {
 		arg1 *ecs.ListAccountSettingsInput
 	}{arg1})
+	stub := fake.ListAccountSettingsStub
+	fakeReturns := fake.listAccountSettingsReturns
 	fake.recordInvocation("ListAccountSettings", []interface{}{arg1})
 	fake.listAccountSettingsMutex.Unlock()
-	if fake.ListAccountSettingsStub != nil {
-		return fake.ListAccountSettingsStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listAccountSettingsReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -6259,15 +6320,16 @@ func (fake *FakeECSClient) ListAccountSettingsPages(arg1 *ecs.ListAccountSetting
 		arg1 *ecs.ListAccountSettingsInput
 		arg2 func(*ecs.ListAccountSettingsOutput, bool) bool
 	}{arg1, arg2})
+	stub := fake.ListAccountSettingsPagesStub
+	fakeReturns := fake.listAccountSettingsPagesReturns
 	fake.recordInvocation("ListAccountSettingsPages", []interface{}{arg1, arg2})
 	fake.listAccountSettingsPagesMutex.Unlock()
-	if fake.ListAccountSettingsPagesStub != nil {
-		return fake.ListAccountSettingsPagesStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.listAccountSettingsPagesReturns
 	return fakeReturns.result1
 }
 
@@ -6322,15 +6384,16 @@ func (fake *FakeECSClient) ListAccountSettingsPagesWithContext(arg1 context.Cont
 		arg3 func(*ecs.ListAccountSettingsOutput, bool) bool
 		arg4 []request.Option
 	}{arg1, arg2, arg3, arg4})
+	stub := fake.ListAccountSettingsPagesWithContextStub
+	fakeReturns := fake.listAccountSettingsPagesWithContextReturns
 	fake.recordInvocation("ListAccountSettingsPagesWithContext", []interface{}{arg1, arg2, arg3, arg4})
 	fake.listAccountSettingsPagesWithContextMutex.Unlock()
-	if fake.ListAccountSettingsPagesWithContextStub != nil {
-		return fake.ListAccountSettingsPagesWithContextStub(arg1, arg2, arg3, arg4...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3, arg4...)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.listAccountSettingsPagesWithContextReturns
 	return fakeReturns.result1
 }
 
@@ -6382,15 +6445,16 @@ func (fake *FakeECSClient) ListAccountSettingsRequest(arg1 *ecs.ListAccountSetti
 	fake.listAccountSettingsRequestArgsForCall = append(fake.listAccountSettingsRequestArgsForCall, struct {
 		arg1 *ecs.ListAccountSettingsInput
 	}{arg1})
+	stub := fake.ListAccountSettingsRequestStub
+	fakeReturns := fake.listAccountSettingsRequestReturns
 	fake.recordInvocation("ListAccountSettingsRequest", []interface{}{arg1})
 	fake.listAccountSettingsRequestMutex.Unlock()
-	if fake.ListAccountSettingsRequestStub != nil {
-		return fake.ListAccountSettingsRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listAccountSettingsRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -6447,15 +6511,16 @@ func (fake *FakeECSClient) ListAccountSettingsWithContext(arg1 context.Context, 
 		arg2 *ecs.ListAccountSettingsInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.ListAccountSettingsWithContextStub
+	fakeReturns := fake.listAccountSettingsWithContextReturns
 	fake.recordInvocation("ListAccountSettingsWithContext", []interface{}{arg1, arg2, arg3})
 	fake.listAccountSettingsWithContextMutex.Unlock()
-	if fake.ListAccountSettingsWithContextStub != nil {
-		return fake.ListAccountSettingsWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listAccountSettingsWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -6510,15 +6575,16 @@ func (fake *FakeECSClient) ListAttributes(arg1 *ecs.ListAttributesInput) (*ecs.L
 	fake.listAttributesArgsForCall = append(fake.listAttributesArgsForCall, struct {
 		arg1 *ecs.ListAttributesInput
 	}{arg1})
+	stub := fake.ListAttributesStub
+	fakeReturns := fake.listAttributesReturns
 	fake.recordInvocation("ListAttributes", []interface{}{arg1})
 	fake.listAttributesMutex.Unlock()
-	if fake.ListAttributesStub != nil {
-		return fake.ListAttributesStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listAttributesReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -6574,15 +6640,16 @@ func (fake *FakeECSClient) ListAttributesPages(arg1 *ecs.ListAttributesInput, ar
 		arg1 *ecs.ListAttributesInput
 		arg2 func(*ecs.ListAttributesOutput, bool) bool
 	}{arg1, arg2})
+	stub := fake.ListAttributesPagesStub
+	fakeReturns := fake.listAttributesPagesReturns
 	fake.recordInvocation("ListAttributesPages", []interface{}{arg1, arg2})
 	fake.listAttributesPagesMutex.Unlock()
-	if fake.ListAttributesPagesStub != nil {
-		return fake.ListAttributesPagesStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.listAttributesPagesReturns
 	return fakeReturns.result1
 }
 
@@ -6637,15 +6704,16 @@ func (fake *FakeECSClient) ListAttributesPagesWithContext(arg1 context.Context, 
 		arg3 func(*ecs.ListAttributesOutput, bool) bool
 		arg4 []request.Option
 	}{arg1, arg2, arg3, arg4})
+	stub := fake.ListAttributesPagesWithContextStub
+	fakeReturns := fake.listAttributesPagesWithContextReturns
 	fake.recordInvocation("ListAttributesPagesWithContext", []interface{}{arg1, arg2, arg3, arg4})
 	fake.listAttributesPagesWithContextMutex.Unlock()
-	if fake.ListAttributesPagesWithContextStub != nil {
-		return fake.ListAttributesPagesWithContextStub(arg1, arg2, arg3, arg4...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3, arg4...)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.listAttributesPagesWithContextReturns
 	return fakeReturns.result1
 }
 
@@ -6697,15 +6765,16 @@ func (fake *FakeECSClient) ListAttributesRequest(arg1 *ecs.ListAttributesInput) 
 	fake.listAttributesRequestArgsForCall = append(fake.listAttributesRequestArgsForCall, struct {
 		arg1 *ecs.ListAttributesInput
 	}{arg1})
+	stub := fake.ListAttributesRequestStub
+	fakeReturns := fake.listAttributesRequestReturns
 	fake.recordInvocation("ListAttributesRequest", []interface{}{arg1})
 	fake.listAttributesRequestMutex.Unlock()
-	if fake.ListAttributesRequestStub != nil {
-		return fake.ListAttributesRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listAttributesRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -6762,15 +6831,16 @@ func (fake *FakeECSClient) ListAttributesWithContext(arg1 context.Context, arg2 
 		arg2 *ecs.ListAttributesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.ListAttributesWithContextStub
+	fakeReturns := fake.listAttributesWithContextReturns
 	fake.recordInvocation("ListAttributesWithContext", []interface{}{arg1, arg2, arg3})
 	fake.listAttributesWithContextMutex.Unlock()
-	if fake.ListAttributesWithContextStub != nil {
-		return fake.ListAttributesWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listAttributesWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -6825,15 +6895,16 @@ func (fake *FakeECSClient) ListClusters(arg1 *ecs.ListClustersInput) (*ecs.ListC
 	fake.listClustersArgsForCall = append(fake.listClustersArgsForCall, struct {
 		arg1 *ecs.ListClustersInput
 	}{arg1})
+	stub := fake.ListClustersStub
+	fakeReturns := fake.listClustersReturns
 	fake.recordInvocation("ListClusters", []interface{}{arg1})
 	fake.listClustersMutex.Unlock()
-	if fake.ListClustersStub != nil {
-		return fake.ListClustersStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listClustersReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -6889,15 +6960,16 @@ func (fake *FakeECSClient) ListClustersPages(arg1 *ecs.ListClustersInput, arg2 f
 		arg1 *ecs.ListClustersInput
 		arg2 func(*ecs.ListClustersOutput, bool) bool
 	}{arg1, arg2})
+	stub := fake.ListClustersPagesStub
+	fakeReturns := fake.listClustersPagesReturns
 	fake.recordInvocation("ListClustersPages", []interface{}{arg1, arg2})
 	fake.listClustersPagesMutex.Unlock()
-	if fake.ListClustersPagesStub != nil {
-		return fake.ListClustersPagesStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.listClustersPagesReturns
 	return fakeReturns.result1
 }
 
@@ -6952,15 +7024,16 @@ func (fake *FakeECSClient) ListClustersPagesWithContext(arg1 context.Context, ar
 		arg3 func(*ecs.ListClustersOutput, bool) bool
 		arg4 []request.Option
 	}{arg1, arg2, arg3, arg4})
+	stub := fake.ListClustersPagesWithContextStub
+	fakeReturns := fake.listClustersPagesWithContextReturns
 	fake.recordInvocation("ListClustersPagesWithContext", []interface{}{arg1, arg2, arg3, arg4})
 	fake.listClustersPagesWithContextMutex.Unlock()
-	if fake.ListClustersPagesWithContextStub != nil {
-		return fake.ListClustersPagesWithContextStub(arg1, arg2, arg3, arg4...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3, arg4...)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.listClustersPagesWithContextReturns
 	return fakeReturns.result1
 }
 
@@ -7012,15 +7085,16 @@ func (fake *FakeECSClient) ListClustersRequest(arg1 *ecs.ListClustersInput) (*re
 	fake.listClustersRequestArgsForCall = append(fake.listClustersRequestArgsForCall, struct {
 		arg1 *ecs.ListClustersInput
 	}{arg1})
+	stub := fake.ListClustersRequestStub
+	fakeReturns := fake.listClustersRequestReturns
 	fake.recordInvocation("ListClustersRequest", []interface{}{arg1})
 	fake.listClustersRequestMutex.Unlock()
-	if fake.ListClustersRequestStub != nil {
-		return fake.ListClustersRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listClustersRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -7077,15 +7151,16 @@ func (fake *FakeECSClient) ListClustersWithContext(arg1 context.Context, arg2 *e
 		arg2 *ecs.ListClustersInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.ListClustersWithContextStub
+	fakeReturns := fake.listClustersWithContextReturns
 	fake.recordInvocation("ListClustersWithContext", []interface{}{arg1, arg2, arg3})
 	fake.listClustersWithContextMutex.Unlock()
-	if fake.ListClustersWithContextStub != nil {
-		return fake.ListClustersWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listClustersWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -7140,15 +7215,16 @@ func (fake *FakeECSClient) ListContainerInstances(arg1 *ecs.ListContainerInstanc
 	fake.listContainerInstancesArgsForCall = append(fake.listContainerInstancesArgsForCall, struct {
 		arg1 *ecs.ListContainerInstancesInput
 	}{arg1})
+	stub := fake.ListContainerInstancesStub
+	fakeReturns := fake.listContainerInstancesReturns
 	fake.recordInvocation("ListContainerInstances", []interface{}{arg1})
 	fake.listContainerInstancesMutex.Unlock()
-	if fake.ListContainerInstancesStub != nil {
-		return fake.ListContainerInstancesStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listContainerInstancesReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -7204,15 +7280,16 @@ func (fake *FakeECSClient) ListContainerInstancesPages(arg1 *ecs.ListContainerIn
 		arg1 *ecs.ListContainerInstancesInput
 		arg2 func(*ecs.ListContainerInstancesOutput, bool) bool
 	}{arg1, arg2})
+	stub := fake.ListContainerInstancesPagesStub
+	fakeReturns := fake.listContainerInstancesPagesReturns
 	fake.recordInvocation("ListContainerInstancesPages", []interface{}{arg1, arg2})
 	fake.listContainerInstancesPagesMutex.Unlock()
-	if fake.ListContainerInstancesPagesStub != nil {
-		return fake.ListContainerInstancesPagesStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.listContainerInstancesPagesReturns
 	return fakeReturns.result1
 }
 
@@ -7267,15 +7344,16 @@ func (fake *FakeECSClient) ListContainerInstancesPagesWithContext(arg1 context.C
 		arg3 func(*ecs.ListContainerInstancesOutput, bool) bool
 		arg4 []request.Option
 	}{arg1, arg2, arg3, arg4})
+	stub := fake.ListContainerInstancesPagesWithContextStub
+	fakeReturns := fake.listContainerInstancesPagesWithContextReturns
 	fake.recordInvocation("ListContainerInstancesPagesWithContext", []interface{}{arg1, arg2, arg3, arg4})
 	fake.listContainerInstancesPagesWithContextMutex.Unlock()
-	if fake.ListContainerInstancesPagesWithContextStub != nil {
-		return fake.ListContainerInstancesPagesWithContextStub(arg1, arg2, arg3, arg4...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3, arg4...)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.listContainerInstancesPagesWithContextReturns
 	return fakeReturns.result1
 }
 
@@ -7327,15 +7405,16 @@ func (fake *FakeECSClient) ListContainerInstancesRequest(arg1 *ecs.ListContainer
 	fake.listContainerInstancesRequestArgsForCall = append(fake.listContainerInstancesRequestArgsForCall, struct {
 		arg1 *ecs.ListContainerInstancesInput
 	}{arg1})
+	stub := fake.ListContainerInstancesRequestStub
+	fakeReturns := fake.listContainerInstancesRequestReturns
 	fake.recordInvocation("ListContainerInstancesRequest", []interface{}{arg1})
 	fake.listContainerInstancesRequestMutex.Unlock()
-	if fake.ListContainerInstancesRequestStub != nil {
-		return fake.ListContainerInstancesRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listContainerInstancesRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -7392,15 +7471,16 @@ func (fake *FakeECSClient) ListContainerInstancesWithContext(arg1 context.Contex
 		arg2 *ecs.ListContainerInstancesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.ListContainerInstancesWithContextStub
+	fakeReturns := fake.listContainerInstancesWithContextReturns
 	fake.recordInvocation("ListContainerInstancesWithContext", []interface{}{arg1, arg2, arg3})
 	fake.listContainerInstancesWithContextMutex.Unlock()
-	if fake.ListContainerInstancesWithContextStub != nil {
-		return fake.ListContainerInstancesWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listContainerInstancesWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -7455,15 +7535,16 @@ func (fake *FakeECSClient) ListServices(arg1 *ecs.ListServicesInput) (*ecs.ListS
 	fake.listServicesArgsForCall = append(fake.listServicesArgsForCall, struct {
 		arg1 *ecs.ListServicesInput
 	}{arg1})
+	stub := fake.ListServicesStub
+	fakeReturns := fake.listServicesReturns
 	fake.recordInvocation("ListServices", []interface{}{arg1})
 	fake.listServicesMutex.Unlock()
-	if fake.ListServicesStub != nil {
-		return fake.ListServicesStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listServicesReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -7519,15 +7600,16 @@ func (fake *FakeECSClient) ListServicesPages(arg1 *ecs.ListServicesInput, arg2 f
 		arg1 *ecs.ListServicesInput
 		arg2 func(*ecs.ListServicesOutput, bool) bool
 	}{arg1, arg2})
+	stub := fake.ListServicesPagesStub
+	fakeReturns := fake.listServicesPagesReturns
 	fake.recordInvocation("ListServicesPages", []interface{}{arg1, arg2})
 	fake.listServicesPagesMutex.Unlock()
-	if fake.ListServicesPagesStub != nil {
-		return fake.ListServicesPagesStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.listServicesPagesReturns
 	return fakeReturns.result1
 }
 
@@ -7582,15 +7664,16 @@ func (fake *FakeECSClient) ListServicesPagesWithContext(arg1 context.Context, ar
 		arg3 func(*ecs.ListServicesOutput, bool) bool
 		arg4 []request.Option
 	}{arg1, arg2, arg3, arg4})
+	stub := fake.ListServicesPagesWithContextStub
+	fakeReturns := fake.listServicesPagesWithContextReturns
 	fake.recordInvocation("ListServicesPagesWithContext", []interface{}{arg1, arg2, arg3, arg4})
 	fake.listServicesPagesWithContextMutex.Unlock()
-	if fake.ListServicesPagesWithContextStub != nil {
-		return fake.ListServicesPagesWithContextStub(arg1, arg2, arg3, arg4...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3, arg4...)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.listServicesPagesWithContextReturns
 	return fakeReturns.result1
 }
 
@@ -7642,15 +7725,16 @@ func (fake *FakeECSClient) ListServicesRequest(arg1 *ecs.ListServicesInput) (*re
 	fake.listServicesRequestArgsForCall = append(fake.listServicesRequestArgsForCall, struct {
 		arg1 *ecs.ListServicesInput
 	}{arg1})
+	stub := fake.ListServicesRequestStub
+	fakeReturns := fake.listServicesRequestReturns
 	fake.recordInvocation("ListServicesRequest", []interface{}{arg1})
 	fake.listServicesRequestMutex.Unlock()
-	if fake.ListServicesRequestStub != nil {
-		return fake.ListServicesRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listServicesRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -7707,15 +7791,16 @@ func (fake *FakeECSClient) ListServicesWithContext(arg1 context.Context, arg2 *e
 		arg2 *ecs.ListServicesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.ListServicesWithContextStub
+	fakeReturns := fake.listServicesWithContextReturns
 	fake.recordInvocation("ListServicesWithContext", []interface{}{arg1, arg2, arg3})
 	fake.listServicesWithContextMutex.Unlock()
-	if fake.ListServicesWithContextStub != nil {
-		return fake.ListServicesWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listServicesWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -7770,15 +7855,16 @@ func (fake *FakeECSClient) ListTagsForResource(arg1 *ecs.ListTagsForResourceInpu
 	fake.listTagsForResourceArgsForCall = append(fake.listTagsForResourceArgsForCall, struct {
 		arg1 *ecs.ListTagsForResourceInput
 	}{arg1})
+	stub := fake.ListTagsForResourceStub
+	fakeReturns := fake.listTagsForResourceReturns
 	fake.recordInvocation("ListTagsForResource", []interface{}{arg1})
 	fake.listTagsForResourceMutex.Unlock()
-	if fake.ListTagsForResourceStub != nil {
-		return fake.ListTagsForResourceStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listTagsForResourceReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -7833,15 +7919,16 @@ func (fake *FakeECSClient) ListTagsForResourceRequest(arg1 *ecs.ListTagsForResou
 	fake.listTagsForResourceRequestArgsForCall = append(fake.listTagsForResourceRequestArgsForCall, struct {
 		arg1 *ecs.ListTagsForResourceInput
 	}{arg1})
+	stub := fake.ListTagsForResourceRequestStub
+	fakeReturns := fake.listTagsForResourceRequestReturns
 	fake.recordInvocation("ListTagsForResourceRequest", []interface{}{arg1})
 	fake.listTagsForResourceRequestMutex.Unlock()
-	if fake.ListTagsForResourceRequestStub != nil {
-		return fake.ListTagsForResourceRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listTagsForResourceRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -7898,15 +7985,16 @@ func (fake *FakeECSClient) ListTagsForResourceWithContext(arg1 context.Context, 
 		arg2 *ecs.ListTagsForResourceInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.ListTagsForResourceWithContextStub
+	fakeReturns := fake.listTagsForResourceWithContextReturns
 	fake.recordInvocation("ListTagsForResourceWithContext", []interface{}{arg1, arg2, arg3})
 	fake.listTagsForResourceWithContextMutex.Unlock()
-	if fake.ListTagsForResourceWithContextStub != nil {
-		return fake.ListTagsForResourceWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listTagsForResourceWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -7961,15 +8049,16 @@ func (fake *FakeECSClient) ListTaskDefinitionFamilies(arg1 *ecs.ListTaskDefiniti
 	fake.listTaskDefinitionFamiliesArgsForCall = append(fake.listTaskDefinitionFamiliesArgsForCall, struct {
 		arg1 *ecs.ListTaskDefinitionFamiliesInput
 	}{arg1})
+	stub := fake.ListTaskDefinitionFamiliesStub
+	fakeReturns := fake.listTaskDefinitionFamiliesReturns
 	fake.recordInvocation("ListTaskDefinitionFamilies", []interface{}{arg1})
 	fake.listTaskDefinitionFamiliesMutex.Unlock()
-	if fake.ListTaskDefinitionFamiliesStub != nil {
-		return fake.ListTaskDefinitionFamiliesStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listTaskDefinitionFamiliesReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -8025,15 +8114,16 @@ func (fake *FakeECSClient) ListTaskDefinitionFamiliesPages(arg1 *ecs.ListTaskDef
 		arg1 *ecs.ListTaskDefinitionFamiliesInput
 		arg2 func(*ecs.ListTaskDefinitionFamiliesOutput, bool) bool
 	}{arg1, arg2})
+	stub := fake.ListTaskDefinitionFamiliesPagesStub
+	fakeReturns := fake.listTaskDefinitionFamiliesPagesReturns
 	fake.recordInvocation("ListTaskDefinitionFamiliesPages", []interface{}{arg1, arg2})
 	fake.listTaskDefinitionFamiliesPagesMutex.Unlock()
-	if fake.ListTaskDefinitionFamiliesPagesStub != nil {
-		return fake.ListTaskDefinitionFamiliesPagesStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.listTaskDefinitionFamiliesPagesReturns
 	return fakeReturns.result1
 }
 
@@ -8088,15 +8178,16 @@ func (fake *FakeECSClient) ListTaskDefinitionFamiliesPagesWithContext(arg1 conte
 		arg3 func(*ecs.ListTaskDefinitionFamiliesOutput, bool) bool
 		arg4 []request.Option
 	}{arg1, arg2, arg3, arg4})
+	stub := fake.ListTaskDefinitionFamiliesPagesWithContextStub
+	fakeReturns := fake.listTaskDefinitionFamiliesPagesWithContextReturns
 	fake.recordInvocation("ListTaskDefinitionFamiliesPagesWithContext", []interface{}{arg1, arg2, arg3, arg4})
 	fake.listTaskDefinitionFamiliesPagesWithContextMutex.Unlock()
-	if fake.ListTaskDefinitionFamiliesPagesWithContextStub != nil {
-		return fake.ListTaskDefinitionFamiliesPagesWithContextStub(arg1, arg2, arg3, arg4...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3, arg4...)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.listTaskDefinitionFamiliesPagesWithContextReturns
 	return fakeReturns.result1
 }
 
@@ -8148,15 +8239,16 @@ func (fake *FakeECSClient) ListTaskDefinitionFamiliesRequest(arg1 *ecs.ListTaskD
 	fake.listTaskDefinitionFamiliesRequestArgsForCall = append(fake.listTaskDefinitionFamiliesRequestArgsForCall, struct {
 		arg1 *ecs.ListTaskDefinitionFamiliesInput
 	}{arg1})
+	stub := fake.ListTaskDefinitionFamiliesRequestStub
+	fakeReturns := fake.listTaskDefinitionFamiliesRequestReturns
 	fake.recordInvocation("ListTaskDefinitionFamiliesRequest", []interface{}{arg1})
 	fake.listTaskDefinitionFamiliesRequestMutex.Unlock()
-	if fake.ListTaskDefinitionFamiliesRequestStub != nil {
-		return fake.ListTaskDefinitionFamiliesRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listTaskDefinitionFamiliesRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -8213,15 +8305,16 @@ func (fake *FakeECSClient) ListTaskDefinitionFamiliesWithContext(arg1 context.Co
 		arg2 *ecs.ListTaskDefinitionFamiliesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.ListTaskDefinitionFamiliesWithContextStub
+	fakeReturns := fake.listTaskDefinitionFamiliesWithContextReturns
 	fake.recordInvocation("ListTaskDefinitionFamiliesWithContext", []interface{}{arg1, arg2, arg3})
 	fake.listTaskDefinitionFamiliesWithContextMutex.Unlock()
-	if fake.ListTaskDefinitionFamiliesWithContextStub != nil {
-		return fake.ListTaskDefinitionFamiliesWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listTaskDefinitionFamiliesWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -8276,15 +8369,16 @@ func (fake *FakeECSClient) ListTaskDefinitions(arg1 *ecs.ListTaskDefinitionsInpu
 	fake.listTaskDefinitionsArgsForCall = append(fake.listTaskDefinitionsArgsForCall, struct {
 		arg1 *ecs.ListTaskDefinitionsInput
 	}{arg1})
+	stub := fake.ListTaskDefinitionsStub
+	fakeReturns := fake.listTaskDefinitionsReturns
 	fake.recordInvocation("ListTaskDefinitions", []interface{}{arg1})
 	fake.listTaskDefinitionsMutex.Unlock()
-	if fake.ListTaskDefinitionsStub != nil {
-		return fake.ListTaskDefinitionsStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listTaskDefinitionsReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -8340,15 +8434,16 @@ func (fake *FakeECSClient) ListTaskDefinitionsPages(arg1 *ecs.ListTaskDefinition
 		arg1 *ecs.ListTaskDefinitionsInput
 		arg2 func(*ecs.ListTaskDefinitionsOutput, bool) bool
 	}{arg1, arg2})
+	stub := fake.ListTaskDefinitionsPagesStub
+	fakeReturns := fake.listTaskDefinitionsPagesReturns
 	fake.recordInvocation("ListTaskDefinitionsPages", []interface{}{arg1, arg2})
 	fake.listTaskDefinitionsPagesMutex.Unlock()
-	if fake.ListTaskDefinitionsPagesStub != nil {
-		return fake.ListTaskDefinitionsPagesStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.listTaskDefinitionsPagesReturns
 	return fakeReturns.result1
 }
 
@@ -8403,15 +8498,16 @@ func (fake *FakeECSClient) ListTaskDefinitionsPagesWithContext(arg1 context.Cont
 		arg3 func(*ecs.ListTaskDefinitionsOutput, bool) bool
 		arg4 []request.Option
 	}{arg1, arg2, arg3, arg4})
+	stub := fake.ListTaskDefinitionsPagesWithContextStub
+	fakeReturns := fake.listTaskDefinitionsPagesWithContextReturns
 	fake.recordInvocation("ListTaskDefinitionsPagesWithContext", []interface{}{arg1, arg2, arg3, arg4})
 	fake.listTaskDefinitionsPagesWithContextMutex.Unlock()
-	if fake.ListTaskDefinitionsPagesWithContextStub != nil {
-		return fake.ListTaskDefinitionsPagesWithContextStub(arg1, arg2, arg3, arg4...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3, arg4...)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.listTaskDefinitionsPagesWithContextReturns
 	return fakeReturns.result1
 }
 
@@ -8463,15 +8559,16 @@ func (fake *FakeECSClient) ListTaskDefinitionsRequest(arg1 *ecs.ListTaskDefiniti
 	fake.listTaskDefinitionsRequestArgsForCall = append(fake.listTaskDefinitionsRequestArgsForCall, struct {
 		arg1 *ecs.ListTaskDefinitionsInput
 	}{arg1})
+	stub := fake.ListTaskDefinitionsRequestStub
+	fakeReturns := fake.listTaskDefinitionsRequestReturns
 	fake.recordInvocation("ListTaskDefinitionsRequest", []interface{}{arg1})
 	fake.listTaskDefinitionsRequestMutex.Unlock()
-	if fake.ListTaskDefinitionsRequestStub != nil {
-		return fake.ListTaskDefinitionsRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listTaskDefinitionsRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -8528,15 +8625,16 @@ func (fake *FakeECSClient) ListTaskDefinitionsWithContext(arg1 context.Context, 
 		arg2 *ecs.ListTaskDefinitionsInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.ListTaskDefinitionsWithContextStub
+	fakeReturns := fake.listTaskDefinitionsWithContextReturns
 	fake.recordInvocation("ListTaskDefinitionsWithContext", []interface{}{arg1, arg2, arg3})
 	fake.listTaskDefinitionsWithContextMutex.Unlock()
-	if fake.ListTaskDefinitionsWithContextStub != nil {
-		return fake.ListTaskDefinitionsWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listTaskDefinitionsWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -8591,15 +8689,16 @@ func (fake *FakeECSClient) ListTasks(arg1 *ecs.ListTasksInput) (*ecs.ListTasksOu
 	fake.listTasksArgsForCall = append(fake.listTasksArgsForCall, struct {
 		arg1 *ecs.ListTasksInput
 	}{arg1})
+	stub := fake.ListTasksStub
+	fakeReturns := fake.listTasksReturns
 	fake.recordInvocation("ListTasks", []interface{}{arg1})
 	fake.listTasksMutex.Unlock()
-	if fake.ListTasksStub != nil {
-		return fake.ListTasksStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listTasksReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -8655,15 +8754,16 @@ func (fake *FakeECSClient) ListTasksPages(arg1 *ecs.ListTasksInput, arg2 func(*e
 		arg1 *ecs.ListTasksInput
 		arg2 func(*ecs.ListTasksOutput, bool) bool
 	}{arg1, arg2})
+	stub := fake.ListTasksPagesStub
+	fakeReturns := fake.listTasksPagesReturns
 	fake.recordInvocation("ListTasksPages", []interface{}{arg1, arg2})
 	fake.listTasksPagesMutex.Unlock()
-	if fake.ListTasksPagesStub != nil {
-		return fake.ListTasksPagesStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.listTasksPagesReturns
 	return fakeReturns.result1
 }
 
@@ -8718,15 +8818,16 @@ func (fake *FakeECSClient) ListTasksPagesWithContext(arg1 context.Context, arg2 
 		arg3 func(*ecs.ListTasksOutput, bool) bool
 		arg4 []request.Option
 	}{arg1, arg2, arg3, arg4})
+	stub := fake.ListTasksPagesWithContextStub
+	fakeReturns := fake.listTasksPagesWithContextReturns
 	fake.recordInvocation("ListTasksPagesWithContext", []interface{}{arg1, arg2, arg3, arg4})
 	fake.listTasksPagesWithContextMutex.Unlock()
-	if fake.ListTasksPagesWithContextStub != nil {
-		return fake.ListTasksPagesWithContextStub(arg1, arg2, arg3, arg4...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3, arg4...)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.listTasksPagesWithContextReturns
 	return fakeReturns.result1
 }
 
@@ -8778,15 +8879,16 @@ func (fake *FakeECSClient) ListTasksRequest(arg1 *ecs.ListTasksInput) (*request.
 	fake.listTasksRequestArgsForCall = append(fake.listTasksRequestArgsForCall, struct {
 		arg1 *ecs.ListTasksInput
 	}{arg1})
+	stub := fake.ListTasksRequestStub
+	fakeReturns := fake.listTasksRequestReturns
 	fake.recordInvocation("ListTasksRequest", []interface{}{arg1})
 	fake.listTasksRequestMutex.Unlock()
-	if fake.ListTasksRequestStub != nil {
-		return fake.ListTasksRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listTasksRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -8843,15 +8945,16 @@ func (fake *FakeECSClient) ListTasksWithContext(arg1 context.Context, arg2 *ecs.
 		arg2 *ecs.ListTasksInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.ListTasksWithContextStub
+	fakeReturns := fake.listTasksWithContextReturns
 	fake.recordInvocation("ListTasksWithContext", []interface{}{arg1, arg2, arg3})
 	fake.listTasksWithContextMutex.Unlock()
-	if fake.ListTasksWithContextStub != nil {
-		return fake.ListTasksWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.listTasksWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -8906,15 +9009,16 @@ func (fake *FakeECSClient) PutAccountSetting(arg1 *ecs.PutAccountSettingInput) (
 	fake.putAccountSettingArgsForCall = append(fake.putAccountSettingArgsForCall, struct {
 		arg1 *ecs.PutAccountSettingInput
 	}{arg1})
+	stub := fake.PutAccountSettingStub
+	fakeReturns := fake.putAccountSettingReturns
 	fake.recordInvocation("PutAccountSetting", []interface{}{arg1})
 	fake.putAccountSettingMutex.Unlock()
-	if fake.PutAccountSettingStub != nil {
-		return fake.PutAccountSettingStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.putAccountSettingReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -8969,15 +9073,16 @@ func (fake *FakeECSClient) PutAccountSettingDefault(arg1 *ecs.PutAccountSettingD
 	fake.putAccountSettingDefaultArgsForCall = append(fake.putAccountSettingDefaultArgsForCall, struct {
 		arg1 *ecs.PutAccountSettingDefaultInput
 	}{arg1})
+	stub := fake.PutAccountSettingDefaultStub
+	fakeReturns := fake.putAccountSettingDefaultReturns
 	fake.recordInvocation("PutAccountSettingDefault", []interface{}{arg1})
 	fake.putAccountSettingDefaultMutex.Unlock()
-	if fake.PutAccountSettingDefaultStub != nil {
-		return fake.PutAccountSettingDefaultStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.putAccountSettingDefaultReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -9032,15 +9137,16 @@ func (fake *FakeECSClient) PutAccountSettingDefaultRequest(arg1 *ecs.PutAccountS
 	fake.putAccountSettingDefaultRequestArgsForCall = append(fake.putAccountSettingDefaultRequestArgsForCall, struct {
 		arg1 *ecs.PutAccountSettingDefaultInput
 	}{arg1})
+	stub := fake.PutAccountSettingDefaultRequestStub
+	fakeReturns := fake.putAccountSettingDefaultRequestReturns
 	fake.recordInvocation("PutAccountSettingDefaultRequest", []interface{}{arg1})
 	fake.putAccountSettingDefaultRequestMutex.Unlock()
-	if fake.PutAccountSettingDefaultRequestStub != nil {
-		return fake.PutAccountSettingDefaultRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.putAccountSettingDefaultRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -9097,15 +9203,16 @@ func (fake *FakeECSClient) PutAccountSettingDefaultWithContext(arg1 context.Cont
 		arg2 *ecs.PutAccountSettingDefaultInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.PutAccountSettingDefaultWithContextStub
+	fakeReturns := fake.putAccountSettingDefaultWithContextReturns
 	fake.recordInvocation("PutAccountSettingDefaultWithContext", []interface{}{arg1, arg2, arg3})
 	fake.putAccountSettingDefaultWithContextMutex.Unlock()
-	if fake.PutAccountSettingDefaultWithContextStub != nil {
-		return fake.PutAccountSettingDefaultWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.putAccountSettingDefaultWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -9160,15 +9267,16 @@ func (fake *FakeECSClient) PutAccountSettingRequest(arg1 *ecs.PutAccountSettingI
 	fake.putAccountSettingRequestArgsForCall = append(fake.putAccountSettingRequestArgsForCall, struct {
 		arg1 *ecs.PutAccountSettingInput
 	}{arg1})
+	stub := fake.PutAccountSettingRequestStub
+	fakeReturns := fake.putAccountSettingRequestReturns
 	fake.recordInvocation("PutAccountSettingRequest", []interface{}{arg1})
 	fake.putAccountSettingRequestMutex.Unlock()
-	if fake.PutAccountSettingRequestStub != nil {
-		return fake.PutAccountSettingRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.putAccountSettingRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -9225,15 +9333,16 @@ func (fake *FakeECSClient) PutAccountSettingWithContext(arg1 context.Context, ar
 		arg2 *ecs.PutAccountSettingInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.PutAccountSettingWithContextStub
+	fakeReturns := fake.putAccountSettingWithContextReturns
 	fake.recordInvocation("PutAccountSettingWithContext", []interface{}{arg1, arg2, arg3})
 	fake.putAccountSettingWithContextMutex.Unlock()
-	if fake.PutAccountSettingWithContextStub != nil {
-		return fake.PutAccountSettingWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.putAccountSettingWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -9288,15 +9397,16 @@ func (fake *FakeECSClient) PutAttributes(arg1 *ecs.PutAttributesInput) (*ecs.Put
 	fake.putAttributesArgsForCall = append(fake.putAttributesArgsForCall, struct {
 		arg1 *ecs.PutAttributesInput
 	}{arg1})
+	stub := fake.PutAttributesStub
+	fakeReturns := fake.putAttributesReturns
 	fake.recordInvocation("PutAttributes", []interface{}{arg1})
 	fake.putAttributesMutex.Unlock()
-	if fake.PutAttributesStub != nil {
-		return fake.PutAttributesStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.putAttributesReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -9351,15 +9461,16 @@ func (fake *FakeECSClient) PutAttributesRequest(arg1 *ecs.PutAttributesInput) (*
 	fake.putAttributesRequestArgsForCall = append(fake.putAttributesRequestArgsForCall, struct {
 		arg1 *ecs.PutAttributesInput
 	}{arg1})
+	stub := fake.PutAttributesRequestStub
+	fakeReturns := fake.putAttributesRequestReturns
 	fake.recordInvocation("PutAttributesRequest", []interface{}{arg1})
 	fake.putAttributesRequestMutex.Unlock()
-	if fake.PutAttributesRequestStub != nil {
-		return fake.PutAttributesRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.putAttributesRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -9416,15 +9527,16 @@ func (fake *FakeECSClient) PutAttributesWithContext(arg1 context.Context, arg2 *
 		arg2 *ecs.PutAttributesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.PutAttributesWithContextStub
+	fakeReturns := fake.putAttributesWithContextReturns
 	fake.recordInvocation("PutAttributesWithContext", []interface{}{arg1, arg2, arg3})
 	fake.putAttributesWithContextMutex.Unlock()
-	if fake.PutAttributesWithContextStub != nil {
-		return fake.PutAttributesWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.putAttributesWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -9479,15 +9591,16 @@ func (fake *FakeECSClient) PutClusterCapacityProviders(arg1 *ecs.PutClusterCapac
 	fake.putClusterCapacityProvidersArgsForCall = append(fake.putClusterCapacityProvidersArgsForCall, struct {
 		arg1 *ecs.PutClusterCapacityProvidersInput
 	}{arg1})
+	stub := fake.PutClusterCapacityProvidersStub
+	fakeReturns := fake.putClusterCapacityProvidersReturns
 	fake.recordInvocation("PutClusterCapacityProviders", []interface{}{arg1})
 	fake.putClusterCapacityProvidersMutex.Unlock()
-	if fake.PutClusterCapacityProvidersStub != nil {
-		return fake.PutClusterCapacityProvidersStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.putClusterCapacityProvidersReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -9542,15 +9655,16 @@ func (fake *FakeECSClient) PutClusterCapacityProvidersRequest(arg1 *ecs.PutClust
 	fake.putClusterCapacityProvidersRequestArgsForCall = append(fake.putClusterCapacityProvidersRequestArgsForCall, struct {
 		arg1 *ecs.PutClusterCapacityProvidersInput
 	}{arg1})
+	stub := fake.PutClusterCapacityProvidersRequestStub
+	fakeReturns := fake.putClusterCapacityProvidersRequestReturns
 	fake.recordInvocation("PutClusterCapacityProvidersRequest", []interface{}{arg1})
 	fake.putClusterCapacityProvidersRequestMutex.Unlock()
-	if fake.PutClusterCapacityProvidersRequestStub != nil {
-		return fake.PutClusterCapacityProvidersRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.putClusterCapacityProvidersRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -9607,15 +9721,16 @@ func (fake *FakeECSClient) PutClusterCapacityProvidersWithContext(arg1 context.C
 		arg2 *ecs.PutClusterCapacityProvidersInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.PutClusterCapacityProvidersWithContextStub
+	fakeReturns := fake.putClusterCapacityProvidersWithContextReturns
 	fake.recordInvocation("PutClusterCapacityProvidersWithContext", []interface{}{arg1, arg2, arg3})
 	fake.putClusterCapacityProvidersWithContextMutex.Unlock()
-	if fake.PutClusterCapacityProvidersWithContextStub != nil {
-		return fake.PutClusterCapacityProvidersWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.putClusterCapacityProvidersWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -9670,15 +9785,16 @@ func (fake *FakeECSClient) RegisterContainerInstance(arg1 *ecs.RegisterContainer
 	fake.registerContainerInstanceArgsForCall = append(fake.registerContainerInstanceArgsForCall, struct {
 		arg1 *ecs.RegisterContainerInstanceInput
 	}{arg1})
+	stub := fake.RegisterContainerInstanceStub
+	fakeReturns := fake.registerContainerInstanceReturns
 	fake.recordInvocation("RegisterContainerInstance", []interface{}{arg1})
 	fake.registerContainerInstanceMutex.Unlock()
-	if fake.RegisterContainerInstanceStub != nil {
-		return fake.RegisterContainerInstanceStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.registerContainerInstanceReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -9733,15 +9849,16 @@ func (fake *FakeECSClient) RegisterContainerInstanceRequest(arg1 *ecs.RegisterCo
 	fake.registerContainerInstanceRequestArgsForCall = append(fake.registerContainerInstanceRequestArgsForCall, struct {
 		arg1 *ecs.RegisterContainerInstanceInput
 	}{arg1})
+	stub := fake.RegisterContainerInstanceRequestStub
+	fakeReturns := fake.registerContainerInstanceRequestReturns
 	fake.recordInvocation("RegisterContainerInstanceRequest", []interface{}{arg1})
 	fake.registerContainerInstanceRequestMutex.Unlock()
-	if fake.RegisterContainerInstanceRequestStub != nil {
-		return fake.RegisterContainerInstanceRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.registerContainerInstanceRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -9798,15 +9915,16 @@ func (fake *FakeECSClient) RegisterContainerInstanceWithContext(arg1 context.Con
 		arg2 *ecs.RegisterContainerInstanceInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.RegisterContainerInstanceWithContextStub
+	fakeReturns := fake.registerContainerInstanceWithContextReturns
 	fake.recordInvocation("RegisterContainerInstanceWithContext", []interface{}{arg1, arg2, arg3})
 	fake.registerContainerInstanceWithContextMutex.Unlock()
-	if fake.RegisterContainerInstanceWithContextStub != nil {
-		return fake.RegisterContainerInstanceWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.registerContainerInstanceWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -9861,15 +9979,16 @@ func (fake *FakeECSClient) RegisterTaskDefinition(arg1 *ecs.RegisterTaskDefiniti
 	fake.registerTaskDefinitionArgsForCall = append(fake.registerTaskDefinitionArgsForCall, struct {
 		arg1 *ecs.RegisterTaskDefinitionInput
 	}{arg1})
+	stub := fake.RegisterTaskDefinitionStub
+	fakeReturns := fake.registerTaskDefinitionReturns
 	fake.recordInvocation("RegisterTaskDefinition", []interface{}{arg1})
 	fake.registerTaskDefinitionMutex.Unlock()
-	if fake.RegisterTaskDefinitionStub != nil {
-		return fake.RegisterTaskDefinitionStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.registerTaskDefinitionReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -9924,15 +10043,16 @@ func (fake *FakeECSClient) RegisterTaskDefinitionRequest(arg1 *ecs.RegisterTaskD
 	fake.registerTaskDefinitionRequestArgsForCall = append(fake.registerTaskDefinitionRequestArgsForCall, struct {
 		arg1 *ecs.RegisterTaskDefinitionInput
 	}{arg1})
+	stub := fake.RegisterTaskDefinitionRequestStub
+	fakeReturns := fake.registerTaskDefinitionRequestReturns
 	fake.recordInvocation("RegisterTaskDefinitionRequest", []interface{}{arg1})
 	fake.registerTaskDefinitionRequestMutex.Unlock()
-	if fake.RegisterTaskDefinitionRequestStub != nil {
-		return fake.RegisterTaskDefinitionRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.registerTaskDefinitionRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -9989,15 +10109,16 @@ func (fake *FakeECSClient) RegisterTaskDefinitionWithContext(arg1 context.Contex
 		arg2 *ecs.RegisterTaskDefinitionInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.RegisterTaskDefinitionWithContextStub
+	fakeReturns := fake.registerTaskDefinitionWithContextReturns
 	fake.recordInvocation("RegisterTaskDefinitionWithContext", []interface{}{arg1, arg2, arg3})
 	fake.registerTaskDefinitionWithContextMutex.Unlock()
-	if fake.RegisterTaskDefinitionWithContextStub != nil {
-		return fake.RegisterTaskDefinitionWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.registerTaskDefinitionWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -10052,15 +10173,16 @@ func (fake *FakeECSClient) RunTask(arg1 *ecs.RunTaskInput) (*ecs.RunTaskOutput, 
 	fake.runTaskArgsForCall = append(fake.runTaskArgsForCall, struct {
 		arg1 *ecs.RunTaskInput
 	}{arg1})
+	stub := fake.RunTaskStub
+	fakeReturns := fake.runTaskReturns
 	fake.recordInvocation("RunTask", []interface{}{arg1})
 	fake.runTaskMutex.Unlock()
-	if fake.RunTaskStub != nil {
-		return fake.RunTaskStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.runTaskReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -10115,15 +10237,16 @@ func (fake *FakeECSClient) RunTaskRequest(arg1 *ecs.RunTaskInput) (*request.Requ
 	fake.runTaskRequestArgsForCall = append(fake.runTaskRequestArgsForCall, struct {
 		arg1 *ecs.RunTaskInput
 	}{arg1})
+	stub := fake.RunTaskRequestStub
+	fakeReturns := fake.runTaskRequestReturns
 	fake.recordInvocation("RunTaskRequest", []interface{}{arg1})
 	fake.runTaskRequestMutex.Unlock()
-	if fake.RunTaskRequestStub != nil {
-		return fake.RunTaskRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.runTaskRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -10180,15 +10303,16 @@ func (fake *FakeECSClient) RunTaskWithContext(arg1 context.Context, arg2 *ecs.Ru
 		arg2 *ecs.RunTaskInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.RunTaskWithContextStub
+	fakeReturns := fake.runTaskWithContextReturns
 	fake.recordInvocation("RunTaskWithContext", []interface{}{arg1, arg2, arg3})
 	fake.runTaskWithContextMutex.Unlock()
-	if fake.RunTaskWithContextStub != nil {
-		return fake.RunTaskWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.runTaskWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -10243,15 +10367,16 @@ func (fake *FakeECSClient) StartTask(arg1 *ecs.StartTaskInput) (*ecs.StartTaskOu
 	fake.startTaskArgsForCall = append(fake.startTaskArgsForCall, struct {
 		arg1 *ecs.StartTaskInput
 	}{arg1})
+	stub := fake.StartTaskStub
+	fakeReturns := fake.startTaskReturns
 	fake.recordInvocation("StartTask", []interface{}{arg1})
 	fake.startTaskMutex.Unlock()
-	if fake.StartTaskStub != nil {
-		return fake.StartTaskStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.startTaskReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -10306,15 +10431,16 @@ func (fake *FakeECSClient) StartTaskRequest(arg1 *ecs.StartTaskInput) (*request.
 	fake.startTaskRequestArgsForCall = append(fake.startTaskRequestArgsForCall, struct {
 		arg1 *ecs.StartTaskInput
 	}{arg1})
+	stub := fake.StartTaskRequestStub
+	fakeReturns := fake.startTaskRequestReturns
 	fake.recordInvocation("StartTaskRequest", []interface{}{arg1})
 	fake.startTaskRequestMutex.Unlock()
-	if fake.StartTaskRequestStub != nil {
-		return fake.StartTaskRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.startTaskRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -10371,15 +10497,16 @@ func (fake *FakeECSClient) StartTaskWithContext(arg1 context.Context, arg2 *ecs.
 		arg2 *ecs.StartTaskInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.StartTaskWithContextStub
+	fakeReturns := fake.startTaskWithContextReturns
 	fake.recordInvocation("StartTaskWithContext", []interface{}{arg1, arg2, arg3})
 	fake.startTaskWithContextMutex.Unlock()
-	if fake.StartTaskWithContextStub != nil {
-		return fake.StartTaskWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.startTaskWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -10434,15 +10561,16 @@ func (fake *FakeECSClient) StopTask(arg1 *ecs.StopTaskInput) (*ecs.StopTaskOutpu
 	fake.stopTaskArgsForCall = append(fake.stopTaskArgsForCall, struct {
 		arg1 *ecs.StopTaskInput
 	}{arg1})
+	stub := fake.StopTaskStub
+	fakeReturns := fake.stopTaskReturns
 	fake.recordInvocation("StopTask", []interface{}{arg1})
 	fake.stopTaskMutex.Unlock()
-	if fake.StopTaskStub != nil {
-		return fake.StopTaskStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.stopTaskReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -10497,15 +10625,16 @@ func (fake *FakeECSClient) StopTaskRequest(arg1 *ecs.StopTaskInput) (*request.Re
 	fake.stopTaskRequestArgsForCall = append(fake.stopTaskRequestArgsForCall, struct {
 		arg1 *ecs.StopTaskInput
 	}{arg1})
+	stub := fake.StopTaskRequestStub
+	fakeReturns := fake.stopTaskRequestReturns
 	fake.recordInvocation("StopTaskRequest", []interface{}{arg1})
 	fake.stopTaskRequestMutex.Unlock()
-	if fake.StopTaskRequestStub != nil {
-		return fake.StopTaskRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.stopTaskRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -10562,15 +10691,16 @@ func (fake *FakeECSClient) StopTaskWithContext(arg1 context.Context, arg2 *ecs.S
 		arg2 *ecs.StopTaskInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.StopTaskWithContextStub
+	fakeReturns := fake.stopTaskWithContextReturns
 	fake.recordInvocation("StopTaskWithContext", []interface{}{arg1, arg2, arg3})
 	fake.stopTaskWithContextMutex.Unlock()
-	if fake.StopTaskWithContextStub != nil {
-		return fake.StopTaskWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.stopTaskWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -10625,15 +10755,16 @@ func (fake *FakeECSClient) SubmitAttachmentStateChanges(arg1 *ecs.SubmitAttachme
 	fake.submitAttachmentStateChangesArgsForCall = append(fake.submitAttachmentStateChangesArgsForCall, struct {
 		arg1 *ecs.SubmitAttachmentStateChangesInput
 	}{arg1})
+	stub := fake.SubmitAttachmentStateChangesStub
+	fakeReturns := fake.submitAttachmentStateChangesReturns
 	fake.recordInvocation("SubmitAttachmentStateChanges", []interface{}{arg1})
 	fake.submitAttachmentStateChangesMutex.Unlock()
-	if fake.SubmitAttachmentStateChangesStub != nil {
-		return fake.SubmitAttachmentStateChangesStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.submitAttachmentStateChangesReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -10688,15 +10819,16 @@ func (fake *FakeECSClient) SubmitAttachmentStateChangesRequest(arg1 *ecs.SubmitA
 	fake.submitAttachmentStateChangesRequestArgsForCall = append(fake.submitAttachmentStateChangesRequestArgsForCall, struct {
 		arg1 *ecs.SubmitAttachmentStateChangesInput
 	}{arg1})
+	stub := fake.SubmitAttachmentStateChangesRequestStub
+	fakeReturns := fake.submitAttachmentStateChangesRequestReturns
 	fake.recordInvocation("SubmitAttachmentStateChangesRequest", []interface{}{arg1})
 	fake.submitAttachmentStateChangesRequestMutex.Unlock()
-	if fake.SubmitAttachmentStateChangesRequestStub != nil {
-		return fake.SubmitAttachmentStateChangesRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.submitAttachmentStateChangesRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -10753,15 +10885,16 @@ func (fake *FakeECSClient) SubmitAttachmentStateChangesWithContext(arg1 context.
 		arg2 *ecs.SubmitAttachmentStateChangesInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.SubmitAttachmentStateChangesWithContextStub
+	fakeReturns := fake.submitAttachmentStateChangesWithContextReturns
 	fake.recordInvocation("SubmitAttachmentStateChangesWithContext", []interface{}{arg1, arg2, arg3})
 	fake.submitAttachmentStateChangesWithContextMutex.Unlock()
-	if fake.SubmitAttachmentStateChangesWithContextStub != nil {
-		return fake.SubmitAttachmentStateChangesWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.submitAttachmentStateChangesWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -10816,15 +10949,16 @@ func (fake *FakeECSClient) SubmitContainerStateChange(arg1 *ecs.SubmitContainerS
 	fake.submitContainerStateChangeArgsForCall = append(fake.submitContainerStateChangeArgsForCall, struct {
 		arg1 *ecs.SubmitContainerStateChangeInput
 	}{arg1})
+	stub := fake.SubmitContainerStateChangeStub
+	fakeReturns := fake.submitContainerStateChangeReturns
 	fake.recordInvocation("SubmitContainerStateChange", []interface{}{arg1})
 	fake.submitContainerStateChangeMutex.Unlock()
-	if fake.SubmitContainerStateChangeStub != nil {
-		return fake.SubmitContainerStateChangeStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.submitContainerStateChangeReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -10879,15 +11013,16 @@ func (fake *FakeECSClient) SubmitContainerStateChangeRequest(arg1 *ecs.SubmitCon
 	fake.submitContainerStateChangeRequestArgsForCall = append(fake.submitContainerStateChangeRequestArgsForCall, struct {
 		arg1 *ecs.SubmitContainerStateChangeInput
 	}{arg1})
+	stub := fake.SubmitContainerStateChangeRequestStub
+	fakeReturns := fake.submitContainerStateChangeRequestReturns
 	fake.recordInvocation("SubmitContainerStateChangeRequest", []interface{}{arg1})
 	fake.submitContainerStateChangeRequestMutex.Unlock()
-	if fake.SubmitContainerStateChangeRequestStub != nil {
-		return fake.SubmitContainerStateChangeRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.submitContainerStateChangeRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -10944,15 +11079,16 @@ func (fake *FakeECSClient) SubmitContainerStateChangeWithContext(arg1 context.Co
 		arg2 *ecs.SubmitContainerStateChangeInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.SubmitContainerStateChangeWithContextStub
+	fakeReturns := fake.submitContainerStateChangeWithContextReturns
 	fake.recordInvocation("SubmitContainerStateChangeWithContext", []interface{}{arg1, arg2, arg3})
 	fake.submitContainerStateChangeWithContextMutex.Unlock()
-	if fake.SubmitContainerStateChangeWithContextStub != nil {
-		return fake.SubmitContainerStateChangeWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.submitContainerStateChangeWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -11007,15 +11143,16 @@ func (fake *FakeECSClient) SubmitTaskStateChange(arg1 *ecs.SubmitTaskStateChange
 	fake.submitTaskStateChangeArgsForCall = append(fake.submitTaskStateChangeArgsForCall, struct {
 		arg1 *ecs.SubmitTaskStateChangeInput
 	}{arg1})
+	stub := fake.SubmitTaskStateChangeStub
+	fakeReturns := fake.submitTaskStateChangeReturns
 	fake.recordInvocation("SubmitTaskStateChange", []interface{}{arg1})
 	fake.submitTaskStateChangeMutex.Unlock()
-	if fake.SubmitTaskStateChangeStub != nil {
-		return fake.SubmitTaskStateChangeStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.submitTaskStateChangeReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -11070,15 +11207,16 @@ func (fake *FakeECSClient) SubmitTaskStateChangeRequest(arg1 *ecs.SubmitTaskStat
 	fake.submitTaskStateChangeRequestArgsForCall = append(fake.submitTaskStateChangeRequestArgsForCall, struct {
 		arg1 *ecs.SubmitTaskStateChangeInput
 	}{arg1})
+	stub := fake.SubmitTaskStateChangeRequestStub
+	fakeReturns := fake.submitTaskStateChangeRequestReturns
 	fake.recordInvocation("SubmitTaskStateChangeRequest", []interface{}{arg1})
 	fake.submitTaskStateChangeRequestMutex.Unlock()
-	if fake.SubmitTaskStateChangeRequestStub != nil {
-		return fake.SubmitTaskStateChangeRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.submitTaskStateChangeRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -11135,15 +11273,16 @@ func (fake *FakeECSClient) SubmitTaskStateChangeWithContext(arg1 context.Context
 		arg2 *ecs.SubmitTaskStateChangeInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.SubmitTaskStateChangeWithContextStub
+	fakeReturns := fake.submitTaskStateChangeWithContextReturns
 	fake.recordInvocation("SubmitTaskStateChangeWithContext", []interface{}{arg1, arg2, arg3})
 	fake.submitTaskStateChangeWithContextMutex.Unlock()
-	if fake.SubmitTaskStateChangeWithContextStub != nil {
-		return fake.SubmitTaskStateChangeWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.submitTaskStateChangeWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -11198,15 +11337,16 @@ func (fake *FakeECSClient) TagResource(arg1 *ecs.TagResourceInput) (*ecs.TagReso
 	fake.tagResourceArgsForCall = append(fake.tagResourceArgsForCall, struct {
 		arg1 *ecs.TagResourceInput
 	}{arg1})
+	stub := fake.TagResourceStub
+	fakeReturns := fake.tagResourceReturns
 	fake.recordInvocation("TagResource", []interface{}{arg1})
 	fake.tagResourceMutex.Unlock()
-	if fake.TagResourceStub != nil {
-		return fake.TagResourceStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.tagResourceReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -11261,15 +11401,16 @@ func (fake *FakeECSClient) TagResourceRequest(arg1 *ecs.TagResourceInput) (*requ
 	fake.tagResourceRequestArgsForCall = append(fake.tagResourceRequestArgsForCall, struct {
 		arg1 *ecs.TagResourceInput
 	}{arg1})
+	stub := fake.TagResourceRequestStub
+	fakeReturns := fake.tagResourceRequestReturns
 	fake.recordInvocation("TagResourceRequest", []interface{}{arg1})
 	fake.tagResourceRequestMutex.Unlock()
-	if fake.TagResourceRequestStub != nil {
-		return fake.TagResourceRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.tagResourceRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -11326,15 +11467,16 @@ func (fake *FakeECSClient) TagResourceWithContext(arg1 context.Context, arg2 *ec
 		arg2 *ecs.TagResourceInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.TagResourceWithContextStub
+	fakeReturns := fake.tagResourceWithContextReturns
 	fake.recordInvocation("TagResourceWithContext", []interface{}{arg1, arg2, arg3})
 	fake.tagResourceWithContextMutex.Unlock()
-	if fake.TagResourceWithContextStub != nil {
-		return fake.TagResourceWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.tagResourceWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -11389,15 +11531,16 @@ func (fake *FakeECSClient) UntagResource(arg1 *ecs.UntagResourceInput) (*ecs.Unt
 	fake.untagResourceArgsForCall = append(fake.untagResourceArgsForCall, struct {
 		arg1 *ecs.UntagResourceInput
 	}{arg1})
+	stub := fake.UntagResourceStub
+	fakeReturns := fake.untagResourceReturns
 	fake.recordInvocation("UntagResource", []interface{}{arg1})
 	fake.untagResourceMutex.Unlock()
-	if fake.UntagResourceStub != nil {
-		return fake.UntagResourceStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.untagResourceReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -11452,15 +11595,16 @@ func (fake *FakeECSClient) UntagResourceRequest(arg1 *ecs.UntagResourceInput) (*
 	fake.untagResourceRequestArgsForCall = append(fake.untagResourceRequestArgsForCall, struct {
 		arg1 *ecs.UntagResourceInput
 	}{arg1})
+	stub := fake.UntagResourceRequestStub
+	fakeReturns := fake.untagResourceRequestReturns
 	fake.recordInvocation("UntagResourceRequest", []interface{}{arg1})
 	fake.untagResourceRequestMutex.Unlock()
-	if fake.UntagResourceRequestStub != nil {
-		return fake.UntagResourceRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.untagResourceRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -11517,15 +11661,16 @@ func (fake *FakeECSClient) UntagResourceWithContext(arg1 context.Context, arg2 *
 		arg2 *ecs.UntagResourceInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.UntagResourceWithContextStub
+	fakeReturns := fake.untagResourceWithContextReturns
 	fake.recordInvocation("UntagResourceWithContext", []interface{}{arg1, arg2, arg3})
 	fake.untagResourceWithContextMutex.Unlock()
-	if fake.UntagResourceWithContextStub != nil {
-		return fake.UntagResourceWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.untagResourceWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -11580,15 +11725,16 @@ func (fake *FakeECSClient) UpdateCapacityProvider(arg1 *ecs.UpdateCapacityProvid
 	fake.updateCapacityProviderArgsForCall = append(fake.updateCapacityProviderArgsForCall, struct {
 		arg1 *ecs.UpdateCapacityProviderInput
 	}{arg1})
+	stub := fake.UpdateCapacityProviderStub
+	fakeReturns := fake.updateCapacityProviderReturns
 	fake.recordInvocation("UpdateCapacityProvider", []interface{}{arg1})
 	fake.updateCapacityProviderMutex.Unlock()
-	if fake.UpdateCapacityProviderStub != nil {
-		return fake.UpdateCapacityProviderStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateCapacityProviderReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -11643,15 +11789,16 @@ func (fake *FakeECSClient) UpdateCapacityProviderRequest(arg1 *ecs.UpdateCapacit
 	fake.updateCapacityProviderRequestArgsForCall = append(fake.updateCapacityProviderRequestArgsForCall, struct {
 		arg1 *ecs.UpdateCapacityProviderInput
 	}{arg1})
+	stub := fake.UpdateCapacityProviderRequestStub
+	fakeReturns := fake.updateCapacityProviderRequestReturns
 	fake.recordInvocation("UpdateCapacityProviderRequest", []interface{}{arg1})
 	fake.updateCapacityProviderRequestMutex.Unlock()
-	if fake.UpdateCapacityProviderRequestStub != nil {
-		return fake.UpdateCapacityProviderRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateCapacityProviderRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -11708,15 +11855,16 @@ func (fake *FakeECSClient) UpdateCapacityProviderWithContext(arg1 context.Contex
 		arg2 *ecs.UpdateCapacityProviderInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.UpdateCapacityProviderWithContextStub
+	fakeReturns := fake.updateCapacityProviderWithContextReturns
 	fake.recordInvocation("UpdateCapacityProviderWithContext", []interface{}{arg1, arg2, arg3})
 	fake.updateCapacityProviderWithContextMutex.Unlock()
-	if fake.UpdateCapacityProviderWithContextStub != nil {
-		return fake.UpdateCapacityProviderWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateCapacityProviderWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -11771,15 +11919,16 @@ func (fake *FakeECSClient) UpdateClusterSettings(arg1 *ecs.UpdateClusterSettings
 	fake.updateClusterSettingsArgsForCall = append(fake.updateClusterSettingsArgsForCall, struct {
 		arg1 *ecs.UpdateClusterSettingsInput
 	}{arg1})
+	stub := fake.UpdateClusterSettingsStub
+	fakeReturns := fake.updateClusterSettingsReturns
 	fake.recordInvocation("UpdateClusterSettings", []interface{}{arg1})
 	fake.updateClusterSettingsMutex.Unlock()
-	if fake.UpdateClusterSettingsStub != nil {
-		return fake.UpdateClusterSettingsStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateClusterSettingsReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -11834,15 +11983,16 @@ func (fake *FakeECSClient) UpdateClusterSettingsRequest(arg1 *ecs.UpdateClusterS
 	fake.updateClusterSettingsRequestArgsForCall = append(fake.updateClusterSettingsRequestArgsForCall, struct {
 		arg1 *ecs.UpdateClusterSettingsInput
 	}{arg1})
+	stub := fake.UpdateClusterSettingsRequestStub
+	fakeReturns := fake.updateClusterSettingsRequestReturns
 	fake.recordInvocation("UpdateClusterSettingsRequest", []interface{}{arg1})
 	fake.updateClusterSettingsRequestMutex.Unlock()
-	if fake.UpdateClusterSettingsRequestStub != nil {
-		return fake.UpdateClusterSettingsRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateClusterSettingsRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -11899,15 +12049,16 @@ func (fake *FakeECSClient) UpdateClusterSettingsWithContext(arg1 context.Context
 		arg2 *ecs.UpdateClusterSettingsInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.UpdateClusterSettingsWithContextStub
+	fakeReturns := fake.updateClusterSettingsWithContextReturns
 	fake.recordInvocation("UpdateClusterSettingsWithContext", []interface{}{arg1, arg2, arg3})
 	fake.updateClusterSettingsWithContextMutex.Unlock()
-	if fake.UpdateClusterSettingsWithContextStub != nil {
-		return fake.UpdateClusterSettingsWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateClusterSettingsWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -11962,15 +12113,16 @@ func (fake *FakeECSClient) UpdateContainerAgent(arg1 *ecs.UpdateContainerAgentIn
 	fake.updateContainerAgentArgsForCall = append(fake.updateContainerAgentArgsForCall, struct {
 		arg1 *ecs.UpdateContainerAgentInput
 	}{arg1})
+	stub := fake.UpdateContainerAgentStub
+	fakeReturns := fake.updateContainerAgentReturns
 	fake.recordInvocation("UpdateContainerAgent", []interface{}{arg1})
 	fake.updateContainerAgentMutex.Unlock()
-	if fake.UpdateContainerAgentStub != nil {
-		return fake.UpdateContainerAgentStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateContainerAgentReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -12025,15 +12177,16 @@ func (fake *FakeECSClient) UpdateContainerAgentRequest(arg1 *ecs.UpdateContainer
 	fake.updateContainerAgentRequestArgsForCall = append(fake.updateContainerAgentRequestArgsForCall, struct {
 		arg1 *ecs.UpdateContainerAgentInput
 	}{arg1})
+	stub := fake.UpdateContainerAgentRequestStub
+	fakeReturns := fake.updateContainerAgentRequestReturns
 	fake.recordInvocation("UpdateContainerAgentRequest", []interface{}{arg1})
 	fake.updateContainerAgentRequestMutex.Unlock()
-	if fake.UpdateContainerAgentRequestStub != nil {
-		return fake.UpdateContainerAgentRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateContainerAgentRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -12090,15 +12243,16 @@ func (fake *FakeECSClient) UpdateContainerAgentWithContext(arg1 context.Context,
 		arg2 *ecs.UpdateContainerAgentInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.UpdateContainerAgentWithContextStub
+	fakeReturns := fake.updateContainerAgentWithContextReturns
 	fake.recordInvocation("UpdateContainerAgentWithContext", []interface{}{arg1, arg2, arg3})
 	fake.updateContainerAgentWithContextMutex.Unlock()
-	if fake.UpdateContainerAgentWithContextStub != nil {
-		return fake.UpdateContainerAgentWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateContainerAgentWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -12153,15 +12307,16 @@ func (fake *FakeECSClient) UpdateContainerInstancesState(arg1 *ecs.UpdateContain
 	fake.updateContainerInstancesStateArgsForCall = append(fake.updateContainerInstancesStateArgsForCall, struct {
 		arg1 *ecs.UpdateContainerInstancesStateInput
 	}{arg1})
+	stub := fake.UpdateContainerInstancesStateStub
+	fakeReturns := fake.updateContainerInstancesStateReturns
 	fake.recordInvocation("UpdateContainerInstancesState", []interface{}{arg1})
 	fake.updateContainerInstancesStateMutex.Unlock()
-	if fake.UpdateContainerInstancesStateStub != nil {
-		return fake.UpdateContainerInstancesStateStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateContainerInstancesStateReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -12216,15 +12371,16 @@ func (fake *FakeECSClient) UpdateContainerInstancesStateRequest(arg1 *ecs.Update
 	fake.updateContainerInstancesStateRequestArgsForCall = append(fake.updateContainerInstancesStateRequestArgsForCall, struct {
 		arg1 *ecs.UpdateContainerInstancesStateInput
 	}{arg1})
+	stub := fake.UpdateContainerInstancesStateRequestStub
+	fakeReturns := fake.updateContainerInstancesStateRequestReturns
 	fake.recordInvocation("UpdateContainerInstancesStateRequest", []interface{}{arg1})
 	fake.updateContainerInstancesStateRequestMutex.Unlock()
-	if fake.UpdateContainerInstancesStateRequestStub != nil {
-		return fake.UpdateContainerInstancesStateRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateContainerInstancesStateRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -12281,15 +12437,16 @@ func (fake *FakeECSClient) UpdateContainerInstancesStateWithContext(arg1 context
 		arg2 *ecs.UpdateContainerInstancesStateInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.UpdateContainerInstancesStateWithContextStub
+	fakeReturns := fake.updateContainerInstancesStateWithContextReturns
 	fake.recordInvocation("UpdateContainerInstancesStateWithContext", []interface{}{arg1, arg2, arg3})
 	fake.updateContainerInstancesStateWithContextMutex.Unlock()
-	if fake.UpdateContainerInstancesStateWithContextStub != nil {
-		return fake.UpdateContainerInstancesStateWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateContainerInstancesStateWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -12344,15 +12501,16 @@ func (fake *FakeECSClient) UpdateService(arg1 *ecs.UpdateServiceInput) (*ecs.Upd
 	fake.updateServiceArgsForCall = append(fake.updateServiceArgsForCall, struct {
 		arg1 *ecs.UpdateServiceInput
 	}{arg1})
+	stub := fake.UpdateServiceStub
+	fakeReturns := fake.updateServiceReturns
 	fake.recordInvocation("UpdateService", []interface{}{arg1})
 	fake.updateServiceMutex.Unlock()
-	if fake.UpdateServiceStub != nil {
-		return fake.UpdateServiceStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateServiceReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -12407,15 +12565,16 @@ func (fake *FakeECSClient) UpdateServicePrimaryTaskSet(arg1 *ecs.UpdateServicePr
 	fake.updateServicePrimaryTaskSetArgsForCall = append(fake.updateServicePrimaryTaskSetArgsForCall, struct {
 		arg1 *ecs.UpdateServicePrimaryTaskSetInput
 	}{arg1})
+	stub := fake.UpdateServicePrimaryTaskSetStub
+	fakeReturns := fake.updateServicePrimaryTaskSetReturns
 	fake.recordInvocation("UpdateServicePrimaryTaskSet", []interface{}{arg1})
 	fake.updateServicePrimaryTaskSetMutex.Unlock()
-	if fake.UpdateServicePrimaryTaskSetStub != nil {
-		return fake.UpdateServicePrimaryTaskSetStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateServicePrimaryTaskSetReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -12470,15 +12629,16 @@ func (fake *FakeECSClient) UpdateServicePrimaryTaskSetRequest(arg1 *ecs.UpdateSe
 	fake.updateServicePrimaryTaskSetRequestArgsForCall = append(fake.updateServicePrimaryTaskSetRequestArgsForCall, struct {
 		arg1 *ecs.UpdateServicePrimaryTaskSetInput
 	}{arg1})
+	stub := fake.UpdateServicePrimaryTaskSetRequestStub
+	fakeReturns := fake.updateServicePrimaryTaskSetRequestReturns
 	fake.recordInvocation("UpdateServicePrimaryTaskSetRequest", []interface{}{arg1})
 	fake.updateServicePrimaryTaskSetRequestMutex.Unlock()
-	if fake.UpdateServicePrimaryTaskSetRequestStub != nil {
-		return fake.UpdateServicePrimaryTaskSetRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateServicePrimaryTaskSetRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -12535,15 +12695,16 @@ func (fake *FakeECSClient) UpdateServicePrimaryTaskSetWithContext(arg1 context.C
 		arg2 *ecs.UpdateServicePrimaryTaskSetInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.UpdateServicePrimaryTaskSetWithContextStub
+	fakeReturns := fake.updateServicePrimaryTaskSetWithContextReturns
 	fake.recordInvocation("UpdateServicePrimaryTaskSetWithContext", []interface{}{arg1, arg2, arg3})
 	fake.updateServicePrimaryTaskSetWithContextMutex.Unlock()
-	if fake.UpdateServicePrimaryTaskSetWithContextStub != nil {
-		return fake.UpdateServicePrimaryTaskSetWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateServicePrimaryTaskSetWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -12598,15 +12759,16 @@ func (fake *FakeECSClient) UpdateServiceRequest(arg1 *ecs.UpdateServiceInput) (*
 	fake.updateServiceRequestArgsForCall = append(fake.updateServiceRequestArgsForCall, struct {
 		arg1 *ecs.UpdateServiceInput
 	}{arg1})
+	stub := fake.UpdateServiceRequestStub
+	fakeReturns := fake.updateServiceRequestReturns
 	fake.recordInvocation("UpdateServiceRequest", []interface{}{arg1})
 	fake.updateServiceRequestMutex.Unlock()
-	if fake.UpdateServiceRequestStub != nil {
-		return fake.UpdateServiceRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateServiceRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -12663,15 +12825,16 @@ func (fake *FakeECSClient) UpdateServiceWithContext(arg1 context.Context, arg2 *
 		arg2 *ecs.UpdateServiceInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.UpdateServiceWithContextStub
+	fakeReturns := fake.updateServiceWithContextReturns
 	fake.recordInvocation("UpdateServiceWithContext", []interface{}{arg1, arg2, arg3})
 	fake.updateServiceWithContextMutex.Unlock()
-	if fake.UpdateServiceWithContextStub != nil {
-		return fake.UpdateServiceWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateServiceWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -12726,15 +12889,16 @@ func (fake *FakeECSClient) UpdateTaskSet(arg1 *ecs.UpdateTaskSetInput) (*ecs.Upd
 	fake.updateTaskSetArgsForCall = append(fake.updateTaskSetArgsForCall, struct {
 		arg1 *ecs.UpdateTaskSetInput
 	}{arg1})
+	stub := fake.UpdateTaskSetStub
+	fakeReturns := fake.updateTaskSetReturns
 	fake.recordInvocation("UpdateTaskSet", []interface{}{arg1})
 	fake.updateTaskSetMutex.Unlock()
-	if fake.UpdateTaskSetStub != nil {
-		return fake.UpdateTaskSetStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateTaskSetReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -12789,15 +12953,16 @@ func (fake *FakeECSClient) UpdateTaskSetRequest(arg1 *ecs.UpdateTaskSetInput) (*
 	fake.updateTaskSetRequestArgsForCall = append(fake.updateTaskSetRequestArgsForCall, struct {
 		arg1 *ecs.UpdateTaskSetInput
 	}{arg1})
+	stub := fake.UpdateTaskSetRequestStub
+	fakeReturns := fake.updateTaskSetRequestReturns
 	fake.recordInvocation("UpdateTaskSetRequest", []interface{}{arg1})
 	fake.updateTaskSetRequestMutex.Unlock()
-	if fake.UpdateTaskSetRequestStub != nil {
-		return fake.UpdateTaskSetRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateTaskSetRequestReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -12854,15 +13019,16 @@ func (fake *FakeECSClient) UpdateTaskSetWithContext(arg1 context.Context, arg2 *
 		arg2 *ecs.UpdateTaskSetInput
 		arg3 []request.Option
 	}{arg1, arg2, arg3})
+	stub := fake.UpdateTaskSetWithContextStub
+	fakeReturns := fake.updateTaskSetWithContextReturns
 	fake.recordInvocation("UpdateTaskSetWithContext", []interface{}{arg1, arg2, arg3})
 	fake.updateTaskSetWithContextMutex.Unlock()
-	if fake.UpdateTaskSetWithContextStub != nil {
-		return fake.UpdateTaskSetWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.updateTaskSetWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -12917,15 +13083,16 @@ func (fake *FakeECSClient) WaitUntilServicesInactive(arg1 *ecs.DescribeServicesI
 	fake.waitUntilServicesInactiveArgsForCall = append(fake.waitUntilServicesInactiveArgsForCall, struct {
 		arg1 *ecs.DescribeServicesInput
 	}{arg1})
+	stub := fake.WaitUntilServicesInactiveStub
+	fakeReturns := fake.waitUntilServicesInactiveReturns
 	fake.recordInvocation("WaitUntilServicesInactive", []interface{}{arg1})
 	fake.waitUntilServicesInactiveMutex.Unlock()
-	if fake.WaitUntilServicesInactiveStub != nil {
-		return fake.WaitUntilServicesInactiveStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.waitUntilServicesInactiveReturns
 	return fakeReturns.result1
 }
 
@@ -12979,15 +13146,16 @@ func (fake *FakeECSClient) WaitUntilServicesInactiveWithContext(arg1 context.Con
 		arg2 *ecs.DescribeServicesInput
 		arg3 []request.WaiterOption
 	}{arg1, arg2, arg3})
+	stub := fake.WaitUntilServicesInactiveWithContextStub
+	fakeReturns := fake.waitUntilServicesInactiveWithContextReturns
 	fake.recordInvocation("WaitUntilServicesInactiveWithContext", []interface{}{arg1, arg2, arg3})
 	fake.waitUntilServicesInactiveWithContextMutex.Unlock()
-	if fake.WaitUntilServicesInactiveWithContextStub != nil {
-		return fake.WaitUntilServicesInactiveWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.waitUntilServicesInactiveWithContextReturns
 	return fakeReturns.result1
 }
 
@@ -13039,15 +13207,16 @@ func (fake *FakeECSClient) WaitUntilServicesStable(arg1 *ecs.DescribeServicesInp
 	fake.waitUntilServicesStableArgsForCall = append(fake.waitUntilServicesStableArgsForCall, struct {
 		arg1 *ecs.DescribeServicesInput
 	}{arg1})
+	stub := fake.WaitUntilServicesStableStub
+	fakeReturns := fake.waitUntilServicesStableReturns
 	fake.recordInvocation("WaitUntilServicesStable", []interface{}{arg1})
 	fake.waitUntilServicesStableMutex.Unlock()
-	if fake.WaitUntilServicesStableStub != nil {
-		return fake.WaitUntilServicesStableStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.waitUntilServicesStableReturns
 	return fakeReturns.result1
 }
 
@@ -13101,15 +13270,16 @@ func (fake *FakeECSClient) WaitUntilServicesStableWithContext(arg1 context.Conte
 		arg2 *ecs.DescribeServicesInput
 		arg3 []request.WaiterOption
 	}{arg1, arg2, arg3})
+	stub := fake.WaitUntilServicesStableWithContextStub
+	fakeReturns := fake.waitUntilServicesStableWithContextReturns
 	fake.recordInvocation("WaitUntilServicesStableWithContext", []interface{}{arg1, arg2, arg3})
 	fake.waitUntilServicesStableWithContextMutex.Unlock()
-	if fake.WaitUntilServicesStableWithContextStub != nil {
-		return fake.WaitUntilServicesStableWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.waitUntilServicesStableWithContextReturns
 	return fakeReturns.result1
 }
 
@@ -13161,15 +13331,16 @@ func (fake *FakeECSClient) WaitUntilTasksRunning(arg1 *ecs.DescribeTasksInput) e
 	fake.waitUntilTasksRunningArgsForCall = append(fake.waitUntilTasksRunningArgsForCall, struct {
 		arg1 *ecs.DescribeTasksInput
 	}{arg1})
+	stub := fake.WaitUntilTasksRunningStub
+	fakeReturns := fake.waitUntilTasksRunningReturns
 	fake.recordInvocation("WaitUntilTasksRunning", []interface{}{arg1})
 	fake.waitUntilTasksRunningMutex.Unlock()
-	if fake.WaitUntilTasksRunningStub != nil {
-		return fake.WaitUntilTasksRunningStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.waitUntilTasksRunningReturns
 	return fakeReturns.result1
 }
 
@@ -13223,15 +13394,16 @@ func (fake *FakeECSClient) WaitUntilTasksRunningWithContext(arg1 context.Context
 		arg2 *ecs.DescribeTasksInput
 		arg3 []request.WaiterOption
 	}{arg1, arg2, arg3})
+	stub := fake.WaitUntilTasksRunningWithContextStub
+	fakeReturns := fake.waitUntilTasksRunningWithContextReturns
 	fake.recordInvocation("WaitUntilTasksRunningWithContext", []interface{}{arg1, arg2, arg3})
 	fake.waitUntilTasksRunningWithContextMutex.Unlock()
-	if fake.WaitUntilTasksRunningWithContextStub != nil {
-		return fake.WaitUntilTasksRunningWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.waitUntilTasksRunningWithContextReturns
 	return fakeReturns.result1
 }
 
@@ -13283,15 +13455,16 @@ func (fake *FakeECSClient) WaitUntilTasksStopped(arg1 *ecs.DescribeTasksInput) e
 	fake.waitUntilTasksStoppedArgsForCall = append(fake.waitUntilTasksStoppedArgsForCall, struct {
 		arg1 *ecs.DescribeTasksInput
 	}{arg1})
+	stub := fake.WaitUntilTasksStoppedStub
+	fakeReturns := fake.waitUntilTasksStoppedReturns
 	fake.recordInvocation("WaitUntilTasksStopped", []interface{}{arg1})
 	fake.waitUntilTasksStoppedMutex.Unlock()
-	if fake.WaitUntilTasksStoppedStub != nil {
-		return fake.WaitUntilTasksStoppedStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.waitUntilTasksStoppedReturns
 	return fakeReturns.result1
 }
 
@@ -13345,15 +13518,16 @@ func (fake *FakeECSClient) WaitUntilTasksStoppedWithContext(arg1 context.Context
 		arg2 *ecs.DescribeTasksInput
 		arg3 []request.WaiterOption
 	}{arg1, arg2, arg3})
+	stub := fake.WaitUntilTasksStoppedWithContextStub
+	fakeReturns := fake.waitUntilTasksStoppedWithContextReturns
 	fake.recordInvocation("WaitUntilTasksStoppedWithContext", []interface{}{arg1, arg2, arg3})
 	fake.waitUntilTasksStoppedWithContextMutex.Unlock()
-	if fake.WaitUntilTasksStoppedWithContextStub != nil {
-		return fake.WaitUntilTasksStoppedWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.waitUntilTasksStoppedWithContextReturns
 	return fakeReturns.result1
 }
 
