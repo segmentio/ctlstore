@@ -33,14 +33,14 @@ type ExecutiveServiceConfig struct {
 	WriterLimitPeriod              time.Duration
 	WriterLimit                    int64
 	EnableDestructiveSchemaChanges bool
+	MaxMutateRequestCount          int
 }
 
 type executiveService struct {
-	ctldb                          *sql.DB
-	limiter                        *dbLimiter
-	ctx                            context.Context
-	serveTimeout                   time.Duration
-	enableDestructiveSchemaChanges bool
+	ctldb   *sql.DB
+	limiter *dbLimiter
+	ctx     context.Context
+	config  ExecutiveServiceConfig
 }
 
 func ExecutiveServiceFromConfig(config ExecutiveServiceConfig) (ExecutiveService, error) {
@@ -56,25 +56,29 @@ func ExecutiveServiceFromConfig(config ExecutiveServiceConfig) (ExecutiveService
 	defaultTableLimit := limits.SizeLimits{MaxSize: config.MaxTableSize, WarnSize: config.WarnTableSize}
 	limiter := newDBLimiter(ctldb, dbType, defaultTableLimit, config.WriterLimitPeriod, config.WriterLimit)
 	es := &executiveService{
-		ctldb:                          ctldb,
-		serveTimeout:                   config.RequestTimeout,
-		limiter:                        limiter,
-		enableDestructiveSchemaChanges: config.EnableDestructiveSchemaChanges,
+		ctldb:   ctldb,
+		limiter: limiter,
+		config:  config,
 	}
 	return es, nil
 }
 
 func (s *executiveService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithTimeout(s.ctx, s.serveTimeout)
+	ctx, cancel := context.WithTimeout(s.ctx, s.config.RequestTimeout)
 	defer cancel()
 
 	// Setup and tear these down every req to limit thread-safety garbage
 	cR := r.WithContext(ctx)
-	exec := &dbExecutive{DB: s.ctldb, Ctx: ctx, limiter: s.limiter}
+	exec := &dbExecutive{
+		DB:                    s.ctldb,
+		Ctx:                   ctx,
+		limiter:               s.limiter,
+		MaxMutateRequestCount: s.config.MaxMutateRequestCount,
+	}
 	ep := ExecutiveEndpoint{
-		Exec:                           exec,
-		HealthChecker:                  exec,
-		EnableDestructiveSchemaChanges: s.enableDestructiveSchemaChanges,
+		Exec:          exec,
+		HealthChecker: exec,
+		config:        s.config,
 	}
 	defer ep.Close()
 
