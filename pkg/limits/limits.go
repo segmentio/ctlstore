@@ -11,13 +11,9 @@ import (
 )
 
 const (
-	LimitRequestBodySize = 1 * units.MEGABYTE
-	LimitMaxDMLSize      = 768 * units.KILOBYTE
-	LimitFieldValueSize  = 512 * units.KILOBYTE
-
-	LimitMaxMutateRequestCount = 100
+	LimitRequestBodySize       = 1 * units.MEGABYTE
+	LimitMaxDMLSize            = 768 * units.KILOBYTE
 	LimitWriterCookieSize      = 1024
-
 	LimitWriterSecretMaxLength = 100
 	LimitWriterSecretMinLength = 3
 )

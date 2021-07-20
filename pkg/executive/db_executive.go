@@ -24,9 +24,10 @@ const mutatorsTableName = "mutators"
 
 // A database-backed (ctldb) Executive.
 type dbExecutive struct {
-	DB      *sql.DB
-	limiter *dbLimiter
-	Ctx     context.Context
+	DB                    *sql.DB
+	limiter               *dbLimiter
+	Ctx                   context.Context
+	MaxMutateRequestCount int
 }
 
 var ErrTableDoesNotExist = errors.New("table does not exist")
@@ -441,6 +442,13 @@ func (e *dbExecutive) HealthCheck() error {
 	return nil
 }
 
+func (e *dbExecutive) getMaxMutateRequestCount() int {
+	if e.MaxMutateRequestCount > 0 {
+		return e.MaxMutateRequestCount
+	}
+	return 100
+}
+
 func (e *dbExecutive) Mutate(
 	writerName string,
 	writerSecret string,
@@ -453,8 +461,8 @@ func (e *dbExecutive) Mutate(
 	defer cancel()
 
 	// Reject requests that are too large
-	if len(requests) > limits.LimitMaxMutateRequestCount {
-		return &errs.PayloadTooLargeError{Err: "Number of requests exceeds maximum"}
+	if len(requests) > e.getMaxMutateRequestCount() {
+		return &errs.PayloadTooLargeError{Err: fmt.Sprintf("Number of requests exceeds maximum (%d)", e.getMaxMutateRequestCount())}
 	}
 
 	famName, err := schema.NewFamilyName(familyName)

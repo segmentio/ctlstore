@@ -76,6 +76,7 @@ type executiveCliConfig struct {
 	Shadow                         bool            `conf:"shadow" help:"set this to true to emit shadow=true metric tags"`
 	Dogstatsd                      dogstatsdConfig `conf:"dogstatsd" help:"dogstatsd Configuration"`
 	EnableDestructiveSchemaChanges bool            `conf:"enable-destructive-schema-changes" help:"Turns on the ability to clear and drop tables from the executive API"`
+	MaxMutateRequestCount          int             `conf:"max-mutate-request-count" help:"The maximum number of mutations allows in any one request"`
 }
 
 // supervisorCliConfig also composes a reflectorCliConfig because it ends up
@@ -392,6 +393,7 @@ func executive(ctx context.Context, args []string) {
 		WarnTableSize:                  50 * units.MEGABYTE,
 		MaxTableSize:                   100 * units.MEGABYTE,
 		EnableDestructiveSchemaChanges: false,
+		MaxMutateRequestCount:          100,
 	}
 
 	loadConfig(&cliCfg, "executive", args)
@@ -422,6 +424,7 @@ func executive(ctx context.Context, args []string) {
 		WriterLimit:                    cliCfg.WriterLimit,
 		WriterLimitPeriod:              cliCfg.WriterLimitPeriod,
 		EnableDestructiveSchemaChanges: cliCfg.EnableDestructiveSchemaChanges,
+		MaxMutateRequestCount:          cliCfg.MaxMutateRequestCount,
 	})
 	if err != nil {
 		errs.IncrDefault(stats.T("op", "startup"))
