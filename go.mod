@@ -18,7 +18,7 @@ require (
 	github.com/segmentio/events/v2 v2.3.2
 	github.com/segmentio/go-sqlite3 v1.11.1
 	github.com/segmentio/stats/v4 v4.6.2
-	github.com/spf13/cobra v0.0.5
+	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
