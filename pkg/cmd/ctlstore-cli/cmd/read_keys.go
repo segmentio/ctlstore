@@ -11,25 +11,13 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/segmentio/cli"
 	"github.com/segmentio/ctlstore"
-	"github.com/spf13/cobra"
 )
 
-func init() {
-	rootCmd.AddCommand(readKeysCmd)
-	useFlagFamily(readKeysCmd)
-	useFlagTable(readKeysCmd)
-	useFlagLDB(readKeysCmd)
-	useFlagQuiet(readKeysCmd)
-}
-
-var hexKeyRE = regexp.MustCompile(`^0x([0-9a-fA-F]*)$`)
-
-// readKeysCmd represents the read-keys command
-var readKeysCmd = &cobra.Command{
-	Use:   "read-keys [key1], [key2], ... [keyN]",
-	Short: "Reads a row from a local LDB",
-	Long: unindent(`
+var cliReadKeys = &cli.CommandFunc{
+	Help: "read-keys [key1], [key2], ... [keyN]",
+	Desc: unindent(`
 		Reads a row from a local LDB
 
 		This command reads one row given the specified family, table, and keys.
@@ -39,27 +27,21 @@ var readKeysCmd = &cobra.Command{
 		The output of this command will be a table of columnName -> columnValue,
 		sorted by the column names.
 	`),
-	Args: cobra.MinimumNArgs(1), // at least one key must be supplied
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Func: func(ctx context.Context, config struct {
+		flagBase
+		flagQuiet
+		flagLDBPath
+		flagFamily
+		flagTable
+	}, args []string) error {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		ldbPath, err := getLDB(cmd)
-		if err != nil {
-			return err
-		}
-		familyName, err := getFamilyName(cmd)
-		if err != nil {
-			return err
-		}
-		tableName, err := getTableName(cmd)
-		if err != nil {
-			return err
-		}
-		quiet, err := cmd.Flags().GetBool(keyQuiet)
-		if err != nil {
-			return err
-		}
+		ldbPath := config.LDBPath
+		familyName := config.MustFamily()
+		tableName := config.MustTable()
+		quiet := config.Quiet
+
 		keys, err := getKeys(args)
 		if err != nil {
 			return err
@@ -100,6 +82,8 @@ var readKeysCmd = &cobra.Command{
 		return nil
 	},
 }
+
+var hexKeyRE = regexp.MustCompile(`^0x([0-9a-fA-F]*)$`)
 
 // getKeys converts each key input into a type that can be passed
 // into the reader.GetRowByKey method.  Specifically, it checks to

@@ -2,54 +2,35 @@ package cmd
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 
-	"github.com/spf13/cobra"
+	"github.com/segmentio/cli"
 )
 
-func init() {
-	rootCmd.AddCommand(addFieldsCmd)
-	useFlagExecutive(addFieldsCmd)
-	useFlagFamily(addFieldsCmd)
-	useFlagTable(addFieldsCmd)
-	useFlagFields(addFieldsCmd)
-}
+var cliAddFields = &cli.CommandFunc{
+	Help: "Add fields to an existing table",
+	Desc: unindent(`
+		This command makes an HTTP request to the executive service
+		to add fields to an existing table
 
-// addFieldsCmd represents the add-fields command
-var addFieldsCmd = &cobra.Command{
-	Use:   "add-fields",
-	Short: "Add fields to an existing table",
-	Long: unindent(`
-			Add fields to an existing table
+		Example:
 
-			This command makes an HTTP request to the executive service
-			to add fields to an existing table
-
-			Example:
-
-			add-fields --family foo --table bar --field name:string
+		add-fields --family foo --table bar --field name:string
 	`),
-	Args: cobra.NoArgs,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		executive, err := getExecutive(cmd)
-		if err != nil {
-			return err
-		}
-		familyName, err := getFamilyName(cmd)
-		if err != nil {
-			return err
-		}
-		tableName, err := getTableName(cmd)
-		if err != nil {
-			return err
-		}
-		fields, err := getFields(cmd)
-		if err != nil {
-			return err
-		}
+	Func: func(ctx context.Context, config struct {
+		flagBase
+		flagExecutive
+		flagFamily
+		flagTable
+		flagFields
+	}) (err error) {
+		executive := config.MustExecutive()
+		familyName := config.MustFamily()
+		tableName := config.MustTable()
+		fields := config.MustFields()
 
-		// todo: dedupe this declaration
 		var payload struct {
 			Fields [][]string `json:"fields"`
 		}
