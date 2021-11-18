@@ -1,25 +1,22 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
+	"context"
+	"time"
 
-	"github.com/spf13/cobra"
+	"github.com/segmentio/cli"
 )
 
-var binaryName = os.Args[0]
-
-var rootCmd = &cobra.Command{
-	Use:   binaryName,
-	Short: fmt.Sprintf("%s allows an operator to query a ctlstore system", binaryName),
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Usage()
-	},
-}
-
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	cli.ExecContext(ctx, cli.CommandSet{
+		"table-limits":  cliTableLimits,
+		"create-table":  cliCreateTable,
+		"create-family": cliCreateFamily,
+		"add-fields":    cliAddFields,
+		"read-keys":     cliReadKeys,
+		"read-seq":      cliReadSeq,
+		"writer-limits": cliWriterLimits,
+	})
 }
