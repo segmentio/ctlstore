@@ -12,7 +12,6 @@ Recommended reading:
 
 * [Rick Branson's blog post on ctlstore](https://segment.com/blog/separating-our-data-and-control-planes-with-ctlstore/)
 * [Calvin talking about ctlstore at Synapse](https://vimeo.com/293246627)
-* [The ctlstore website](https://ctlstore.segment.com/)
 
 ## Security
 
