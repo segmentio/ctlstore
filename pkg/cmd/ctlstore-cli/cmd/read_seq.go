@@ -5,26 +5,17 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/segmentio/cli"
 	"github.com/segmentio/ctlstore"
-	"github.com/spf13/cobra"
 )
 
-func init() {
-	rootCmd.AddCommand(readSeqCmd)
-	useFlagLDB(readSeqCmd)
-}
-
-// readSeqCmd represents the read-seq command
-var readSeqCmd = &cobra.Command{
-	Use:   "read-seq",
-	Short: "Read last sequence from the ldb",
-	Args:  cobra.NoArgs,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ldb, err := getLDB(cmd)
-		if err != nil {
-			return err
-		}
-		reader, err := ctlstore.ReaderForPath(ldb)
+var cliReadSeq = &cli.CommandFunc{
+	Help: "Read last sequenece from the LDB",
+	Func: func(ctx context.Context, config struct {
+		flagLDBPath
+	}) error {
+		ldbPath := config.LDBPath
+		reader, err := ctlstore.ReaderForPath(ldbPath)
 		if err != nil {
 			bail("Could not get reader: %s", err)
 		}

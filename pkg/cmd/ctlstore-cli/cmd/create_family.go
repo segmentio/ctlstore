@@ -1,33 +1,35 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 
-	"github.com/spf13/cobra"
+	"github.com/segmentio/cli"
 )
 
-func init() {
-	rootCmd.AddCommand(createFamilyCmd)
-	useFlagExecutive(createFamilyCmd)
-}
+var cliCreateFamily = &cli.CommandFunc{
+	Help: "Create a new table family",
+	Desc: unindent(fmt.Sprintf(`
+		Create a new table family
 
-// createFamilyCmd represents the create-family command
-var createFamilyCmd = &cobra.Command{
-	Use:   "create-family [familyName]",
-	Short: "Create a new table family",
-	Long: unindent(`
-			Create a new table family
+		This command makes an HTTP request to the executive service
+		to create a new table family. 
 
-			This command makes an HTTP request to the executive service
-			to create a new table family. 
-	`),
-	Args: cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		executive, err := getExecutive(cmd)
-		if err != nil {
-			return err
+		Example:
+		
+		%s create-family foo
+	`, filepath.Base(os.Args[0]))),
+	Func: func(ctx context.Context, config struct {
+		flagBase
+		flagExecutive
+	}, args []string) (err error) {
+		if len(args) != 1 {
+			bail("Family required")
 		}
+		executive := config.MustExecutive()
 		familyName := args[0]
 		url := executive + "/families/" + familyName
 		req, err := http.NewRequest("POST", url, nil)
