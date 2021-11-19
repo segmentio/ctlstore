@@ -2,57 +2,42 @@ package cmd
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
-	"github.com/spf13/cobra"
+	"github.com/segmentio/cli"
 )
 
-func init() {
-	rootCmd.AddCommand(createTableCmd)
-	useFlagExecutive(createTableCmd)
-	useFlagFamily(createTableCmd)
-	useFlagFields(createTableCmd)
-	useFlagKeyFields(createTableCmd)
-}
+var cliCreateTable = &cli.CommandFunc{
+	Help: "Create a new table",
+	Desc: unindent(`
+		Create a new table
 
-// createTableCmd represents the create-table command
-var createTableCmd = &cobra.Command{
-	Use:   "create-table [tableName]",
-	Short: "Create a new table",
-	Long: unindent(`
-			Create a new table
+		This command makes an HTTP request to the executive service
+		to create a new table. 
 
-			This command makes an HTTP request to the executive service
-			to create a new table. 
+		Example:
 
-			Example:
+		create-table --family foo --field name:string --field foo:integer --key-field name testtable
 
-			create-table --family foo --field name:string --field foo:integer --key-field name testtable
+		Resulting schema:
 
-			Resulting schema:
-
-			CREATE TABLE foo___testtable (name VARCHAR(191), foo INTEGER, PRIMARY KEY(name));
+		CREATE TABLE foo___testtable (name VARCHAR(191), foo INTEGER, PRIMARY KEY(name));
 	`),
-	Args: cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		executive, err := getExecutive(cmd)
-		if err != nil {
-			return err
-		}
-		familyName, err := getFamilyName(cmd)
-		if err != nil {
-			return err
-		}
-		fields, err := getFields(cmd)
-		if err != nil {
-			return err
-		}
-		keyFields, err := getKeyFields(cmd)
-		if err != nil {
-			return err
-		}
+	Func: func(ctx context.Context, config struct {
+		flagBase
+		flagExecutive
+		flagFamily
+		flagFields
+		flagKeyFields
+	}, args []string) error {
+		executive := config.MustExecutive()
+		familyName := config.MustFamily()
+		fields := config.MustFields()
+		keyFields := config.MustKeyFields()
+
 		tableName := args[0]
 
 		// todo: dedupe this declaration

@@ -61,6 +61,17 @@ type FakeExecutiveInterface struct {
 	createTableReturnsOnCall map[int]struct {
 		result1 error
 	}
+	CreateTablesStub        func([]schema.Table) error
+	createTablesMutex       sync.RWMutex
+	createTablesArgsForCall []struct {
+		arg1 []schema.Table
+	}
+	createTablesReturns struct {
+		result1 error
+	}
+	createTablesReturnsOnCall map[int]struct {
+		result1 error
+	}
 	DeleteTableSizeLimitStub        func(schema.FamilyTable) error
 	deleteTableSizeLimitMutex       sync.RWMutex
 	deleteTableSizeLimitArgsForCall []struct {
@@ -93,6 +104,19 @@ type FakeExecutiveInterface struct {
 	}
 	dropTableReturnsOnCall map[int]struct {
 		result1 error
+	}
+	FamilySchemasStub        func(string) ([]schema.Table, error)
+	familySchemasMutex       sync.RWMutex
+	familySchemasArgsForCall []struct {
+		arg1 string
+	}
+	familySchemasReturns struct {
+		result1 []schema.Table
+		result2 error
+	}
+	familySchemasReturnsOnCall map[int]struct {
+		result1 []schema.Table
+		result2 error
 	}
 	GetWriterCookieStub        func(string, string) ([]byte, error)
 	getWriterCookieMutex       sync.RWMutex
@@ -201,6 +225,20 @@ type FakeExecutiveInterface struct {
 	setWriterCookieReturnsOnCall map[int]struct {
 		result1 error
 	}
+	TableSchemaStub        func(string, string) (*schema.Table, error)
+	tableSchemaMutex       sync.RWMutex
+	tableSchemaArgsForCall []struct {
+		arg1 string
+		arg2 string
+	}
+	tableSchemaReturns struct {
+		result1 *schema.Table
+		result2 error
+	}
+	tableSchemaReturnsOnCall map[int]struct {
+		result1 *schema.Table
+		result2 error
+	}
 	UpdateTableSizeLimitStub        func(limits.TableSizeLimit) error
 	updateTableSizeLimitMutex       sync.RWMutex
 	updateTableSizeLimitArgsForCall []struct {
@@ -246,15 +284,16 @@ func (fake *FakeExecutiveInterface) AddFields(arg1 string, arg2 string, arg3 []s
 		arg3 []string
 		arg4 []schema.FieldType
 	}{arg1, arg2, arg3Copy, arg4Copy})
+	stub := fake.AddFieldsStub
+	fakeReturns := fake.addFieldsReturns
 	fake.recordInvocation("AddFields", []interface{}{arg1, arg2, arg3Copy, arg4Copy})
 	fake.addFieldsMutex.Unlock()
-	if fake.AddFieldsStub != nil {
-		return fake.AddFieldsStub(arg1, arg2, arg3, arg4)
+	if stub != nil {
+		return stub(arg1, arg2, arg3, arg4)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.addFieldsReturns
 	return fakeReturns.result1
 }
 
@@ -306,15 +345,16 @@ func (fake *FakeExecutiveInterface) ClearTable(arg1 schema.FamilyTable) error {
 	fake.clearTableArgsForCall = append(fake.clearTableArgsForCall, struct {
 		arg1 schema.FamilyTable
 	}{arg1})
+	stub := fake.ClearTableStub
+	fakeReturns := fake.clearTableReturns
 	fake.recordInvocation("ClearTable", []interface{}{arg1})
 	fake.clearTableMutex.Unlock()
-	if fake.ClearTableStub != nil {
-		return fake.ClearTableStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.clearTableReturns
 	return fakeReturns.result1
 }
 
@@ -366,15 +406,16 @@ func (fake *FakeExecutiveInterface) CreateFamily(arg1 string) error {
 	fake.createFamilyArgsForCall = append(fake.createFamilyArgsForCall, struct {
 		arg1 string
 	}{arg1})
+	stub := fake.CreateFamilyStub
+	fakeReturns := fake.createFamilyReturns
 	fake.recordInvocation("CreateFamily", []interface{}{arg1})
 	fake.createFamilyMutex.Unlock()
-	if fake.CreateFamilyStub != nil {
-		return fake.CreateFamilyStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.createFamilyReturns
 	return fakeReturns.result1
 }
 
@@ -445,15 +486,16 @@ func (fake *FakeExecutiveInterface) CreateTable(arg1 string, arg2 string, arg3 [
 		arg4 []schema.FieldType
 		arg5 []string
 	}{arg1, arg2, arg3Copy, arg4Copy, arg5Copy})
+	stub := fake.CreateTableStub
+	fakeReturns := fake.createTableReturns
 	fake.recordInvocation("CreateTable", []interface{}{arg1, arg2, arg3Copy, arg4Copy, arg5Copy})
 	fake.createTableMutex.Unlock()
-	if fake.CreateTableStub != nil {
-		return fake.CreateTableStub(arg1, arg2, arg3, arg4, arg5)
+	if stub != nil {
+		return stub(arg1, arg2, arg3, arg4, arg5)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.createTableReturns
 	return fakeReturns.result1
 }
 
@@ -499,21 +541,88 @@ func (fake *FakeExecutiveInterface) CreateTableReturnsOnCall(i int, result1 erro
 	}{result1}
 }
 
+func (fake *FakeExecutiveInterface) CreateTables(arg1 []schema.Table) error {
+	var arg1Copy []schema.Table
+	if arg1 != nil {
+		arg1Copy = make([]schema.Table, len(arg1))
+		copy(arg1Copy, arg1)
+	}
+	fake.createTablesMutex.Lock()
+	ret, specificReturn := fake.createTablesReturnsOnCall[len(fake.createTablesArgsForCall)]
+	fake.createTablesArgsForCall = append(fake.createTablesArgsForCall, struct {
+		arg1 []schema.Table
+	}{arg1Copy})
+	stub := fake.CreateTablesStub
+	fakeReturns := fake.createTablesReturns
+	fake.recordInvocation("CreateTables", []interface{}{arg1Copy})
+	fake.createTablesMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeExecutiveInterface) CreateTablesCallCount() int {
+	fake.createTablesMutex.RLock()
+	defer fake.createTablesMutex.RUnlock()
+	return len(fake.createTablesArgsForCall)
+}
+
+func (fake *FakeExecutiveInterface) CreateTablesCalls(stub func([]schema.Table) error) {
+	fake.createTablesMutex.Lock()
+	defer fake.createTablesMutex.Unlock()
+	fake.CreateTablesStub = stub
+}
+
+func (fake *FakeExecutiveInterface) CreateTablesArgsForCall(i int) []schema.Table {
+	fake.createTablesMutex.RLock()
+	defer fake.createTablesMutex.RUnlock()
+	argsForCall := fake.createTablesArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeExecutiveInterface) CreateTablesReturns(result1 error) {
+	fake.createTablesMutex.Lock()
+	defer fake.createTablesMutex.Unlock()
+	fake.CreateTablesStub = nil
+	fake.createTablesReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeExecutiveInterface) CreateTablesReturnsOnCall(i int, result1 error) {
+	fake.createTablesMutex.Lock()
+	defer fake.createTablesMutex.Unlock()
+	fake.CreateTablesStub = nil
+	if fake.createTablesReturnsOnCall == nil {
+		fake.createTablesReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.createTablesReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeExecutiveInterface) DeleteTableSizeLimit(arg1 schema.FamilyTable) error {
 	fake.deleteTableSizeLimitMutex.Lock()
 	ret, specificReturn := fake.deleteTableSizeLimitReturnsOnCall[len(fake.deleteTableSizeLimitArgsForCall)]
 	fake.deleteTableSizeLimitArgsForCall = append(fake.deleteTableSizeLimitArgsForCall, struct {
 		arg1 schema.FamilyTable
 	}{arg1})
+	stub := fake.DeleteTableSizeLimitStub
+	fakeReturns := fake.deleteTableSizeLimitReturns
 	fake.recordInvocation("DeleteTableSizeLimit", []interface{}{arg1})
 	fake.deleteTableSizeLimitMutex.Unlock()
-	if fake.DeleteTableSizeLimitStub != nil {
-		return fake.DeleteTableSizeLimitStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.deleteTableSizeLimitReturns
 	return fakeReturns.result1
 }
 
@@ -565,15 +674,16 @@ func (fake *FakeExecutiveInterface) DeleteWriterRateLimit(arg1 string) error {
 	fake.deleteWriterRateLimitArgsForCall = append(fake.deleteWriterRateLimitArgsForCall, struct {
 		arg1 string
 	}{arg1})
+	stub := fake.DeleteWriterRateLimitStub
+	fakeReturns := fake.deleteWriterRateLimitReturns
 	fake.recordInvocation("DeleteWriterRateLimit", []interface{}{arg1})
 	fake.deleteWriterRateLimitMutex.Unlock()
-	if fake.DeleteWriterRateLimitStub != nil {
-		return fake.DeleteWriterRateLimitStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.deleteWriterRateLimitReturns
 	return fakeReturns.result1
 }
 
@@ -625,15 +735,16 @@ func (fake *FakeExecutiveInterface) DropTable(arg1 schema.FamilyTable) error {
 	fake.dropTableArgsForCall = append(fake.dropTableArgsForCall, struct {
 		arg1 schema.FamilyTable
 	}{arg1})
+	stub := fake.DropTableStub
+	fakeReturns := fake.dropTableReturns
 	fake.recordInvocation("DropTable", []interface{}{arg1})
 	fake.dropTableMutex.Unlock()
-	if fake.DropTableStub != nil {
-		return fake.DropTableStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.dropTableReturns
 	return fakeReturns.result1
 }
 
@@ -679,6 +790,70 @@ func (fake *FakeExecutiveInterface) DropTableReturnsOnCall(i int, result1 error)
 	}{result1}
 }
 
+func (fake *FakeExecutiveInterface) FamilySchemas(arg1 string) ([]schema.Table, error) {
+	fake.familySchemasMutex.Lock()
+	ret, specificReturn := fake.familySchemasReturnsOnCall[len(fake.familySchemasArgsForCall)]
+	fake.familySchemasArgsForCall = append(fake.familySchemasArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	stub := fake.FamilySchemasStub
+	fakeReturns := fake.familySchemasReturns
+	fake.recordInvocation("FamilySchemas", []interface{}{arg1})
+	fake.familySchemasMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeExecutiveInterface) FamilySchemasCallCount() int {
+	fake.familySchemasMutex.RLock()
+	defer fake.familySchemasMutex.RUnlock()
+	return len(fake.familySchemasArgsForCall)
+}
+
+func (fake *FakeExecutiveInterface) FamilySchemasCalls(stub func(string) ([]schema.Table, error)) {
+	fake.familySchemasMutex.Lock()
+	defer fake.familySchemasMutex.Unlock()
+	fake.FamilySchemasStub = stub
+}
+
+func (fake *FakeExecutiveInterface) FamilySchemasArgsForCall(i int) string {
+	fake.familySchemasMutex.RLock()
+	defer fake.familySchemasMutex.RUnlock()
+	argsForCall := fake.familySchemasArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeExecutiveInterface) FamilySchemasReturns(result1 []schema.Table, result2 error) {
+	fake.familySchemasMutex.Lock()
+	defer fake.familySchemasMutex.Unlock()
+	fake.FamilySchemasStub = nil
+	fake.familySchemasReturns = struct {
+		result1 []schema.Table
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeExecutiveInterface) FamilySchemasReturnsOnCall(i int, result1 []schema.Table, result2 error) {
+	fake.familySchemasMutex.Lock()
+	defer fake.familySchemasMutex.Unlock()
+	fake.FamilySchemasStub = nil
+	if fake.familySchemasReturnsOnCall == nil {
+		fake.familySchemasReturnsOnCall = make(map[int]struct {
+			result1 []schema.Table
+			result2 error
+		})
+	}
+	fake.familySchemasReturnsOnCall[i] = struct {
+		result1 []schema.Table
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeExecutiveInterface) GetWriterCookie(arg1 string, arg2 string) ([]byte, error) {
 	fake.getWriterCookieMutex.Lock()
 	ret, specificReturn := fake.getWriterCookieReturnsOnCall[len(fake.getWriterCookieArgsForCall)]
@@ -686,15 +861,16 @@ func (fake *FakeExecutiveInterface) GetWriterCookie(arg1 string, arg2 string) ([
 		arg1 string
 		arg2 string
 	}{arg1, arg2})
+	stub := fake.GetWriterCookieStub
+	fakeReturns := fake.getWriterCookieReturns
 	fake.recordInvocation("GetWriterCookie", []interface{}{arg1, arg2})
 	fake.getWriterCookieMutex.Unlock()
-	if fake.GetWriterCookieStub != nil {
-		return fake.GetWriterCookieStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.getWriterCookieReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -769,15 +945,16 @@ func (fake *FakeExecutiveInterface) Mutate(arg1 string, arg2 string, arg3 string
 		arg5 []byte
 		arg6 []executive.ExecutiveMutationRequest
 	}{arg1, arg2, arg3, arg4Copy, arg5Copy, arg6Copy})
+	stub := fake.MutateStub
+	fakeReturns := fake.mutateReturns
 	fake.recordInvocation("Mutate", []interface{}{arg1, arg2, arg3, arg4Copy, arg5Copy, arg6Copy})
 	fake.mutateMutex.Unlock()
-	if fake.MutateStub != nil {
-		return fake.MutateStub(arg1, arg2, arg3, arg4, arg5, arg6)
+	if stub != nil {
+		return stub(arg1, arg2, arg3, arg4, arg5, arg6)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.mutateReturns
 	return fakeReturns.result1
 }
 
@@ -829,15 +1006,16 @@ func (fake *FakeExecutiveInterface) ReadFamilyTableNames(arg1 schema.FamilyName)
 	fake.readFamilyTableNamesArgsForCall = append(fake.readFamilyTableNamesArgsForCall, struct {
 		arg1 schema.FamilyName
 	}{arg1})
+	stub := fake.ReadFamilyTableNamesStub
+	fakeReturns := fake.readFamilyTableNamesReturns
 	fake.recordInvocation("ReadFamilyTableNames", []interface{}{arg1})
 	fake.readFamilyTableNamesMutex.Unlock()
-	if fake.ReadFamilyTableNamesStub != nil {
-		return fake.ReadFamilyTableNamesStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.readFamilyTableNamesReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -894,15 +1072,16 @@ func (fake *FakeExecutiveInterface) ReadRow(arg1 string, arg2 string, arg3 map[s
 		arg2 string
 		arg3 map[string]interface{}
 	}{arg1, arg2, arg3})
+	stub := fake.ReadRowStub
+	fakeReturns := fake.readRowReturns
 	fake.recordInvocation("ReadRow", []interface{}{arg1, arg2, arg3})
 	fake.readRowMutex.Unlock()
-	if fake.ReadRowStub != nil {
-		return fake.ReadRowStub(arg1, arg2, arg3)
+	if stub != nil {
+		return stub(arg1, arg2, arg3)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.readRowReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -956,15 +1135,16 @@ func (fake *FakeExecutiveInterface) ReadTableSizeLimits() (limits.TableSizeLimit
 	ret, specificReturn := fake.readTableSizeLimitsReturnsOnCall[len(fake.readTableSizeLimitsArgsForCall)]
 	fake.readTableSizeLimitsArgsForCall = append(fake.readTableSizeLimitsArgsForCall, struct {
 	}{})
+	stub := fake.ReadTableSizeLimitsStub
+	fakeReturns := fake.readTableSizeLimitsReturns
 	fake.recordInvocation("ReadTableSizeLimits", []interface{}{})
 	fake.readTableSizeLimitsMutex.Unlock()
-	if fake.ReadTableSizeLimitsStub != nil {
-		return fake.ReadTableSizeLimitsStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.readTableSizeLimitsReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -1011,15 +1191,16 @@ func (fake *FakeExecutiveInterface) ReadWriterRateLimits() (limits.WriterRateLim
 	ret, specificReturn := fake.readWriterRateLimitsReturnsOnCall[len(fake.readWriterRateLimitsArgsForCall)]
 	fake.readWriterRateLimitsArgsForCall = append(fake.readWriterRateLimitsArgsForCall, struct {
 	}{})
+	stub := fake.ReadWriterRateLimitsStub
+	fakeReturns := fake.readWriterRateLimitsReturns
 	fake.recordInvocation("ReadWriterRateLimits", []interface{}{})
 	fake.readWriterRateLimitsMutex.Unlock()
-	if fake.ReadWriterRateLimitsStub != nil {
-		return fake.ReadWriterRateLimitsStub()
+	if stub != nil {
+		return stub()
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.readWriterRateLimitsReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -1068,15 +1249,16 @@ func (fake *FakeExecutiveInterface) RegisterWriter(arg1 string, arg2 string) err
 		arg1 string
 		arg2 string
 	}{arg1, arg2})
+	stub := fake.RegisterWriterStub
+	fakeReturns := fake.registerWriterReturns
 	fake.recordInvocation("RegisterWriter", []interface{}{arg1, arg2})
 	fake.registerWriterMutex.Unlock()
-	if fake.RegisterWriterStub != nil {
-		return fake.RegisterWriterStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.registerWriterReturns
 	return fakeReturns.result1
 }
 
@@ -1135,15 +1317,16 @@ func (fake *FakeExecutiveInterface) SetWriterCookie(arg1 string, arg2 string, ar
 		arg2 string
 		arg3 []byte
 	}{arg1, arg2, arg3Copy})
+	stub := fake.SetWriterCookieStub
+	fakeReturns := fake.setWriterCookieReturns
 	fake.recordInvocation("SetWriterCookie", []interface{}{arg1, arg2, arg3Copy})
 	fake.setWriterCookieMutex.Unlock()
-	if fake.SetWriterCookieStub != nil {
-		return fake.SetWriterCookieStub(arg1, arg2, arg3)
+	if stub != nil {
+		return stub(arg1, arg2, arg3)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.setWriterCookieReturns
 	return fakeReturns.result1
 }
 
@@ -1189,21 +1372,87 @@ func (fake *FakeExecutiveInterface) SetWriterCookieReturnsOnCall(i int, result1 
 	}{result1}
 }
 
+func (fake *FakeExecutiveInterface) TableSchema(arg1 string, arg2 string) (*schema.Table, error) {
+	fake.tableSchemaMutex.Lock()
+	ret, specificReturn := fake.tableSchemaReturnsOnCall[len(fake.tableSchemaArgsForCall)]
+	fake.tableSchemaArgsForCall = append(fake.tableSchemaArgsForCall, struct {
+		arg1 string
+		arg2 string
+	}{arg1, arg2})
+	stub := fake.TableSchemaStub
+	fakeReturns := fake.tableSchemaReturns
+	fake.recordInvocation("TableSchema", []interface{}{arg1, arg2})
+	fake.tableSchemaMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeExecutiveInterface) TableSchemaCallCount() int {
+	fake.tableSchemaMutex.RLock()
+	defer fake.tableSchemaMutex.RUnlock()
+	return len(fake.tableSchemaArgsForCall)
+}
+
+func (fake *FakeExecutiveInterface) TableSchemaCalls(stub func(string, string) (*schema.Table, error)) {
+	fake.tableSchemaMutex.Lock()
+	defer fake.tableSchemaMutex.Unlock()
+	fake.TableSchemaStub = stub
+}
+
+func (fake *FakeExecutiveInterface) TableSchemaArgsForCall(i int) (string, string) {
+	fake.tableSchemaMutex.RLock()
+	defer fake.tableSchemaMutex.RUnlock()
+	argsForCall := fake.tableSchemaArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeExecutiveInterface) TableSchemaReturns(result1 *schema.Table, result2 error) {
+	fake.tableSchemaMutex.Lock()
+	defer fake.tableSchemaMutex.Unlock()
+	fake.TableSchemaStub = nil
+	fake.tableSchemaReturns = struct {
+		result1 *schema.Table
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeExecutiveInterface) TableSchemaReturnsOnCall(i int, result1 *schema.Table, result2 error) {
+	fake.tableSchemaMutex.Lock()
+	defer fake.tableSchemaMutex.Unlock()
+	fake.TableSchemaStub = nil
+	if fake.tableSchemaReturnsOnCall == nil {
+		fake.tableSchemaReturnsOnCall = make(map[int]struct {
+			result1 *schema.Table
+			result2 error
+		})
+	}
+	fake.tableSchemaReturnsOnCall[i] = struct {
+		result1 *schema.Table
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeExecutiveInterface) UpdateTableSizeLimit(arg1 limits.TableSizeLimit) error {
 	fake.updateTableSizeLimitMutex.Lock()
 	ret, specificReturn := fake.updateTableSizeLimitReturnsOnCall[len(fake.updateTableSizeLimitArgsForCall)]
 	fake.updateTableSizeLimitArgsForCall = append(fake.updateTableSizeLimitArgsForCall, struct {
 		arg1 limits.TableSizeLimit
 	}{arg1})
+	stub := fake.UpdateTableSizeLimitStub
+	fakeReturns := fake.updateTableSizeLimitReturns
 	fake.recordInvocation("UpdateTableSizeLimit", []interface{}{arg1})
 	fake.updateTableSizeLimitMutex.Unlock()
-	if fake.UpdateTableSizeLimitStub != nil {
-		return fake.UpdateTableSizeLimitStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.updateTableSizeLimitReturns
 	return fakeReturns.result1
 }
 
@@ -1255,15 +1504,16 @@ func (fake *FakeExecutiveInterface) UpdateWriterRateLimit(arg1 limits.WriterRate
 	fake.updateWriterRateLimitArgsForCall = append(fake.updateWriterRateLimitArgsForCall, struct {
 		arg1 limits.WriterRateLimit
 	}{arg1})
+	stub := fake.UpdateWriterRateLimitStub
+	fakeReturns := fake.updateWriterRateLimitReturns
 	fake.recordInvocation("UpdateWriterRateLimit", []interface{}{arg1})
 	fake.updateWriterRateLimitMutex.Unlock()
-	if fake.UpdateWriterRateLimitStub != nil {
-		return fake.UpdateWriterRateLimitStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.updateWriterRateLimitReturns
 	return fakeReturns.result1
 }
 
@@ -1320,12 +1570,16 @@ func (fake *FakeExecutiveInterface) Invocations() map[string][][]interface{} {
 	defer fake.createFamilyMutex.RUnlock()
 	fake.createTableMutex.RLock()
 	defer fake.createTableMutex.RUnlock()
+	fake.createTablesMutex.RLock()
+	defer fake.createTablesMutex.RUnlock()
 	fake.deleteTableSizeLimitMutex.RLock()
 	defer fake.deleteTableSizeLimitMutex.RUnlock()
 	fake.deleteWriterRateLimitMutex.RLock()
 	defer fake.deleteWriterRateLimitMutex.RUnlock()
 	fake.dropTableMutex.RLock()
 	defer fake.dropTableMutex.RUnlock()
+	fake.familySchemasMutex.RLock()
+	defer fake.familySchemasMutex.RUnlock()
 	fake.getWriterCookieMutex.RLock()
 	defer fake.getWriterCookieMutex.RUnlock()
 	fake.mutateMutex.RLock()
@@ -1342,6 +1596,8 @@ func (fake *FakeExecutiveInterface) Invocations() map[string][][]interface{} {
 	defer fake.registerWriterMutex.RUnlock()
 	fake.setWriterCookieMutex.RLock()
 	defer fake.setWriterCookieMutex.RUnlock()
+	fake.tableSchemaMutex.RLock()
+	defer fake.tableSchemaMutex.RUnlock()
 	fake.updateTableSizeLimitMutex.RLock()
 	defer fake.updateTableSizeLimitMutex.RUnlock()
 	fake.updateWriterRateLimitMutex.RLock()

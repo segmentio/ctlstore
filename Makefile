@@ -56,6 +56,10 @@ release-stable: docker
 vet:
 	$Qgo vet ./...
 
+.PHONY: generate
+generate:
+	$Qgo generate ./...
+
 .PHONY: fmtcheck
 fmtchk:
 	$Qexit $(shell gofmt -l . | grep -v '^vendor' | wc -l)
@@ -72,25 +76,3 @@ test:
 bench:
 	$Qgo test $(GOTESTFLAGS) -bench .
 
-.PHONY: trebvet
-trebvet:
-	$Qecho "production ctlstore $(shell treb config validate .run/ctlstore-executive.yml -e production)"
-	$Qecho "stage ctlstore $(shell treb config validate .run/ctlstore-executive.yml -e stage)"
-
-
-.PHONY: gensite
-gensite:
-	rm -rf $(PWD)/docs/*
-	$Qdocker build \
-		-f Dockerfile-webgen \
-		-t ctlstore-webgen \
-		.
-	$Qdocker run \
-	    -it --rm \
-		-v $(PWD)/docs:/out \
-		-v $(PWD):/pwd \
-		ctlstore-webgen
-
-.PHONY: site
-site: gensite install
-	$(GOPATH)/bin/ctlstore site

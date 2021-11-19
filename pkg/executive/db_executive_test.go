@@ -118,6 +118,7 @@ func TestAllDBExecutive(t *testing.T) {
 	testFns := map[string]dbExecTestFn{
 		"testDBExecutiveCreateFamily":           testDBExecutiveCreateFamily,
 		"testDBExecutiveCreateTable":            testDBExecutiveCreateTable,
+		"testDBExecutiveCreateTables":           testDBExecutiveCreateTables,
 		"testDBExecutiveCreateTableLocksLedger": testDBExecutiveCreateTableLocksLedger,
 		"testDBExecutiveAddFields":              testDBExecutiveAddFields,
 		"testDBExecutiveAddFieldsLocksLedger":   testDBExecutiveAddFieldsLocksLedger,
@@ -134,6 +135,8 @@ func TestAllDBExecutive(t *testing.T) {
 		"testDBExecutiveClearTable":             testDBExecutiveClearTable,
 		"testDBExecutiveDropTable":              testDBExecutiveDropTable,
 		"testDBExecutiveReadFamilyTableNames":   testDBExecutiveReadFamilyTableNames,
+		"testDBExecutiveTableSchema":            testDBExecutiveTableSchema,
+		"testDBExecutiveFamilySchemas":          testDBExecutiveFamilySchemas,
 	}
 
 	for _, dbType := range dbTypes {
@@ -311,6 +314,124 @@ func queryDMLTable(t *testing.T, db *sql.DB, limit int) []string {
 	}
 	require.NoError(t, stRows.Err())
 	return statements
+}
+
+func testDBExecutiveFamilySchemas(t *testing.T, dbType string) {
+	u := newDbExecTestUtil(t, dbType)
+	defer u.Close()
+	err := u.e.CreateFamily("schematest2")
+	require.NoError(t, err)
+	err = u.e.CreateTable("schematest2",
+		"table1",
+		[]string{"field1", "field2", "field3", "field4", "field5", "field6"},
+		[]schema.FieldType{
+			schema.FTString,
+			schema.FTInteger,
+			schema.FTDecimal,
+			schema.FTText,
+			schema.FTBinary,
+			schema.FTByteString,
+		},
+		[]string{"field1", "field2", "field6"},
+	)
+	require.NoError(t, err)
+	err = u.e.CreateTable("schematest2",
+		"table2",
+		[]string{"field1", "field2"},
+		[]schema.FieldType{
+			schema.FTInteger,
+			schema.FTBinary,
+		},
+		[]string{"field1"},
+	)
+	require.NoError(t, err)
+
+	err = u.e.CreateFamily("schematest_other")
+	require.NoError(t, err)
+	err = u.e.CreateTable("schematest_other",
+		"table3",
+		[]string{"field1"},
+		[]schema.FieldType{
+			schema.FTInteger,
+		},
+		[]string{"field1"},
+	)
+	require.NoError(t, err)
+
+	schemas, err := u.e.FamilySchemas("schematest2")
+	require.NoError(t, err)
+	expected := []schema.Table{
+		{
+			Family: "schematest2",
+			Name:   "table1",
+			Fields: [][]string{
+				{"field1", "string"},
+				{"field2", "integer"},
+				{"field3", "decimal"},
+				{"field4", "text"},
+				{"field5", "binary"},
+				{"field6", "bytestring"},
+			},
+			KeyFields: []string{
+				"field1",
+				"field2",
+				"field6",
+			},
+		},
+		{
+			Family: "schematest2",
+			Name:   "table2",
+			Fields: [][]string{
+				{"field1", "integer"},
+				{"field2", "binary"},
+			},
+			KeyFields: []string{
+				"field1",
+			},
+		},
+	}
+	require.EqualValues(t, expected, schemas)
+}
+
+func testDBExecutiveTableSchema(t *testing.T, dbType string) {
+	u := newDbExecTestUtil(t, dbType)
+	defer u.Close()
+	err := u.e.CreateFamily("schematest1")
+	require.NoError(t, err)
+	err = u.e.CreateTable("schematest1",
+		"table1",
+		[]string{"field1", "field2", "field3", "field4", "field5", "field6"},
+		[]schema.FieldType{
+			schema.FTString,
+			schema.FTInteger,
+			schema.FTDecimal,
+			schema.FTText,
+			schema.FTBinary,
+			schema.FTByteString,
+		},
+		[]string{"field1", "field2", "field6"},
+	)
+	require.NoError(t, err)
+	tableSchema, err := u.e.TableSchema("schematest1", "table1")
+	require.NoError(t, err)
+	expected := &schema.Table{
+		Family: "schematest1",
+		Name:   "table1",
+		Fields: [][]string{
+			{"field1", "string"},
+			{"field2", "integer"},
+			{"field3", "decimal"},
+			{"field4", "text"},
+			{"field5", "binary"},
+			{"field6", "bytestring"},
+		},
+		KeyFields: []string{
+			"field1",
+			"field2",
+			"field6",
+		},
+	}
+	require.EqualValues(t, expected, tableSchema)
 }
 
 // multiple goroutine will attempt to add a number of fields to the same
@@ -634,6 +755,93 @@ func testDBExecutiveCreateTable(t *testing.T, dbType string) {
 		[]string{})
 	if err == nil || err.Error() != "table must have at least one key field" {
 		t.Errorf("Unexpected error calling CreateTable: %+v", err)
+	}
+}
+
+func testDBExecutiveCreateTables(t *testing.T, dbType string) {
+	u := newDbExecTestUtil(t, dbType)
+	defer u.Close()
+
+	err := u.e.CreateFamily("foofamily")
+	if err != nil {
+		t.Errorf("Unexpected error calling CreateFamily: %+v", err)
+	}
+
+	createTables := func() error {
+		return u.e.CreateTables(
+			[]schema.Table{
+				{
+					Family: "foofamily",
+					Name:   "bartable",
+					Fields: [][]string{
+						{"field1", "string"},
+					},
+					KeyFields: []string{"field1"},
+				},
+				{
+					Family: "foofamily",
+					Name:   "bartable2",
+					Fields: [][]string{
+						{"field1", "string"},
+						{"field2", "integer"},
+					},
+					KeyFields: []string{"field1"},
+				},
+			},
+		)
+	}
+
+	err = createTables()
+	require.NoError(t, err)
+	dmls := queryDMLTable(t, u.db, -1)
+	require.Len(t, dmls, 2) // 2 DMLs should exist to create the 2 tables
+
+	// try to create the tables again, verify it fails, and verify that the ledger is correct
+	err = createTables()
+	require.Error(t, err)
+	dmls = queryDMLTable(t, u.db, -1)
+	require.Len(t, dmls, 2) // there should still be two DMLs
+
+	// Just check that empty tables exist at all, because the field
+	// creation logic gets checked by sqlgen unit tests
+
+	row := u.db.QueryRow("SELECT COUNT(*) FROM foofamily___bartable")
+	var cnt sql.NullInt64
+	err = row.Scan(&cnt)
+	if err != nil {
+		t.Fatalf("Unexpected error scanning result: %+v", err)
+	}
+	if want, got := 0, cnt; !got.Valid || int(got.Int64) != want {
+		t.Errorf("Expected %+v, got %+v", want, got)
+	}
+
+	// Next table
+	row = u.db.QueryRow("SELECT COUNT(*) FROM foofamily___bartable2")
+	err = row.Scan(&cnt)
+	if err != nil {
+		t.Fatalf("Unexpected error scanning result: %+v", err)
+	}
+	if want, got := 0, cnt; !got.Valid || int(got.Int64) != want {
+		t.Errorf("Expected %+v, got %+v", want, got)
+	}
+
+	rows, err := u.db.Query("SELECT statement FROM " + dmlLedgerTableName)
+	if err != nil {
+		t.Fatalf("Unexpected error: %+v", err)
+	}
+	defer rows.Close()
+	i := 0
+	for rows.Next() {
+		var rowStatement string
+		if err := rows.Scan(&rowStatement); err != nil {
+			t.Fatalf("Unexpected error: %+v", err)
+		}
+		tableNames := []string{"bartable", "bartable2"}
+		indexOfCreate := strings.Index(rowStatement, "CREATE TABLE foofamily___"+tableNames[i])
+		if want, got := 0, indexOfCreate; want != got {
+			t.Errorf("Expected %+v, got %+v", want, got)
+		}
+		i++
 	}
 }
 

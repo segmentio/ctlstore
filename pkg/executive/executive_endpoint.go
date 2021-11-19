@@ -41,6 +41,27 @@ func (ee *ExecutiveEndpoint) handleFamilyRoute(w http.ResponseWriter, r *http.Re
 	return
 }
 
+func (ee *ExecutiveEndpoint) handleTablesRoute(w http.ResponseWriter, r *http.Request) {
+	rawBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		writeErrorResponse(err, w)
+		return
+	}
+
+	var payload []schema.Table
+	err = json.Unmarshal(rawBody, &payload)
+	if err != nil {
+		writeErrorResponse(&errs.BadRequestError{Err: "JSON Error: " + err.Error()}, w)
+		return
+	}
+
+	err = ee.Exec.CreateTables(payload)
+	if err != nil {
+		writeErrorResponse(err, w)
+		return
+	}
+}
+
 func (ee *ExecutiveEndpoint) handleTableRoute(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	// if these panic, Mux is broken and nothing is sacred anymore
@@ -136,6 +157,49 @@ func (ee *ExecutiveEndpoint) handleCookieRoute(w http.ResponseWriter, r *http.Re
 	}
 
 	w.WriteHeader(http.StatusMethodNotAllowed)
+}
+
+func (ee *ExecutiveEndpoint) handleFamilySchemasRoute(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	familyName := vars["familyName"]
+	schemas, err := ee.Exec.FamilySchemas(familyName)
+	switch {
+	case err == nil:
+	default:
+		writeErrorResponse(err, w)
+		return
+	}
+	bs, err := json.Marshal(schemas)
+	if err != nil {
+		writeErrorResponse(err, w)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(bs)
+}
+
+func (ee *ExecutiveEndpoint) handleTableSchemaRoute(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	familyName := vars["familyName"]
+	tableName := vars["tableName"]
+	schema, err := ee.Exec.TableSchema(familyName, tableName)
+	switch {
+	case err == nil:
+		// do nothing, no error
+	case errors.Cause(err) == ErrTableDoesNotExist:
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	default:
+		writeErrorResponse(err, w)
+		return
+	}
+	bs, err := json.Marshal(schema)
+	if err != nil {
+		writeErrorResponse(err, w)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(bs)
 }
 
 func (ee *ExecutiveEndpoint) handleWritersRoute(w http.ResponseWriter, r *http.Request) {
@@ -283,9 +347,13 @@ func (ee *ExecutiveEndpoint) Handler() http.Handler {
 	r.HandleFunc("/families/{familyName}", ee.handleFamilyRoute).Methods("POST")
 	r.HandleFunc("/families/{familyName}/tables/{tableName}", ee.handleTableRoute).Methods("POST", "PUT")
 	r.HandleFunc("/families/{familyName}/mutations", ee.handleMutationsRoute).Methods("POST")
+	r.HandleFunc("/tables", ee.handleTablesRoute).Methods("POST")
 	r.HandleFunc("/sleep", ee.handleSleepRoute).Methods("GET")
 	r.HandleFunc("/status", ee.handleStatusRoute).Methods("GET")
 	r.HandleFunc("/writers/{writerName}", ee.handleWritersRoute).Methods("POST")
+
+	r.HandleFunc("/schema/table/{familyName}/{tableName}", ee.handleTableSchemaRoute).Methods(http.MethodGet)
+	r.HandleFunc("/schema/family/{familyName}", ee.handleFamilySchemasRoute).Methods(http.MethodGet)
 
 	r.HandleFunc("/limits/tables", ee.handleTableLimitsRead).Methods("GET")
 	r.HandleFunc("/limits/tables/{familyName}/{tableName}", ee.handleTableLimitsUpdate).Methods("POST")

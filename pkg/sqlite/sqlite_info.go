@@ -5,12 +5,33 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
 )
 
 type SqliteDBInfo struct {
 	Db *sql.DB
+}
+
+func (m *SqliteDBInfo) GetAllTables(ctx context.Context) ([]schema.FamilyTable, error) {
+	var res []schema.FamilyTable
+	rows, err := m.Db.QueryContext(ctx, "select distinct name from sqlite_master where type='table' order by name")
+	if err != nil {
+		return nil, errors.Wrap(err, "query table names")
+	}
+	for rows.Next() {
+		var fullName string
+		err = rows.Scan(&fullName)
+		if err != nil {
+			return nil, errors.Wrap(err, "scan table name")
+		}
+		if ft, ok := schema.ParseFamilyTable(fullName); ok {
+			res = append(res, ft)
+		}
+
+	}
+	return res, err
 }
 
 func (m *SqliteDBInfo) GetColumnInfo(ctx context.Context, tableNames []string) ([]schema.DBColumnInfo, error) {

@@ -2,101 +2,119 @@ package cmd
 
 import (
 	"path"
+	"strings"
 
 	"github.com/segmentio/ctlstore"
-	"github.com/segmentio/ctlstore/pkg/executive"
 	"github.com/segmentio/ctlstore/pkg/ldb"
-	"github.com/spf13/cobra"
 )
 
-const (
-	keyFamily                 = "family"
-	keyFamilyShort            = "f"
-	keyTable                  = "table"
-	keyTableShort             = "t"
-	keyLDB                    = "ldb"
-	keyLDBShort               = "l"
-	keyQuiet                  = "quiet"
-	keyQuietShort             = "q"
-	keyExecutiveLocation      = "executive"
-	keyExecutiveLocationShort = "e"
-	keyFields                 = "field"
-	keyKeyFields              = "key-field"
-	keyMaxSize                = "max-size"
-	keyWarnSize               = "warn-size"
-	keyWriter                 = "writer"
-	keyRowsPerMinute          = "rows-per-minute"
-	keyDataDogAddress         = "dogstatsd.address"
-	keyDataDogBufferSize      = "dogstatsd.buffer-size"
-	keyDataDogTags            = "dogstatsd.tags"
-	keyCTLDBAddress           = "ctldb-address"
-	keySoRAddress             = "sor-address"
-)
+type flagBase struct {
+}
+
+type flagRowsPerMinute struct {
+	RowsPerMinute int64 `flag:"rows-per-minute"`
+}
+
+type flagWriter struct {
+	Writer string `flag:"writer"`
+}
+
+func (f flagWriter) MustWriter() string {
+	if f.Writer == "" {
+		bail("Writer required")
+	}
+	return f.Writer
+}
+
+type flagQuiet struct {
+	Quiet bool `flag:"-q,--quiet"`
+}
+
+type flagExecutive struct {
+	Executive string `flag:"-e,--executive" default:"ctlstore-executive.segment.local"`
+}
+
+func (f flagExecutive) MustExecutive() string {
+	return normalizeURL(f.Executive)
+}
+
+type flagFamily struct {
+	Family string `flag:"-f,--family"`
+}
+
+func (f flagFamily) MustFamily() string {
+	if f.Family == "" {
+		bail("Family required")
+	}
+	return f.Family
+}
+
+type flagTable struct {
+	Table string `flag:"-t,--table"`
+}
+
+func (f flagTable) MustTable() string {
+	if f.Table == "" {
+		bail("Table required")
+	}
+	return f.Table
+}
+
+type flagSizeLimits struct {
+	MaxSize  int64 `flag:"--max-size" default:"104857600"`
+	WarnSize int64 `flag:"--warn-size" default:"52428800"`
+}
+
+func (f flagSizeLimits) MustMaxSize() int64 {
+	switch {
+	case f.MaxSize < 0:
+		bail("Max size cannot be negative")
+	case f.MaxSize == 0:
+		bail("Max size required")
+	}
+	return f.MaxSize
+}
+
+func (f flagSizeLimits) MustWarnSize() int64 {
+	switch {
+	case f.WarnSize < 0:
+		bail("Warn size cannot be negative")
+	case f.WarnSize == 0:
+		bail("Warn size required")
+	}
+	return f.WarnSize
+}
+
+type flagFields struct {
+	Fields []string `flag:"--field"`
+}
+
+func (f flagFields) MustFields() (res []field) {
+	for _, val := range f.Fields {
+		parts := strings.Split(val, ":")
+		if len(parts) != 2 {
+			bail("invalid field: %s", val)
+		}
+		res = append(res, field{
+			name: parts[0],
+			typ:  parts[1],
+		})
+	}
+	return
+}
+
+type flagKeyFields struct {
+	KeyFields []string `flag:"--key-field"`
+}
+
+func (f flagKeyFields) MustKeyFields() []string {
+	return f.KeyFields
+}
+
+type flagLDBPath struct {
+	LDBPath string `flag:"-l,--ldb" default:"/var/spool/ctlstore/ldb.db"`
+}
 
 var (
 	defaultLDBPath = path.Join(ctlstore.DefaultCtlstorePath, ldb.DefaultLDBFilename)
 )
-
-func useFlagFields(cmd *cobra.Command) {
-	cmd.Flags().StringArray(keyFields, nil, "the fields of the table of the form [name]:[type]")
-}
-
-func useFlagKeyFields(cmd *cobra.Command) {
-	cmd.Flags().StringArray(keyKeyFields, nil, "the names of the fields that should serve as primary keys")
-}
-
-func useFlagExecutive(cmd *cobra.Command) {
-	cmd.Flags().StringP(keyExecutiveLocation, keyExecutiveLocationShort, executive.DefaultExecutiveURL, "the location of the executive service")
-}
-
-func useFlagFamily(cmd *cobra.Command) {
-	cmd.Flags().StringP(keyFamily, keyFamilyShort, "", "the name of the family")
-}
-
-func useFlagTable(cmd *cobra.Command) {
-	cmd.Flags().StringP(keyTable, keyTableShort, "", "the name of the table")
-}
-
-func useFlagLDB(cmd *cobra.Command) {
-	cmd.Flags().StringP(keyLDB, keyLDBShort, defaultLDBPath, "the path to the ldb")
-}
-
-func useFlagQuiet(cmd *cobra.Command) {
-	cmd.Flags().BoolP(keyQuiet, keyQuietShort, false, "omit header output")
-}
-
-func useFlagMaxSize(cmd *cobra.Command) {
-	cmd.Flags().Int64(keyMaxSize, 0, "max size in bytes")
-}
-
-func useFlagWarnSize(cmd *cobra.Command) {
-	cmd.Flags().Int64(keyWarnSize, 0, "warn size in bytes")
-}
-
-func useFlagWriter(cmd *cobra.Command) {
-	cmd.Flags().String(keyWriter, "", "writer name")
-}
-
-func useFlagRowsPerMinute(cmd *cobra.Command) {
-	cmd.Flags().Int64(keyRowsPerMinute, 0, "rows per minute")
-}
-
-func useFlagDataDogAddress(cmd *cobra.Command) {
-	cmd.Flags().String(keyDataDogAddress, "", "address of the dogstatsd agent")
-}
-
-func useFlagDataDogBufferSize(cmd *cobra.Command) {
-	cmd.Flags().Int(keyDataDogBufferSize, 0, "buffer size for the dogstatsd client")
-}
-
-func useFlagDataDogTags(cmd *cobra.Command) {
-	cmd.Flags().StringSlice(keyDataDogTags, []string{}, `list of tags to use to add to datadog metrics. format: ["key:value","key:value"]`)
-}
-
-func useFlagCTLDBAddress(cmd *cobra.Command) {
-	cmd.Flags().String(keyCTLDBAddress, "", "address of the ctldb")
-}
-
-func useFlagSoRAddress(cmd *cobra.Command) {
-	cmd.Flags().String(keySoRAddress, "", "address of the SoR")
-}

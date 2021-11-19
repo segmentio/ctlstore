@@ -50,15 +50,16 @@ func (fake *FakeS3Uploader) Upload(arg1 *s3manager.UploadInput, arg2 ...func(*s3
 		arg1 *s3manager.UploadInput
 		arg2 []func(*s3manager.Uploader)
 	}{arg1, arg2})
+	stub := fake.UploadStub
+	fakeReturns := fake.uploadReturns
 	fake.recordInvocation("Upload", []interface{}{arg1, arg2})
 	fake.uploadMutex.Unlock()
-	if fake.UploadStub != nil {
-		return fake.UploadStub(arg1, arg2...)
+	if stub != nil {
+		return stub(arg1, arg2...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.uploadReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 
@@ -115,15 +116,16 @@ func (fake *FakeS3Uploader) UploadWithContext(arg1 context.Context, arg2 *s3mana
 		arg2 *s3manager.UploadInput
 		arg3 []func(*s3manager.Uploader)
 	}{arg1, arg2, arg3})
+	stub := fake.UploadWithContextStub
+	fakeReturns := fake.uploadWithContextReturns
 	fake.recordInvocation("UploadWithContext", []interface{}{arg1, arg2, arg3})
 	fake.uploadWithContextMutex.Unlock()
-	if fake.UploadWithContextStub != nil {
-		return fake.UploadWithContextStub(arg1, arg2, arg3...)
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.uploadWithContextReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 

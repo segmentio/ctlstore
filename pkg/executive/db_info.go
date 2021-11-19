@@ -14,6 +14,7 @@ import (
 
 type sqlDBInfo interface {
 	GetColumnInfo(ctx context.Context, tableNames []string) ([]schema.DBColumnInfo, error)
+	GetAllTables(ctx context.Context) ([]schema.FamilyTable, error)
 }
 
 func getDBInfo(db *sql.DB) sqlDBInfo {
