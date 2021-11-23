@@ -3,7 +3,12 @@ LDFLAGS     := -ldflags='-X "github.com/segmentio/ctlstore/pkg/version.version=$
 DOCKER_REPO := 528451384384.dkr.ecr.us-west-2.amazonaws.com/ctlstore
 Q=
 
-GOTESTFLAGS = -race -count 1
+NORACE      = ""
+ifeq ($(NORACE),"")
+	GOTESTFLAGS = -race -count 1
+else
+	GOTESTFLAGS = -count 1
+endif
 
 export GO111MODULE?=on
 
