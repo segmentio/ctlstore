@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"sync"
 
-	"github.com/segmentio/go-sqlite3"
-	_ "github.com/segmentio/go-sqlite3"
+	"github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 func init() {

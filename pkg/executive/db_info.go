@@ -9,7 +9,7 @@ import (
 	mysql2 "github.com/segmentio/ctlstore/pkg/mysql"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	sqlite2 "github.com/segmentio/ctlstore/pkg/sqlite"
-	sqlite "github.com/segmentio/go-sqlite3"
+	sqlite "modernc.org/sqlite"
 )
 
 type sqlDBInfo interface {
@@ -21,7 +21,7 @@ func getDBInfo(db *sql.DB) sqlDBInfo {
 	switch t := db.Driver().(type) {
 	case *mysql.MySQLDriver:
 		return &mysql2.MySQLDBInfo{Db: db}
-	case *sqlite.SQLiteDriver:
+	case *sqlite.Driver:
 		return &sqlite2.SqliteDBInfo{Db: db}
 	default:
 		panic(fmt.Sprintf("Invalid driver type %T", t))

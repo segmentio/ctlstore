@@ -16,7 +16,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
 	"github.com/segmentio/events/v2"
-	"github.com/segmentio/go-sqlite3"
+	"modernc.org/sqlite"
 )
 
 const dmlLedgerTableName = "ctlstore_dml_ledger"
@@ -254,7 +254,7 @@ func (e *dbExecutive) applyDDL(ctx context.Context, tx *sql.Tx, ddl string) (sql
 		// statement outside of the current tx to prevent it from being implicitly
 		// committed by the ddl
 		return e.DB.ExecContext(ctx, ddl)
-	case *sqlite3.SQLiteDriver:
+	case *sqlite.Driver:
 		// sqlite supports transactional ddl
 		return tx.ExecContext(ctx, ddl)
 	default:

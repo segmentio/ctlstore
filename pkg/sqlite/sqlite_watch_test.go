@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	sqlite3 "github.com/segmentio/go-sqlite3"
 	"github.com/stretchr/testify/assert"
+	sqlite3 "modernc.org/sqlite"
 )
 
 func TestRegisterSQLiteWatch(t *testing.T) {

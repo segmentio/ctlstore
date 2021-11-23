@@ -8,6 +8,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/scanfunc"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/go-sqlite3"
+	"modernc.org/sqlite"
 )
 
 type (
@@ -33,8 +34,10 @@ type (
 // database. These messages are pre-update, so the buffer will be populated
 // before the change is committed.
 func RegisterSQLiteWatch(dbName string, buffer *SQLChangeBuffer) error {
-	sql.Register(dbName, &sqlite3.SQLiteDriver{
-		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
+	driver := &sqlite.Driver{}
+	driver.Open()
+	sql.Register(dbName, &sqlite.Driver{
+		ConnectHook: func(conn *sqlite.SQLiteConn) error {
 			conn.RegisterPreUpdateHook(func(pud sqlite3.SQLitePreUpdateData) {
 				cnt := pud.Count()
 				var newRow []interface{}

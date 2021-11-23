@@ -14,7 +14,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/segmentio/ctlstore/pkg/ctldb"
 	"github.com/segmentio/ctlstore/pkg/schema"
-	_ "github.com/segmentio/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 func TestMetaTableAsCreateTableDDL(t *testing.T) {
