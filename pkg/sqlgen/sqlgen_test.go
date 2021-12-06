@@ -48,7 +48,7 @@ func TestMetaTableAsCreateTableDDL(t *testing.T) {
 	}
 
 	ddl := want
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	if err != nil {
 		t.Fatalf("Unexpected error opening SQLite3 DB: %v", err)
 	}
@@ -118,7 +118,7 @@ func TestMetaTableAddColumnDDL(t *testing.T) {
 	}
 
 	{
-		db, err := sql.Open("sqlite3", ":memory:")
+		db, err := sql.Open("sqlite", ":memory:")
 		if err != nil {
 			t.Fatalf("Unexpected error opening SQLite3 DB: %v", err)
 		}
@@ -369,7 +369,7 @@ func TestSQLQuote(t *testing.T) {
 		testName := fmt.Sprintf("%d_%s", caseIdx, testCase.desc)
 
 		t.Run(testName, func(t *testing.T) {
-			sqliteDb, err := sql.Open("sqlite3", ":memory:")
+			sqliteDb, err := sql.Open("sqlite", ":memory:")
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
