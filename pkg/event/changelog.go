@@ -5,14 +5,16 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/segmentio/ctlstore/pkg/errs"
-	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
 )
@@ -63,7 +65,7 @@ func (c *fileChangelog) next(ctx context.Context) (Event, error) {
 func (c *fileChangelog) start(ctx context.Context) error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		return errors.Wrap(err, "create fsnotify watcher")
+		return fmt.Errorf("create fsnotify watcher: %w", err)
 	}
 	go func() {
 		select {
@@ -76,7 +78,7 @@ func (c *fileChangelog) start(ctx context.Context) error {
 	paths := []string{c.path, filepath.Dir(c.path)}
 	for _, w := range paths {
 		if err := watcher.Add(w); err != nil {
-			return errors.Wrapf(err, "could not watch '%s'", w)
+			return fmt.Errorf("could not watch '%s': %w", w, err)
 		}
 	}
 	fsNotifyCh := make(chan fsnotify.Event)
@@ -136,7 +138,7 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 			// first, open the changelog
 			f, err := os.Open(c.path)
 			if err != nil {
-				return errors.Wrap(err, "open changelog")
+				return fmt.Errorf("open changelog: %w", err)
 			}
 			defer func() {
 				if err := f.Close(); err != nil {
@@ -155,7 +157,7 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 				}
 				var entry entry
 				if err := json.Unmarshal(b, &entry); err != nil {
-					c.send(ctx, eventErr{err: errors.Wrapf(err, "parse entry '%s'", b)})
+					c.send(ctx, eventErr{err: fmt.Errorf("parse entry '%s': %w", b, err)})
 					errs.Incr("changelog-errors", stats.T("op", "parse json"))
 					return
 				}
@@ -196,7 +198,7 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 			for {
 				err = readEvents()
 				if err != io.EOF {
-					return errors.Wrap(err, "read bytes")
+					return fmt.Errorf("read bytes: %w", err)
 				}
 				events.Debug("EOF. Waiting for more content...")
 				select {
@@ -207,7 +209,7 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 					if err := readEvents(); err != io.EOF {
 						events.Log("could not consume rest of file: %{error}s", err)
 					}
-					return errors.Wrap(err, "watcher error")
+					return fmt.Errorf("watcher error: %w", err)
 				case event := <-fsNotifyCh:
 					switch event.Op {
 					case fsnotify.Write:
@@ -217,7 +219,7 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 						events.Debug("New changelog created. Consuming the rest of current one...")
 						err := readEvents()
 						if err != io.EOF {
-							return errors.Wrap(err, "consume rest of changelog")
+							return fmt.Errorf("consume rest of changelog: %w", err)
 						}
 						events.Debug("Restarting reader")
 						return nil
@@ -233,7 +235,7 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 			// loop again
 		case errs.IsCanceled(err):
 			return
-		case os.IsNotExist(errors.Cause(err)):
+		case errors.Is(err, fs.ErrNotExist):
 			events.Log("Changelog file does not exist, rechecking...")
 			select {
 			case <-fsNotifyCh:
@@ -271,12 +273,12 @@ func (c *fileChangelog) validate() error {
 		switch {
 		case err == nil:
 		case os.IsNotExist(err):
-			return errors.Wrap(err, "changelog does not exist")
+			return fmt.Errorf("changelog does not exist: %w", err)
 		default:
-			return errors.Wrap(err, "stat changelog")
+			return fmt.Errorf("stat changelog: %w", err)
 		}
 	default:
-		return errors.Wrap(err, "stat changelog")
+		return fmt.Errorf("stat changelog: %w", err)
 	}
 	return nil
 }

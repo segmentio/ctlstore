@@ -1,9 +1,8 @@
 package ledger
 
 import (
+	"fmt"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 type EcsMetadata struct {
@@ -17,7 +16,7 @@ type EcsMetadata struct {
 func (m EcsMetadata) accountID() (string, error) {
 	parts := strings.Split(m.ContainerInstanceArn, ":")
 	if len(parts) != 6 {
-		return "", errors.Errorf("invalid container instance arn: '%s'", m.ContainerInstanceArn)
+		return "", fmt.Errorf("invalid container instance arn: '%s'", m.ContainerInstanceArn)
 	}
 	return parts[4], nil
 }

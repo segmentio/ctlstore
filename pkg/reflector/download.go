@@ -3,6 +3,7 @@ package reflector
 import (
 	"bytes"
 	"compress/gzip"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -49,11 +50,11 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 		case awserr.RequestFailure:
 			if d.StartOverOnNotFound && err.StatusCode() == http.StatusNotFound {
 				// don't bother retrying. we'll start with a fresh ldb.
-				return -1, errors.WithTypes(errors.Wrap(err, "get s3 data"), errs.ErrTypePermanent)
+				return -1, errs.ErrTypePermanent{fmt.Errorf("get s3 data: %w", err)}
 			}
 		}
 		// retry
-		return -1, errors.WithTypes(errors.Wrap(err, "get s3 data"), errs.ErrTypeTemporary)
+		return -1, errs.ErrTypeTemporary{fmt.Errorf("get s3 data: %w", err)}
 	}
 	defer obj.Body.Close()
 	compressedSize := obj.ContentLength
@@ -61,12 +62,12 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 	if strings.HasSuffix(d.Key, ".gz") {
 		reader, err = gzip.NewReader(reader)
 		if err != nil {
-			return n, errors.Wrap(err, "create gzip reader")
+			return n, fmt.Errorf("create gzip reader: %w", err)
 		}
 	}
 	n, err = io.Copy(w, reader)
 	if err != nil {
-		return n, errors.Wrap(err, "copy from s3 to writer")
+		return n, fmt.Errorf("copy from s3 to writer: %w", err)
 	}
 	if compressedSize != nil {
 		events.Log("LDB inflated %d -> %d bytes", *compressedSize, n)

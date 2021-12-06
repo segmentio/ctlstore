@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -291,12 +292,12 @@ func supervisor(ctx context.Context, args []string) {
 		})
 		defer teardown()
 		if err := utils.EnsureDirForFile(cliCfg.ReflectorConfig.LDBPath); err != nil {
-			return errors.Wrap(err, "ensure ldb dir")
+			return fmt.Errorf("ensure ldb dir: %w", err)
 		}
 
 		reflector, err := newReflector(cliCfg.ReflectorConfig, true)
 		if err != nil {
-			return errors.Wrap(err, "build supervisor reflector")
+			return fmt.Errorf("build supervisor reflector: %w", err)
 		}
 
 		supervisor, err := supervisorpkg.SupervisorFromConfig(supervisorpkg.SupervisorConfig{
@@ -306,7 +307,7 @@ func supervisor(ctx context.Context, args []string) {
 			Reflector:        reflector,                      // compose the reflector, since it will start with the supervisor
 		})
 		if err != nil {
-			return errors.Wrap(err, "start supervisor")
+			return fmt.Errorf("start supervisor: %w", err)
 		}
 		defer supervisor.Close()
 		supervisor.Start(ctx)
@@ -403,7 +404,7 @@ func executive(ctx context.Context, args []string) {
 	defer executive.Close()
 
 	if err := executive.Start(ctx, cliCfg.Bind); err != nil {
-		if errors.Cause(err) != context.Canceled {
+		if errors.Is(err, context.Canceled) {
 			errs.IncrDefault(stats.T("op", "service shutdown"))
 		}
 		events.Log("executive quit: %v", err)

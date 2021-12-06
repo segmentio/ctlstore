@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -12,6 +14,13 @@ import (
 	"github.com/segmentio/ctlstore"
 	"github.com/stretchr/testify/require"
 )
+
+func TestErrLimitExceeded(t *testing.T) {
+	cause := errors.New("boom")
+	err := fmt.Errorf("%w: %v", errLimitExceeded, cause)
+	require.True(t, errors.Is(err, errLimitExceeded))
+	require.Equal(t, "limit exceeded: boom", err.Error())
+}
 
 func TestLedgerLatency(t *testing.T) {
 	tu, teardown := ctlstore.NewLDBTestUtil(t)

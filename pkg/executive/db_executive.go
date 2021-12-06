@@ -3,12 +3,13 @@ package executive
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/pkg/errors"
+
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/limits"
@@ -34,19 +35,19 @@ var ErrTableDoesNotExist = errors.New("table does not exist")
 func (e *dbExecutive) FamilySchemas(family string) ([]schema.Table, error) {
 	familyName, err := schema.NewFamilyName(family)
 	if err != nil {
-		return nil, errors.Wrap(err, "family name")
+		return nil, fmt.Errorf("family name: %w", err)
 	}
 	dbInfo := getDBInfo(e.DB)
 	tables, err := dbInfo.GetAllTables(context.TODO())
 	if err != nil {
-		return nil, errors.Wrap(err, "get table names")
+		return nil, fmt.Errorf("get table names: %w", err)
 	}
 	var res []schema.Table
 	for _, table := range tables {
 		if table.Family == familyName.String() {
 			ts, err := e.TableSchema(familyName.Name, table.Table)
 			if err != nil {
-				return nil, errors.Wrap(err, "get table schema")
+				return nil, fmt.Errorf("get table schema: %w", err)
 			}
 			res = append(res, *ts)
 		}
@@ -57,24 +58,24 @@ func (e *dbExecutive) FamilySchemas(family string) ([]schema.Table, error) {
 func (e *dbExecutive) TableSchema(family, table string) (*schema.Table, error) {
 	familyName, err := schema.NewFamilyName(family)
 	if err != nil {
-		return nil, errors.Wrap(err, "family name")
+		return nil, fmt.Errorf("family name: %w", err)
 	}
 	if normalized := familyName.String(); normalized != family {
-		return nil, errors.Wrapf(err, "passed in family name does not match normalized family name: %q", normalized)
+		return nil, fmt.Errorf("passed in family name does not match normalized family name: %q: %w", normalized, err)
 	}
 	tableName, err := schema.NewTableName(table)
 	if err != nil {
-		return nil, errors.Wrap(err, "table name")
+		return nil, fmt.Errorf("table name: %w", err)
 	}
 	if normalized := tableName.String(); normalized != table {
-		return nil, errors.Wrapf(err, "passed in table name does not match normalized table name: %q", normalized)
+		return nil, fmt.Errorf("passed in table name does not match normalized table name: %q: %w", normalized, err)
 	}
 	tbl, ok, err := e.fetchMetaTableByName(familyName, tableName)
 	if err != nil {
-		return nil, errors.Wrap(err, "fetch meta table")
+		return nil, fmt.Errorf("fetch meta table: %w", err)
 	}
 	if !ok {
-		return nil, errors.Wrapf(ErrTableDoesNotExist, "%s___%s", family, table)
+		return nil, fmt.Errorf("%s___%s: %w", family, table, ErrTableDoesNotExist)
 	}
 	res := &schema.Table{
 		Family: familyName.Name,
@@ -89,7 +90,7 @@ func (e *dbExecutive) TableSchema(family, table string) (*schema.Table, error) {
 		case schema.FTBinary:
 		case schema.FTByteString:
 		default:
-			return nil, errors.Errorf("unsupported field type: %q", field.FieldType)
+			return nil, fmt.Errorf("unsupported field type: %q", field.FieldType)
 		}
 		res.Fields = append(res.Fields, []string{
 			field.Name.Name, field.FieldType.String(),
@@ -166,7 +167,7 @@ func (e *dbExecutive) CreateTable(familyName string, tableName string, fieldName
 
 	err = tbl.Validate()
 	if err != nil {
-		return &errs.BadRequestError{err.Error()}
+		return &errs.BadRequestError{Err: err.Error()}
 	}
 
 	ddl, err := tbl.AsCreateTableDDL()
@@ -195,7 +196,7 @@ func (e *dbExecutive) CreateTable(familyName string, tableName string, fieldName
 
 	err = e.takeLedgerLock(ctx, tx)
 	if err != nil {
-		return errors.Wrap(err, "take ledger lock")
+		return fmt.Errorf("take ledger lock: %w", err)
 	}
 
 	dlw := dmlLedgerWriter{
@@ -206,7 +207,7 @@ func (e *dbExecutive) CreateTable(familyName string, tableName string, fieldName
 
 	seq, err := dlw.Add(ctx, logDDL)
 	if err != nil {
-		return errors.Wrap(err, "apply dml")
+		return fmt.Errorf("apply dml: %w", err)
 	}
 
 	_, err = e.applyDDL(ctx, tx, ddl)
@@ -215,7 +216,7 @@ func (e *dbExecutive) CreateTable(familyName string, tableName string, fieldName
 			strings.Contains(err.Error(), "already exists") {
 			return &errs.ConflictError{Err: "Table already exists"}
 		}
-		return errors.Wrap(err, "apply ddl")
+		return fmt.Errorf("apply ddl: %w", err)
 	}
 
 	err = tx.Commit()
@@ -232,11 +233,11 @@ func (e *dbExecutive) CreateTables(tables []schema.Table) error {
 	for _, table := range tables {
 		fieldNames, fieldTypes, err := schema.UnzipFieldsParam(table.Fields)
 		if err != nil {
-			return errors.Wrap(err, fmt.Sprintf("unzipping fields param for family %q table %q", table.Family, table.Name))
+			return fmt.Errorf("unzipping fields param for family %q table %q: %w", table.Family, table.Name, err)
 		}
 		err = e.CreateTable(table.Family, table.Name, fieldNames, fieldTypes, table.KeyFields)
 		if err != nil {
-			return errors.Wrap(err, fmt.Sprintf("creating table for family %q table %q", table.Family, table.Name))
+			return fmt.Errorf("creating table for family %q table %q: %w", table.Family, table.Name, err)
 		}
 	}
 	return nil
@@ -258,7 +259,7 @@ func (e *dbExecutive) applyDDL(ctx context.Context, tx *sql.Tx, ddl string) (sql
 		// sqlite supports transactional ddl
 		return tx.ExecContext(ctx, ddl)
 	default:
-		return nil, errors.Errorf("Unknown driver: %T", e.DB.Driver())
+		return nil, fmt.Errorf("Unknown driver: %T", e.DB.Driver())
 	}
 }
 
@@ -315,7 +316,7 @@ func (e *dbExecutive) AddFields(familyName string, tableName string, fieldNames 
 
 			err = e.takeLedgerLock(ctx, tx)
 			if err != nil {
-				return errors.Wrap(err, "take ledger lock")
+				return fmt.Errorf("take ledger lock: %w", err)
 			}
 
 			// We first write the column modification to the DML ledger within the transaction.
@@ -326,7 +327,7 @@ func (e *dbExecutive) AddFields(familyName string, tableName string, fieldNames 
 			defer dlw.Close()
 			seq, err := dlw.Add(ctx, logDDL)
 			if err != nil {
-				return errors.Wrap(err, "add dml")
+				return fmt.Errorf("add dml: %w", err)
 			}
 
 			// Next, apply the DDL to the ctldb. If the DDL fails, return the err, which will
@@ -337,13 +338,13 @@ func (e *dbExecutive) AddFields(familyName string, tableName string, fieldNames 
 					strings.Contains(err.Error(), "duplicate column name") { // sqlite
 					return &errs.ConflictError{Err: "Column already exists"}
 				}
-				return errors.Wrap(err, "apply ddl")
+				return fmt.Errorf("apply ddl: %w", err)
 			}
 
 			// if the DDL succeeds, commit the transaction
 			err = tx.Commit()
 			if err != nil {
-				return errors.Wrap(err, "commit tx")
+				return fmt.Errorf("commit tx: %w", err)
 			}
 			events.Log("Successfully created new field `%{fieldName}s %{fieldType}v` on table %{tableName}s at seq %{seq}v", fieldName, fieldType, tableName, seq)
 			return nil
@@ -404,7 +405,7 @@ func (e *dbExecutive) GetWriterCookie(writerName string, writerSecret string) ([
 func (e *dbExecutive) takeLedgerLock(ctx context.Context, tx *sql.Tx) error {
 	_, err := tx.ExecContext(ctx, "UPDATE locks SET clock = clock + 1 WHERE id = 'ledger'")
 	if err != nil {
-		return errors.Wrap(err, "update locks")
+		return fmt.Errorf("update locks: %w", err)
 	}
 	return nil
 }
@@ -476,12 +477,12 @@ func (e *dbExecutive) Mutate(
 	tblNames := reqset.TableNames()
 	tbls, err := e.fetchMetaTablesByName(famName, tblNames)
 	if err != nil {
-		return errors.Wrap(err, "fetch meta tables error")
+		return fmt.Errorf("fetch meta tables error: %w", err)
 	}
 
 	for _, tblName := range tblNames {
 		if _, ok := tbls[tblName]; !ok {
-			return errors.Errorf("Table not found: %s", tblName)
+			return fmt.Errorf("Table not found: %s", tblName)
 		}
 	}
 
@@ -491,7 +492,7 @@ func (e *dbExecutive) Mutate(
 	// dope, y'all.
 	tx, err := e.DB.BeginTx(ctx, nil)
 	if err != nil {
-		return errors.Wrap(err, "begin tx error")
+		return fmt.Errorf("begin tx error: %w", err)
 	}
 	defer tx.Rollback()
 
@@ -512,7 +513,7 @@ func (e *dbExecutive) Mutate(
 	// See the method documentation for more information.
 	err = e.takeLedgerLock(ctx, tx)
 	if err != nil {
-		return errors.Wrap(err, "taking ledger lock")
+		return fmt.Errorf("taking ledger lock: %w", err)
 	}
 
 	// Check Cookie
@@ -544,7 +545,7 @@ func (e *dbExecutive) Mutate(
 	if len(reqset.Requests) > 1 {
 		_, err := dlw.BeginTx(ctx)
 		if err != nil {
-			return errors.Wrap(err, "logging tx begin failed")
+			return fmt.Errorf("logging tx begin failed: %w", err)
 		}
 	}
 
@@ -589,26 +590,26 @@ func (e *dbExecutive) Mutate(
 		_, err = tx.ExecContext(ctx, dmlSQL)
 		if err != nil {
 			events.Log("dml exec error, Request: %{req}+v SQL: %{sql}s", req, dmlSQL)
-			return errors.Wrap(err, "dml exec error")
+			return fmt.Errorf("dml exec error: %w", err)
 		}
 
 		// Now record it in the log table
 		lastSeq, err = dlw.Add(ctx, dmlSQL)
 		if err != nil {
-			return errors.Wrap(err, "log write error")
+			return fmt.Errorf("log write error: %w", err)
 		}
 	}
 
 	if len(reqset.Requests) > 1 {
 		lastSeq, err = dlw.CommitTx(ctx)
 		if err != nil {
-			return errors.Wrap(err, "logging tx commit failed")
+			return fmt.Errorf("logging tx commit failed: %w", err)
 		}
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return errors.Wrap(err, "commit failed")
+		return fmt.Errorf("commit failed: %w", err)
 	}
 
 	events.Debug(
@@ -735,9 +736,6 @@ func (e *dbExecutive) fetchFamilyByName(famName schema.FamilyName) (fam dbFamily
 	} else if err == nil {
 		// No errors, no ErrNoRows, that means found!
 		ok = true
-	} else {
-		// An error!
-		err = errors.WithStack(err)
 	}
 
 	return
@@ -750,10 +748,10 @@ func (e *dbExecutive) RegisterWriter(writerName string, secret string) error {
 	}
 
 	if len(secret) < limits.LimitWriterSecretMinLength {
-		return errors.Errorf("Secret should be at least %d characters", limits.LimitWriterSecretMinLength)
+		return fmt.Errorf("Secret should be at least %d characters", limits.LimitWriterSecretMinLength)
 	}
 	if len(secret) > limits.LimitWriterSecretMaxLength {
-		return errors.Errorf("Secret can be at most %d characters", limits.LimitWriterSecretMaxLength)
+		return fmt.Errorf("Secret can be at most %d characters", limits.LimitWriterSecretMaxLength)
 	}
 
 	ms := mutatorStore{
@@ -859,13 +857,13 @@ func (e *dbExecutive) ReadTableSizeLimits() (res limits.TableSizeLimits, err err
 			"FROM max_table_sizes "+
 			"ORDER BY family_name, table_name")
 	if err != nil {
-		return res, errors.Wrap(err, "select table sizes")
+		return res, fmt.Errorf("select table sizes: %w", err)
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var tsl limits.TableSizeLimit
 		if err := rows.Scan(&tsl.Family, &tsl.Table, &tsl.WarnSize, &tsl.MaxSize); err != nil {
-			return res, errors.Wrap(err, "scan table sizes")
+			return res, fmt.Errorf("scan table sizes: %w", err)
 		}
 		res.Tables = append(res.Tables, tsl)
 	}
@@ -877,14 +875,14 @@ func (e *dbExecutive) UpdateTableSizeLimit(limit limits.TableSizeLimit) error {
 	defer cancel()
 	tx, err := e.DB.BeginTx(ctx, nil)
 	if err != nil {
-		return errors.Wrap(err, "start tx")
+		return fmt.Errorf("start tx: %w", err)
 	}
 	defer tx.Rollback()
 	// check first to see if the table exists
 	ft := schema.FamilyTable{Family: limit.Family, Table: limit.Table}
 	_, err = tx.ExecContext(ctx, "select * from "+ft.String()+" limit 1")
 	if err != nil {
-		return errors.Errorf("table '%s' not found", ft)
+		return fmt.Errorf("table '%s' not found", ft)
 	}
 	// then do the upsert
 	res, err := tx.ExecContext(ctx, "replace into max_table_sizes "+
@@ -892,17 +890,17 @@ func (e *dbExecutive) UpdateTableSizeLimit(limit limits.TableSizeLimit) error {
 		"values (?, ?, ?, ?)",
 		limit.Family, limit.Table, limit.WarnSize, limit.MaxSize)
 	if err != nil {
-		return errors.Wrap(err, "replace into max_table_sizes")
+		return fmt.Errorf("replace into max_table_sizes: %w", err)
 	}
 	ra, err := res.RowsAffected()
 	if err != nil {
-		return errors.Wrap(err, "max_table_sizes rows affected")
+		return fmt.Errorf("max_table_sizes rows affected: %w", err)
 	}
 	if ra <= 0 {
 		return errors.New("unexpected failure -- no rows updated")
 	}
 	if err := tx.Commit(); err != nil {
-		return errors.Wrap(err, "commit tx")
+		return fmt.Errorf("commit tx: %w", err)
 	}
 	return nil
 }
@@ -914,14 +912,14 @@ func (e *dbExecutive) DeleteTableSizeLimit(ft schema.FamilyTable) error {
 	resp, err := e.DB.ExecContext(ctx, "delete from max_table_sizes where family_name=? and table_name=?",
 		ft.Family, ft.Table)
 	if err != nil {
-		return errors.Wrap(err, "delete from max_table_sizes")
+		return fmt.Errorf("delete from max_table_sizes: %w", err)
 	}
 	rows, err := resp.RowsAffected()
 	if err != nil {
-		return errors.Wrap(err, "rows affected")
+		return fmt.Errorf("rows affected: %w", err)
 	}
 	if rows < 1 {
-		return errors.Errorf("could not find table limit for %s", ft)
+		return fmt.Errorf("could not find table limit for %s", ft)
 	}
 	return nil
 }
@@ -935,14 +933,14 @@ func (e *dbExecutive) ReadWriterRateLimits() (res limits.WriterRateLimits, err e
 			"FROM max_writer_rates "+
 			"ORDER BY writer_name")
 	if err != nil {
-		return res, errors.Wrap(err, "select writer rates")
+		return res, fmt.Errorf("select writer rates: %w", err)
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var wrl limits.WriterRateLimit
 		wrl.RateLimit.Period = time.Minute
 		if err := rows.Scan(&wrl.Writer, &wrl.RateLimit.Amount); err != nil {
-			return res, errors.Wrap(err, "scan writer rates")
+			return res, fmt.Errorf("scan writer rates: %w", err)
 		}
 		res.Writers = append(res.Writers, wrl)
 	}
@@ -954,7 +952,7 @@ func (e *dbExecutive) UpdateWriterRateLimit(limit limits.WriterRateLimit) error 
 	defer cancel()
 	tx, err := e.DB.BeginTx(ctx, nil)
 	if err != nil {
-		return errors.Wrap(err, "start tx")
+		return fmt.Errorf("start tx: %w", err)
 	}
 	defer tx.Rollback()
 
@@ -963,34 +961,34 @@ func (e *dbExecutive) UpdateWriterRateLimit(limit limits.WriterRateLimit) error 
 	// computers are fast.
 	writer, err := schema.NewWriterName(limit.Writer)
 	if err != nil {
-		return errors.Wrap(err, "validate writer")
+		return fmt.Errorf("validate writer: %w", err)
 	}
 	exists, err := ms.Exists(writer)
 	if err != nil {
-		return errors.Wrap(err, "check writer exists")
+		return fmt.Errorf("check writer exists: %w", err)
 	}
 	if !exists {
-		return errors.Errorf("no writer with the name '%s' exists", limit.Writer)
+		return fmt.Errorf("no writer with the name '%s' exists", limit.Writer)
 	}
 	adjustedAmount, err := limit.RateLimit.AdjustAmount(time.Minute)
 	if err != nil {
-		return errors.Wrap(err, "check limit")
+		return fmt.Errorf("check limit: %w", err)
 	}
 	res, err := tx.ExecContext(ctx, "replace into max_writer_rates "+
 		"(writer_name, max_rows_per_minute) "+
 		"values (?, ?)", limit.Writer, adjustedAmount)
 	if err != nil {
-		return errors.Wrap(err, "replace into max_writer_rates")
+		return fmt.Errorf("replace into max_writer_rates: %w", err)
 	}
 	ra, err := res.RowsAffected()
 	if err != nil {
-		return errors.Wrap(err, "max_writer_rates rows affected")
+		return fmt.Errorf("max_writer_rates rows affected: %w", err)
 	}
 	if ra <= 0 {
 		return errors.New("unexpected failure -- no rows updated")
 	}
 	if err := tx.Commit(); err != nil {
-		return errors.Wrap(err, "commit tx")
+		return fmt.Errorf("commit tx: %w", err)
 	}
 	return nil
 }
@@ -1000,14 +998,14 @@ func (e *dbExecutive) DeleteWriterRateLimit(writerName string) error {
 	defer cancel()
 	res, err := e.DB.ExecContext(ctx, "delete from max_writer_rates where writer_name=?", writerName)
 	if err != nil {
-		return errors.Wrap(err, "delete from max_writer_rates")
+		return fmt.Errorf("delete from max_writer_rates: %w", err)
 	}
 	ra, err := res.RowsAffected()
 	if err != nil {
-		return errors.Wrap(err, "get rows affected from max_writer_rates")
+		return fmt.Errorf("get rows affected from max_writer_rates: %w", err)
 	}
 	if ra <= 0 {
-		return errors.Errorf("no writer limit for the writer '%s' was found", writerName)
+		return fmt.Errorf("no writer limit for the writer '%s' was found", writerName)
 	}
 	return nil
 }
@@ -1048,13 +1046,13 @@ func (e *dbExecutive) DropTable(table schema.FamilyTable) error {
 
 	tx, err := e.DB.BeginTx(ctx, nil)
 	if err != nil {
-		return errors.Wrap(err, "error beginning transaction")
+		return fmt.Errorf("error beginning transaction: %w", err)
 	}
 	defer tx.Rollback()
 
 	err = e.takeLedgerLock(ctx, tx)
 	if err != nil {
-		return errors.Wrap(err, "take ledger lock")
+		return fmt.Errorf("take ledger lock: %w", err)
 	}
 
 	dlw := dmlLedgerWriter{
@@ -1065,17 +1063,17 @@ func (e *dbExecutive) DropTable(table schema.FamilyTable) error {
 
 	_, err = tx.ExecContext(ctx, ddl)
 	if err != nil {
-		return errors.Wrap(err, "error running drop command")
+		return fmt.Errorf("error running drop command: %w", err)
 	}
 
 	seq, err := dlw.Add(ctx, logDDL)
 	if err != nil {
-		return errors.Wrap(err, "error inserting drop command into ledger")
+		return fmt.Errorf("error inserting drop command into ledger: %w", err)
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return errors.Wrap(err, "error committing transaction")
+		return fmt.Errorf("error committing transaction: %w", err)
 	}
 
 	events.Log("Successfully dropped `%{tableName}s` at seq %{seq}v", table.String(), seq)
@@ -1120,13 +1118,13 @@ func (e *dbExecutive) ClearTable(table schema.FamilyTable) error {
 
 	tx, err := e.DB.BeginTx(ctx, nil)
 	if err != nil {
-		return errors.Wrap(err, "error beginning transaction")
+		return fmt.Errorf("error beginning transaction: %w", err)
 	}
 	defer tx.Rollback()
 
 	err = e.takeLedgerLock(ctx, tx)
 	if err != nil {
-		return errors.Wrap(err, "take ledger lock")
+		return fmt.Errorf("take ledger lock: %w", err)
 	}
 
 	dlw := dmlLedgerWriter{
@@ -1137,17 +1135,17 @@ func (e *dbExecutive) ClearTable(table schema.FamilyTable) error {
 
 	_, err = tx.ExecContext(ctx, ddl)
 	if err != nil {
-		return errors.Wrap(err, "error running delete command")
+		return fmt.Errorf("error running delete command: %w", err)
 	}
 
 	seq, err := dlw.Add(ctx, logDDL)
 	if err != nil {
-		return errors.Wrap(err, "error inserting delete command into ledger")
+		return fmt.Errorf("error inserting delete command into ledger: %w", err)
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return errors.Wrap(err, "error committing transaction")
+		return fmt.Errorf("error committing transaction: %w", err)
 	}
 
 	events.Log("Successfully deleted all rows from `%{tableName}s` at seq %{seq}v", table.String(), seq)
@@ -1162,13 +1160,13 @@ func (e *dbExecutive) ReadFamilyTableNames(family schema.FamilyName) (tables []s
 	events.Debug("reading family table names where f=%s", family)
 	rows, err := e.DB.QueryContext(ctx, fmt.Sprintf(`select table_name from information_schema.tables where table_name like '%s___%%'`, family.String()))
 	if err != nil {
-		return nil, errors.Wrap(err, "error reading family table names")
+		return nil, fmt.Errorf("error reading family table names: %w", err)
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var fullTableName string
 		if err := rows.Scan(&fullTableName); err != nil {
-			return nil, errors.Wrap(err, "error reading family table names")
+			return nil, fmt.Errorf("error reading family table names: %w", err)
 		}
 		prefix := family.String() + "___"
 		table := strings.TrimPrefix(fullTableName, prefix)
@@ -1189,11 +1187,11 @@ func (e *dbExecutive) ReadFamilyTableNames(family schema.FamilyName) (tables []s
 func sanitizeFamilyAndTableNames(family string, table string) (string, string, error) {
 	sanFamily, err := schema.NewFamilyName(family)
 	if err != nil {
-		return "", "", errors.Wrap(err, "sanitize family")
+		return "", "", fmt.Errorf("sanitize family: %w", err)
 	}
 	sanTable, err := schema.NewTableName(table)
 	if err != nil {
-		return "", "", errors.Wrap(err, "sanitize table")
+		return "", "", fmt.Errorf("sanitize table: %w", err)
 	}
 	return sanFamily.Name, sanTable.Name, nil
 }

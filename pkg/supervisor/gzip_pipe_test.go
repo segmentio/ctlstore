@@ -3,12 +3,13 @@ package supervisor
 import (
 	"bytes"
 	"compress/gzip"
+	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"strings"
 	"testing"
 
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -92,10 +93,10 @@ func TestIOPipes(t *testing.T) {
 		pw.CloseWithError(func() error {
 			_, err := io.Copy(gw, bytes.NewReader(data))
 			if err != nil {
-				return errors.Wrap(err, "copy to gw")
+				return fmt.Errorf("copy to gw: %w", err)
 			}
 			if err = gw.Close(); err != nil {
-				return errors.Wrap(err, "close gzip writer")
+				return fmt.Errorf("close gzip writer: %w", err)
 			}
 			return nil
 		}())

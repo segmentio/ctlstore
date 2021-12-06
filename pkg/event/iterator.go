@@ -2,8 +2,8 @@ package event
 
 import (
 	"context"
-
-	"github.com/segmentio/errors-go"
+	"errors"
+	"fmt"
 )
 
 type (
@@ -44,13 +44,13 @@ func NewIterator(ctx context.Context, changelogPath string, opts ...IteratorOpt)
 	if iter.changelog == nil {
 		cl := newFileChangelog(changelogPath)
 		if err := cl.validate(); err != nil {
-			return nil, errors.Wrap(err, "validate changelog")
+			return nil, fmt.Errorf("validate changelog: %w", err)
 		}
 		iter.changelog = cl
 	}
 	ctx, iter.cancelFunc = context.WithCancel(ctx)
 	if err := iter.changelog.start(ctx); err != nil {
-		return nil, errors.Wrap(err, "start changelog")
+		return nil, fmt.Errorf("start changelog: %w", err)
 	}
 	return iter, nil
 }

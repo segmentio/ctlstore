@@ -1,6 +1,8 @@
 package ctldb
 
-import "testing"
+import (
+	"testing"
+)
 
 // This configuration comes from the docker-compose.yml file
 const testCtlDBRawDSN = "ctldb:ctldbpw@tcp(localhost:3306)/ctldb"

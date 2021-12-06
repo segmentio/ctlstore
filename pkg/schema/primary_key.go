@@ -1,6 +1,8 @@
 package schema
 
-import errors "github.com/segmentio/errors-go"
+import (
+	"fmt"
+)
 
 var PrimaryKeyZero = PrimaryKey{}
 
@@ -50,7 +52,7 @@ func NewPKFromRawNamesAndTypes(names []string, types []string) (PrimaryKey, erro
 		}
 		ft, ok := SqlTypeToFieldType(types[i])
 		if !ok {
-			return PrimaryKeyZero, errors.Errorf("no field type found for '%s'", types[i])
+			return PrimaryKeyZero, fmt.Errorf("no field type found for '%s'", types[i])
 		}
 		fns[i] = fn
 		fts[i] = ft

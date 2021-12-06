@@ -1,6 +1,8 @@
 package schema
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // use newWriterName to construct a writerName
 type WriterName struct {

@@ -16,7 +16,6 @@ import (
 
 	"github.com/segmentio/conf"
 	"github.com/segmentio/ctlstore/pkg/utils"
-	"github.com/segmentio/errors-go"
 )
 
 type config struct {
@@ -99,7 +98,7 @@ func main() {
 			}
 			b, err := json.Marshal(payload)
 			if err != nil {
-				return errors.Wrap(err, "marshaling payload")
+				return fmt.Errorf("marshaling payload: %w", err)
 			}
 			req, err := http.NewRequest("POST", executiveURL+"/families/"+cfg.FamilyName+"/mutations", bytes.NewReader(b))
 			req.Header.Set("Content-Type", "application/json")
@@ -107,7 +106,7 @@ func main() {
 			req.Header.Set("ctlstore-secret", cfg.WriterSecret)
 			resp, err := client.Do(req)
 			if err != nil {
-				return errors.Wrap(err, "making mutation request")
+				return fmt.Errorf("making mutation request: %w", err)
 			}
 			defer resp.Body.Close()
 			if resp.StatusCode != http.StatusOK {
@@ -145,12 +144,12 @@ func setup(cfg config, url string) error {
 
 	req, err := http.NewRequest("POST", url+"/families/"+cfg.FamilyName, nil)
 	if err != nil {
-		return errors.Wrap(err, "create family request")
+		return fmt.Errorf("create family request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	res, err = client.Do(req)
 	if err != nil {
-		return errors.Wrap(err, "making faily request")
+		return fmt.Errorf("making faily request: %w", err)
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusConflict {
@@ -175,12 +174,12 @@ func setup(cfg config, url string) error {
 	}
 	req, err = http.NewRequest("POST", url+"/families/"+cfg.FamilyName+"/tables/"+cfg.TableName, utils.NewJsonReader(tableDef))
 	if err != nil {
-		return errors.Wrap(err, "create family request")
+		return fmt.Errorf("create family request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	res, err = client.Do(req)
 	if err != nil {
-		return errors.Wrap(err, "making table request")
+		return fmt.Errorf("making table request: %w", err)
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusConflict {

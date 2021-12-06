@@ -13,8 +13,6 @@ import (
 )
 
 func BenchmarkLDBQueryBaseline(b *testing.B) {
-	b.StopTimer()
-
 	ctx := context.TODO()
 
 	tmpDir, err := ioutil.TempDir("", "")
@@ -51,8 +49,8 @@ func BenchmarkLDBQueryBaseline(b *testing.B) {
 		b.Fatalf("Unexpected error preparing query: %v", err)
 	}
 
-	b.StartTimer()
-
+	b.ReportAllocs()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		rows, err := prepQ.QueryContext(ctx, "foo")
 		if err != nil {
@@ -123,6 +121,8 @@ func BenchmarkGetRowByKey(b *testing.B) {
 		r:   r,
 	}
 
+	b.ReportAllocs()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		var row benchKVRow
 		found, err := benchSetup.r.GetRowByKey(benchSetup.ctx, &row, "foo", "bar", "foo")

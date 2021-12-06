@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/limits"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
@@ -51,7 +51,7 @@ func (ms *mutatorStore) Register(writerName schema.WriterName, writerSecret stri
 	case err == sql.ErrNoRows:
 		// this is OK, it just means that it wasn't found
 	case err != nil:
-		return errors.Wrap(err, "select from mutators")
+		return fmt.Errorf("select from mutators: %w", err)
 	case count == 1:
 		// writer already exists with this secret
 		return nil
@@ -70,7 +70,7 @@ func (ms *mutatorStore) Exists(writerName schema.WriterName) (bool, error) {
 	row := ms.DB.QueryRowContext(ms.Ctx, qs, writerName.Name)
 	var count int64
 	if err := row.Scan(&count); err != nil {
-		return false, errors.Wrap(err, "scan writer count")
+		return false, fmt.Errorf("scan writer count: %w", err)
 	}
 	return count > 0, nil
 }

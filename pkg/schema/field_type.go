@@ -1,6 +1,8 @@
 package schema
 
-import "strings"
+import (
+	"strings"
+)
 
 type FieldType int
 

@@ -12,4 +12,3 @@ services:
             MYSQL_DATABASE: ctldb
             MYSQL_USER: ctldb
             MYSQL_PASSWORD: ctldbpw
-        mem_limit: 536870912
