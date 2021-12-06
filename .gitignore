@@ -4,3 +4,5 @@
 /bin
 .coverprofile
 .vscode
+/ctlstore.test
+/cpu.out
