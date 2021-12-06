@@ -1,3 +1,5 @@
+// +build integration
+
 package event
 
 import (
@@ -25,7 +27,8 @@ func TestIteratorIntegration(t *testing.T) {
 	defer teardown()
 
 	changeBuffer := new(sqlite.SQLChangeBuffer)
-	driverName := fmt.Sprintf("%s_%d", ldb.LDBDatabaseDriver, time.Now().UnixNano())
+	//driverName := fmt.Sprintf("%s_%d", ldb.LDBDatabaseDriver, time.Now().UnixNano())
+	driverName := fmt.Sprintf("%s", ldb.LDBDatabaseDriver)
 
 	ldbTmpPath, teardown := ldb.NewLDBTmpPath(t)
 	defer teardown()

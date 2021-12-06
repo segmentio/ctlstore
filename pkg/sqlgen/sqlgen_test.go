@@ -9,11 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/segmentio/ctlstore/pkg/ctldb"
 	"github.com/segmentio/ctlstore/pkg/schema"
+	"github.com/stretchr/testify/require"
 	_ "modernc.org/sqlite"
 )
 
