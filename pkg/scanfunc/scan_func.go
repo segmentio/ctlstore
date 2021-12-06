@@ -39,6 +39,14 @@ func (s *Placeholder) Scan(src interface{}) error {
 			// one blob type in sqlite
 			s.Val = string(src)
 		}
+	case int64:
+		colType := strings.ToUpper(s.Col.Type)
+		switch {
+		case colType == "BOOLEAN":
+			s.Val = (int64(1) == src)
+		default:
+			s.Val = src
+		}
 	default:
 		s.Val = src
 	}
