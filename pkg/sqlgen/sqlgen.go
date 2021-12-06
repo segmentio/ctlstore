@@ -27,26 +27,32 @@ type MetaTable struct {
 var fieldTypeToSQLMap = map[schema.FieldType]map[string]string{
 	schema.FTString: {
 		"mysql":   "VARCHAR(191)",
+		"sqlite":  "VARCHAR(191)",
 		"sqlite3": "VARCHAR(191)",
 	},
 	schema.FTInteger: {
 		"mysql":   "BIGINT",
+		"sqlite":  "INTEGER",
 		"sqlite3": "INTEGER",
 	},
 	schema.FTDecimal: {
 		"mysql":   "DOUBLE",
+		"sqlite":  "REAL",
 		"sqlite3": "REAL",
 	},
 	schema.FTText: {
 		"mysql":   "MEDIUMTEXT",
+		"sqlite":  "TEXT",
 		"sqlite3": "TEXT",
 	},
 	schema.FTBinary: {
 		"mysql":   "MEDIUMBLOB",
+		"sqlite":  "BLOB",
 		"sqlite3": "BLOB",
 	},
 	schema.FTByteString: {
 		"mysql":   "VARBINARY(255)",
+		"sqlite":  "BLOB(255)",
 		"sqlite3": "BLOB(255)",
 	},
 }

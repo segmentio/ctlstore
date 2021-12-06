@@ -397,7 +397,7 @@ func TestLDBReaderEmptyFileHandling(t *testing.T) {
 	dbPath, teardown := ldb.NewLDBTmpPath(t)
 	defer teardown()
 
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		t.Fatalf("Couldn't open SQLite db, error %v", err)
 	}
@@ -411,11 +411,11 @@ func TestLDBReaderEmptyFileHandling(t *testing.T) {
 		t.Errorf("Expected %v, got %v", want, got)
 	}
 
-	if want, got := "Table not found", gotErr; gotErr == nil || want != got.Error() {
+	if want, got := "SQL logic error: no such table: foo___bar (1)", gotErr; gotErr == nil || want != got.Error() {
 		t.Errorf("Expected %v, got %v", want, got)
 	}
 
-	db2, err := sql.Open("sqlite3", dbPath)
+	db2, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		t.Fatalf("Couldn't open SQLite db, error %v", err)
 	}
