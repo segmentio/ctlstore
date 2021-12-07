@@ -315,7 +315,7 @@ func (e *dbExecutive) AddFields(familyName string, tableName string, fieldNames 
 
 			err = e.takeLedgerLock(ctx, tx)
 			if err != nil {
-				return errors.Wrap(err, "take ledger lock")
+				return fmt.Errorf("take ledger lock: %w", err)
 			}
 
 			// We first write the column modification to the DML ledger within the transaction.
