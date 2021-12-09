@@ -409,6 +409,48 @@ func TestDBExecutiveTableSchema(t *testing.T) {
 	})
 }
 
+func TestSimpleLockLedger(t *testing.T) {
+	withDBTypes(t, func(dbType string) {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		u := newDbExecTestUtil(t, dbType)
+		defer u.Close()
+		err := u.e.CreateTable("family1",
+			"table2",
+			[]string{"field1"},
+			[]schema.FieldType{schema.FTString},
+			[]string{"field1"},
+		)
+		require.NoError(t, err)
+
+		const numGoroutines = 2
+		errs := make(chan error, numGoroutines)
+		for i := 0; i < numGoroutines; i++ {
+			go func() {
+				errs <- func() error {
+					tx, err := u.e.DB.BeginTx(ctx, nil)
+					if err != nil {
+						return err
+					}
+					defer tx.Rollback()
+					err = u.e.takeLedgerLock(ctx, tx)
+					if err != nil {
+						return err
+					}
+					err = tx.Commit()
+					return err
+				}()
+			}()
+		}
+		for i := 0; i < numGoroutines; i++ {
+			err := <-errs
+			require.NoError(t, err)
+		}
+
+	})
+}
+
 // multiple goroutine will attempt to add a number of fields to the same
 // table concurrently. this test verifies that the ledger sequences do not
 // skip from the perspective of a reader repeatedly querying the dml ledger
