@@ -1,7 +1,8 @@
 package executive
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
+
 	"github.com/segmentio/ctlstore/pkg/limits"
 	"github.com/segmentio/ctlstore/pkg/schema"
 )
@@ -85,7 +86,7 @@ func (r *mutationRequest) valuesByOrder(fieldOrder []schema.FieldName) ([]interf
 		if v, ok := r.Values[fn]; ok {
 			values = append(values, v)
 		} else {
-			return nil, errors.Errorf("Missing field %s", fn)
+			return nil, fmt.Errorf("Missing field %s", fn)
 		}
 	}
 	return values, nil

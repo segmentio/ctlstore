@@ -2,10 +2,10 @@ package reflector
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/utils"
 	"github.com/segmentio/events/v2"
@@ -168,7 +168,7 @@ func (r *ReflectorCtl) lifecycle(appCtx context.Context) {
 						running = false
 					case <-time.After(reflectorCtlTimeout):
 						errs.Incr("reflector-ctl-timeouts", stats.Tag{Name: "op", Value: "stop-reflector"})
-						err := errors.Errorf("could not stop reflector after %s", reflectorCtlTimeout)
+						err := fmt.Errorf("could not stop reflector after %s", reflectorCtlTimeout)
 						msg.sendErr(appCtx, err)
 						continue
 					}
@@ -195,6 +195,6 @@ func (m *reflectorCtlMsg) sendErr(ctx context.Context, err error) {
 		// should never happen but we don't want to block indefinitely
 		// if someone did not create a result chan
 		errs.Incr("reflector-ctl-timeouts", stats.Tag{Name: "op", Value: "send-err"})
-		panic(errors.Errorf("could not send err on ctl msg after %s", reflectorCtlTimeout))
+		panic(fmt.Errorf("could not send err on ctl msg after %s", reflectorCtlTimeout))
 	}
 }

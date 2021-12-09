@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,7 +24,6 @@ import (
 	supervisorpkg "github.com/segmentio/ctlstore/pkg/supervisor"
 	"github.com/segmentio/ctlstore/pkg/units"
 	"github.com/segmentio/ctlstore/pkg/utils"
-	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	_ "github.com/segmentio/events/v2/sigevents"
 	"github.com/segmentio/stats/v4"
@@ -294,12 +294,12 @@ func supervisor(ctx context.Context, args []string) {
 		})
 		defer teardown()
 		if err := utils.EnsureDirForFile(cliCfg.ReflectorConfig.LDBPath); err != nil {
-			return errors.Wrap(err, "ensure ldb dir")
+			return fmt.Errorf("ensure ldb dir: %w", err)
 		}
 
 		reflector, err := newReflector(cliCfg.ReflectorConfig, true)
 		if err != nil {
-			return errors.Wrap(err, "build supervisor reflector")
+			return fmt.Errorf("build supervisor reflector: %w", err)
 		}
 
 		supervisor, err := supervisorpkg.SupervisorFromConfig(supervisorpkg.SupervisorConfig{
@@ -309,7 +309,7 @@ func supervisor(ctx context.Context, args []string) {
 			Reflector:        reflector,                      // compose the reflector, since it will start with the supervisor
 		})
 		if err != nil {
-			return errors.Wrap(err, "start supervisor")
+			return fmt.Errorf("start supervisor: %w", err)
 		}
 		defer supervisor.Close()
 		supervisor.Start(ctx)
@@ -431,7 +431,7 @@ func executive(ctx context.Context, args []string) {
 	defer executive.Close()
 
 	if err := executive.Start(ctx, cliCfg.Bind); err != nil {
-		if errors.Cause(err) != context.Canceled {
+		if errors.Is(err, context.Canceled) {
 			errs.IncrDefault(stats.T("op", "service shutdown"))
 		}
 		events.Log("executive quit: %v", err)

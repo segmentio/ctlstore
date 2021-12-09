@@ -1,10 +1,9 @@
 package utils
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
-
-	"github.com/pkg/errors"
 )
 
 // EnsureDirForFile ensures that the specified file's parent directory
@@ -17,8 +16,8 @@ func EnsureDirForFile(file string) error {
 		return nil
 	case os.IsNotExist(err):
 		err = os.Mkdir(dir, 0700)
-		return errors.Wrapf(err, "mkdir %s", dir)
+		return fmt.Errorf("mkdir %s: %w", dir, err)
 	default:
-		return errors.Wrapf(err, "stat %s", dir)
+		return fmt.Errorf("stat %s: %w", dir, err)
 	}
 }

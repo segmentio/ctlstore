@@ -3,8 +3,8 @@ package mysql
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
 )
@@ -17,13 +17,13 @@ func (m *MySQLDBInfo) GetAllTables(ctx context.Context) ([]schema.FamilyTable, e
 	var res []schema.FamilyTable
 	rows, err := m.Db.QueryContext(ctx, "select distinct table_name from information_schema.tables order by table_name")
 	if err != nil {
-		return nil, errors.Wrap(err, "query table names")
+		return nil, fmt.Errorf("query table names: %w", err)
 	}
 	for rows.Next() {
 		var fullName string
 		err = rows.Scan(&fullName)
 		if err != nil {
-			return nil, errors.Wrap(err, "scan table name")
+			return nil, fmt.Errorf("scan table name: %w", err)
 		}
 		if ft, ok := schema.ParseFamilyTable(fullName); ok {
 			res = append(res, ft)

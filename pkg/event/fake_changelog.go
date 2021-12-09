@@ -2,8 +2,7 @@ package event
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"errors"
 )
 
 type (

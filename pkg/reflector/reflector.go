@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -22,7 +23,6 @@ import (
 	"github.com/segmentio/ctlstore/pkg/ledger"
 	"github.com/segmentio/ctlstore/pkg/logwriter"
 	"github.com/segmentio/ctlstore/pkg/sqlite"
-	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	_ "github.com/segmentio/events/v2/log" // lets events actually log
 	"github.com/segmentio/stats/v4"
@@ -150,7 +150,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	var maxKnownSeq sql.NullInt64
 	err = row.Scan(&maxKnownSeq)
 	if err != nil {
-		return nil, errors.Wrap(err, "find max seq from ledger")
+		return nil, fmt.Errorf("find max seq from ledger: %w", err)
 	}
 
 	events.Log("Max known ledger sequence: %{seq}d", maxKnownSeq)
@@ -231,7 +231,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	ledgerLatencyFunc := ctlstore.NewLDBReaderFromDB(ldbDB).GetLedgerLatency
 	ledgerMon, err := ledger.NewLedgerMonitor(config.LedgerHealth, ledgerLatencyFunc)
 	if err != nil {
-		return nil, errors.Wrap(err, "build ledger latency monitor")
+		return nil, fmt.Errorf("build ledger latency monitor: %w", err)
 	}
 
 	return &Reflector{
@@ -250,21 +250,19 @@ func (r *Reflector) Start(ctx context.Context) error {
 		err := func() error {
 			shovel, err := r.shovel()
 			if err != nil {
-				return errors.Wrap(err, "build shovel")
+				return fmt.Errorf("build shovel: %w", err)
 			}
 			defer shovel.Close()
 			events.Log("Shoveling...")
 			stats.Incr("reflector.shovel_start")
 			err = shovel.Start(ctx)
-			return errors.Wrap(err, "shovel")
+			return fmt.Errorf("shovel: %w", err)
 		}()
 		switch {
 		case errs.IsCanceled(err): // this is normal
-		case events.IsTermination(errors.Cause(err)): // this is normal
-			events.Log("Reflector received termination signal")
 		case err != nil:
 			switch {
-			case errors.Is("SkippedSequence", err):
+			case errors.Is(err, errSkippedSequence):
 				// this is instrumented elsewhere and is not an error that we need
 				// to handle normally, so we will skip instrumenting this as a
 				// shovel_error for now.
@@ -353,7 +351,7 @@ func bootstrapLDB(cfg ldbBootstrapConfig) error {
 		}
 		dler = &memoryDownloader{Content: decoded}
 	default:
-		return errors.Errorf("unsupported scheme '%s' for bootstrap URL '%s'", scheme, cfg.url)
+		return fmt.Errorf("unsupported scheme '%s' for bootstrap URL '%s'", scheme, cfg.url)
 	}
 
 	// Download to a temp file first to prevent leaving a zero-byte file
@@ -390,7 +388,7 @@ func bootstrapLDB(cfg ldbBootstrapConfig) error {
 			}
 			events.Log("Bootstrap: Downloaded %{bytes}d bytes", bytes)
 			return nil
-		case errors.Is(errs.ErrTypeTemporary, err):
+		case errors.Is(err, errs.ErrTypeTemporary{}):
 			incrError("temporary")
 			events.Log("Temporary error trying to download snapshot: %{error}s", err)
 			delay := cfg.retryDelay
@@ -399,7 +397,7 @@ func bootstrapLDB(cfg ldbBootstrapConfig) error {
 			}
 			events.Log("Retrying in %{delay}s", delay)
 			time.Sleep(delay)
-		case errors.Is(errs.ErrTypePermanent, err):
+		case errors.Is(err, errs.ErrTypePermanent{}):
 			incrError("permanent")
 			events.Log("Could not download snapshot: %{error}s", err)
 			events.Log("Starting with a new LDB")
@@ -409,5 +407,5 @@ func bootstrapLDB(cfg ldbBootstrapConfig) error {
 			return err
 		}
 	}
-	return errors.Errorf("download of ldb snapshot failed after max attempts reached: %s", err)
+	return fmt.Errorf("download of ldb snapshot failed after max attempts reached: %s", err)
 }

@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/limits"
 	"github.com/segmentio/ctlstore/pkg/schema"
@@ -126,11 +125,11 @@ func (s *tableSizer) refresh(ctx context.Context) error {
 	defer cancel()
 	sizes, err := s.getSizes(ctx)
 	if err != nil {
-		return errors.Wrap(err, "get table sizes")
+		return fmt.Errorf("get table sizes: %w", err)
 	}
 	configuredLimits, err := s.getLimits(ctx)
 	if err != nil {
-		return errors.Wrap(err, "get configured table limits")
+		return fmt.Errorf("get configured table limits: %w", err)
 	}
 	s.mut.Lock()
 	defer s.mut.Unlock()
@@ -168,7 +167,7 @@ func (s *tableSizer) getSizes(ctx context.Context) (map[schema.FamilyTable]int64
 	}
 	dbSchema, err := s.getSchema(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "get schema")
+		return nil, fmt.Errorf("get schema: %w", err)
 	}
 	query := "SELECT table_name, (data_length + index_length) FROM information_schema.tables WHERE table_schema=?"
 	rows, err := s.ctldb.QueryContext(ctx, query, dbSchema)

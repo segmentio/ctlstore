@@ -3,9 +3,9 @@ package ldbwriter
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/schema"
@@ -53,7 +53,7 @@ func (writer *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schem
 		tx, err = writer.Db.Begin()
 		if err != nil {
 			errs.Incr("sql_ldb_writer.begin_tx.error")
-			return errors.Wrap(err, "open tx error")
+			return fmt.Errorf("open tx error: %w", err)
 		}
 	} else {
 		// Applying a ledger transaction, so bring it into scope
@@ -84,7 +84,7 @@ func (writer *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schem
 	if err != nil {
 		tx.Rollback()
 		errs.Incr("sql_ldb_writer.upsert_last_update.error")
-		return errors.Wrap(err, "update last_update")
+		return fmt.Errorf("update last_update: %w", err)
 	}
 
 	// Update the sequence tracker row. This SQL will insert the row
@@ -103,7 +103,7 @@ func (writer *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schem
 	if err != nil {
 		tx.Rollback()
 		errs.Incr("sql_ldb_writer.upsert_seq.error")
-		return errors.Wrap(err, "update seq tracker error")
+		return fmt.Errorf("update seq tracker error: %w", err)
 	}
 
 	// Check for replayed statements
@@ -111,7 +111,7 @@ func (writer *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schem
 	if err != nil {
 		tx.Rollback()
 		errs.Incr("sql_ldb_writer.upsert_seq.rows_affected_error")
-		return errors.Wrap(err, "update seq tracker rows affected error")
+		return fmt.Errorf("update seq tracker rows affected error: %w", err)
 	}
 	if rowsAffected == 0 {
 		tx.Rollback()
@@ -145,7 +145,7 @@ func (writer *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schem
 			events.Log("Failed to commit Tx at seq %{seq}s: %{error}+v",
 				statement.Sequence,
 				err)
-			return errors.Wrap(err, "commit multi-statement dml tx error")
+			return fmt.Errorf("commit multi-statement dml tx error: %w", err)
 		}
 		stats.Incr("sql_ldb_writer.ledgerTx.commit.success")
 		events.Debug("Committed TX at %{sequence}v", statement.Sequence)
@@ -158,7 +158,7 @@ func (writer *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schem
 	if err != nil {
 		tx.Rollback()
 		errs.Incr("sql_ldb_writer.exec.error")
-		return errors.Wrap(err, "exec dml statement error")
+		return fmt.Errorf("exec dml statement error: %w", err)
 	}
 
 	stats.Incr("sql_ldb_writer.exec.success")
@@ -175,7 +175,7 @@ func (writer *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schem
 			tx.Rollback()
 			errs.Incr("sql_ldb_writer.single.commit.error")
 			errs.Incr("sql_ldb_writer.commit.error")
-			return errors.Wrap(err, "commit one-statement dml tx error")
+			return fmt.Errorf("commit one-statement dml tx error: %w", err)
 		}
 	}
 

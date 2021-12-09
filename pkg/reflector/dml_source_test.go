@@ -3,11 +3,12 @@ package reflector
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/limits"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
 	"github.com/stretchr/testify/require"
@@ -94,16 +95,16 @@ func TestSqlDmlSource(t *testing.T) {
 	foundError := false
 	for i := 0; i < 2; i++ {
 		_, err = src.Next(ctx)
-		cause := errors.Cause(err)
+
 		switch {
-		case cause == nil:
-		case cause == context.Canceled:
+		case err == nil:
+		case errors.Is(err, context.Canceled):
 			foundError = true
 			break
 			// the db driver will at some point return an error with
 			// the value "interrupted" instead of returning
 			// context.Canceled().  Sigh.
-		case cause.Error() == "interrupted":
+		case strings.Contains(err.Error(), "interrupted"):
 			foundError = true
 			break
 		}

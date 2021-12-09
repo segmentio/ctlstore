@@ -2,8 +2,8 @@ package changelog
 
 import (
 	"encoding/json"
+	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/segmentio/events/v2"
 )
 
@@ -42,7 +42,7 @@ func (w *ChangelogWriter) WriteChange(e ChangelogEntry) error {
 
 	bytes, err := json.Marshal(structure)
 	if err != nil {
-		return errors.Wrap(err, "error marshalling json")
+		return fmt.Errorf("error marshalling json: %w", err)
 	}
 
 	events.Debug("changelogWriter.WriteChange: %{family}s.%{table}s => %{key}v",

@@ -3,6 +3,7 @@ package reflector_test
 import (
 	"bytes"
 	"compress/gzip"
+	"errors"
 	"io"
 	"io/ioutil"
 	"math/rand"
@@ -12,9 +13,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/fakes"
 	"github.com/segmentio/ctlstore/pkg/reflector"
-	"github.com/segmentio/errors-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -30,7 +31,7 @@ func TestS3DownloadErrors(t *testing.T) {
 		s3Client     func() reflector.S3Client
 		n            int64
 		err          error
-		errTypes     []string
+		errTypes     []error
 	}{
 		{
 			name: "success",
@@ -52,7 +53,7 @@ func TestS3DownloadErrors(t *testing.T) {
 				return f
 			},
 			err:      errors.New("get s3 data: failure"),
-			errTypes: []string{"Temporary"}, // generic failures get retried
+			errTypes: []error{errs.ErrTypeTemporary{}}, // generic failures get retried
 			n:        -1,
 		},
 		{
@@ -65,7 +66,7 @@ func TestS3DownloadErrors(t *testing.T) {
 				return f
 			},
 			err:      errors.New("failure"),
-			errTypes: []string{"Permanent"},
+			errTypes: []error{errs.ErrTypePermanent{}},
 			n:        -1,
 		},
 		{
@@ -77,7 +78,7 @@ func TestS3DownloadErrors(t *testing.T) {
 				return f
 			},
 			err:      errors.New("failure"),
-			errTypes: []string{"Temporary"},
+			errTypes: []error{errs.ErrTypeTemporary{}},
 			n:        -1,
 		},
 		{
@@ -89,7 +90,7 @@ func TestS3DownloadErrors(t *testing.T) {
 				return f
 			},
 			err:      errors.New("failure"),
-			errTypes: []string{"Temporary"},
+			errTypes: []error{errs.ErrTypeTemporary{}},
 			n:        -1,
 		},
 	} {
@@ -104,11 +105,8 @@ func TestS3DownloadErrors(t *testing.T) {
 				require.NoError(t, err)
 			} else {
 				require.Contains(t, err.Error(), test.err.Error())
-				require.EqualValues(t, len(test.errTypes), len(errors.Types(err)),
-					"got types: %v", errors.Types(err))
-				for _, typ := range test.errTypes {
-					require.True(t, errors.Is(typ, err),
-						"error did not have the error type '%s', got types: %v", typ, errors.Types(err))
+				for _, target := range test.errTypes {
+					require.True(t, errors.Is(err, target))
 				}
 			}
 			require.EqualValues(t, test.n, n)

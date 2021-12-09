@@ -6,6 +6,7 @@ import (
 	"database/sql/driver"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -13,7 +14,6 @@ import (
 	"strings"
 
 	"github.com/segmentio/ctlstore/pkg/schema"
-	"github.com/segmentio/errors-go"
 )
 
 type MetaTable struct {
@@ -132,7 +132,7 @@ func maybeDecodeBase64(val interface{}, should bool) (interface{}, error) {
 
 	decoded, err := base64.StdEncoding.DecodeString(valstr)
 	if err != nil {
-		return nil, errors.Wrap(err, "maybeDecodeBase64")
+		return nil, fmt.Errorf("maybeDecodeBase64: %w", err)
 	}
 
 	return decoded, nil
@@ -255,7 +255,7 @@ func (t *MetaTable) DeleteDML(values []interface{}) (string, error) {
 
 		ft, found := t.fieldTypeByName(fn)
 		if !found {
-			return "", errors.Errorf("DeleteDML couldn't find fieldName %s", fn.String())
+			return "", fmt.Errorf("DeleteDML couldn't find fieldName %s", fn.String())
 		}
 		val, err := maybeDecodeBase64(values[i], isBase64EncodedFieldType(ft))
 		if err != nil {

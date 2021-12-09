@@ -2,10 +2,10 @@ package supervisor
 
 import (
 	"compress/gzip"
+	"errors"
+	"fmt"
 	"io"
 	"sync"
-
-	"github.com/pkg/errors"
 )
 
 type gzipCompressionReader struct {
@@ -39,10 +39,10 @@ func (r *gzipCompressionReader) Read(p []byte) (n int, err error) {
 			pw.CloseWithError(func() error {
 				_, err := io.Copy(gw, r.reader)
 				if err != nil {
-					return errors.Wrap(err, "copy to gzip writer")
+					return fmt.Errorf("copy to gzip writer: %w", err)
 				}
 				if err = gw.Close(); err != nil {
-					return errors.Wrap(err, "close gzip writer")
+					return fmt.Errorf("close gzip writer: %w", err)
 				}
 				return nil
 			}())

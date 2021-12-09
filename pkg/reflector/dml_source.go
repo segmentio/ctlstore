@@ -3,10 +3,10 @@ package reflector
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
 	"github.com/segmentio/stats/v4"
@@ -54,7 +54,7 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 
 		rows, err := source.db.QueryContext(ctx, qs, source.lastSequence)
 		if err != nil {
-			return statement, errors.Wrap(err, "select row")
+			return statement, fmt.Errorf("select row: %w", err)
 		}
 
 		// CR: reconsider naked returns here
@@ -78,7 +78,7 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 
 			err = rows.Scan(&row.seq, &row.leaderTs, &row.statement)
 			if err != nil {
-				return statement, errors.Wrap(err, "scan row")
+				return statement, fmt.Errorf("scan row: %w", err)
 			}
 
 			if schema.DMLSequence(row.seq) > source.lastSequence+1 {
@@ -87,7 +87,7 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 
 			timestamp, err := time.Parse(dmlLedgerTimestampFormat, row.leaderTs)
 			if err != nil {
-				return statement, errors.Wrapf(err, "could not parse time '%s'", row.leaderTs)
+				return statement, fmt.Errorf("could not parse time '%s': %w", row.leaderTs, err)
 			}
 
 			dmlst := schema.DMLStatement{
@@ -106,7 +106,7 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 
 		err = rows.Err()
 		if err != nil {
-			return statement, errors.Wrap(err, "rows err")
+			return statement, fmt.Errorf("rows err: %w", err)
 		}
 	}
 

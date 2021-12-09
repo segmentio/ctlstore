@@ -2,11 +2,11 @@ package limits
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/units"
 )
 
@@ -70,7 +70,7 @@ func (l *RateLimit) UnmarshalJSON(b []byte) error {
 		case float64:
 			l.Amount = int64(amount)
 		default:
-			return errors.Errorf("invalid amount: '%v'", amount)
+			return fmt.Errorf("invalid amount: '%v'", amount)
 		}
 	}
 	if period, ok := val["period"]; ok {
@@ -80,11 +80,11 @@ func (l *RateLimit) UnmarshalJSON(b []byte) error {
 		case string:
 			parsed, err := time.ParseDuration(period)
 			if err != nil {
-				return errors.Errorf("invalid period: '%v'", period)
+				return fmt.Errorf("invalid period: '%v'", period)
 			}
 			l.Period = parsed
 		default:
-			return errors.Errorf("invalid period: '%v'", period)
+			return fmt.Errorf("invalid period: '%v'", period)
 		}
 	}
 	return nil

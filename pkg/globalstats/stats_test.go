@@ -26,7 +26,7 @@ func newFakeHandler() *fakeHandler {
 	}
 }
 
-func (h *fakeHandler) HandleMeasures(t time.Time, measures ...stats.Measure) {
+func (h *fakeHandler) HandleMeasures(_ time.Time, measures ...stats.Measure) {
 	h.mut.Lock()
 	defer h.mut.Unlock()
 

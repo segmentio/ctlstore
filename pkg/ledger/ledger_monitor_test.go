@@ -2,13 +2,14 @@ package ledger_test
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
-	"github.com/pkg/errors"
+
 	"github.com/segmentio/ctlstore/pkg/ledger"
 	"github.com/segmentio/ctlstore/pkg/ledger/fakes"
 	_ "github.com/segmentio/events/v2/log"
