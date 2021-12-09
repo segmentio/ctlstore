@@ -25,8 +25,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type dbExecTestFn func(*testing.T, string)
-
 const (
 	// Schema executed to initialize the test database.
 	testCtlDBSchemaUpForMySQL = `
