@@ -480,7 +480,10 @@ func TestDBExecutiveAddFieldsLocksLedger(t *testing.T) {
 					time.Sleep(10 * time.Millisecond)
 				}
 			}()
-			errs <- fmt.Errorf("reader: %w", err)
+			if err != nil {
+				err = fmt.Errorf("reader: %w", err)
+			}
+			errs <- err
 		}()
 		for i := 0; i < numGoroutines+1; i++ {
 			err := <-errs
@@ -641,7 +644,10 @@ func TestDBExecutiveCreateTableLocksLedger(t *testing.T) {
 					time.Sleep(10 * time.Millisecond)
 				}
 			}()
-			errs <- fmt.Errorf("reader: %w", err)
+			if err != nil {
+				err = fmt.Errorf("reader: %w", err)
+			}
+			errs <- err
 		}()
 		for i := 0; i < numGoroutines+1; i++ {
 			err := <-errs
