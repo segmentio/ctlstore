@@ -3,6 +3,7 @@ package supervisor
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"io"
 	"net/url"
 	"os"
@@ -10,7 +11,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/pkg/errors"
+
 	"github.com/segmentio/ctlstore/pkg/utils"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
@@ -26,19 +27,19 @@ type localSnapshot struct {
 
 func (c *localSnapshot) Upload(ctx context.Context, path string) error {
 	if err := utils.EnsureDirForFile(c.Path); err != nil {
-		return errors.Wrap(err, "ensure snapshot dir exists")
+		return fmt.Errorf("ensure snapshot dir exists: %w", err)
 	}
 	fdst, err := os.OpenFile(c.Path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil {
-		return errors.Wrap(err, "opening destination file")
+		return fmt.Errorf("opening destination file: %w", err)
 	}
 	fsrc, err := os.OpenFile(path, os.O_RDONLY, 0)
 	if err != nil {
-		return errors.Wrap(err, "opening src file")
+		return fmt.Errorf("opening src file: %w", err)
 	}
 	_, err = io.Copy(fdst, fsrc)
 	if err != nil {
-		return errors.Wrap(err, "copying file")
+		return fmt.Errorf("copying file: %w", err)
 	}
 	return nil
 }
@@ -56,12 +57,12 @@ type s3Snapshot struct {
 func (c *s3Snapshot) Upload(ctx context.Context, path string) error {
 	f, err := os.OpenFile(path, os.O_RDONLY, 0)
 	if err != nil {
-		return errors.Wrap(err, "opening file")
+		return fmt.Errorf("opening file: %w", err)
 	}
 	defer f.Close()
 	stat, err := f.Stat()
 	if err != nil {
-		return errors.Wrap(err, "stat LDB")
+		return fmt.Errorf("stat LDB: %w", err)
 	}
 	size := stat.Size()
 	key := c.Key
@@ -77,7 +78,7 @@ func (c *s3Snapshot) Upload(ctx context.Context, path string) error {
 	}
 	events.Log("Uploading %{file}s (%d bytes) to %{bucket}s/%{key}s", path, size, c.Bucket, key)
 	if err = c.sendToS3(ctx, key, c.Bucket, reader); err != nil {
-		return errors.Wrap(err, "send to s3")
+		return fmt.Errorf("send to s3: %w", err)
 	}
 	events.Log("Successfully uploaded %{file}s to %{bucket}s/%{key}s", path, c.Bucket, key)
 	if gpr != nil {
@@ -107,7 +108,7 @@ func (c *s3Snapshot) sendToS3(ctx context.Context, key string, bucket string, bo
 	if err == nil {
 		events.Log("Wrote to S3 location: %s", output.Location)
 	}
-	return errors.Wrap(err, "upload with context")
+	return fmt.Errorf("upload with context: %w", err)
 }
 
 func (c *s3Snapshot) getS3Uploader() (S3Uploader, error) {
@@ -116,7 +117,7 @@ func (c *s3Snapshot) getS3Uploader() (S3Uploader, error) {
 	}
 	sess, err := session.NewSession()
 	if err != nil {
-		return nil, errors.Wrap(err, "creating aws session")
+		return nil, fmt.Errorf("creating aws session: %w", err)
 	}
 	uploader := s3manager.NewUploader(sess)
 	return uploader, nil
@@ -125,7 +126,7 @@ func (c *s3Snapshot) getS3Uploader() (S3Uploader, error) {
 func archivedSnapshotFromURL(URL string) (archivedSnapshot, error) {
 	parsed, err := url.Parse(URL)
 	if err != nil {
-		return nil, errors.Wrap(err, "parsing url")
+		return nil, fmt.Errorf("parsing url: %w", err)
 	}
 	switch parsed.Scheme {
 	case "s3":
@@ -135,6 +136,6 @@ func archivedSnapshotFromURL(URL string) (archivedSnapshot, error) {
 		events.Log("Using local FS destination for snapshots file=%v", parsed.Path)
 		return &localSnapshot{parsed.Path}, nil
 	default:
-		return nil, errors.Errorf("Unknown scheme %s", parsed.Scheme)
+		return nil, fmt.Errorf("Unknown scheme %s", parsed.Scheme)
 	}
 }

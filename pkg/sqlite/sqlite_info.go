@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
 )
@@ -18,13 +17,13 @@ func (m *SqliteDBInfo) GetAllTables(ctx context.Context) ([]schema.FamilyTable, 
 	var res []schema.FamilyTable
 	rows, err := m.Db.QueryContext(ctx, "select distinct name from sqlite_master where type='table' order by name")
 	if err != nil {
-		return nil, errors.Wrap(err, "query table names")
+		return nil, fmt.Errorf("query table names: %w", err)
 	}
 	for rows.Next() {
 		var fullName string
 		err = rows.Scan(&fullName)
 		if err != nil {
-			return nil, errors.Wrap(err, "scan table name")
+			return nil, fmt.Errorf("scan table name: %w", err)
 		}
 		if ft, ok := schema.ParseFamilyTable(fullName); ok {
 			res = append(res, ft)

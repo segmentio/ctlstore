@@ -3,8 +3,9 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/scanfunc"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/go-sqlite3"
@@ -107,7 +108,7 @@ func (c *SQLiteWatchChange) ExtractKeys(db *sql.DB) ([][]interface{}, error) {
 					},
 				}
 				if err := ph.Scan(row[colInfo.Index]); err != nil {
-					return nil, errors.Wrap(err, "scan key value column")
+					return nil, fmt.Errorf("scan key value column: %w", err)
 				}
 				key = append(key, pkAndMeta{
 					Name:  colInfo.ColumnName,

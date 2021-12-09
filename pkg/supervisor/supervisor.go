@@ -3,12 +3,13 @@ package supervisor
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"io"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/reflector"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
@@ -45,7 +46,7 @@ func SupervisorFromConfig(config SupervisorConfig) (Supervisor, error) {
 	for _, url := range urls {
 		snapshot, err := archivedSnapshotFromURL(url)
 		if err != nil {
-			return nil, errors.Wrapf(err, "configure snapshot for '%s'", url)
+			return nil, fmt.Errorf("configure snapshot for '%s': %w", url, err)
 		}
 		snapshots = append(snapshots, snapshot)
 	}
@@ -63,18 +64,18 @@ func (s *supervisor) snapshot(ctx context.Context) error {
 	s.reflectorCtl.Stop(ctx)
 	defer s.reflectorCtl.Start(ctx)
 	if err := s.checkpointLDB(); err != nil {
-		return errors.Wrap(err, "checkpoint ldb")
+		return fmt.Errorf("checkpoint ldb: %w", err)
 	}
 	info, err := os.Stat(s.LDBPath)
 	if err != nil {
-		return errors.Wrap(err, "stat ldb path")
+		return fmt.Errorf("stat ldb path: %w", err)
 	}
 	stats.Set("ldb-size-bytes", info.Size())
 	errs := make(chan error, len(s.Snapshots))
 	for _, snapshot := range s.Snapshots {
 		go func(snapshot archivedSnapshot) {
 			err := snapshot.Upload(ctx, s.LDBPath)
-			errs <- errors.Wrapf(err, "upload snapshot")
+			errs <- fmt.Errorf("upload snapshot: %w", err)
 		}(snapshot)
 	}
 	for range s.Snapshots {
@@ -89,31 +90,31 @@ func (s *supervisor) checkpointLDB() error {
 	ctx := context.Background() // we do not want to interrupt this operation
 	srcDb, err := sql.Open("sqlite3", s.LDBPath+"?_journal_mode=wal")
 	if err != nil {
-		return errors.Wrap(err, "opening source db")
+		return fmt.Errorf("opening source db: %w", err)
 	}
 	defer srcDb.Close()
 	conn, err := srcDb.Conn(ctx)
 	if err != nil {
-		return errors.Wrap(err, "src db connection")
+		return fmt.Errorf("src db connection: %w", err)
 	}
 	defer conn.Close()
 	_, err = conn.ExecContext(ctx, "PRAGMA wal_checkpoint(PASSIVE);")
 	if err != nil {
-		return errors.Wrap(err, "checkpointing database")
+		return fmt.Errorf("checkpointing database: %w", err)
 	}
 	_, err = conn.ExecContext(ctx, "VACUUM")
 	if err != nil {
-		return errors.Wrap(err, "vacuuming database")
+		return fmt.Errorf("vacuuming database: %w", err)
 	}
 	// This will prevent any writes while the copy is taking place
 	_, err = conn.ExecContext(ctx, "BEGIN IMMEDIATE TRANSACTION;")
 	if err != nil {
-		return errors.Wrap(err, "locking database")
+		return fmt.Errorf("locking database: %w", err)
 	}
 	events.Log("Acquired write lock on %{srcDb}s", s.LDBPath)
 	_, err = conn.ExecContext(ctx, "COMMIT;")
 	if err != nil {
-		return errors.Wrap(err, "commit")
+		return fmt.Errorf("commit: %w", err)
 	}
 	events.Log("Released write lock on %{srcDb}s", s.LDBPath)
 	events.Log("Checkpointed WAL on %{srcDb}s", s.LDBPath)

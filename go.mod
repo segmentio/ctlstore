@@ -14,10 +14,8 @@ require (
 	github.com/gorilla/mux v1.7.3
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.4.1
-	github.com/pkg/errors v0.9.1
 	github.com/segmentio/cli v0.4.2
 	github.com/segmentio/conf v1.1.0
-	github.com/segmentio/errors-go v1.0.0
 	github.com/segmentio/events/v2 v2.3.2
 	github.com/segmentio/go-sqlite3 v1.11.1
 	github.com/segmentio/stats/v4 v4.6.2

@@ -11,7 +11,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/pkg/errors"
 	ctldbpkg "github.com/segmentio/ctlstore/pkg/ctldb"
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/limits"
@@ -90,7 +89,7 @@ func (s *executiveService) Start(ctx context.Context, bind string) error {
 
 	// tell the limiter to start picking up db changes
 	if err := s.limiter.start(ctx); err != nil {
-		return errors.Wrap(err, "could not start limiter")
+		return fmt.Errorf("could not start limiter: %w", err)
 	}
 
 	// perform instrumentation in the background

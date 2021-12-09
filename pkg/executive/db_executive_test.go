@@ -3,6 +3,7 @@ package executive
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"sort"
@@ -12,7 +13,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/pkg/errors"
+
 	"github.com/segmentio/ctlstore/pkg/ctldb"
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/limits"
@@ -455,13 +456,13 @@ func TestDBExecutiveAddFieldsLocksLedger(t *testing.T) {
 					sql := "SELECT seq FROM ctlstore_dml_ledger WHERE seq > ? ORDER BY seq LIMIT 10"
 					rows, err := u.db.QueryContext(u.ctx, sql, lastSeq)
 					if err != nil {
-						return errors.Wrap(err, "fetch")
+						return fmt.Errorf("fetch: %w", err)
 					}
 					for rows.Next() {
 						var seq int64
 						err := rows.Scan(&seq)
 						if err != nil {
-							return errors.Wrap(err, "scan")
+							return fmt.Errorf("scan: %w", err)
 						}
 						if lastSeq == -1 {
 							if seq != 1 {
@@ -481,7 +482,7 @@ func TestDBExecutiveAddFieldsLocksLedger(t *testing.T) {
 					time.Sleep(10 * time.Millisecond)
 				}
 			}()
-			errs <- errors.Wrap(err, "reader")
+			errs <- fmt.Errorf("reader: %w", err)
 		}()
 		for i := 0; i < numGoroutines+1; i++ {
 			err := <-errs
@@ -615,13 +616,13 @@ func TestDBExecutiveCreateTableLocksLedger(t *testing.T) {
 					sql := "SELECT seq FROM ctlstore_dml_ledger WHERE seq > ? ORDER BY seq LIMIT 10"
 					rows, err := u.db.QueryContext(u.ctx, sql, lastSeq)
 					if err != nil {
-						return errors.Wrap(err, "fetch")
+						return fmt.Errorf("fetch: %w", err)
 					}
 					for rows.Next() {
 						var seq int64
 						err := rows.Scan(&seq)
 						if err != nil {
-							return errors.Wrap(err, "scan")
+							return fmt.Errorf("scan: %w", err)
 						}
 						if lastSeq == -1 {
 							if seq != 1 {
@@ -642,7 +643,7 @@ func TestDBExecutiveCreateTableLocksLedger(t *testing.T) {
 					time.Sleep(10 * time.Millisecond)
 				}
 			}()
-			errs <- errors.Wrap(err, "reader")
+			errs <- fmt.Errorf("reader: %w", err)
 		}()
 		for i := 0; i < numGoroutines+1; i++ {
 			err := <-errs
@@ -864,7 +865,7 @@ func TestDBExecutiveTableLimits(t *testing.T) {
 
 		// ensure that you can't set table size limits for tables that do not exist
 		err = u.e.UpdateTableSizeLimit(tableLimit1)
-		require.EqualError(t, errors.Cause(err), "table 'foo___bar' not found")
+		require.EqualError(t, err, "table 'foo___bar' not found")
 
 		// createTable creates a table in the ctldb with a generic schema
 		createTable := func(family, name string) {

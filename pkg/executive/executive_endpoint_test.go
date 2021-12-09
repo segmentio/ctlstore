@@ -3,13 +3,13 @@ package executive_test
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/pkg/errors"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/segmentio/ctlstore/pkg/errs"
@@ -923,7 +923,7 @@ func TestExecEndpointHandler(_t *testing.T) {
 			Method:             http.MethodGet,
 			ExpectedStatusCode: http.StatusNotFound,
 			PreFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
-				atom.ei.TableSchemaReturns(nil, errors.Wrap(executive.ErrTableDoesNotExist, "boom"))
+				atom.ei.TableSchemaReturns(nil, fmt.Errorf("boom: %w", executive.ErrTableDoesNotExist))
 			},
 			PostFunc: func(t *testing.T, atom *testExecEndpointHandlerAtom) {
 				require.EqualValues(t, 1, atom.ei.TableSchemaCallCount())

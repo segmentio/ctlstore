@@ -1,6 +1,8 @@
 package sqlite
 
-import "sync"
+import (
+	"sync"
+)
 
 // SQLChangeBuffer accumulates sqliteWatchChanges and allows them to be popped
 // off later when writing the changelog.
