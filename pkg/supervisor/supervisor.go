@@ -133,7 +133,7 @@ func (s *supervisor) Start(ctx context.Context) {
 	for {
 		sleepDur := s.SleepDuration
 		err := s.snapshot(ctx)
-		if err != nil && errors.Cause(err) != context.Canceled {
+		if errors.Is(err, context.Canceled) {
 			s.incrementSnapshotErrorMetric(1)
 			events.Log("Error taking snapshot: %{error}+v", err)
 			// Use a shorter sleep duration for faster retries
