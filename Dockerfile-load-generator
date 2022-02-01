@@ -1,4 +1,4 @@
-FROM golang:1.15
+FROM 528451384384.dkr.ecr.us-west-2.amazonaws.com/segment-golang:1.17.6
 COPY . /go/src/github.com/segmentio/ctlstore/
 RUN go install github.com/segmentio/ctlstore/pkg/cmd/ctlstore-mutator
 ENTRYPOINT /go/bin/ctlstore-mutator
