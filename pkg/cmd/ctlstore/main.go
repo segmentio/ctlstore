@@ -3,10 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -116,10 +114,6 @@ type heartbeatCliConfig struct {
 	Dogstatsd         dogstatsdConfig `conf:"dogstatsd" help:"dogstatsd Configuration"`
 }
 
-type siteConfig struct {
-	Bind string `conf:"bind" help:"The bind address"`
-}
-
 type ldbReadKeyParams struct {
 	LDBPath string `conf:"ldb-path" help:"Path to LDB file" validate:"nonzero"`
 	Family  string `conf:"family" validate:"nonzero"`
@@ -157,7 +151,6 @@ func main() {
 			{Name: "heartbeat", Help: "Run the ctlstore Heartbeat service"},
 			{Name: "ldb-read-key", Help: "Reads a key from the LDB"},
 			{Name: "ctldb-schema", Help: "Dump the MySQL schema for the CtlDB"},
-			{Name: "site", Help: "Run the ctlstore site in a browser"},
 		},
 	}
 
@@ -183,8 +176,6 @@ func main() {
 		ctldbSchema(ctx, args)
 	case "ldb-read-key":
 		ldbReadKey(ctx, args)
-	case "site":
-		site(ctx, args)
 	default:
 		panic("inconceivable")
 	}
@@ -318,31 +309,6 @@ func supervisor(ctx context.Context, args []string) {
 	if err != nil && !errs.IsCanceled(err) {
 		events.Log("Fatal Supervisor error: %{error}+v", err)
 		errs.IncrDefault(stats.T("op", "startup"))
-	}
-}
-
-func site(ctx context.Context, args []string) {
-	cfg := siteConfig{Bind: "localhost:3000"}
-	loadConfig(&cfg, "site", args)
-	fs := http.FileServer(http.Dir("docs"))
-	normalizer := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		base := filepath.Base(r.URL.Path)
-		ext := filepath.Ext(r.URL.Path)
-		if ext == "" && base != "/" {
-			r.URL.Path = "/"
-		}
-		fs.ServeHTTP(w, r)
-	})
-	http.Handle("/", normalizer)
-	log.Printf("Starting site at %s", cfg.Bind)
-	errc := make(chan error, 1)
-	go func() {
-		errc <- http.ListenAndServe(cfg.Bind, nil)
-	}()
-	select {
-	case <-ctx.Done():
-	case err := <-errc:
-		log.Println("Server stopped:", err)
 	}
 }
 
