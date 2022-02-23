@@ -1,4 +1,4 @@
-FROM golang:alpine
+FROM golang:1.14-alpine
 ENV SRC github.com/segmentio/ctlstore
 ARG VERSION
 
