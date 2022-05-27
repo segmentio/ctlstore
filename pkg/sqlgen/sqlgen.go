@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/errors-go"
@@ -321,11 +322,16 @@ func (t *MetaTable) Validate() error {
 	return nil
 }
 
+// without a mutex guarding sqlDriverNamesByType, parallel tests will result in
+// race detector failures, on top of inconsistent errors due to this global
+// state being modified concurrently.
+var sqlDriverNamesByTypeMux sync.RWMutex
 var sqlDriverNamesByType map[reflect.Type]string
 
 // The database/sql API doesn't provide a way to get the registry name for
 // a driver from the driver type.
 func SqlDriverToDriverName(driver driver.Driver) string {
+	sqlDriverNamesByTypeMux.Lock()
 	if sqlDriverNamesByType == nil {
 		sqlDriverNamesByType = map[reflect.Type]string{}
 
@@ -343,7 +349,10 @@ func SqlDriverToDriverName(driver driver.Driver) string {
 			}
 		}
 	}
+	sqlDriverNamesByTypeMux.Unlock()
 
+	sqlDriverNamesByTypeMux.RLock()
+	defer sqlDriverNamesByTypeMux.RUnlock()
 	driverType := reflect.TypeOf(driver)
 	if driverName, found := sqlDriverNamesByType[driverType]; found {
 		return driverName

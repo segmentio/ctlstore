@@ -52,6 +52,40 @@ func NewLDBTestUtil(t testing.TB) (*LDBTestUtil, func()) {
 	}
 }
 
+// NewLDBTestUtilLocal is just like NewLDBTestUtil above except it does not rely
+// on global state and is therefore threadsafe, at the cost of requiring users
+// to use ensure that the DB property is used to initialize the ctlstore Reader
+// instead of relying on the global/default init.
+func NewLDBTestUtilLocal(t testing.TB) (*LDBTestUtil, func()) {
+	tmpDir, err := ioutil.TempDir("", "ldb_test")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	path := filepath.Join(tmpDir, ldb.DefaultLDBFilename)
+
+	db, err := sql.Open(ldb.LDBDatabaseDriver, fmt.Sprintf(
+		"file:%s?_journal_mode=wal&mode=%s&cache=shared",
+		path,
+		"rwc",
+	))
+	if err != nil {
+		os.RemoveAll(tmpDir)
+		t.Fatal(err)
+	}
+
+	err = ldb.EnsureLdbInitialized(context.Background(), db)
+	if err != nil {
+		os.RemoveAll(tmpDir)
+		t.Fatal(err)
+	}
+
+	tu := &LDBTestUtil{DB: db, T: t}
+	return tu, func() {
+		os.RemoveAll(tmpDir)
+	}
+}
+
 // LDBTestUtil provides basic unit testing facilities for injecting data
 // into a "fake" LDB.
 type LDBTestUtil struct {
