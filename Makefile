@@ -29,7 +29,7 @@ build: deps
 
 .PHONY: docker
 docker:
-	$Qdocker buildx build --platform linux/arm64 --build-arg VERSION=$(VERSION) \
+	$Qdocker buildx build --platform linux/arm64,linux/amd64 --build-arg VERSION=$(VERSION) \
 		-t $(DOCKER_REPO):$(VERSION) \
 		--push .
 

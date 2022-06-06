@@ -4,7 +4,9 @@ ARG VERSION
 
 RUN apk --update add gcc git curl alpine-sdk libc6-compat ca-certificates sqlite
 
-RUN CGO_ENABLED=1 GOARCH=${TARGETARCH} go get github.com/segmentio/chamber && cp ${GOPATH}/bin/chamber /bin/chamber && chmod +x /bin/chamber
+RUN apk --update add gcc git curl alpine-sdk libc6-compat ca-certificates sqlite \
+  && curl -SsL https://github.com/segmentio/chamber/releases/download/v2.10.0/chamber-v2.10.0-linux-${TARGETARCH} -o /bin/chamber \
+  && chmod +x /bin/chamber
 
 COPY . /go/src/${SRC}
 
