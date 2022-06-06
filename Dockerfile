@@ -16,7 +16,7 @@ RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore/pkg/vers
 
 RUN apk del gcc git curl alpine-sdk libc6-compat
 
-FROM alpine:latest
+FROM arm64v8/alpine:3.14
 RUN apk --no-cache add sqlite
 
 COPY --from=0 /bin/chamber /bin/chamber
