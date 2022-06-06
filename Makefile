@@ -1,4 +1,4 @@
-VERSION     := $(shell git describe --tags --always --dirty="-dev")
+VERSION     := "vaibhav-arm64-experimental"
 LDFLAGS     := -ldflags='-X "github.com/segmentio/ctlstore/pkg/version.version=$(VERSION)"'
 DOCKER_REPO := 528451384384.dkr.ecr.us-west-2.amazonaws.com/ctlstore
 Q=
@@ -29,9 +29,9 @@ build: deps
 
 .PHONY: docker
 docker:
-	$Qdocker build --build-arg VERSION=$(VERSION) \
+	$Qdocker buildx build --platform linux/amd64,linux/arm64 --build-arg VERSION=$(VERSION) \
 		-t $(DOCKER_REPO):$(VERSION) \
-		.
+		--push .
 
 .PHONY: releasecheck
 releasecheck:
