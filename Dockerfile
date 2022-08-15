@@ -1,4 +1,4 @@
-FROM golang:1.14-alpine
+FROM --platform=linux/amd64 golang:1.14-alpine
 ENV SRC github.com/segmentio/ctlstore
 ARG VERSION
 
@@ -16,7 +16,7 @@ RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore/pkg/vers
 
 RUN apk del gcc git curl alpine-sdk libc6-compat
 
-FROM 528451384384.dkr.ecr.us-west-2.amazonaws.com/segment-alpine
+FROM --platform=linux/amd64 528451384384.dkr.ecr.us-west-2.amazonaws.com/segment-alpine
 RUN apk --no-cache add sqlite
 
 COPY --from=0 /bin/chamber /bin/chamber
