@@ -60,6 +60,7 @@ type reflectorCliConfig struct {
 	LedgerHealth          ledgerHealthConfig `conf:"ledger-latency" help:"Configure ledger latency behavior"`
 	Dogstatsd             dogstatsdConfig    `conf:"dogstatsd" help:"dogstatsd Configuration"`
 	MetricsBind           string             `conf:"metrics-bind" help:"address to serve Prometheus metircs"`
+	RestartLimit          int                `conf:"restart-limit" help:"Maximum restarts before the reflector exits (-1 is default and means no limit)"`
 }
 
 type executiveCliConfig struct {
@@ -477,6 +478,7 @@ func defaultReflectorCLIConfig(isSupervisor bool) reflectorCliConfig {
 		PollJitterCoefficient: 0.25,
 		QueryBlockSize:        100,
 		Dogstatsd:             defaultDogstatsdConfig(),
+		RestartLimit:          0,
 		LedgerHealth: ledgerHealthConfig{
 			Disable:                 false,
 			MaxHealthyLatency:       time.Minute,
@@ -525,6 +527,7 @@ func newReflector(cliCfg reflectorCliConfig, isSupervisor bool) (*reflectorpkg.R
 		BootstrapURL:    cliCfg.BootstrapURL,
 		BootstrapRegion: cliCfg.BootstrapRegion,
 		IsSupervisor:    isSupervisor,
+		RestartLimit:    cliCfg.RestartLimit,
 		LedgerHealth: ledger.HealthConfig{
 			DisableECSBehavior:      cliCfg.LedgerHealth.Disable || cliCfg.LedgerHealth.DisableECSBehavior,
 			MaxHealthyLatency:       cliCfg.LedgerHealth.MaxHealthyLatency,

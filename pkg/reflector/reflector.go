@@ -37,6 +37,7 @@ type Reflector struct {
 	upstreamdb    *sql.DB
 	ledgerMonitor *ledger.Monitor
 	stop          chan struct{}
+	restartLimit  int
 }
 
 // UpstreamConfig specifies how to reach and treat the upstream CtlDB.
@@ -62,6 +63,7 @@ type ReflectorConfig struct {
 	IsSupervisor     bool
 	LDBWriteCallback ldbwriter.LDBWriteCallback // optional
 	BootstrapRegion  string                     // optional
+	RestartLimit     int
 }
 
 // Printable returns a "pretty" stringified version of the config
@@ -240,12 +242,14 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 		upstreamdb:    upstreamdb,
 		ledgerMonitor: ledgerMon,
 		stop:          stop,
+		restartLimit:  config.RestartLimit,
 	}, nil
 }
 
 func (r *Reflector) Start(ctx context.Context) error {
 	events.Log("Starting Reflector.")
 	go r.ledgerMonitor.Start(ctx)
+	restarts := 0
 	for {
 		err := func() error {
 			shovel, err := r.shovel()
@@ -273,6 +277,11 @@ func (r *Reflector) Start(ctx context.Context) error {
 			}
 			events.Log("Error encountered during shoveling: %{error}+v", err)
 		}
+		if r.restartLimit != -1 && restarts >= r.restartLimit {
+			events.Log(fmt.Sprintf("Shoveling restarts hit the limit of %d, so reflector is exiting", restarts))
+			return nil
+		}
+		restarts += 1
 		select {
 		case <-r.stop:
 			return nil
