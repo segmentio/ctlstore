@@ -8,10 +8,12 @@ RUN apk --update add gcc git curl alpine-sdk libc6-compat ca-certificates sqlite
 
 COPY . /go/src/${SRC}
 
-RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=$VERSION" ${SRC}/pkg/cmd/ctlstore \
+RUN GO111MODULE=on go get github.com/go-delve/delve/cmd/dlv@latest
+
+RUN CGO_ENABLED=1 go install -gcflags "all=-N -l" -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=$VERSION" ${SRC}/pkg/cmd/ctlstore \
   && cp ${GOPATH}/bin/ctlstore /usr/local/bin
 
-RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=$VERSION" ${SRC}/pkg/cmd/ctlstore-cli \
+RUN CGO_ENABLED=1 go install -gcflags "all=-N -l" -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=$VERSION" ${SRC}/pkg/cmd/ctlstore-cli \
   && cp ${GOPATH}/bin/ctlstore-cli /usr/local/bin
 
 RUN apk del gcc git curl alpine-sdk libc6-compat
@@ -22,3 +24,4 @@ RUN apk --no-cache add sqlite
 COPY --from=0 /bin/chamber /bin/chamber
 COPY --from=0 /usr/local/bin/ctlstore /usr/local/bin/
 COPY --from=0 /usr/local/bin/ctlstore-cli /usr/local/bin/
+COPY --from=0 /go/bin/dlv /bin/dlv
