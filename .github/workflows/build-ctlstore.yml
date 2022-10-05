@@ -33,11 +33,12 @@ jobs:
         run: |
           make test
 
-      - name: Snyk Setup
-        run:  curl -sL https://raw.githubusercontent.com/segmentio/snyk_helpers/master/initialization/snyk.sh | sh
+      - name: Run Snyk
+        uses: snyk/actions/golang@master
         env:
-          SNYK_FAIL_ON: upgradable
-          SNYK_SEVERITY_THRESHOLD: high
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --fail-on=upgradable
 
       - name: build
         run: |
