@@ -33,13 +33,6 @@ jobs:
         run: |
           make test
 
-      - name: Run Snyk
-        uses: snyk/actions/golang@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high --fail-on=upgradable
-
       - name: build
         run: |
           make build
