@@ -5,7 +5,6 @@ go 1.13
 require (
 	github.com/AlekSi/pointer v1.0.0
 	github.com/aws/aws-sdk-go v1.37.8
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang/protobuf v1.5.2 // indirect
@@ -21,12 +20,11 @@ require (
 	github.com/segmentio/events/v2 v2.3.2
 	github.com/segmentio/go-sqlite3 v1.11.1
 	github.com/segmentio/stats/v4 v4.6.2
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.8.1
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420 // indirect
 	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
 	golang.org/x/tools v0.1.5 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
