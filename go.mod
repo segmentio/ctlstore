@@ -14,7 +14,7 @@ require (
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.4.1
 	github.com/pkg/errors v0.9.1
-	github.com/segmentio/cli v0.4.2
+	github.com/segmentio/cli v0.5.1
 	github.com/segmentio/conf v1.1.0
 	github.com/segmentio/errors-go v1.0.0
 	github.com/segmentio/events/v2 v2.3.2
