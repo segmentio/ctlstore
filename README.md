@@ -85,3 +85,4 @@ $ make deps
 $ make vendor
 $ docker-compose -f docker-compose-example.yml up -d
 ```
+test
