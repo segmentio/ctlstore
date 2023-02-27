@@ -39,7 +39,7 @@ services:
       - -writer-secret
       - heartbeat
 
-  # supervisor periodically snapshots ldb
+    # supervisor periodically snapshots ldb
     supervisor:
       restart: always
       build:

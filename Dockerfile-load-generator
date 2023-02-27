@@ -1,4 +1,4 @@
-FROM golang:1.15
+FROM golang:1.19
 COPY . /go/src/github.com/segmentio/ctlstore/
 RUN go install github.com/segmentio/ctlstore/pkg/cmd/ctlstore-mutator
 ENTRYPOINT /go/bin/ctlstore-mutator
