@@ -95,14 +95,14 @@ func (m *Monitor) Start(ctx context.Context) {
 					}
 					health = pointer.ToBool(false)
 				}
-				switch {
-				case health == nil:
-					stats.Set("ledger-health", 1, stats.T("status", "unknown"))
-				case *health == false:
-					stats.Set("ledger-health", 1, stats.T("status", "unhealthy"))
-				case *health == true:
-					stats.Set("ledger-health", 1, stats.T("status", "healthy"))
-				}
+			}
+			switch {
+			case health == nil:
+				stats.Set("ledger_health", 1, stats.T("status", "unknown"))
+			case *health == false:
+				stats.Set("ledger_health", 1, stats.T("status", "unhealthy"))
+			case *health == true:
+				stats.Set("ledger_health", 1, stats.T("status", "healthy"))
 			}
 			return nil
 		}()
