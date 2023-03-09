@@ -138,7 +138,7 @@ func (reader *LDBReader) GetLedgerLatency(ctx context.Context) (time.Duration, e
 	}
 }
 
-// GetRowsByKeyPrefix returns a *Rows iterator that will supply all of the rows in
+// GetRowsByKeyPrefix returns a *Rows iterator that will supply all the rows in
 // the family and table match the supplied primary key prefix.
 func (reader *LDBReader) GetRowsByKeyPrefix(ctx context.Context, familyName string, tableName string, key ...interface{}) (*Rows, error) {
 	ctx = discardContext()
@@ -201,8 +201,8 @@ func (reader *LDBReader) GetRowsByKeyPrefix(ctx context.Context, familyName stri
 // filling the data into the out param.
 //
 // The out param may be one of the following types:
-//    * pointer to struct
-//    * map[string]interface{}
+//   - pointer to struct
+//   - map[string]interface{}
 //
 // The key parameter can support composite keys by passing a slice type.
 func (reader *LDBReader) GetRowByKey(
@@ -240,7 +240,7 @@ func (reader *LDBReader) GetRowByKey(
 	// very likely use the global singleton reader, this means that we
 	// must assume that the cache will be shared across the whole process.
 	// The way that a PK would be changed on a table is that it would need
-	// to be dropped and re-created. In the mean time, this cache will
+	// to be dropped and re-created. In the meantime, this cache will
 	// go stale. The way that this is dealt with is to clear the cache if
 	// the statement encounters any execution errors.
 	pk, err := reader.getPrimaryKey(ctx, ldbTable) // assumes RLock held
@@ -367,11 +367,11 @@ func (reader *LDBReader) Ping(ctx context.Context) bool {
 // ensure that a supplied key is converted appropriately with respect
 // to the type of each PK column.
 func convertKeyBeforeQuery(pk schema.PrimaryKey, key []interface{}) error {
+	// sanity check on th length of the pk field type slice
+	if len(key) > len(pk.Types) {
+		return errors.New("insufficient key field type data")
+	}
 	for i, k := range key {
-		// sanity check on th elength of the pk field type slice
-		if i >= len(pk.Types) {
-			return errors.New("insufficient key field type data")
-		}
 		pkt := pk.Types[i]
 		switch k := k.(type) {
 		case string:
@@ -398,7 +398,7 @@ func (reader *LDBReader) unlock() {
 func (reader *LDBReader) invalidatePKCache(ldbTable string) {
 	if reader.pkCache == nil {
 		// Cache hasn't even been initialized yet, so invalidation would
-		// do nothing anyways.
+		// do nothing anyway.
 		return
 	}
 
