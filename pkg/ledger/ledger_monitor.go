@@ -80,21 +80,19 @@ func (m *Monitor) Start(ctx context.Context) {
 			}
 			// always instrument ledger latency even if ECS behavior is disabled.
 			stats.Set("reflector-ledger-latency", latency)
-			if !m.cfg.DisableECSBehavior {
-				switch {
-				case latency <= m.cfg.MaxHealthyLatency && (health == nil || *health != true):
-					// set a healthy attribute
-					if err := m.setHealthAttribute(ctx, m.cfg.HealthyAttributeValue); err != nil {
-						return errors.Wrap(err, "set healthy")
-					}
-					health = pointer.ToBool(true)
-				case latency > m.cfg.MaxHealthyLatency && (health == nil || *health != false):
-					// set an unhealthy attribute
-					if err := m.setHealthAttribute(ctx, m.cfg.UnhealthyAttributeValue); err != nil {
-						return errors.Wrap(err, "set unhealthy")
-					}
-					health = pointer.ToBool(false)
+			switch {
+			case latency <= m.cfg.MaxHealthyLatency && (health == nil || *health != true):
+				// set a healthy attribute
+				if err := m.setHealthAttribute(ctx, m.cfg.HealthyAttributeValue); err != nil {
+					return errors.Wrap(err, "set healthy")
 				}
+				health = pointer.ToBool(true)
+			case latency > m.cfg.MaxHealthyLatency && (health == nil || *health != false):
+				// set an unhealthy attribute
+				if err := m.setHealthAttribute(ctx, m.cfg.UnhealthyAttributeValue); err != nil {
+					return errors.Wrap(err, "set unhealthy")
+				}
+				health = pointer.ToBool(false)
 			}
 			switch {
 			case health == nil:
