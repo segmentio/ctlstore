@@ -122,6 +122,10 @@ func (m *Monitor) Start(ctx context.Context) {
 }
 
 func (m *Monitor) setHealthAttribute(ctx context.Context, attrValue string) error {
+	if m.cfg.DisableECSBehavior {
+		return nil
+	}
+
 	events.Log("Setting ECS instance attribute: %s=%s", m.cfg.AttributeName, attrValue)
 	ecsMeta, err := m.getECSMetadata(ctx)
 	if err != nil {
