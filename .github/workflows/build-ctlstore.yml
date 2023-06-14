@@ -27,7 +27,7 @@ jobs:
 
       - name: Deps
         run: |
-          make deps
+          make vendor
 
       - name: Test
         run: |
