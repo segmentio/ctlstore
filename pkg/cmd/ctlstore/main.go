@@ -23,7 +23,6 @@ import (
 	"github.com/segmentio/ctlstore/pkg/errs"
 	executivepkg "github.com/segmentio/ctlstore/pkg/executive"
 	heartbeatpkg "github.com/segmentio/ctlstore/pkg/heartbeat"
-	"github.com/segmentio/ctlstore/pkg/ldbwriter"
 	"github.com/segmentio/ctlstore/pkg/ledger"
 	reflectorpkg "github.com/segmentio/ctlstore/pkg/reflector"
 	sidecarpkg "github.com/segmentio/ctlstore/pkg/sidecar"
@@ -47,25 +46,22 @@ type sidecarConfig struct {
 }
 
 type reflectorCliConfig struct {
-	LDBPath                    string                   `conf:"ldb-path" help:"Path to LDB file" validate:"nonzero"`
-	ChangelogPath              string                   `conf:"changelog-path" help:"Path to changelog file"`
-	ChangelogSize              int                      `conf:"changelog-size" help:"Maximum size of the changelog file"`
-	UpstreamDriver             string                   `conf:"upstream-driver" help:"Upstream driver name (e.g. sqlite3)" validate:"nonzero"`
-	UpstreamDSN                string                   `conf:"upstream-dsn" help:"Upstream DSN (e.g. path to file if sqlite3)" validate:"nonzero"`
-	UpstreamLedgerTable        string                   `conf:"upstream-ledger-table" help:"Table on the upstream to look for statement ledger"`
-	BootstrapURL               string                   `conf:"bootstrap-url" help:"Bootstraps LDB from an S3 URL"`
-	BootstrapRegion            string                   `conf:"bootstrap-region" help:"If specified, indicates which region in which the S3 bucket lives"`
-	PollInterval               time.Duration            `conf:"poll-interval" help:"How often to pull the upstream" validate:"nonzero"`
-	PollJitterCoefficient      float64                  `conf:"poll-jitter-coefficient" help:"Coefficient for poll jittering"`
-	QueryBlockSize             int                      `conf:"query-block-size" help:"Number of ledger entries to get at once"`
-	Debug                      bool                     `conf:"debug" help:"Turns on debug logging"`
-	LedgerHealth               ledgerHealthConfig       `conf:"ledger-latency" help:"Configure ledger latency behavior"`
-	Dogstatsd                  dogstatsdConfig          `conf:"dogstatsd" help:"dogstatsd Configuration"`
-	MetricsBind                string                   `conf:"metrics-bind" help:"address to serve Prometheus metircs"`
-	WALPollInterval            time.Duration            `conf:"wal-poll-interval" help:"How often to pull the sqlite's wal size and status. 0 indicates disabled monitoring'"`
-	WALCheckpointThresholdSize int                      `conf:"wal-checkpoint-threshold-size" help:"Performs a checkpoint after the WAL file exceeds this size in bytes"`
-	WALCheckpointType          ldbwriter.CheckpointType `conf:"wal-checkpoint-type" help:"what type of checkpoint to manually perform once the wal size is exceeded"`
-	BusyTimeoutMS              int                      `conf:"busy-timeout-ms" help:"Set a busy timeout on the connection string for sqlite in milliseconds"`
+	LDBPath               string             `conf:"ldb-path" help:"Path to LDB file" validate:"nonzero"`
+	ChangelogPath         string             `conf:"changelog-path" help:"Path to changelog file"`
+	ChangelogSize         int                `conf:"changelog-size" help:"Maximum size of the changelog file"`
+	UpstreamDriver        string             `conf:"upstream-driver" help:"Upstream driver name (e.g. sqlite3)" validate:"nonzero"`
+	UpstreamDSN           string             `conf:"upstream-dsn" help:"Upstream DSN (e.g. path to file if sqlite3)" validate:"nonzero"`
+	UpstreamLedgerTable   string             `conf:"upstream-ledger-table" help:"Table on the upstream to look for statement ledger"`
+	BootstrapURL          string             `conf:"bootstrap-url" help:"Bootstraps LDB from an S3 URL"`
+	BootstrapRegion       string             `conf:"bootstrap-region" help:"If specified, indicates which region in which the S3 bucket lives"`
+	PollInterval          time.Duration      `conf:"poll-interval" help:"How often to pull the upstream" validate:"nonzero"`
+	PollJitterCoefficient float64            `conf:"poll-jitter-coefficient" help:"Coefficient for poll jittering"`
+	QueryBlockSize        int                `conf:"query-block-size" help:"Number of ledger entries to get at once"`
+	Debug                 bool               `conf:"debug" help:"Turns on debug logging"`
+	LedgerHealth          ledgerHealthConfig `conf:"ledger-latency" help:"Configure ledger latency behavior"`
+	Dogstatsd             dogstatsdConfig    `conf:"dogstatsd" help:"dogstatsd Configuration"`
+	MetricsBind           string             `conf:"metrics-bind" help:"address to serve Prometheus metircs"`
+	WALPollInterval       time.Duration      `conf:"wal-poll-interval" help:"How often to pull the sqlite's wal size and status'"`
 }
 
 type executiveCliConfig struct {
@@ -492,11 +488,7 @@ func defaultReflectorCLIConfig(isSupervisor bool) reflectorCliConfig {
 			PollInterval:            10 * time.Second,
 			AWSRegion:               os.Getenv("AWS_REGION"),
 		},
-		// disabled by default
-		WALPollInterval: 0,
-		// 8 MB, double what a "healthy" WAL file should be https://www.sqlite.org/compile.html#default_wal_autocheckpoint
-		WALCheckpointThresholdSize: 8 * 1024 * 1024,
-		WALCheckpointType:          ldbwriter.Passive,
+		WALPollInterval: 1 * time.Minute,
 	}
 	if isSupervisor {
 		// the supervisor runs as an ECS task, so it cannot yet set
@@ -554,10 +546,6 @@ func newReflector(cliCfg reflectorCliConfig, isSupervisor bool) (*reflectorpkg.R
 			QueryBlockSize:        cliCfg.QueryBlockSize,
 			PollTimeout:           5 * time.Second,
 		},
-		WALPollInterval:            cliCfg.WALPollInterval,
-		DoMonitorWAL:               cliCfg.WALPollInterval > 0,
-		WALCheckpointThresholdSize: cliCfg.WALCheckpointThresholdSize,
-		WALCheckpointType:          cliCfg.WALCheckpointType,
-		BusyTimeoutMS:              cliCfg.BusyTimeoutMS,
+		WALPollInterval: cliCfg.WALPollInterval,
 	})
 }
