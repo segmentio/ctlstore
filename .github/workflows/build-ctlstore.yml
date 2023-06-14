@@ -1,0 +1,38 @@
+name: build
+on:
+  - push
+jobs:
+  build:
+    name: Executes a full build
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.6
+        env:
+          MYSQL_ROOT_PASSWORD: ctldbpw
+          MYSQL_DATABASE: ctldb
+          MYSQL_USER: ctldb
+          MYSQL_PASSWORD: ctldbpw
+        ports:
+          - 3306:3306
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup go 1.20
+        uses: actions/setup-go@v3
+        with:
+            go-version: 1.20
+
+      - name: Deps
+        run: |
+          make vendor
+
+      - name: Test
+        run: |
+          make test
+
+      - name: build
+        run: |
+          make build
