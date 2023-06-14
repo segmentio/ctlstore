@@ -189,7 +189,7 @@ func (reader *LDBReader) GetRowsByKeyPrefix(ctx context.Context, familyName stri
 		if err != nil {
 			return nil, err
 		}
-		res := &Rows{rows: rows, cols: cols}
+		res := &Rows{rows: rows, cols: cols, familyName: familyName, tableName: tableName}
 		return res, nil
 	case err == sql.ErrNoRows:
 		return &Rows{}, nil
