@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -12,11 +12,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecs"
-	"github.com/segmentio/ctlstore/pkg/errs"
-	"github.com/segmentio/ctlstore/pkg/utils"
 	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
+
+	"github.com/segmentio/ctlstore/pkg/errs"
+	"github.com/segmentio/ctlstore/pkg/utils"
 )
 
 const (
@@ -192,7 +193,7 @@ func (m *Monitor) getECSMetadata(ctx context.Context) (meta EcsMetadata, err err
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
-			b, _ := io.ReadAll(resp.Body)
+			b, _ := ioutil.ReadAll(resp.Body)
 			return errors.Errorf("could not get ecs metadata: [%d]: %s", resp.StatusCode, b)
 		}
 		if err = json.NewDecoder(resp.Body).Decode(&meta); err != nil {
