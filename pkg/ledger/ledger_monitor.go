@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -193,7 +193,7 @@ func (m *Monitor) getECSMetadata(ctx context.Context) (meta EcsMetadata, err err
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
-			b, _ := io.ReadAll(resp.Body)
+			b, _ := ioutil.ReadAll(resp.Body)
 			return errors.Errorf("could not get ecs metadata: [%d]: %s", resp.StatusCode, b)
 		}
 		if err = json.NewDecoder(resp.Body).Decode(&meta); err != nil {
