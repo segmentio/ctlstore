@@ -6,14 +6,17 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
+	"github.com/segmentio/stats/v4"
+
+	"github.com/segmentio/ctlstore/pkg/errs"
 )
 
 type downloadTo interface {
@@ -25,7 +28,7 @@ type S3Downloader struct {
 	Bucket              string
 	Key                 string
 	S3Client            S3Client
-	StartOverOnNotFound bool // whether or not we should rebuild LDB if snapshot not found
+	StartOverOnNotFound bool // whether we should rebuild LDB if snapshot not found
 }
 
 func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
@@ -33,6 +36,8 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 	if err != nil {
 		return -1, err
 	}
+	start := time.Now()
+	defer stats.Observe("snapshot_download_time", time.Now().Sub(start))
 	obj, err := client.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.Key),
