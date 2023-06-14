@@ -37,9 +37,7 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 		return -1, err
 	}
 	start := time.Now()
-	defer func() {
-		stats.Observe("snapshot_download_time", time.Now().Sub(start))
-	}()
+	defer stats.Observe("snapshot_download_time", time.Now().Sub(start))
 	obj, err := client.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.Key),
