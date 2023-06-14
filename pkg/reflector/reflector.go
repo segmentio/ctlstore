@@ -36,6 +36,7 @@ type Reflector struct {
 	ldb           *sql.DB
 	upstreamdb    *sql.DB
 	ledgerMonitor *ledger.Monitor
+	walMonitor    *WALMonitor
 	stop          chan struct{}
 }
 
@@ -62,6 +63,7 @@ type ReflectorConfig struct {
 	IsSupervisor     bool
 	LDBWriteCallback ldbwriter.LDBWriteCallback // optional
 	BootstrapRegion  string                     // optional
+	WALPollInterval  time.Duration
 }
 
 // Printable returns a "pretty" stringified version of the config
@@ -234,18 +236,26 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 		return nil, errors.Wrap(err, "build ledger latency monitor")
 	}
 
+	w := &ldbwriter.SqlLdbWriter{Db: ldbDB}
+	walMon := NewMonitor(MonitorConfig{
+		PollInterval: config.WALPollInterval,
+		Path:         config.LDBPath + "-wal",
+	}, w.QueryCheckpoint)
+
 	return &Reflector{
 		shovel:        shovel,
 		ldb:           ldbDB,
 		upstreamdb:    upstreamdb,
 		ledgerMonitor: ledgerMon,
 		stop:          stop,
+		walMonitor:    walMon,
 	}, nil
 }
 
 func (r *Reflector) Start(ctx context.Context) error {
 	events.Log("Starting Reflector.")
 	go r.ledgerMonitor.Start(ctx)
+	go r.walMonitor.Start(ctx)
 	for {
 		err := func() error {
 			shovel, err := r.shovel()

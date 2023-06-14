@@ -191,3 +191,37 @@ func (writer *SqlLdbWriter) Close() error {
 	}
 	return nil
 }
+
+// PragmaWALResult https://www.sqlite.org/pragma.html#pragma_wal_checkpoint
+type PragmaWALResult struct {
+	// 0 indicates not busy, checkpoint was not blocked from completing. 1 is blocked
+	Busy int
+	// number of modified pages that have been written to the write-ahead log file
+	Log int
+	// number of pages in the write-ahead log file that have been successfully moved back into the database file at the conclusion of the checkpoint
+	Checkpointed int
+}
+
+func (p *PragmaWALResult) String() string {
+	return fmt.Sprintf("busy=%d, log=%d, checkpointed=%d", p.Busy, p.Log, p.Checkpointed)
+}
+
+// QueryCheckpoint queries the wal checkpoint stats sqlite updates as it manages the WAL file
+// see https://www.sqlite.org/pragma.html#pragma_wal_checkpoint for more details
+// requires write access
+func (writer *SqlLdbWriter) QueryCheckpoint() (*PragmaWALResult, error) {
+	res, err := writer.Db.Query("PRAGMA wal_checkpoint")
+	if err != nil {
+		errs.Incr("sql_ldb_writer.wal_checkpoint.query.error")
+		return nil, err
+	}
+	var p PragmaWALResult
+	if res.Next() {
+		err := res.Scan(&p.Busy, &p.Log, &p.Checkpointed)
+		if err != nil {
+			errs.Incr("sql_ldb_writer.wal_checkpoint.scan.error")
+			return nil, err
+		}
+	}
+	return &p, nil
+}

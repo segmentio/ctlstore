@@ -323,3 +323,26 @@ func TestApplyDMLStatementReplayAborts(t *testing.T) {
 		t.Errorf("Expected %v, got %v", want, got)
 	}
 }
+
+func TestCheckpointQuery(t *testing.T) {
+	db, teardown := ldb.LDBForTest(t)
+	defer teardown()
+	defer db.Close()
+	writer := SqlLdbWriter{Db: db}
+
+	res, err := writer.QueryCheckpoint()
+	if err != nil {
+		t.Fatalf("expected no error")
+	}
+	if res.Busy == 1 {
+		t.Errorf("expected busy to be 0, got %d", res.Busy)
+	}
+
+	if res.Checkpointed <= 0 {
+		t.Errorf("expected Checkpointed to be greater than 0, got %d", res.Checkpointed)
+	}
+
+	if res.Checkpointed != res.Log {
+		t.Errorf("expected checkpointed and log to be equal, got %v", res)
+	}
+}

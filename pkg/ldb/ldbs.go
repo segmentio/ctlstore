@@ -45,7 +45,7 @@ var (
 var testTmpSeq int64 = 0
 
 func LDBForTest(t testing.TB) (res *sql.DB, teardown func()) {
-	tmpDir, err := ioutil.TempDir("", "ldb-for-test")
+	tmpDir, err := os.MkdirTemp("", "ldb-for-test")
 	if err != nil {
 		t.Fatal(err)
 	}
