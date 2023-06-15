@@ -125,5 +125,4 @@ func (m *WALMonitor) getWALSize(path string) (int64, error) {
 		return 0, err
 	}
 	return s.Size(), nil
-
 }
