@@ -36,7 +36,7 @@ type Reflector struct {
 	ldb           *sql.DB
 	upstreamdb    *sql.DB
 	ledgerMonitor *ledger.Monitor
-	walMonitor    *WALMonitor
+	walMonitor    starter
 	stop          chan struct{}
 }
 
@@ -64,6 +64,11 @@ type ReflectorConfig struct {
 	LDBWriteCallback ldbwriter.LDBWriteCallback // optional
 	BootstrapRegion  string                     // optional
 	WALPollInterval  time.Duration
+	DoMonitorWAL     bool
+}
+
+type starter interface {
+	Start(ctx context.Context)
 }
 
 // Printable returns a "pretty" stringified version of the config
@@ -236,11 +241,16 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 		return nil, errors.Wrap(err, "build ledger latency monitor")
 	}
 
-	w := &ldbwriter.SqlLdbWriter{Db: ldbDB}
-	walMon := NewMonitor(MonitorConfig{
-		PollInterval: config.WALPollInterval,
-		Path:         config.LDBPath + "-wal",
-	}, w.QueryCheckpoint)
+	var walMon starter
+	if config.DoMonitorWAL && config.WALPollInterval > 0 {
+		w := &ldbwriter.SqlLdbWriter{Db: ldbDB}
+		walMon = NewMonitor(MonitorConfig{
+			PollInterval: config.WALPollInterval,
+			Path:         config.LDBPath + "-wal",
+		}, w.PassiveCheckpoint)
+	} else {
+		walMon = &noopStarter{}
+	}
 
 	return &Reflector{
 		shovel:        shovel,
@@ -421,3 +431,8 @@ func bootstrapLDB(cfg ldbBootstrapConfig) error {
 	}
 	return errors.Errorf("download of ldb snapshot failed after max attempts reached: %s", err)
 }
+
+type noopStarter struct {
+}
+
+func (n *noopStarter) Start(ctx context.Context) {}

@@ -7,9 +7,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/schema"
-	"github.com/stretchr/testify/require"
 )
 
 var testLdbSeq int
@@ -330,7 +331,7 @@ func TestCheckpointQuery(t *testing.T) {
 	defer db.Close()
 	writer := SqlLdbWriter{Db: db}
 
-	res, err := writer.QueryCheckpoint()
+	res, err := writer.PassiveCheckpoint()
 	if err != nil {
 		t.Fatalf("expected no error")
 	}

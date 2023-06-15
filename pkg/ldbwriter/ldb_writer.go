@@ -6,12 +6,13 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	"github.com/segmentio/events/v2"
+	"github.com/segmentio/stats/v4"
+
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlite"
-	"github.com/segmentio/events/v2"
-	"github.com/segmentio/stats/v4"
 )
 
 // Statement to update the sequence tracker, ensuring that it doesn't go
@@ -196,7 +197,7 @@ func (writer *SqlLdbWriter) Close() error {
 type PragmaWALResult struct {
 	// 0 indicates not busy, checkpoint was not blocked from completing. 1 is blocked
 	Busy int
-	// number of modified pages that have been written to the write-ahead log file
+	// number of modified pages that have been written to the write-ahead log file per a checkpoint run
 	Log int
 	// number of pages in the write-ahead log file that have been successfully moved back into the database file at the conclusion of the checkpoint
 	Checkpointed int
@@ -206,10 +207,10 @@ func (p *PragmaWALResult) String() string {
 	return fmt.Sprintf("busy=%d, log=%d, checkpointed=%d", p.Busy, p.Log, p.Checkpointed)
 }
 
-// QueryCheckpoint queries the wal checkpoint stats sqlite updates as it manages the WAL file
+// PassiveCheckpoint initiates a passive wal checkpoint, returning stats on the checkpoint's progress
 // see https://www.sqlite.org/pragma.html#pragma_wal_checkpoint for more details
 // requires write access
-func (writer *SqlLdbWriter) QueryCheckpoint() (*PragmaWALResult, error) {
+func (writer *SqlLdbWriter) PassiveCheckpoint() (*PragmaWALResult, error) {
 	res, err := writer.Db.Query("PRAGMA wal_checkpoint")
 	if err != nil {
 		errs.Incr("sql_ldb_writer.wal_checkpoint.query.error")

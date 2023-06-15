@@ -8,6 +8,7 @@ import (
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
 
+	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/ldbwriter"
 	"github.com/segmentio/ctlstore/pkg/utils"
 )
@@ -26,6 +27,9 @@ type (
 		// tickerFunc returns a ticker configured for the polling interval
 		tickerFunc   func() *time.Ticker
 		cpTesterFunc checkpointTesterFunc
+		// consecutiveMaxErrors indicates when to stop performing a monitor when it fails consecutiveMaxErrors in a row
+		// under default configuration, this is 5 minutes of failures before stopping
+		consecutiveMaxErrors int
 	}
 	// returns the size of the wal file, or error
 	walSizeFunc func(string) (int64, error)
@@ -37,8 +41,9 @@ type (
 
 func NewMonitor(cfg MonitorConfig, checkpointTester checkpointTesterFunc, opts ...MonitorOps) *WALMonitor {
 	m := &WALMonitor{
-		walPath:      cfg.Path,
-		cpTesterFunc: checkpointTester,
+		walPath:              cfg.Path,
+		cpTesterFunc:         checkpointTester,
+		consecutiveMaxErrors: 5,
 		tickerFunc: func() *time.Ticker {
 			return time.NewTicker(cfg.PollInterval)
 		},
@@ -62,45 +67,47 @@ func (m *WALMonitor) Start(ctx context.Context) {
 		return
 	}
 	sizeCtx, sizeCancel := context.WithCancel(ctx)
-	i := 0
+	statsFailedInARow := 0
 	fn := m.getWALSize
 	if m.walSizeFunc != nil {
 		fn = m.walSizeFunc
 	}
 	go utils.CtxFireLoopTicker(sizeCtx, m.tickerFunc(), func() {
 		// possible for ticker to invoke another loop before cancel makes it to the Done channel
-		if i > 4 {
+		if statsFailedInARow >= m.consecutiveMaxErrors {
 			return
 		}
 		size, err := fn(m.walPath)
 		if err != nil {
 			events.Log("error retrieving wal stat, %s", err)
-			i++
-			if i > 4 {
+			statsFailedInARow++
+			if statsFailedInARow >= m.consecutiveMaxErrors {
 				// cancel to prevent log spamming
 				events.Log("canceling WAL size monitoring due to consistent error, %s", err)
+				errs.Incr("reflector.wal_monitor.persistent_stat_error")
 				sizeCancel()
 			}
 			return
 		}
 		stats.Set("wal-file-size", size)
-		i = 0
+		statsFailedInARow = 0
 	})
 
-	x := 0
+	cpFailedInARow := 0
 	cpCtx, cpCancel := context.WithCancel(ctx)
 	utils.CtxFireLoopTicker(cpCtx, m.tickerFunc(), func() {
 		// possible for ticker to invoke another loop before cancel makes it to the Done channel
-		if x > 4 {
+		if cpFailedInARow >= m.consecutiveMaxErrors {
 			return
 		}
 		res, err := m.cpTesterFunc()
 		if err != nil {
 			events.Log("error checking wal's checkpoint status, %s", err)
-			x++
-			if x > 4 {
+			cpFailedInARow++
+			if cpFailedInARow >= m.consecutiveMaxErrors {
 				// cancel to prevent log spamming
 				events.Log("canceling WAL checkpoint monitoring due to consistent error, %s", err)
+				errs.Incr("reflector.wal_monitor.persistent_checkpoint_error")
 				cpCancel()
 			}
 			return
@@ -114,7 +121,7 @@ func (m *WALMonitor) Start(ctx context.Context) {
 		if res.Log-res.Checkpointed > 0 {
 			stats.Set("wal-uncommitted-pages", res.Log-res.Checkpointed)
 		}
-		x = 0
+		cpFailedInARow = 0
 	})
 }
 
@@ -125,5 +132,4 @@ func (m *WALMonitor) getWALSize(path string) (int64, error) {
 		return 0, err
 	}
 	return s.Size(), nil
-
 }
