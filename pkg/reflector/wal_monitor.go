@@ -117,10 +117,8 @@ func (m *WALMonitor) Start(ctx context.Context) {
 			isBusy = "true"
 		}
 		stats.Set("wal-checkpoint-status", 1, stats.T("busy", isBusy))
-
-		if res.Log-res.Checkpointed > 0 {
-			stats.Set("wal-uncommitted-pages", res.Log-res.Checkpointed)
-		}
+		stats.Set("wal-total-pages", res.Log)
+		stats.Set("wal-checkpointed-pages", res.Checkpointed)
 		cpFailedInARow = 0
 	})
 }
