@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/segmentio/stats/v4"
 
@@ -23,8 +24,9 @@ type Rows struct {
 	cols       []schema.DBColumnMeta
 	familyName string
 	tableName  string
-	count      atomic.Uint32
+	count      uint32
 	once       sync.Once
+	start      time.Time
 }
 
 // Next returns true if there's another row available.
@@ -32,7 +34,7 @@ func (r *Rows) Next() bool {
 	if r.rows == nil {
 		return false
 	}
-	r.count.Add(1)
+	atomic.AddUint32(&r.count, 1)
 	return r.rows.Next()
 }
 
@@ -53,9 +55,14 @@ func (r *Rows) Close() error {
 		return nil
 	}
 	r.once.Do(func() {
-		globalstats.Observe("get_rows_by_key_prefix_row_count", r.count.Load(),
+		globalstats.Observe("get_rows_by_key_prefix_row_count", atomic.LoadUint32(&r.count),
 			stats.T("family", r.familyName),
 			stats.T("table", r.tableName))
+		if !r.start.IsZero() {
+			globalstats.Observe("get_rows_by_prefix_scan_time", time.Now().Sub(r.start),
+				stats.T("family", r.familyName),
+				stats.T("table", r.tableName))
+		}
 	})
 	return r.rows.Close()
 }
