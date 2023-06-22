@@ -212,6 +212,7 @@ func (p *PragmaWALResult) String() string {
 // requires write access
 func (writer *SqlLdbWriter) PassiveCheckpoint() (*PragmaWALResult, error) {
 	res, err := writer.Db.Query("PRAGMA wal_checkpoint")
+	defer res.Close()
 	if err != nil {
 		errs.Incr("sql_ldb_writer.wal_checkpoint.query.error")
 		return nil, err
