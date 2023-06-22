@@ -11,15 +11,16 @@ import (
 	"sync"
 	"time"
 
+	"github.com/segmentio/errors-go"
+	"github.com/segmentio/events/v2"
+	"github.com/segmentio/stats/v4"
+
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/globalstats"
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/scanfunc"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
-	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events/v2"
-	"github.com/segmentio/stats/v4"
 )
 
 // LDBReader reads data from the LDB. The external interface is
@@ -188,7 +189,7 @@ func (reader *LDBReader) GetRowsByKeyPrefix(ctx context.Context, familyName stri
 		if err != nil {
 			return nil, err
 		}
-		res := &Rows{rows: rows, cols: cols, familyName: familyName, tableName: tableName}
+		res := &Rows{rows: rows, cols: cols, familyName: familyName, tableName: tableName, start: time.Now()}
 		return res, nil
 	case err == sql.ErrNoRows:
 		return &Rows{}, nil
