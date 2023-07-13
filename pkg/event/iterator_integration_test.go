@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	changelogpkg "github.com/segmentio/ctlstore/pkg/changelog"
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/ldbwriter"
@@ -14,7 +16,6 @@ import (
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlite"
 	"github.com/segmentio/ctlstore/pkg/tests"
-	"github.com/stretchr/testify/require"
 )
 
 func TestIteratorIntegration(t *testing.T) {
@@ -80,7 +81,7 @@ func TestIteratorIntegration(t *testing.T) {
 		keys := update.Keys
 		require.EqualValues(t, []Key{{
 			Name:  "id",
-			Type:  "int",
+			Type:  "INT",
 			Value: float64(i),
 		}}, keys)
 
