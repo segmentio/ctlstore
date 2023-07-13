@@ -1,4 +1,4 @@
-FROM golang:1.14-alpine
+FROM golang:1.20-alpine
 ENV SRC github.com/segmentio/ctlstore
 ARG VERSION
 
@@ -7,6 +7,8 @@ RUN apk --update add gcc git curl alpine-sdk libc6-compat ca-certificates sqlite
   && chmod +x /bin/chamber
 
 COPY . /go/src/${SRC}
+WORKDIR /go/src/${SRC}
+ENV GO111MODULE=on
 
 RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=$VERSION" ${SRC}/pkg/cmd/ctlstore \
   && cp ${GOPATH}/bin/ctlstore /usr/local/bin

@@ -60,6 +60,7 @@ type reflectorCliConfig struct {
 	LedgerHealth          ledgerHealthConfig `conf:"ledger-latency" help:"Configure ledger latency behavior"`
 	Dogstatsd             dogstatsdConfig    `conf:"dogstatsd" help:"dogstatsd Configuration"`
 	MetricsBind           string             `conf:"metrics-bind" help:"address to serve Prometheus metircs"`
+	WALPollInterval       time.Duration      `conf:"wal-poll-interval" help:"How often to pull the sqlite's wal size and status. 0 indicates disabled monitoring'"`
 }
 
 type executiveCliConfig struct {
@@ -486,6 +487,8 @@ func defaultReflectorCLIConfig(isSupervisor bool) reflectorCliConfig {
 			PollInterval:            10 * time.Second,
 			AWSRegion:               os.Getenv("AWS_REGION"),
 		},
+		// disabled by default
+		WALPollInterval: 0,
 	}
 	if isSupervisor {
 		// the supervisor runs as an ECS task, so it cannot yet set
@@ -543,5 +546,7 @@ func newReflector(cliCfg reflectorCliConfig, isSupervisor bool) (*reflectorpkg.R
 			QueryBlockSize:        cliCfg.QueryBlockSize,
 			PollTimeout:           5 * time.Second,
 		},
+		WALPollInterval: cliCfg.WALPollInterval,
+		DoMonitorWAL:    cliCfg.WALPollInterval > 0,
 	})
 }
