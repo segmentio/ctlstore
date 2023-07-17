@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -15,15 +16,15 @@ type fake struct {
 	size           int64
 	err            error
 	wg             sync.WaitGroup
-	statCallCount  int
-	checkCallCount int
+	statCallCount  atomic.Int64
+	checkCallCount atomic.Int64
 }
 
 func (f *fake) Stat() func(m *WALMonitor) {
 	return func(m *WALMonitor) {
 		m.walSizeFunc = func(p string) (int64, error) {
 			defer f.wg.Done()
-			f.statCallCount++
+			f.statCallCount.Add(1)
 			v, err := m.getWALSize(p)
 			f.size = v
 			f.err = err
@@ -43,7 +44,7 @@ func (f *fake) Ticker() func(m *WALMonitor) {
 func (f *fake) Checkpointer() func(m *WALMonitor) {
 	return func(m *WALMonitor) {
 		m.cpTesterFunc = func() (*ldbwriter.PragmaWALResult, error) {
-			f.checkCallCount++
+			f.checkCallCount.Add(1)
 			return nil, fmt.Errorf("fail")
 		}
 	}
@@ -78,11 +79,11 @@ func TestWALMonitorSize(t *testing.T) {
 	fake.wg.Wait()
 	cancel()
 
-	if fake.statCallCount == 0 {
+	if fake.statCallCount.Load() == 0 {
 		t.Errorf("Stat should have been called at least once")
 	}
 
-	if fake.checkCallCount == 0 {
+	if fake.checkCallCount.Load() == 0 {
 		t.Errorf("Checkpoint should have been called at least once")
 	}
 	if fake.err != nil {
@@ -103,11 +104,11 @@ func TestNoWALPath(t *testing.T) {
 
 	mon.Start(context.Background())
 
-	if fake.statCallCount != 0 {
+	if fake.statCallCount.Load() != 0 {
 		t.Errorf("Stat should not have been called")
 	}
 
-	if fake.checkCallCount != 0 {
+	if fake.checkCallCount.Load() != 0 {
 		t.Errorf("Checkpoint should not have been called")
 	}
 }
@@ -122,11 +123,11 @@ func TestWALMonitorStopsOnError(t *testing.T) {
 
 	mon.Start(context.Background())
 	fake.wg.Wait()
-	if fake.statCallCount != 5 {
+	if fake.statCallCount.Load() != 5 {
 		t.Errorf("Stat should have been called 5 times, got %d", fake.statCallCount)
 	}
 
-	if fake.checkCallCount != 5 {
+	if fake.checkCallCount.Load() != 5 {
 		t.Errorf("Checkpoint should have have been called 5 times, got %d", fake.checkCallCount)
 	}
 }
