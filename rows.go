@@ -24,7 +24,7 @@ type Rows struct {
 	cols       []schema.DBColumnMeta
 	familyName string
 	tableName  string
-	count      uint32
+	count      atomic.Uint32
 	once       sync.Once
 	start      time.Time
 }
@@ -34,7 +34,7 @@ func (r *Rows) Next() bool {
 	if r.rows == nil {
 		return false
 	}
-	atomic.AddUint32(&r.count, 1)
+	r.count.Add(1)
 	return r.rows.Next()
 }
 
@@ -54,8 +54,8 @@ func (r *Rows) Close() error {
 	if r.rows == nil {
 		return nil
 	}
-	r.once.Do(func() {
-		globalstats.Observe("get_rows_by_key_prefix_row_count", atomic.LoadUint32(&r.count),
+	go r.once.Do(func() {
+		globalstats.Observe("get_rows_by_key_prefix_row_count", r.count.Load(),
 			stats.T("family", r.familyName),
 			stats.T("table", r.tableName))
 		if !r.start.IsZero() {
