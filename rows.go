@@ -3,7 +3,6 @@ package ctlstore
 import (
 	"database/sql"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/segmentio/stats/v4"
@@ -24,7 +23,7 @@ type Rows struct {
 	cols       []schema.DBColumnMeta
 	familyName string
 	tableName  string
-	count      atomic.Uint32
+	count      int
 	once       sync.Once
 	start      time.Time
 }
@@ -34,7 +33,7 @@ func (r *Rows) Next() bool {
 	if r.rows == nil {
 		return false
 	}
-	r.count.Add(1)
+	r.count++
 	return r.rows.Next()
 }
 
@@ -55,7 +54,7 @@ func (r *Rows) Close() error {
 		return nil
 	}
 	go r.once.Do(func() {
-		globalstats.Observe("get_rows_by_key_prefix_row_count", r.count.Load(),
+		globalstats.Observe("get_rows_by_key_prefix_row_count", r.count,
 			stats.T("family", r.familyName),
 			stats.T("table", r.tableName))
 		if !r.start.IsZero() {
