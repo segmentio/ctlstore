@@ -60,7 +60,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           logout: true
       - run: echo "GHCR LOGIN SUCCESSFUL"
-      - if: ${{ (github.ref_name == 'master') && (github.event_name == 'push'}}
+      - if: ${{ (github.ref_name == 'master') && (github.event_name == 'push')}}
         name: Build and push image for master
         run: |
           docker context create buildx-build
