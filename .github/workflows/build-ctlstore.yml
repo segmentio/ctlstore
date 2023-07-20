@@ -30,7 +30,6 @@ jobs:
 
       - name: Deps
         run: |
-          echo ghcr.io/segmentio/ctlstore:$(echo ${GITHUB_HEAD_REF:0:119} | sed 's/[^a-zA-Z0-9]/-/g' )-${GITHUB_SHA:0:8}
           make deps
 
       - name: Test
@@ -60,6 +59,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           logout: true
       - run: echo "GHCR LOGIN SUCCESSFUL"
+
       - if: ${{ (github.ref_name == 'master') && (github.event_name == 'push')}}
         name: Build and push image for master
         run: |
@@ -71,7 +71,7 @@ jobs:
             --push \
             .
       - if: ${{ (github.event_name == 'pull_request') }}
-        name: Build and push image for v0
+        name: Build and push image for pull request
         run: |
           docker context create buildx-build
           docker buildx create --use buildx-build

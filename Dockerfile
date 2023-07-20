@@ -7,7 +7,7 @@ RUN apk --update add gcc git curl alpine-sdk libc6-compat ca-certificates sqlite
   && chmod +x /bin/chamber
 
 COPY . /go/src/${SRC}
-
+WORKDIR /go/src/${SRC}
 RUN go mod vendor
 RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=$VERSION" ${SRC}/pkg/cmd/ctlstore \
   && cp ${GOPATH}/bin/ctlstore /usr/local/bin
