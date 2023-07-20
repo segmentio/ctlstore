@@ -30,7 +30,7 @@ jobs:
 
       - name: Deps
         run: |
-          echo ghcr.io/segmentio/ctlstore:$(echo $GITHUB_HEAD_REF:0:119 | sed 's/[^a-zA-Z0-9]/-/g' )-${SHORT_SHA}
+          echo ghcr.io/segmentio/ctlstore:$(echo ${GITHUB_HEAD_REF:0:119} | sed 's/[^a-zA-Z0-9]/-/g' )-${GITHUB_SHA:0:8}
           make deps
 
       - name: Test
@@ -76,7 +76,7 @@ jobs:
           docker context create buildx-build
           docker buildx create --use buildx-build
           docker buildx build \
-            -t ghcr.io/segmentio/ctlstore:$(echo $GITHUB_HEAD_REF:0:119 | sed 's/[^a-zA-Z0-9]/-/g' )-${SHORT_SHA} \
+            -t ghcr.io/segmentio/ctlstore:$(echo ${GITHUB_HEAD_REF:0:119} | sed 's/[^a-zA-Z0-9]/-/g' )-${SHORT_SHA} \
             --build-arg VERSION=${SHORT_SHA} \
             --push \
             .
