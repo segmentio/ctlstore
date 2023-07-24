@@ -1,4 +1,4 @@
-name: build
+name: arm-build
 on:
   push:
     branches: ["master"]
