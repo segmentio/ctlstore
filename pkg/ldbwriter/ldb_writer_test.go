@@ -330,20 +330,46 @@ func TestCheckpointQuery(t *testing.T) {
 	defer teardown()
 	defer db.Close()
 	writer := SqlLdbWriter{Db: db}
-
-	res, err := writer.PassiveCheckpoint()
+	err := writer.ApplyDMLStatement(context.Background(), schema.NewTestDMLStatement("CREATE TABLE foo (bar VARCHAR);"))
 	if err != nil {
-		t.Fatalf("expected no error")
-	}
-	if res.Busy == 1 {
-		t.Errorf("expected busy to be 0, got %d", res.Busy)
+		t.Fatalf("Could not issue CREATE TABLE statement, error %v", err)
 	}
 
-	if res.Checkpointed <= 0 {
-		t.Errorf("expected Checkpointed to be greater than 0, got %d", res.Checkpointed)
+	tests := []struct {
+		cpType CheckpointType
+	}{
+		{
+			cpType: Full,
+		},
+		{
+			cpType: Passive,
+		},
+		{
+			cpType: Restart,
+		},
+		{
+			cpType: Truncate,
+		},
 	}
 
-	if res.Checkpointed != res.Log {
-		t.Errorf("expected checkpointed and log to be equal, got %v", res)
+	for _, tt := range tests {
+		t.Run(string(tt.cpType), func(t *testing.T) {
+			res, err := writer.Checkpoint(tt.cpType)
+			err = writer.ApplyDMLStatement(context.Background(), schema.NewTestDMLStatement("INSERT INTO foo VALUES('hello');"))
+			if err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+			if res.Busy == 1 {
+				t.Errorf("expected busy to be 0, got %d", res.Busy)
+			}
+
+			if tt.cpType != Truncate && res.Checkpointed <= 0 {
+				t.Errorf("expected Checkpointed to be greater than 0, got %d", res.Checkpointed)
+			}
+
+			if res.Checkpointed != res.Log {
+				t.Errorf("expected checkpointed and log to be equal, got %v", res)
+			}
+		})
 	}
 }

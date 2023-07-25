@@ -63,8 +63,14 @@ type ReflectorConfig struct {
 	IsSupervisor     bool
 	LDBWriteCallback ldbwriter.LDBWriteCallback // optional
 	BootstrapRegion  string                     // optional
-	WALPollInterval  time.Duration
-	DoMonitorWAL     bool
+	// How often to poll the WAL stats
+	WALPollInterval time.Duration // optional
+	// Performs a checkpoint after the WAL file exceeds this size in bytes
+	WALCheckpointThresholdSize int // optional
+	// What type of checkpoint to perform
+	WALCheckpointType ldbwriter.CheckpointType // optional
+	DoMonitorWAL      bool                     // optional
+
 }
 
 type starter interface {
@@ -242,12 +248,17 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	}
 
 	var walMon starter
+
 	if config.DoMonitorWAL && config.WALPollInterval > 0 {
 		w := &ldbwriter.SqlLdbWriter{Db: ldbDB}
+		cper := func() (*ldbwriter.PragmaWALResult, error) {
+			return w.Checkpoint(config.WALCheckpointType)
+		}
 		walMon = NewMonitor(MonitorConfig{
-			PollInterval: config.WALPollInterval,
-			Path:         config.LDBPath + "-wal",
-		}, w.PassiveCheckpoint)
+			PollInterval:               config.WALPollInterval,
+			Path:                       config.LDBPath + "-wal",
+			WALCheckpointThresholdSize: int64(config.WALCheckpointThresholdSize),
+		}, cper)
 	} else {
 		walMon = &noopStarter{}
 	}
