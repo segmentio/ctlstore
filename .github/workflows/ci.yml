@@ -114,7 +114,6 @@ jobs:
             --platform=linux/arm64 \
             -t ghcr.io/segmentio/ctlstore:${SHORT_SHA} \
             --build-arg VERSION=${SHORT_SHA} \
-            --push \
             .
           docker push ghcr.io/segmentio/ctlstore:${SHORT_SHA}
 
@@ -125,7 +124,6 @@ jobs:
             --platform=linux/arm64 \
             -t ghcr.io/segmentio/ctlstore:$(echo ${GITHUB_HEAD_REF:0:119} | sed 's/[^a-zA-Z0-9]/-/g' )-${SHORT_SHA} \
             --build-arg VERSION=${SHORT_SHA} \
-            --push \
             .
           docker push ghcr.io/segmentio/ctlstore:$(echo ${GITHUB_HEAD_REF:0:119} | sed 's/[^a-zA-Z0-9]/-/g' )-${SHORT_SHA}
 
