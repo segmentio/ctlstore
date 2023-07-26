@@ -18,7 +18,6 @@ jobs:
           MYSQL_PASSWORD: ctldbpw
         ports:
           - 3306:3306
-
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -39,7 +38,6 @@ jobs:
       - name: build
         run: |
           make build
-
 
   publish-amd-ghcr:
     needs: [ build ]
@@ -79,6 +77,51 @@ jobs:
           docker context create buildx-build
           docker buildx create --use buildx-build
           docker buildx build \
+            -t ghcr.io/segmentio/ctlstore:$(echo ${GITHUB_HEAD_REF:0:119} | sed 's/[^a-zA-Z0-9]/-/g' )-${SHORT_SHA} \
+            --build-arg VERSION=${SHORT_SHA} \
+            --push \
+            .
+      - run: echo "GHCR PUBLISH SUCCESSFUL"
+
+  publish-arm-ghcr:
+    runs-on: [ self-hosted, linux, arm64, segment ]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup env variables
+        id: vars
+        run: |
+          echo "SHORT_SHA=${GITHUB_SHA:0:8}" >> $GITHUB_ENV
+      - run: echo "publishing the image ghcr.io/segmentio/ctlstore:${SHORT_SHA}"
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          logout: true
+      - run: echo "GHCR LOGIN SUCCESSFUL"
+
+      - if: ${{ (github.ref_name == 'master') && (github.event_name == 'push')}}
+        name: Build and push image for master
+        run: |
+          docker context create buildx-build
+          docker buildx create --use buildx-build
+          docker buildx build \
+            --platform=linux/arm64 \
+            -t ghcr.io/segmentio/ctlstore:${SHORT_SHA} \
+            --build-arg VERSION=${SHORT_SHA} \
+            --push \
+            .
+      - if: ${{ (github.event_name == 'pull_request') }}
+        name: Build and push image for pull request
+        run: |
+          docker context create buildx-build
+          docker buildx create --use buildx-build
+          docker buildx build \
+            --platform=linux/arm64 \
             -t ghcr.io/segmentio/ctlstore:$(echo ${GITHUB_HEAD_REF:0:119} | sed 's/[^a-zA-Z0-9]/-/g' )-${SHORT_SHA} \
             --build-arg VERSION=${SHORT_SHA} \
             --push \
