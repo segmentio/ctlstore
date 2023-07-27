@@ -223,16 +223,19 @@ var (
 // see https://www.sqlite.org/pragma.html#pragma_wal_checkpoint for more details
 // requires write access
 func (writer *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*PragmaWALResult, error) {
-	res, err := writer.Db.Query(fmt.Sprintf("PRAGMA wal_checkpoint(%s)", checkpointingType))
-	defer res.Close()
+	res, err := writer.Db.Query(fmt.Sprintf("PRAGMA wal_checkpoint(%s)", string(checkpointingType)))
 	if err != nil {
+		events.Log("error in checkpointing, %{error}", err)
 		errs.Incr("sql_ldb_writer.wal_checkpoint.query.error")
 		return nil, err
 	}
+	
+	defer res.Close()
 	var p PragmaWALResult
 	if res.Next() {
 		err := res.Scan(&p.Busy, &p.Log, &p.Checkpointed)
 		if err != nil {
+			events.Log("error in scanning checkpointing, %{error}", err)
 			errs.Incr("sql_ldb_writer.wal_checkpoint.scan.error")
 			return nil, err
 		}
