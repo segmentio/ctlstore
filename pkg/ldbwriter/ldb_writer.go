@@ -229,7 +229,7 @@ func (writer *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*Pragm
 		errs.Incr("sql_ldb_writer.wal_checkpoint.query.error")
 		return nil, err
 	}
-	
+
 	defer res.Close()
 	var p PragmaWALResult
 	if res.Next() {

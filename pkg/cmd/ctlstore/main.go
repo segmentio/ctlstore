@@ -556,5 +556,6 @@ func newReflector(cliCfg reflectorCliConfig, isSupervisor bool) (*reflectorpkg.R
 		WALPollInterval:            cliCfg.WALPollInterval,
 		DoMonitorWAL:               cliCfg.WALPollInterval > 0,
 		WALCheckpointThresholdSize: cliCfg.WALCheckpointThresholdSize,
+		WALCheckpointType:          cliCfg.WALCheckpointType,
 	})
 }
