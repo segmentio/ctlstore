@@ -76,7 +76,7 @@ func (m *WALMonitor) Start(ctx context.Context) {
 	if m.walSizeFunc != nil {
 		fn = m.walSizeFunc
 	}
-	go utils.CtxFireLoopTicker(loopCtx, m.tickerFunc(), func() {
+	utils.CtxFireLoopTicker(loopCtx, m.tickerFunc(), func() {
 		// possible for ticker to invoke another loop before cancel makes it to the Done channel
 		if failedInARow >= m.consecutiveMaxErrors {
 			return
