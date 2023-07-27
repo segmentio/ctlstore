@@ -33,7 +33,7 @@ jobs:
           docker buildx create --use buildx-build
           docker buildx build \
             --platform=linux/arm64 \
-            -t ghcr.io/segmentio/ctlstore:${SHORT_SHA} \
+            -t ghcr.io/segmentio/ctlstore:${SHORT_SHA}-arm \
             --build-arg VERSION=${SHORT_SHA} \
             --push \
             .
@@ -44,7 +44,7 @@ jobs:
           docker buildx create --use buildx-build
           docker buildx build \
             --platform=linux/arm64 \
-            -t ghcr.io/segmentio/ctlstore:$(echo ${GITHUB_HEAD_REF:0:119} | sed 's/[^a-zA-Z0-9]/-/g' )-${SHORT_SHA} \
+            -t ghcr.io/segmentio/ctlstore:$(echo ${GITHUB_HEAD_REF:0:116} | sed 's/[^a-zA-Z0-9]/-/g' )-${SHORT_SHA}-arm \
             --build-arg VERSION=${SHORT_SHA} \
             --push \
             .
