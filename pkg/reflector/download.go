@@ -3,15 +3,18 @@ package reflector
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
@@ -33,15 +36,25 @@ type S3Downloader struct {
 
 func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 	client, err := d.getS3Client()
+	downloader := manager.NewDownloader(client, func(d *manager.Downloader) {
+		d.PartSize = 64 * 1024 * 1024 // 64MB per part
+		d.Concurrency = 5
+	})
 	if err != nil {
 		return -1, err
 	}
 	start := time.Now()
 	defer stats.Observe("snapshot_download_time", time.Now().Sub(start))
-	obj, err := client.GetObject(&s3.GetObjectInput{
+	buffer := manager.NewWriteAtBuffer([]byte{})
+	numBytes, err := downloader.Download(context.TODO(), buffer, &s3.GetObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.Key),
 	})
+
+	//obj, err := client.GetObject(&s3.GetObjectInput{
+	//	Bucket: aws.String(d.Bucket),
+	//	Key:    aws.String(d.Key),
+	//})
 	if err != nil {
 		switch err := err.(type) {
 		case awserr.RequestFailure:
@@ -77,14 +90,16 @@ func (d *S3Downloader) getS3Client() (S3Client, error) {
 	if d.S3Client != nil {
 		return d.S3Client, nil
 	}
-	configs := []*aws.Config{}
-	if d.Region != "" {
-		configs = append(configs, &aws.Config{
-			Region: aws.String(d.Region),
-		})
+
+	cfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithRegion(d.Region), // Empty string will result in the region value being ignored
+	)
+
+	if err != nil {
+		panic(fmt.Sprintf("failed loading config, %v", err))
 	}
-	sess := session.Must(session.NewSession(configs...))
-	client := s3.New(sess)
+
+	client := s3.NewFromConfig(cfg)
 	return client, nil
 }
 

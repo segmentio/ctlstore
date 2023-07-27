@@ -1,10 +1,10 @@
 package reflector
 
 import (
-	"github.com/aws/aws-sdk-go/service/s3/s3iface"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 )
 
 //counterfeiter:generate -o ../fakes/s3_client.go . S3Client
 type S3Client interface {
-	s3iface.S3API
+	manager.DownloadAPIClient
 }
