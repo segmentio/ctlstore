@@ -46,7 +46,7 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 	start := time.Now()
 	defer stats.Observe("snapshot_download_time", time.Now().Sub(start))
 	buffer := manager.NewWriteAtBuffer([]byte{})
-	numBytes, err := downloader.Download(context.TODO(), buffer, &s3.GetObjectInput{
+	compressedSize, err := downloader.Download(context.TODO(), buffer, &s3.GetObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.Key),
 	})
@@ -67,7 +67,6 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 		return -1, errors.WithTypes(errors.Wrap(err, "get s3 data"), errs.ErrTypeTemporary)
 	}
 	defer obj.Body.Close()
-	compressedSize := obj.ContentLength
 	var reader io.Reader = obj.Body
 	if strings.HasSuffix(d.Key, ".gz") {
 		reader, err = gzip.NewReader(reader)
@@ -79,9 +78,8 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 	if err != nil {
 		return n, errors.Wrap(err, "copy from s3 to writer")
 	}
-	if compressedSize != nil {
-		events.Log("LDB inflated %d -> %d bytes", *compressedSize, n)
-	}
+
+	events.Log("LDB inflated %d -> %d bytes", compressedSize, n)
 
 	return
 }
