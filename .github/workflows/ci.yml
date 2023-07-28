@@ -41,6 +41,7 @@ jobs:
           make build
 
   publish-amd-production:
+    needs: [ build ]
     runs-on: ubuntu-latest
     permissions:
       contents: read
