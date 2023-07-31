@@ -70,7 +70,7 @@ type ReflectorConfig struct {
 	// What type of checkpoint to perform
 	WALCheckpointType ldbwriter.CheckpointType // optional
 	DoMonitorWAL      bool                     // optional
-
+	BusyTimeoutMS     int                      // optional
 }
 
 type starter interface {
@@ -141,9 +141,16 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	// themselves are appended to the log instead of the database file. After
 	// the log grows large enough, its contents are "checkpointed" into the
 	// database file in batch.
-	ldbDB, err := sql.Open(driverName, config.LDBPath+"?_journal_mode=wal")
-	if err != nil {
-		return nil, fmt.Errorf("Error when opening LDB at '%v': %v", config.LDBPath, err)
+	var ldbDB *sql.DB
+	var openErr error
+	if config.BusyTimeoutMS > 0 {
+		ldbDB, openErr = sql.Open(driverName, config.LDBPath+fmt.Sprintf("?_journal_mode=wal&_busy_timeout=%d", config.BusyTimeoutMS))
+	} else {
+		ldbDB, openErr = sql.Open(driverName, config.LDBPath+"?_journal_mode=wal")
+	}
+
+	if openErr != nil {
+		return nil, fmt.Errorf("Error when opening LDB at '%v': %v", config.LDBPath, openErr)
 	}
 
 	dsn := config.Upstream.DSN

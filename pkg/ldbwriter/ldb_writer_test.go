@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -372,4 +374,79 @@ func TestCheckpointQuery(t *testing.T) {
 			}
 		})
 	}
+}
+
+// SimulateBusyCheckpointing this reproduces blocked checkpointing by having lots of readers with long queries open
+func SimulateBusyCheckpointing(t *testing.T) {
+	db, teardown, path := ldb.LDBForTestWithPath(t)
+	defer teardown()
+	defer db.Close()
+	writer := SqlLdbWriter{Db: db}
+	writer.ApplyDMLStatement(context.Background(), schema.NewTestDMLStatement("CREATE TABLE foo (bar VARCHAR);"))
+
+	var waiter sync.WaitGroup
+
+	fi, _ := os.Stat(path + "-wal")
+	fmt.Printf("Path: %s-wal\n", path)
+	fmt.Printf("File size: %d\n", fi.Size())
+
+	readers := 35
+	writers := 5
+	waiter.Add(readers + writers)
+	tester := func(x string) {
+		defer waiter.Done()
+		for i := 0; i < 20_000; i++ {
+			time.Sleep(1 * time.Millisecond)
+			writer.ApplyDMLStatement(context.Background(), schema.NewTestDMLStatement(fmt.Sprintf("INSERT INTO foo VALUES('%s%d');", x, i)))
+		}
+	}
+
+	cper := func() {
+		ticker := time.NewTicker(100 * time.Millisecond)
+		for {
+			select {
+			case <-ticker.C:
+				s := time.Now()
+				res, _ := writer.Checkpoint(Truncate)
+				if res.Busy == 1 {
+					fmt.Println("Checkpoint was busy")
+				}
+				e := time.Now().Sub(s)
+				if e.Seconds() > 0.5 {
+					fmt.Printf("Checkpoint took: %fs", e.Seconds())
+				}
+			}
+		}
+	}
+
+	readTest := func() {
+		time.Sleep(5 * time.Second)
+		defer waiter.Done()
+		res, err := db.Query("SELECT * FROM foo LIMIT 1000")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		for res.Next() {
+			var val string
+			res.Scan(&val)
+			time.Sleep(20 * time.Millisecond)
+		}
+	}
+
+	go cper()
+	for i := 0; i < writers; i++ {
+		go tester(fmt.Sprintf("%d-abcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefgh", i))
+	}
+
+	for i := 0; i < readers; i++ {
+		go readTest()
+	}
+
+	waiter.Wait()
+
+	fi, _ = os.Stat(path + "-wal")
+	fmt.Printf("File size: %d\n", fi.Size())
+
 }

@@ -65,6 +65,7 @@ type reflectorCliConfig struct {
 	WALPollInterval            time.Duration            `conf:"wal-poll-interval" help:"How often to pull the sqlite's wal size and status. 0 indicates disabled monitoring'"`
 	WALCheckpointThresholdSize int                      `conf:"wal-checkpoint-threshold-size" help:"Performs a checkpoint after the WAL file exceeds this size in bytes"`
 	WALCheckpointType          ldbwriter.CheckpointType `conf:"wal-checkpoint-type" help:"what type of checkpoint to manually perform once the wal size is exceeded"`
+	BusyTimeoutMS              int                      `conf:"busy-timeout-ms" help:"Set a busy timeout on the connection string for sqlite in milliseconds"`
 }
 
 type executiveCliConfig struct {
@@ -557,5 +558,6 @@ func newReflector(cliCfg reflectorCliConfig, isSupervisor bool) (*reflectorpkg.R
 		DoMonitorWAL:               cliCfg.WALPollInterval > 0,
 		WALCheckpointThresholdSize: cliCfg.WALCheckpointThresholdSize,
 		WALCheckpointType:          cliCfg.WALCheckpointType,
+		BusyTimeoutMS:              cliCfg.BusyTimeoutMS,
 	})
 }
