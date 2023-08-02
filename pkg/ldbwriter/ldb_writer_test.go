@@ -377,7 +377,7 @@ func TestCheckpointQuery(t *testing.T) {
 }
 
 // SimulateBusyCheckpointing this reproduces blocked checkpointing by having lots of readers with long queries open
-func SimulateBusyCheckpointing(t *testing.T) {
+func TestSimulateBusyCheckpointing(t *testing.T) {
 	db, teardown, path := ldb.LDBForTestWithPath(t)
 	defer teardown()
 	defer db.Close()
