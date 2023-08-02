@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/segmentio/events/v2"
@@ -223,22 +224,46 @@ var (
 // see https://www.sqlite.org/pragma.html#pragma_wal_checkpoint for more details
 // requires write access
 func (writer *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*PragmaWALResult, error) {
-	res, err := writer.Db.Query(fmt.Sprintf("PRAGMA wal_checkpoint(%s)", string(checkpointingType)))
+	ctx := context.Background()
+	conn, err := writer.Db.Conn(ctx)
 	if err != nil {
 		events.Log("error in checkpointing, %{error}", err)
-		errs.Incr("sql_ldb_writer.wal_checkpoint.query.error")
+		errs.Incr("sql_ldb_writer.wal_checkpoint.conn.error")
 		return nil, err
 	}
 
-	defer res.Close()
-	var p PragmaWALResult
-	if res.Next() {
-		err := res.Scan(&p.Busy, &p.Log, &p.Checkpointed)
-		if err != nil {
-			events.Log("error in scanning checkpointing, %{error}", err)
-			errs.Incr("sql_ldb_writer.wal_checkpoint.scan.error")
-			return nil, err
+	defer conn.Close()
+	_, err = conn.ExecContext(ctx, "BEGIN EXCLUSIVE TRANSACTION;")
+	defer func() {
+		// this is just in case we exit before applying the COMMIT below.
+		// it will return an error if the transaction successfully completed below
+		_, err := conn.ExecContext(ctx, "COMMIT;")
+		if err != nil && !strings.Contains(err.Error(), "no transaction is active") {
+			errs.Incr("sql_ldb_writer.wal_checkpoint.deferred_commit.error")
 		}
+	}()
+
+	if err != nil {
+		errs.Incr("sql_ldb_writer.wal_checkpoint.begin.error")
+		return nil, err
+	}
+	res := conn.QueryRowContext(ctx, fmt.Sprintf("PRAGMA wal_checkpoint(%s)", string(checkpointingType)))
+	if res.Err() != nil {
+		errs.Incr("sql_ldb_writer.wal_checkpoint.exec.error")
+		return nil, res.Err()
+	}
+	_, err = conn.ExecContext(ctx, "COMMIT;")
+	if err != nil {
+		errs.Incr("sql_ldb_writer.wal_checkpoint.commit.error")
+		return nil, err
+	}
+
+	var p PragmaWALResult
+	err = res.Scan(&p.Busy, &p.Log, &p.Checkpointed)
+	if err != nil {
+		events.Log("error in scanning checkpointing, %{error}", err)
+		errs.Incr("sql_ldb_writer.wal_checkpoint.scan.error")
+		return nil, err
 	}
 	p.Type = checkpointingType
 	return &p, nil

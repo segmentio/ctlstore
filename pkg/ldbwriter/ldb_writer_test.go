@@ -413,7 +413,7 @@ func SimulateBusyCheckpointing(t *testing.T) {
 				}
 				e := time.Now().Sub(s)
 				if e.Seconds() > 0.5 {
-					fmt.Printf("Checkpoint took: %fs", e.Seconds())
+					fmt.Printf("Checkpoint took: %fs\n", e.Seconds())
 				}
 			}
 		}
