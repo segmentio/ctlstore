@@ -15,8 +15,9 @@ import (
 
 type (
 	MonitorConfig struct {
-		PollInterval time.Duration
-		Path         string
+		PollInterval               time.Duration
+		Path                       string
+		WALCheckpointThresholdSize int64
 	}
 
 	// WALMonitor is responsible for querying the file size of sqlite's WAL file while in WAL mode as well as sqlite's checkpointing of the WAL file.
@@ -24,6 +25,8 @@ type (
 		// walPath file system location the sqlite wal file is located
 		walPath     string
 		walSizeFunc walSizeFunc
+		// walCheckpointThresholdSize once the wal exceeds this size in bytes, a checkpoint is performed
+		walCheckpointThresholdSize int64
 		// tickerFunc returns a ticker configured for the polling interval
 		tickerFunc   func() *time.Ticker
 		cpTesterFunc checkpointTesterFunc
@@ -41,9 +44,10 @@ type (
 
 func NewMonitor(cfg MonitorConfig, checkpointTester checkpointTesterFunc, opts ...MonitorOps) *WALMonitor {
 	m := &WALMonitor{
-		walPath:              cfg.Path,
-		cpTesterFunc:         checkpointTester,
-		consecutiveMaxErrors: 5,
+		walPath:                    cfg.Path,
+		cpTesterFunc:               checkpointTester,
+		consecutiveMaxErrors:       5,
+		walCheckpointThresholdSize: cfg.WALCheckpointThresholdSize,
 		tickerFunc: func() *time.Ticker {
 			return time.NewTicker(cfg.PollInterval)
 		},
@@ -66,49 +70,45 @@ func (m *WALMonitor) Start(ctx context.Context) {
 		events.Log("Not monitoring the WAL because its path is not set")
 		return
 	}
-	sizeCtx, sizeCancel := context.WithCancel(ctx)
-	statsFailedInARow := 0
+	loopCtx, cancel := context.WithCancel(ctx)
+	failedInARow := 0
 	fn := m.getWALSize
 	if m.walSizeFunc != nil {
 		fn = m.walSizeFunc
 	}
-	go utils.CtxFireLoopTicker(sizeCtx, m.tickerFunc(), func() {
+	utils.CtxFireLoopTicker(loopCtx, m.tickerFunc(), func() {
 		// possible for ticker to invoke another loop before cancel makes it to the Done channel
-		if statsFailedInARow >= m.consecutiveMaxErrors {
+		if failedInARow >= m.consecutiveMaxErrors {
 			return
 		}
 		size, err := fn(m.walPath)
 		if err != nil {
 			events.Log("error retrieving wal stat, %s", err)
-			statsFailedInARow++
-			if statsFailedInARow >= m.consecutiveMaxErrors {
+			failedInARow++
+			if failedInARow >= m.consecutiveMaxErrors {
 				// cancel to prevent log spamming
 				events.Log("canceling WAL size monitoring due to consistent error, %s", err)
 				errs.Incr("reflector.wal_monitor.persistent_stat_error")
-				sizeCancel()
+				cancel()
 			}
 			return
 		}
 		stats.Set("wal-file-size", size)
-		statsFailedInARow = 0
-	})
 
-	cpFailedInARow := 0
-	cpCtx, cpCancel := context.WithCancel(ctx)
-	utils.CtxFireLoopTicker(cpCtx, m.tickerFunc(), func() {
-		// possible for ticker to invoke another loop before cancel makes it to the Done channel
-		if cpFailedInARow >= m.consecutiveMaxErrors {
+		if size <= m.walCheckpointThresholdSize {
+			stats.Incr("wal-no-checkpoint")
 			return
 		}
+
 		res, err := m.cpTesterFunc()
 		if err != nil {
 			events.Log("error checking wal's checkpoint status, %s", err)
-			cpFailedInARow++
-			if cpFailedInARow >= m.consecutiveMaxErrors {
+			failedInARow++
+			if failedInARow >= m.consecutiveMaxErrors {
 				// cancel to prevent log spamming
 				events.Log("canceling WAL checkpoint monitoring due to consistent error, %s", err)
 				errs.Incr("reflector.wal_monitor.persistent_checkpoint_error")
-				cpCancel()
+				cancel()
 			}
 			return
 		}
@@ -119,7 +119,8 @@ func (m *WALMonitor) Start(ctx context.Context) {
 		stats.Set("wal-checkpoint-status", 1, stats.T("busy", isBusy))
 		stats.Set("wal-total-pages", res.Log)
 		stats.Set("wal-checkpointed-pages", res.Checkpointed)
-		cpFailedInARow = 0
+
+		failedInARow = 0
 	})
 }
 
