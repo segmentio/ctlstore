@@ -1,0 +1,82 @@
+name: arm-build
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["**"]
+jobs:
+
+  publish-arm-production:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    if: ${{ (github.ref_name == 'master') && (github.event_name == 'push')}}
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup env variables
+        id: vars
+        run: |
+          SHA=${GITHUB_SHA:0:7}
+          echo "SHA=$SHA" >> $GITHUB_ENV
+          echo "IMAGE=ghcr.io/segmentio/ctlstore:$SHA-arm" >> $GITHUB_ENV
+
+      - name: "Image Name"
+        run: echo "publishing ${IMAGE}"
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          logout: true
+
+      - name: Build and push image for master
+        run: |
+          docker context create buildx-build
+          docker buildx create --use buildx-build
+          docker buildx build \
+            --platform=linux/arm64 \
+            -t ${IMAGE} \
+            --build-arg VERSION=${SHA} \
+            --push \
+            .
+
+  publish-arm-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    if: ${{ (github.event_name == 'pull_request') }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup env variables
+        id: vars
+        run: |
+          SHA=$(git rev-parse --short ${{ github.event.pull_request.head.sha }})
+          echo "SHA=$SHA" >> $GITHUB_ENV
+          echo "IMAGE=ghcr.io/segmentio/ctlstore:$(echo ${GITHUB_HEAD_REF:0:116} | sed 's/[^a-zA-Z0-9]/-/g' )-$SHA-arm" >> $GITHUB_ENV
+
+      - name: "Image Name"
+        run: echo "publishing ${IMAGE}"
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          logout: true
+
+      - name: Build and push image for pull request
+        run: |
+          docker context create buildx-build
+          docker buildx create --use buildx-build
+          docker buildx build \
+            --platform=linux/arm64 \
+            -t ${IMAGE} \
+            --build-arg VERSION=${SHA} \
+            --push \
+            .
+      - run: echo "GHCR PUBLISH SUCCESSFUL"
