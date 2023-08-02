@@ -229,7 +229,7 @@ func (writer *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*Pragm
 	ctx := context.Background()
 	conn, err := writer.Db.Conn(ctx)
 	if err != nil {
-		events.Log("error in checkpointing, %{error}", err)
+		events.Log("error in opening connection, %{error}", err)
 		errs.Incr("sql_ldb_writer.wal_checkpoint.conn.error")
 		return nil, err
 	}
@@ -238,7 +238,7 @@ func (writer *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*Pragm
 	defer func() {
 		globalstats.Observe("sql_ldb_writer.checkpoint_time", time.Now().Sub(start))
 	}()
-	
+
 	defer conn.Close()
 	_, err = conn.ExecContext(ctx, "BEGIN EXCLUSIVE TRANSACTION;")
 	defer func() {
@@ -251,16 +251,21 @@ func (writer *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*Pragm
 	}()
 
 	if err != nil {
+		events.Log("error in beginning tx, %{error}", err)
 		errs.Incr("sql_ldb_writer.wal_checkpoint.begin.error")
 		return nil, err
 	}
 	res := conn.QueryRowContext(ctx, fmt.Sprintf("PRAGMA wal_checkpoint(%s)", string(checkpointingType)))
 	if res.Err() != nil {
+		events.Log("error in executing checkpoint, %{error}", err)
 		errs.Incr("sql_ldb_writer.wal_checkpoint.exec.error")
 		return nil, res.Err()
 	}
+
+	// need to commit first or else the db is locked when trying to scan the row result
 	_, err = conn.ExecContext(ctx, "COMMIT;")
 	if err != nil {
+		events.Log("error in committing tx, %{error}", err)
 		errs.Incr("sql_ldb_writer.wal_checkpoint.commit.error")
 		return nil, err
 	}
