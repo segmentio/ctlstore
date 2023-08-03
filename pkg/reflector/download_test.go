@@ -3,6 +3,7 @@ package reflector_test
 import (
 	"bytes"
 	"compress/gzip"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"io"
 	"io/ioutil"
 	"math/rand"
@@ -10,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	//"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/segmentio/ctlstore/pkg/fakes"
 	"github.com/segmentio/ctlstore/pkg/reflector"
 	"github.com/segmentio/errors-go"
@@ -21,7 +22,7 @@ import (
 // Verifies error handling behavior when downloading from s3 fails.
 // Specifically, the supervisor is allowed to create a new LDB if
 // a 404 is received from S3, and other errors from S3 are able
-// to be retried.  These behaviors result from the kind of error
+// to be retired.  These behaviors result from the kind of error
 // that s3Downloader.DownloadTo(writer) returns.
 func TestS3DownloadErrors(t *testing.T) {
 	for _, test := range []struct {
@@ -160,7 +161,7 @@ func TestS3Downloader(t *testing.T) {
 			contentLength := int64(len(toWrite))
 			fake.GetObjectReturns(&s3.GetObjectOutput{
 				Body:          ioutil.NopCloser(bytes.NewReader(toWrite)),
-				ContentLength: &contentLength,
+				ContentLength: contentLength,
 			}, nil)
 
 			sd := &reflector.S3Downloader{
@@ -171,7 +172,7 @@ func TestS3Downloader(t *testing.T) {
 			w := new(bytes.Buffer)
 			n, err := sd.DownloadTo(w)
 
-			arg := fake.GetObjectArgsForCall(0)
+			_, arg, _ := fake.GetObjectArgsForCall(0)
 
 			require.Equal(t, test.bucket, *arg.Bucket)
 			require.Equal(t, test.key, *arg.Key)
