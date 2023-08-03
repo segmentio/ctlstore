@@ -75,8 +75,6 @@ github.com/segmentio/fasthash v0.0.0-20180216231524-a72b379d632e h1:uO75wNGioszj
 github.com/segmentio/fasthash v0.0.0-20180216231524-a72b379d632e/go.mod h1:tm/wZFQ8e24NYaBGIlnO2WGCAi67re4HHuOm0sftE/M=
 github.com/segmentio/go-snakecase v1.1.0 h1:ZJO4SNKKV0MjGOv0LHnixxN5FYv1JKBnVXEuBpwcbQI=
 github.com/segmentio/go-snakecase v1.1.0/go.mod h1:jk1miR5MS7Na32PZUykG89Arm+1BUSYhuGR6b7+hJto=
-github.com/segmentio/go-sqlite3 v1.11.2-0.20230621210714-15668e6e8a24 h1:7eJoBtSCZpgvQXdiGBytZMVWbSKwR4ocsa846M44mtM=
-github.com/segmentio/go-sqlite3 v1.11.2-0.20230621210714-15668e6e8a24/go.mod h1:WWHiTx1FuYI3ls1upYTTjGCAC0oKNL3KlQcG5k1fa6U=
 github.com/segmentio/go-sqlite3 v1.12.0 h1:NG3Hdja6V/dDz1uYCapBJCobL+nQLwn6b8Z28DLOU0s=
 github.com/segmentio/go-sqlite3 v1.12.0/go.mod h1:ARXycbQZSoCAgThy5syFIL2aXbrKF3tE1DEHfOkxh1g=
 github.com/segmentio/objconv v1.0.1 h1:QjfLzwriJj40JibCV3MGSEiAoXixbp4ybhwfTB8RXOM=
