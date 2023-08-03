@@ -1,13 +1,12 @@
 module github.com/segmentio/ctlstore
 
-go 1.13
+go 1.20
 
 require (
 	github.com/AlekSi/pointer v1.0.0
 	github.com/aws/aws-sdk-go v1.37.8
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/go-sql-driver/mysql v1.4.1
-	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.6
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.7.3
@@ -22,6 +21,9 @@ require (
 	github.com/segmentio/stats/v4 v4.6.2
 	github.com/stretchr/testify v1.8.1
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
+	gopkg.in/go-playground/mold.v2 v2.2.0 // indirect
+	gopkg.in/validator.v2 v2.0.0-20180514200540-135c24b11c19 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

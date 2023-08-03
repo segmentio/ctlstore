@@ -44,7 +44,7 @@ var (
 
 var testTmpSeq int64 = 0
 
-func LDBForTest(t testing.TB) (res *sql.DB, teardown func()) {
+func LDBForTestWithPath(t testing.TB) (res *sql.DB, teardown func(), path string) {
 	tmpDir, err := ioutil.TempDir("", "ldb-for-test")
 	if err != nil {
 		t.Fatal(err)
@@ -53,7 +53,8 @@ func LDBForTest(t testing.TB) (res *sql.DB, teardown func()) {
 	// Since there's a need for multiple TXs, have to use a tmp file
 	// for the database. In-memory in shared-cache mode kinda works,
 	// but it has aggressive locking that blocks the tests we want to do.
-	db, err := OpenLDB(NextTestLdbTmpPath(tmpDir), "rwc")
+	path = NextTestLdbTmpPath(tmpDir)
+	db, err := OpenLDB(path, "rwc")
 	if err != nil {
 		t.Fatalf("Couldn't open SQLite db, error %v", err)
 	}
@@ -65,7 +66,12 @@ func LDBForTest(t testing.TB) (res *sql.DB, teardown func()) {
 		if tmpDir != "" {
 			os.RemoveAll(tmpDir)
 		}
-	}
+	}, path
+}
+
+func LDBForTest(t testing.TB) (res *sql.DB, teardown func()) {
+	x, y, _ := LDBForTestWithPath(t)
+	return x, y
 }
 
 func OpenLDB(path string, mode string) (*sql.DB, error) {

@@ -11,15 +11,16 @@ import (
 	"sync"
 	"time"
 
+	"github.com/segmentio/errors-go"
+	"github.com/segmentio/events/v2"
+	"github.com/segmentio/stats/v4"
+
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/globalstats"
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/scanfunc"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
-	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events/v2"
-	"github.com/segmentio/stats/v4"
 )
 
 // LDBReader reads data from the LDB. The external interface is
@@ -201,8 +202,8 @@ func (reader *LDBReader) GetRowsByKeyPrefix(ctx context.Context, familyName stri
 // filling the data into the out param.
 //
 // The out param may be one of the following types:
-//    * pointer to struct
-//    * map[string]interface{}
+//   - pointer to struct
+//   - map[string]interface{}
 //
 // The key parameter can support composite keys by passing a slice type.
 func (reader *LDBReader) GetRowByKey(
