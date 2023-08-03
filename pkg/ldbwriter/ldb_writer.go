@@ -12,7 +12,6 @@ import (
 	"github.com/segmentio/stats/v4"
 
 	"github.com/segmentio/ctlstore/pkg/errs"
-	"github.com/segmentio/ctlstore/pkg/globalstats"
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlite"
@@ -236,7 +235,7 @@ func (writer *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*Pragm
 
 	start := time.Now()
 	defer func() {
-		globalstats.Observe("sql_ldb_writer.checkpoint_time", time.Now().Sub(start))
+		stats.Observe("checkpoint_time", time.Now().Sub(start))
 	}()
 
 	defer conn.Close()
