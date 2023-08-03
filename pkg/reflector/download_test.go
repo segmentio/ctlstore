@@ -2,8 +2,6 @@ package reflector_test
 
 import (
 	"bytes"
-	"compress/gzip"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"io"
 	"io/ioutil"
 	"math/rand"
@@ -12,11 +10,13 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	//"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	gzip "github.com/klauspost/pgzip"
+	"github.com/stretchr/testify/require"
+
 	"github.com/segmentio/ctlstore/pkg/fakes"
 	"github.com/segmentio/ctlstore/pkg/reflector"
 	"github.com/segmentio/errors-go"
-	"github.com/stretchr/testify/require"
 )
 
 // Verifies error handling behavior when downloading from s3 fails.

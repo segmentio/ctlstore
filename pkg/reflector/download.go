@@ -2,7 +2,6 @@ package reflector
 
 import (
 	"bytes"
-	"compress/gzip"
 	"context"
 	"fmt"
 	"io"
@@ -16,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	gzip "github.com/klauspost/pgzip"
 
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/errors-go"
