@@ -20,6 +20,22 @@ require (
 	github.com/segmentio/go-sqlite3 v1.11.2-0.20230621210714-15668e6e8a24
 	github.com/segmentio/stats/v4 v4.6.2
 	github.com/stretchr/testify v1.8.1
+)
+
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/mdlayher/genetlink v0.0.0-20190313224034-60417448a851 // indirect
+	github.com/mdlayher/netlink v0.0.0-20190313131330-258ea9dff42c // indirect
+	github.com/mdlayher/taskstats v0.0.0-20190313225729-7cbba52ee072 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/segmentio/fasthash v0.0.0-20180216231524-a72b379d632e // indirect
+	github.com/segmentio/go-snakecase v1.1.0 // indirect
+	github.com/segmentio/objconv v1.0.1 // indirect
+	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
+	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/tools v0.1.12 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/mold.v2 v2.2.0 // indirect
