@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -15,11 +16,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+
+	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
-
-	"github.com/segmentio/ctlstore/pkg/errs"
 )
 
 type downloadTo interface {
@@ -43,18 +44,21 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 	if err != nil {
 		return -1, err
 	}
+
+	tmpdir := os.TempDir()
+	file, err := os.CreateTemp(tmpdir, d.Key)
+	if err != nil {
+		return -1, errors.Wrap(err, "download snapshot into disk")
+	}
+	defer os.Remove(file.Name())
+
 	start := time.Now()
-	defer stats.Observe("snapshot_download_time", time.Now().Sub(start))
-	buffer := manager.NewWriteAtBuffer([]byte{})
-	compressedSize, err := downloader.Download(context.TODO(), buffer, &s3.GetObjectInput{
+	numBytes, err := downloader.Download(context.TODO(), file, &s3.GetObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.Key),
 	})
+	stats.Observe("snapshot_download_time", time.Now().Sub(start))
 
-	//obj, err := client.GetObject(&s3.GetObjectInput{
-	//	Bucket: aws.String(d.Bucket),
-	//	Key:    aws.String(d.Key),
-	//})
 	if err != nil {
 		switch err := err.(type) {
 		case awserr.RequestFailure:
@@ -66,22 +70,33 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 		// retry
 		return -1, errors.WithTypes(errors.Wrap(err, "get s3 data"), errs.ErrTypeTemporary)
 	}
-	defer obj.Body.Close()
-	var reader io.Reader = obj.Body
+
 	if strings.HasSuffix(d.Key, ".gz") {
-		reader, err = gzip.NewReader(reader)
+		n, err = Unzip(file, w)
 		if err != nil {
-			return n, errors.Wrap(err, "create gzip reader")
+			return n, errors.Wrap(err, "unzip snapshot")
 		}
 	}
-	n, err = io.Copy(w, reader)
-	if err != nil {
-		return n, errors.Wrap(err, "copy from s3 to writer")
-	}
 
-	events.Log("LDB inflated %d -> %d bytes", compressedSize, n)
+	events.Log("LDB inflated %d -> %d bytes", numBytes, n)
 
 	return
+}
+
+func Unzip(src io.Reader, dest io.Writer) (int64, error) {
+	r, err := gzip.NewReader(src)
+	if err != nil {
+		return -1, err
+	}
+	defer r.Close()
+
+	n, err := io.Copy(dest, r)
+
+	if err != nil {
+		return -1, err
+	}
+
+	return n, nil
 }
 
 func (d *S3Downloader) getS3Client() (S3Client, error) {
