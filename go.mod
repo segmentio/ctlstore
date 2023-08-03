@@ -17,7 +17,7 @@ require (
 	github.com/segmentio/conf v1.1.0
 	github.com/segmentio/errors-go v1.0.0
 	github.com/segmentio/events/v2 v2.3.2
-	github.com/segmentio/go-sqlite3 v1.11.1
+	github.com/segmentio/go-sqlite3 v1.12.0
 	github.com/segmentio/stats/v4 v4.6.2
 	github.com/stretchr/testify v1.8.1
 )
@@ -32,11 +32,10 @@ require (
 	github.com/segmentio/fasthash v0.0.0-20180216231524-a72b379d632e // indirect
 	github.com/segmentio/go-snakecase v1.1.0 // indirect
 	github.com/segmentio/objconv v1.0.1 // indirect
-	golang.org/x/mod v0.4.2 // indirect
-	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420 // indirect
-	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
-	golang.org/x/tools v0.1.5 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
+	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/tools v0.1.12 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/mold.v2 v2.2.0 // indirect
