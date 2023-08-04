@@ -36,6 +36,7 @@ type Reflector struct {
 	ldb           *sql.DB
 	upstreamdb    *sql.DB
 	ledgerMonitor *ledger.Monitor
+	walMonitor    starter
 	stop          chan struct{}
 }
 
@@ -62,6 +63,18 @@ type ReflectorConfig struct {
 	IsSupervisor     bool
 	LDBWriteCallback ldbwriter.LDBWriteCallback // optional
 	BootstrapRegion  string                     // optional
+	// How often to poll the WAL stats
+	WALPollInterval time.Duration // optional
+	// Performs a checkpoint after the WAL file exceeds this size in bytes
+	WALCheckpointThresholdSize int // optional
+	// What type of checkpoint to perform
+	WALCheckpointType ldbwriter.CheckpointType // optional
+	DoMonitorWAL      bool                     // optional
+	BusyTimeoutMS     int                      // optional
+}
+
+type starter interface {
+	Start(ctx context.Context)
 }
 
 // Printable returns a "pretty" stringified version of the config
@@ -128,9 +141,16 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	// themselves are appended to the log instead of the database file. After
 	// the log grows large enough, its contents are "checkpointed" into the
 	// database file in batch.
-	ldbDB, err := sql.Open(driverName, config.LDBPath+"?_journal_mode=wal")
-	if err != nil {
-		return nil, fmt.Errorf("Error when opening LDB at '%v': %v", config.LDBPath, err)
+	var ldbDB *sql.DB
+	var openErr error
+	if config.BusyTimeoutMS > 0 {
+		ldbDB, openErr = sql.Open(driverName, config.LDBPath+fmt.Sprintf("?_journal_mode=wal&_busy_timeout=%d", config.BusyTimeoutMS))
+	} else {
+		ldbDB, openErr = sql.Open(driverName, config.LDBPath+"?_journal_mode=wal")
+	}
+
+	if openErr != nil {
+		return nil, fmt.Errorf("Error when opening LDB at '%v': %v", config.LDBPath, openErr)
 	}
 
 	dsn := config.Upstream.DSN
@@ -234,18 +254,36 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 		return nil, errors.Wrap(err, "build ledger latency monitor")
 	}
 
+	var walMon starter
+
+	if config.DoMonitorWAL && config.WALPollInterval > 0 {
+		w := &ldbwriter.SqlLdbWriter{Db: ldbDB}
+		cper := func() (*ldbwriter.PragmaWALResult, error) {
+			return w.Checkpoint(config.WALCheckpointType)
+		}
+		walMon = NewMonitor(MonitorConfig{
+			PollInterval:               config.WALPollInterval,
+			Path:                       config.LDBPath + "-wal",
+			WALCheckpointThresholdSize: int64(config.WALCheckpointThresholdSize),
+		}, cper)
+	} else {
+		walMon = &noopStarter{}
+	}
+
 	return &Reflector{
 		shovel:        shovel,
 		ldb:           ldbDB,
 		upstreamdb:    upstreamdb,
 		ledgerMonitor: ledgerMon,
 		stop:          stop,
+		walMonitor:    walMon,
 	}, nil
 }
 
 func (r *Reflector) Start(ctx context.Context) error {
 	events.Log("Starting Reflector.")
 	go r.ledgerMonitor.Start(ctx)
+	go r.walMonitor.Start(ctx)
 	for {
 		err := func() error {
 			shovel, err := r.shovel()
@@ -411,3 +449,8 @@ func bootstrapLDB(cfg ldbBootstrapConfig) error {
 	}
 	return errors.Errorf("download of ldb snapshot failed after max attempts reached: %s", err)
 }
+
+type noopStarter struct {
+}
+
+func (n *noopStarter) Start(ctx context.Context) {}

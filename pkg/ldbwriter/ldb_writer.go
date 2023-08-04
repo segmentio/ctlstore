@@ -6,12 +6,13 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
+	"github.com/segmentio/events/v2"
+	"github.com/segmentio/stats/v4"
+
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlite"
-	"github.com/segmentio/events/v2"
-	"github.com/segmentio/stats/v4"
 )
 
 // Statement to update the sequence tracker, ensuring that it doesn't go
@@ -190,4 +191,55 @@ func (writer *SqlLdbWriter) Close() error {
 		writer.LedgerTx = nil
 	}
 	return nil
+}
+
+// PragmaWALResult https://www.sqlite.org/pragma.html#pragma_wal_checkpoint
+type PragmaWALResult struct {
+	// 0 indicates not busy, checkpoint was not blocked from completing. 1 is blocked
+	Busy int
+	// number of modified pages that have been written to the write-ahead log file per a checkpoint run
+	Log int
+	// number of pages in the write-ahead log file that have been successfully moved back into the database file at the conclusion of the checkpoint
+	Checkpointed int
+	// Type of checkpointing performed
+	Type CheckpointType
+}
+
+func (p *PragmaWALResult) String() string {
+	return fmt.Sprintf("busy=%d, log=%d, checkpointed=%d", p.Busy, p.Log, p.Checkpointed)
+}
+
+// CheckpointType see https://www.sqlite.org/pragma.html#pragma_wal_checkpoint
+type CheckpointType string
+
+var (
+	Passive  CheckpointType = "PASSIVE"
+	Full     CheckpointType = "FULL"
+	Restart  CheckpointType = "RESTART"
+	Truncate CheckpointType = "TRUNCATE"
+)
+
+// Checkpoint initiates a wal checkpoint, returning stats on the checkpoint's progress
+// see https://www.sqlite.org/pragma.html#pragma_wal_checkpoint for more details
+// requires write access
+func (writer *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*PragmaWALResult, error) {
+	res, err := writer.Db.Query(fmt.Sprintf("PRAGMA wal_checkpoint(%s)", string(checkpointingType)))
+	if err != nil {
+		events.Log("error in checkpointing, %{error}", err)
+		errs.Incr("sql_ldb_writer.wal_checkpoint.query.error")
+		return nil, err
+	}
+
+	defer res.Close()
+	var p PragmaWALResult
+	if res.Next() {
+		err := res.Scan(&p.Busy, &p.Log, &p.Checkpointed)
+		if err != nil {
+			events.Log("error in scanning checkpointing, %{error}", err)
+			errs.Incr("sql_ldb_writer.wal_checkpoint.scan.error")
+			return nil, err
+		}
+	}
+	p.Type = checkpointingType
+	return &p, nil
 }

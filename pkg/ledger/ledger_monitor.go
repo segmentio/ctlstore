@@ -12,11 +12,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecs"
-	"github.com/segmentio/ctlstore/pkg/errs"
-	"github.com/segmentio/ctlstore/pkg/utils"
 	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
+
+	"github.com/segmentio/ctlstore/pkg/errs"
+	"github.com/segmentio/ctlstore/pkg/utils"
 )
 
 const (

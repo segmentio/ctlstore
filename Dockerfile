@@ -1,13 +1,14 @@
-FROM golang:1.14-alpine
+FROM golang:1.20-alpine
 ENV SRC github.com/segmentio/ctlstore
 ARG VERSION
 
 RUN apk --update add gcc git curl alpine-sdk libc6-compat ca-certificates sqlite \
-  && curl -SsL https://github.com/segmentio/chamber/releases/download/v2.1.0/chamber-v2.1.0-linux-amd64 -o /bin/chamber \
+  && curl -SsL https://github.com/segmentio/chamber/releases/download/v2.13.2/chamber-v2.13.2-linux-amd64 -o /bin/chamber \
   && chmod +x /bin/chamber
 
 COPY . /go/src/${SRC}
-
+WORKDIR /go/src/${SRC}
+RUN go mod vendor
 RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=$VERSION" ${SRC}/pkg/cmd/ctlstore \
   && cp ${GOPATH}/bin/ctlstore /usr/local/bin
 
@@ -16,7 +17,7 @@ RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore/pkg/vers
 
 RUN apk del gcc git curl alpine-sdk libc6-compat
 
-FROM 528451384384.dkr.ecr.us-west-2.amazonaws.com/segment-alpine
+FROM alpine
 RUN apk --no-cache add sqlite
 
 COPY --from=0 /bin/chamber /bin/chamber
