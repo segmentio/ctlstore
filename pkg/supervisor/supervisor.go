@@ -148,9 +148,6 @@ func (s *supervisor) Start(ctx context.Context) {
 		//       * Would be nice to be able to determine what the state of the LDB actions were
 		//         before we stopped the reflector and did the snapshot, so we can log it and spit out
 		//         a metric about it.
-		//   * Ensure we have good metrics around these behaviors; e.g., number of ledger entries processed
-		//     in the last iteration of the reflector.
-		//
 		select {
 		case <-time.After(sleepDur):
 			// reset to default
