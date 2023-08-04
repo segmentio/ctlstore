@@ -22,7 +22,7 @@ import (
 // Verifies error handling behavior when downloading from s3 fails.
 // Specifically, the supervisor is allowed to create a new LDB if
 // a 404 is received from S3, and other errors from S3 are able
-// to be retired.  These behaviors result from the kind of error
+// to be retried.  These behaviors result from the kind of error
 // that s3Downloader.DownloadTo(writer) returns.
 func TestS3DownloadErrors(t *testing.T) {
 	for _, test := range []struct {
