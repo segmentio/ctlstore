@@ -136,8 +136,8 @@ func (s *supervisor) Start(ctx context.Context) {
 		// the LDB that does a deletion of many rows.
 		//
 		// ⚠️ If you don't increase the sleep duration enough to allow a transaction to complete,
-		// then supervisor will get stuck and never make progress.
-		// Such a situation has a growing compound effect that on the Ctlstore ecosystem,
+		// then the supervisor will get stuck and never make progress.
+		// Such a situation has a growing compound effect on the Ctlstore ecosystem,
 		// as all new reflectors have old snapshots and thus need to pull down an ever-growing
 		// number of ledger updates to sync-up with the latest state.
 		// This also creates an ever-increasing load on the Ctlstore DB (ctldb).
