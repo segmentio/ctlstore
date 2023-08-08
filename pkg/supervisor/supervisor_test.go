@@ -50,8 +50,10 @@ func TestSupervisor(t *testing.T) {
 		require.True(t, reflector.Closed.IsSet())
 	}()
 
+	snapshotInterval := 100 * time.Millisecond
+
 	cfg := SupervisorConfig{
-		SnapshotInterval: 100 * time.Millisecond,
+		SnapshotInterval: snapshotInterval,
 		SnapshotURL:      "file://" + archivePath,
 		LDBPath:          ldbDbPath,
 		Reflector:        reflector,
@@ -127,7 +129,7 @@ func TestSupervisor(t *testing.T) {
 		}
 
 		// Wait for snapshot to complete
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(snapshotInterval)
 
 		// Cancels the context passed to the supervisor, which should cause it
 		// to return from the Start() call
