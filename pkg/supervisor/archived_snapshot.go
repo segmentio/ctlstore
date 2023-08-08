@@ -7,13 +7,15 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/pkg/errors"
-	"github.com/segmentio/ctlstore/pkg/utils"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
+
+	"github.com/segmentio/ctlstore/pkg/utils"
 )
 
 type archivedSnapshot interface {
@@ -76,9 +78,13 @@ func (c *s3Snapshot) Upload(ctx context.Context, path string) error {
 		reader = gpr
 	}
 	events.Log("Uploading %{file}s (%d bytes) to %{bucket}s/%{key}s", path, size, c.Bucket, key)
+
+	start := time.Now()
 	if err = c.sendToS3(ctx, key, c.Bucket, reader); err != nil {
 		return errors.Wrap(err, "send to s3")
 	}
+	stats.Observe("ldb-upload-time", time.Since(start), stats.T("compressed", isCompressed(gpr)))
+
 	events.Log("Successfully uploaded %{file}s to %{bucket}s/%{key}s", path, c.Bucket, key)
 	if gpr != nil {
 		stats.Set("ldb-size-bytes-compressed", gpr.bytesRead)
@@ -89,6 +95,13 @@ func (c *s3Snapshot) Upload(ctx context.Context, path string) error {
 		}
 	}
 	return nil
+}
+
+func isCompressed(gpr *gzipCompressionReader) string {
+	if gpr == nil {
+		return "false"
+	}
+	return "true"
 }
 
 func (c *s3Snapshot) sendToS3(ctx context.Context, key string, bucket string, body io.Reader) error {
