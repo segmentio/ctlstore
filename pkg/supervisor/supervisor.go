@@ -129,21 +129,40 @@ func (s *supervisor) Start(ctx context.Context) {
 	events.Log("Starting supervisor")
 	s.reflectorCtl.Start(ctx)
 	defer events.Log("Stopped Supervisor")
+	sleepDur := s.SleepDuration
 	for {
-		sleepDur := s.SleepDuration
+		// Wait for the reflector to make changes to its LDB before stopping it.  Sometimes
+		// we need more time than to process a big transaction, such as a large cleanup of
+		// the LDB that does a deletion of many rows.
+		//
+		// ⚠️ If you don't increase the sleep duration enough to allow a transaction to complete,
+		// then the supervisor will get stuck and never make progress.
+		// Such a situation has a growing compound effect on the Ctlstore ecosystem,
+		// as all new reflectors have old snapshots and thus need to pull down an ever-growing
+		// number of ledger updates to sync-up with the latest state.
+		// This also creates an ever-increasing load on the Ctlstore DB (ctldb).
+		//
+		// TODO:
+		//   * Add detection of progress stopping (same ledger seq on 2+ runs) and backoff the sleep duration
+		//     automatically, up to a limit.
+		//       * Would be nice to be able to determine what the state of the LDB actions were
+		//         before we stopped the reflector and did the snapshot, so we can log it and spit out
+		//         a metric about it.
+		select {
+		case <-time.After(sleepDur):
+			// reset to default
+			sleepDur = s.SleepDuration
+		case <-ctx.Done():
+			events.Log("Supervisor exiting because context done (err=%v)", ctx.Err())
+			// Outer context is done, aborting everything
+			return
+		}
 		err := s.snapshot(ctx)
 		if err != nil && errors.Cause(err) != context.Canceled {
 			s.incrementSnapshotErrorMetric(1)
 			events.Log("Error taking snapshot: %{error}+v", err)
 			// Use a shorter sleep duration for faster retries
 			sleepDur = s.BreatheDuration
-		}
-		select {
-		case <-time.After(sleepDur):
-		case <-ctx.Done():
-			events.Log("Supervisor exiting because context done (err=%v)", ctx.Err())
-			// Outer context is done, aborting everything
-			return
 		}
 	}
 }
