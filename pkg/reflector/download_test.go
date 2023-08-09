@@ -38,7 +38,8 @@ func TestS3DownloadErrors(t *testing.T) {
 			s3Client: func() reflector.S3Client {
 				f := &fakes.FakeS3Client{}
 				f.GetObjectReturns(&s3.GetObjectOutput{
-					Body: ioutil.NopCloser(strings.NewReader("data")),
+					Body:          ioutil.NopCloser(strings.NewReader("data")),
+					ContentLength: 4,
 				}, nil)
 				return f
 			},

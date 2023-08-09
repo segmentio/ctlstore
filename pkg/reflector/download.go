@@ -53,7 +53,7 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 	defer os.Remove(file.Name())
 
 	start := time.Now()
-	numBytes, err := downloader.Download(context.TODO(), file, &s3.GetObjectInput{
+	numBytes, err := downloader.Download(context.Background(), file, &s3.GetObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.Key),
 	})
@@ -75,6 +75,11 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 		n, err = Unzip(file, w)
 		if err != nil {
 			return n, errors.Wrap(err, "unzip snapshot")
+		}
+	} else {
+		n, err = io.Copy(w, file)
+		if err != nil {
+			return n, errors.Wrap(err, "copy snapshot")
 		}
 	}
 
