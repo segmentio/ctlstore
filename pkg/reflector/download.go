@@ -3,9 +3,9 @@ package reflector
 import (
 	"bytes"
 	"context"
+	er "errors"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -14,7 +14,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/aws/smithy-go"
 	gzip "github.com/klauspost/pgzip"
 
 	"github.com/segmentio/ctlstore/pkg/errs"
@@ -60,11 +61,14 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 	stats.Observe("snapshot_download_time", time.Now().Sub(start))
 
 	if err != nil {
-		switch err := err.(type) {
-		case awserr.RequestFailure:
-			if d.StartOverOnNotFound && err.StatusCode() == http.StatusNotFound {
-				// don't bother retrying. we'll start with a fresh ldb.
-				return -1, errors.WithTypes(errors.Wrap(err, "get s3 data"), errs.ErrTypePermanent)
+		var ae smithy.APIError
+		if er.As(err, &ae) {
+			switch ae.(type) {
+			case *types.NotFound:
+				if d.StartOverOnNotFound {
+					// don't bother retrying. we'll start with a fresh ldb.
+					return -1, errors.WithTypes(errors.Wrap(err, "get s3 data"), errs.ErrTypePermanent)
+				}
 			}
 		}
 		// retry

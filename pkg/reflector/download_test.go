@@ -9,8 +9,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/aws/smithy-go"
 	gzip "github.com/klauspost/pgzip"
 	"github.com/stretchr/testify/require"
 
@@ -62,8 +64,9 @@ func TestS3DownloadErrors(t *testing.T) {
 			isSupervisor: true,
 			s3Client: func() reflector.S3Client {
 				f := &fakes.FakeS3Client{}
-				f.GetObjectReturns(nil, awserr.NewRequestFailure(
-					awserr.New("error-code", "error-message", errors.New("failure")), http.StatusNotFound, ""))
+				f.GetObjectReturns(nil, &types.NotFound{
+					Message: aws.String("failure"),
+				})
 				return f
 			},
 			err:      errors.New("failure"),
@@ -74,8 +77,9 @@ func TestS3DownloadErrors(t *testing.T) {
 			name: "temporary failure on 404 if not-supervisor",
 			s3Client: func() reflector.S3Client {
 				f := &fakes.FakeS3Client{}
-				f.GetObjectReturns(nil, awserr.NewRequestFailure(
-					awserr.New("error-code", "error-message", errors.New("failure")), http.StatusNotFound, ""))
+				f.GetObjectReturns(nil, &types.NotFound{
+					Message: aws.String("failure"),
+				})
 				return f
 			},
 			err:      errors.New("failure"),
@@ -86,8 +90,10 @@ func TestS3DownloadErrors(t *testing.T) {
 			name: "temporary failure",
 			s3Client: func() reflector.S3Client {
 				f := &fakes.FakeS3Client{}
-				f.GetObjectReturns(nil, awserr.NewRequestFailure(
-					awserr.New("error-code", "error-message", errors.New("failure")), http.StatusInternalServerError, ""))
+				f.GetObjectReturns(nil, &smithy.GenericAPIError{
+					Code:    string(rune(http.StatusInternalServerError)),
+					Message: "failure",
+				})
 				return f
 			},
 			err:      errors.New("failure"),
