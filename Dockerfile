@@ -21,6 +21,7 @@ RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore/pkg/vers
 FROM alpine
 RUN apk --no-cache add sqlite pigz
 
+COPY --from=0 /go/src/github.com/segmentio/ctlstore/scripts/download.sh .
 COPY --from=0 /bin/chamber /bin/chamber
 COPY --from=0 /bin/s5cmd /bin/s5cmd
 COPY --from=0 /usr/local/bin/ctlstore /usr/local/bin/
