@@ -35,5 +35,8 @@ else
 fi
 
 if [ ! -z "$STATS_IP" ]; then
+  while ! echo exit | nc -u -w1 $NODE_IP $STATS_PORT;
+  do sleep 120;
+  done
   echo -n "ctlstore.reflector.init_snapshot_download_time:$(($END - $START))|h|#$TAGS" | nc -u -w1 $NODE_IP $STATS_PORT
 fi
