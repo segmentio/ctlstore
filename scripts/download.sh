@@ -52,4 +52,4 @@ emit_metrics(){
   fi
 }
 
-emit_metrics &
+emit_metrics
