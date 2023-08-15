@@ -37,7 +37,7 @@ fi
 emit_metrics(){
   if [ ! -z "$STATS_IP" ]; then
     counter=0
-    while ! echo exit | nc -u -w1 $NODE_IP $STATS_PORT;
+    while ! echo exit | nc -u $NODE_IP $STATS_PORT;
     if (($((counter % 15)) == 0)); then
       echo "awaiting datadog UDP port to be ready..."
     fi
