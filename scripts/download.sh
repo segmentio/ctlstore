@@ -34,22 +34,18 @@ else
   echo "Snapshot already present"
 fi
 
-emit_metrics(){
-  if [ ! -z "$STATS_IP" ]; then
-    counter=0
-    while ! echo exit | nc -u $NODE_IP $STATS_PORT;
-    if (($((counter % 15)) == 0)); then
-      echo "awaiting datadog UDP port to be ready..."
-    fi
-    counter=$((counter+1))
-    if ((counter > 300)); then
-      break;
-    fi
-    do sleep 1;
-    done
-
-    echo -n "ctlstore.reflector.init_snapshot_download_time:$(($END - $START))|h|#$TAGS" | nc -u -w1 $NODE_IP $STATS_PORT
+if [ ! -z "$STATS_IP" ]; then
+  counter=0
+  while ! echo exit | nc -u $NODE_IP $STATS_PORT;
+  if (($((counter % 15)) == 0)); then
+    echo "awaiting datadog UDP port to be ready..."
   fi
-}
+  counter=$((counter+1))
+  if ((counter > 300)); then
+    break;
+  fi
+  do sleep 1;
+  done
 
-emit_metrics
+  echo -n "ctlstore.reflector.init_snapshot_download_time:$(($END - $START))|h|#$TAGS" | nc -u -w1 $NODE_IP $STATS_PORT
+fi
