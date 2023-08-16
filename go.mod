@@ -20,6 +20,7 @@ require (
 	github.com/segmentio/go-sqlite3 v1.12.0
 	github.com/segmentio/stats/v4 v4.6.2
 	github.com/stretchr/testify v1.8.1
+	golang.org/x/sync v0.3.0
 )
 
 require (

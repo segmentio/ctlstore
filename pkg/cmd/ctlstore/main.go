@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"reflect"
 	"strings"
 	"syscall"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/segmentio/conf"
 	"github.com/segmentio/errors-go"
@@ -66,6 +69,12 @@ type reflectorCliConfig struct {
 	WALCheckpointThresholdSize int                      `conf:"wal-checkpoint-threshold-size" help:"Performs a checkpoint after the WAL file exceeds this size in bytes"`
 	WALCheckpointType          ldbwriter.CheckpointType `conf:"wal-checkpoint-type" help:"what type of checkpoint to manually perform once the wal size is exceeded"`
 	BusyTimeoutMS              int                      `conf:"busy-timeout-ms" help:"Set a busy timeout on the connection string for sqlite in milliseconds"`
+	MultiReflector             multiReflectorConfig     `conf:"multi-reflector" help:"Configuration for running multiple reflectors at once"`
+}
+
+type multiReflectorConfig struct {
+	LDBPaths       []string `conf:"ldb-paths" help:"list of ldbs, each ldb is managed by a unique reflector" validate:"nonzero,dive,nonzero"`
+	ChangelogPaths []string `conf:"changelog-paths" help:"list of ldbs, each ldb is managed by a unique reflector" validate:"nonzero,dive,nonzero"`
 }
 
 type executiveCliConfig struct {
@@ -170,6 +179,8 @@ func main() {
 		fmt.Println(ctlstore.Version)
 	case "reflector":
 		reflector(ctx, args)
+	case "multi-reflector":
+		multiReflector(ctx, args)
 	case "sidecar":
 		sidecar(ctx, args)
 	case "executive":
@@ -468,6 +479,69 @@ func reflector(ctx context.Context, args []string) {
 		return
 	}
 	reflector.Start(ctx)
+}
+
+func multiReflector(ctx context.Context, args []string) {
+	cliCfg := defaultReflectorCLIConfig(false)
+	loadConfig(&cliCfg, "reflector", args)
+
+	if cliCfg.Debug {
+		enableDebug()
+	}
+
+	var promHandler *prometheus.Handler
+	if len(cliCfg.MetricsBind) > 0 {
+		promHandler = &prometheus.Handler{}
+
+		http.Handle("/metrics", promHandler)
+
+		go func() {
+			events.Log("Serving Prometheus metrics on %s", cliCfg.MetricsBind)
+			err := http.ListenAndServe(cliCfg.MetricsBind, nil)
+			if err != nil {
+				events.Log("Failed to served Prometheus metrics: %s", err)
+			}
+		}()
+	}
+	_, teardown := configureDogstatsd(ctx, dogstatsdOpts{
+		config:            cliCfg.Dogstatsd,
+		statsPrefix:       "reflector",
+		prometheusHandler: promHandler,
+	})
+	defer teardown()
+
+	var reflectors []*reflectorpkg.Reflector
+	for i, path := range cliCfg.MultiReflector.LDBPaths {
+		p := path
+		x := cliCfg
+		x.LDBPath = p
+		if len(cliCfg.MultiReflector.ChangelogPaths) > i {
+			x.ChangelogPath = cliCfg.MultiReflector.ChangelogPaths[i]
+		} else {
+			x.ChangelogPath = ""
+		}
+		r, err := newReflector(x, false)
+		if err != nil {
+			events.Log("Fatal error starting Reflector: %{error}+v", err)
+			errs.IncrDefault(stats.T("op", "startup"), stats.T("path", p))
+			return
+		}
+		reflectors = append(reflectors, r)
+	}
+
+	grp, grpCtx := errgroup.WithContext(ctx)
+	for _, r := range reflectors {
+		grp.Go(func() error {
+			return r.Start(grpCtx)
+		})
+	}
+
+	err := grp.Wait()
+	if err != nil {
+		events.Log("reflectors ended in error %{error}v", err)
+		errs.Incr("multi.shutdown", stats.T("err", reflect.ValueOf(err).Type().String()))
+		return
+	}
 }
 
 func defaultReflectorCLIConfig(isSupervisor bool) reflectorCliConfig {
