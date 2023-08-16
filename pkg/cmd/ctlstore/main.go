@@ -7,6 +7,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -73,8 +74,7 @@ type reflectorCliConfig struct {
 }
 
 type multiReflectorConfig struct {
-	LDBPaths       []string `conf:"ldb-paths" help:"list of ldbs, each ldb is managed by a unique reflector" validate:"nonzero,dive,nonzero"`
-	ChangelogPaths []string `conf:"changelog-paths" help:"list of ldbs, each ldb is managed by a unique reflector" validate:"nonzero,dive,nonzero"`
+	LDBPaths []string `conf:"ldb-paths" help:"list of ldbs, each ldb is managed by a unique reflector" validate:"nonzero"`
 }
 
 type executiveCliConfig struct {
@@ -160,6 +160,7 @@ func main() {
 		Commands: []conf.Command{
 			{Name: "version", Help: "Get the ctlstore version"},
 			{Name: "reflector", Help: "Run the ctlstore Reflector"},
+			{Name: "multi-reflector", Help: "Run the ctlstore Reflector in multi mode"},
 			{Name: "sidecar", Help: "Run the ctlstore Sidecar"},
 			{Name: "executive", Help: "Run the ctlstore Executive service"},
 			{Name: "supervisor", Help: "Run the ctlstore Supervisor service"},
@@ -510,23 +511,36 @@ func multiReflector(ctx context.Context, args []string) {
 	})
 	defer teardown()
 
-	var reflectors []*reflectorpkg.Reflector
+	reflectors := make([]*reflectorpkg.Reflector, len(cliCfg.MultiReflector.LDBPaths))
+	var wg sync.WaitGroup
+	errChan := make(chan error, len(cliCfg.MultiReflector.LDBPaths))
+	wg.Add(len(cliCfg.MultiReflector.LDBPaths))
 	for i, path := range cliCfg.MultiReflector.LDBPaths {
 		p := path
 		x := cliCfg
 		x.LDBPath = p
-		if len(cliCfg.MultiReflector.ChangelogPaths) > i {
-			x.ChangelogPath = cliCfg.MultiReflector.ChangelogPaths[i]
-		} else {
-			x.ChangelogPath = ""
-		}
-		r, err := newReflector(x, false)
-		if err != nil {
-			events.Log("Fatal error starting Reflector: %{error}+v", err)
-			errs.IncrDefault(stats.T("op", "startup"), stats.T("path", p))
-			return
-		}
-		reflectors = append(reflectors, r)
+		// no changelog in this mode
+		x.ChangelogPath = ""
+		x.ChangelogSize = 0
+		go func(x reflectorCliConfig, idx int) {
+			defer wg.Done()
+			r, err := newReflector(x, false)
+			if err != nil {
+				events.Log("Fatal error starting Reflector: %{error}+v", err)
+				errs.IncrDefault(stats.T("op", "startup"), stats.T("path", p))
+				errChan <- err
+				return
+			}
+			reflectors[idx] = r
+		}(x, i)
+	}
+
+	wg.Wait()
+
+	select {
+	case <-errChan:
+		return
+	default:
 	}
 
 	grp, grpCtx := errgroup.WithContext(ctx)
