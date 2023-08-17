@@ -46,6 +46,11 @@ var (
 	ErrNoLedgerUpdates      = errors.New("no ledger updates have been received yet")
 )
 
+type RowRetriever interface {
+	GetRowsByKeyPrefix(ctx context.Context, familyName string, tableName string, key ...interface{}) (*Rows, error)
+	GetRowByKey(ctx context.Context, out interface{}, familyName string, tableName string, key ...interface{}) (found bool, err error)
+}
+
 func newLDBReader(path string) (*LDBReader, error) {
 	db, err := newLDB(path)
 	if err != nil {
@@ -369,7 +374,7 @@ func (reader *LDBReader) Ping(ctx context.Context) bool {
 // to the type of each PK column.
 func convertKeyBeforeQuery(pk schema.PrimaryKey, key []interface{}) error {
 	for i, k := range key {
-		// sanity check on th elength of the pk field type slice
+		// sanity check on the length of the pk field type slice
 		if i >= len(pk.Types) {
 			return errors.New("insufficient key field type data")
 		}
