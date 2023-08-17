@@ -36,13 +36,13 @@ fi
 
 COUNTER=0
 if [ ! -z "$STATS_IP" ]; then
-  while ! echo exit | nc -u $NODE_IP $STATS_PORT;
+  while ! echo exit | nc -u -w1 $NODE_IP $STATS_PORT;
   echo $COUNTER
-  if [ $(($COUNTER % 15)) -eq 0 ]; then
+  if [ $(($COUNTER % 8)) -eq 0 ]; then
     echo "awaiting datadog UDP port to be ready..."
   fi
   COUNTER=$(($COUNTER+1))
-  if [ $COUNTER -gt 30 ]; then
+  if [ $COUNTER -gt 150 ]; then
     break;
   fi
   do sleep 1;
