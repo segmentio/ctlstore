@@ -34,15 +34,16 @@ else
   echo "Snapshot already present"
 fi
 
+COUNTER=0
 if [ ! -z "$STATS_IP" ]; then
-  counter=0
 #  while ! echo exit | nc -u $NODE_IP $STATS_PORT;
   while true;
-  if (($((counter % 15)) == 0)); then
+  echo $COUNTER
+  if (($((COUNTER % 15)) == 0)); then
     echo "awaiting datadog UDP port to be ready..."
   fi
-  counter=$((counter+1))
-  if ((counter > 30)); then
+  COUNTER=$((COUNTER+1))
+  if ((COUNTER > 30)); then
     break;
   fi
   do sleep 1;
