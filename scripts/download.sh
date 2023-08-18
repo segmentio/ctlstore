@@ -35,9 +35,8 @@ else
 fi
 
 COUNTER=0
-if [ -z "$STATS_IP" ]; then
+if [ ! -z "$STATS_IP" ]; then
   while true;
-  echo $COUNTER
   nc -zu $NODE_IP $STATS_PORT
   if [ $? = 0 ] || [ $COUNTER -gt 300 ]; then
     break
