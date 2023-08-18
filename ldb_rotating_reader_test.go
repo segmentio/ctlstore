@@ -222,6 +222,7 @@ func TestMultipleReaders(t *testing.T) {
 	ctx := context.Background()
 	dbs, paths := getMultiDBs(t, 4)
 
+	// create the tables in each db, and add a row unique to that db
 	for i, db := range dbs {
 		_, err := db.Exec("CREATE TABLE family___foo (id varchar primary key );")
 		if err != nil {
@@ -254,6 +255,7 @@ func TestMultipleReaders(t *testing.T) {
 	go rr.rotate(ctx)
 
 	for x := range dbs {
+		// for each db, ensure that we read its unique row
 		out := make(map[string]interface{})
 		val, err := rr.GetRowByKey(ctx, out, "family", "foo", x)
 		if err != nil || !val {
@@ -262,6 +264,7 @@ func TestMultipleReaders(t *testing.T) {
 
 		require.EqualValues(t, out, map[string]interface{}{"id": strconv.Itoa(x)}, "did not read correct value from table")
 
+		// also ensure we can't read any other unique rows from other dbs
 		for y := range dbs {
 			if y == x {
 				continue
@@ -272,6 +275,7 @@ func TestMultipleReaders(t *testing.T) {
 			}
 		}
 
+		// allow the ticker to proceed with its rotation
 		<-wait
 		time.Sleep(500 * time.Microsecond)
 	}
@@ -283,10 +287,12 @@ type kv struct {
 	bar string `ctlstore:"bar"`
 }
 
+// verifies that the rows cursor returned by GetRowsByKeyPrefix is still valid even if a rotation occurs while iterating over the row set
 func TestGetRowByPrefixAfterRotation(t *testing.T) {
 	ctx := context.Background()
 	dbs, paths := getMultiDBs(t, 4)
 
+	// create the tables and multiple rows
 	for i, db := range dbs {
 		_, err := db.Exec("CREATE TABLE family___foo (id varchar, bar varchar, primary key (id, bar));")
 		if err != nil {
@@ -316,6 +322,7 @@ func TestGetRowByPrefixAfterRotation(t *testing.T) {
 	}
 	rr.tickerInterval = 1 * time.Millisecond
 	rr.setActive()
+	// get an active rows cursor for the results set from db 0
 	rows, err := rr.GetRowsByKeyPrefix(ctx, "family", "foo", "0")
 
 	go rr.rotate(ctx)
@@ -323,9 +330,13 @@ func TestGetRowByPrefixAfterRotation(t *testing.T) {
 	count := 0
 	for rows.Next() {
 		var tar kv
-		rows.Scan(&tar)
+		err := rows.Scan(&tar)
+		if err != nil {
+			t.Fatalf("scan error: %v", err)
+		}
 		require.Equal(t, "0", tar.id)
 		require.Equal(t, strconv.Itoa(count), tar.bar)
+		// trigger a rotation
 		<-wait
 		time.Sleep(500 * time.Microsecond)
 		var out kv
@@ -334,6 +345,7 @@ func TestGetRowByPrefixAfterRotation(t *testing.T) {
 		// should rotate by now, check if different result set is returned
 		found, err := rr.GetRowByKey(ctx, &out, "family", "foo", "0", "0")
 		if count == 4 {
+			// on the 4th rotation, we're back at the beginning
 			require.EqualValues(t, kv{"0", "0"}, out, "should have rotated all the way back to the first reader")
 		} else if found || err != nil {
 			t.Errorf("should not have found the key since it rotated: %v", err)
