@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/segmentio/ctlstore/pkg/ldb"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -36,10 +37,26 @@ const (
 	Every10 RotationFrequency = 10
 	// Every6 rotate on 6 minute marks in an hour
 	Every6 RotationFrequency = 6
+
+	defaultPath = DefaultCtlstorePath + ldb.DefaultLDBFilename
+	ldbFormat   = DefaultCtlstorePath + "ldb-%d.db"
 )
 
-// RotatingReader creates a new reader that rotates which ldb it reads from on a rotation frequency
-func RotatingReader(ctx context.Context, rotationsPerHour RotationFrequency, ldbPaths ...string) (RowRetriever, error) {
+func defaultPaths(count int) []string {
+	paths := []string{defaultPath}
+	for i := 1; i < count; i++ {
+		paths = append(paths, fmt.Sprintf(ldbFormat, i))
+	}
+	return paths
+}
+
+// RotatingReader creates a new reader that rotates which ldb it reads from on a rotation frequency with the default location in /var/spool/ctlstore
+func RotatingReader(ctx context.Context, rotationsPerHour RotationFrequency, ldbsCount int) (RowRetriever, error) {
+	return CustomerRotatingReader(ctx, rotationsPerHour, defaultPaths(ldbsCount)...)
+}
+
+// CustomerRotatingReader creates a new reader that rotates which ldb it reads from on a rotation frequency
+func CustomerRotatingReader(ctx context.Context, rotationsPerHour RotationFrequency, ldbPaths ...string) (RowRetriever, error) {
 	r, err := rotatingReader(rotationsPerHour, ldbPaths...)
 	if err != nil {
 		return nil, err

@@ -45,7 +45,7 @@ func TestBasicRotatingReader(t *testing.T) {
 		}
 	}
 
-	rr, err := RotatingReader(context.Background(), Every30, paths...)
+	rr, err := CustomerRotatingReader(context.Background(), Every30, paths...)
 	if err != nil {
 		t.Fatalf("failed to create rotating reader: %v", err)
 	}
@@ -353,4 +353,21 @@ func TestGetRowByPrefixAfterRotation(t *testing.T) {
 	}
 
 	require.Equal(t, 4, count, "should've returned 4 rows")
+}
+
+func TestPath(t *testing.T) {
+	paths := defaultPaths(5)
+	if len(paths) != 5 {
+		t.Fatal("should be 5 paths")
+	}
+
+	if paths[0] != defaultPath {
+		t.Fatalf("First path should be the default, %s", paths[0])
+	}
+
+	for i := 1; i < 5; i++ {
+		if !strings.Contains(paths[i], strconv.Itoa(i)) {
+			t.Errorf("path %s should've contained its number, %d", paths[i], i)
+		}
+	}
 }
