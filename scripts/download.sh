@@ -48,6 +48,7 @@ if [ ! -z "$STATS_IP" ]; then
   COUNTER=$(($COUNTER+1))
   do sleep 1;
   done
-
+  echo "UDP port ready, awaiting for 10 seconds..";
+  sleep 10;
   echo -n "ctlstore.reflector.init_snapshot_download_time:$(($END - $START))|h|#$TAGS" | nc -u -w1 $NODE_IP $STATS_PORT
 fi
