@@ -45,11 +45,20 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
     COUNTER=$(($COUNTER+1))
     do sleep 1;
     done
-    echo "ctlstore.reflector.init_snapshot_download_time:$(($END - $START))|h|#$TAGS"
+    # experiment
     echo $NODE_IP
     echo $STATS_PORT
-    echo "UDP port ready, awaiting for 10 seconds..";
-    sleep 10;
+    FAKETIME=0
+    while true;
+    do sleep 10;
+    FAKETIME=$(($FAKETIME+10))
+    echo -n "ctlstore.reflector.init_snapshot_download_time:$(($FAKETIME))|h|#$TAGS" | nc -u -w1 $NODE_IP $STATS_PORT
+    if [ $FAKETIME -gt 1200 ]; then
+      break
+    fi
+    done
+    # experiment
+
     echo -n "ctlstore.reflector.init_snapshot_download_time:$(($END - $START))|h|#$TAGS" | nc -u -w1 $NODE_IP $STATS_PORT
   fi
 else
