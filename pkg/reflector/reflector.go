@@ -3,8 +3,11 @@ package reflector
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	"encoding/base64"
 	"fmt"
+	"github.com/go-sql-driver/mysql"
+	"github.com/segmentio/go-sqlite3"
 	"io"
 	"net/url"
 	"os"
@@ -126,7 +129,8 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	var changeBuffer sqlite.SQLChangeBuffer
 
 	// use a unique driver name to prevent database/sql panics.
-	driverName = fmt.Sprintf("%s_%d", ldb.LDBDatabaseDriver, atomic.AddInt64(&driverNameSequence, 1))
+	uniq := atomic.AddInt64(&driverNameSequence, 1)
+	driverName = fmt.Sprintf("%s_%d", ldb.LDBDatabaseDriver, uniq)
 	err := sqlite.RegisterSQLiteWatch(driverName, &changeBuffer)
 	if err != nil {
 		return nil, err
@@ -161,7 +165,10 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 		}
 	}
 
-	upstreamdb, err := sql.Open(config.Upstream.Driver, dsn)
+	// unique mysql driver so multiple reflectors don't clobber each other
+	driverName = fmt.Sprintf("%s_%[2]d_%[2]d", config.Upstream.Driver, uniq)
+	sql.Register(driverName, getDriver(driverName))
+	upstreamdb, err := sql.Open(driverName, dsn)
 	if err != nil {
 		return nil, fmt.Errorf("Error when opening upstream DB (%v): %v", config.Upstream.Driver, err)
 	}
@@ -278,6 +285,16 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 		stop:          stop,
 		walMonitor:    walMon,
 	}, nil
+}
+
+func getDriver(name string) driver.Driver {
+	if strings.Contains(name, "mysql") {
+		return &mysql.MySQLDriver{}
+	}
+	if strings.Contains(name, "sqlite") {
+		return &sqlite3.SQLiteDriver{}
+	}
+	panic("unknown driver: " + name)
 }
 
 func (r *Reflector) Start(ctx context.Context) error {
