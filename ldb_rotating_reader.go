@@ -14,7 +14,7 @@ import (
 // The main benefit is relieving read pressure on a particular ldb file when it becomes inactive,
 // allowing sqlite maintenance
 type LDBRotatingReader struct {
-	active           atomic.Int32
+	active           int32
 	dbs              []RowRetriever
 	mu               sync.RWMutex
 	cancelWatcher    context.CancelFunc
@@ -99,17 +99,17 @@ func (r *LDBRotatingReader) setActive() {
 	if r.now == nil {
 		r.now = time.Now
 	}
-	r.active.Store(int32(r.schedule[r.now().Minute()]))
+	atomic.StoreInt32(&r.active, int32(r.schedule[r.now().Minute()]))
 }
 
 // GetRowsByKeyPrefix delegates to the active LDBReader
 func (r *LDBRotatingReader) GetRowsByKeyPrefix(ctx context.Context, familyName string, tableName string, key ...interface{}) (*Rows, error) {
-	return r.dbs[r.active.Load()].GetRowsByKeyPrefix(ctx, familyName, tableName, key...)
+	return r.dbs[atomic.LoadInt32(&r.active)].GetRowsByKeyPrefix(ctx, familyName, tableName, key...)
 }
 
 // GetRowByKey delegates to the active LDBReader
 func (r *LDBRotatingReader) GetRowByKey(ctx context.Context, out interface{}, familyName string, tableName string, key ...interface{}) (found bool, err error) {
-	return r.dbs[r.active.Load()].GetRowByKey(ctx, out, familyName, tableName, key...)
+	return r.dbs[atomic.LoadInt32(&r.active)].GetRowByKey(ctx, out, familyName, tableName, key...)
 }
 
 func (r *LDBRotatingReader) rotate(ctx context.Context) {
@@ -124,7 +124,7 @@ func (r *LDBRotatingReader) rotate(ctx context.Context) {
 			return
 		case <-ticker.C:
 			next := r.schedule[r.now().Minute()]
-			r.active.Swap(int32(next))
+			atomic.SwapInt32(&r.active, int32(next))
 		}
 	}
 }

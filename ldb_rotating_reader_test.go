@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -29,7 +30,7 @@ func getMultiDBs(t *testing.T, count int) (dbs []*sql.DB, paths []string) {
 }
 
 type basic struct {
-	x int `ctlstore:"x"`
+	x int32 `ctlstore:"x"`
 }
 
 func TestBasicRotatingReader(t *testing.T) {
@@ -51,21 +52,20 @@ func TestBasicRotatingReader(t *testing.T) {
 	}
 
 	var out basic
-	found, err := rr.GetRowByKey(context.Background(), &out, "family", "table", 1)
-	if err != nil || !found {
-		t.Errorf("failed to find key 0: %v", err)
-	}
-	require.Equal(t, 1, out.x)
-
 	reader := rr.(*LDBRotatingReader)
-
-	var out2 basic
-	reader.active.Store(1)
-	found, err = reader.GetRowByKey(context.Background(), &out2, "family", "table", 2)
+	found, err := rr.GetRowByKey(context.Background(), &out, "family", "table", reader.active+1)
 	if err != nil || !found {
 		t.Errorf("failed to find key 1: %v", err)
 	}
-	require.Equal(t, 2, out2.x)
+	require.Equal(t, reader.active+1, out.x)
+
+	var out2 basic
+	atomic.StoreInt32(&reader.active, (reader.active+1)%2)
+	found, err = reader.GetRowByKey(context.Background(), &out2, "family", "table", reader.active+1)
+	if err != nil || !found {
+		t.Errorf("failed to find key 2: %v", err)
+	}
+	require.Equal(t, reader.active+1, out2.x)
 
 }
 
@@ -211,8 +211,8 @@ func TestRotation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			rr.now = tt.nowFunc
 			rr.setActive()
-			if rr.active.Load() != int32(tt.exp) {
-				t.Errorf("expected %d to be active, got %d instead", tt.exp, rr.active.Load())
+			if rr.active != int32(tt.exp) {
+				t.Errorf("expected %d to be active, got %d instead", tt.exp, rr.active)
 			}
 		})
 	}
