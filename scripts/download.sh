@@ -30,37 +30,12 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
   mv snapshot.db ldb.db
   END=$(date +%s)
   echo "ldb.db ready in $(($END - $START)) seconds"
-
-  COUNTER=0
-  if [ ! -z "$STATS_IP" ]; then
-    while true;
-    nc -zu $NODE_IP $STATS_PORT
-    if [ $? = 0 ] || [ $COUNTER -gt 300 ]; then
-      break
-    fi
-
-    if [ $(($COUNTER % 15)) -eq 0 ]; then
-      echo "awaiting datadog UDP port to be ready..."
-    fi
-    COUNTER=$(($COUNTER+1))
-    do sleep 1;
-    done
-    # experiment
-    echo $NODE_IP
-    echo $STATS_PORT
-    FAKETIME=0
-    while true;
-    do sleep 10;
-    FAKETIME=$(($FAKETIME+10))
-    echo -n "ctlstore.reflector.init_snapshot_download_time:$(($FAKETIME))|h|#$TAGS" | nc -u -w1 $NODE_IP $STATS_PORT
-    if [ $FAKETIME -gt 1200 ]; then
-      break
-    fi
-    done
-    # experiment
-
-    echo -n "ctlstore.reflector.init_snapshot_download_time:$(($END - $START))|h|#$TAGS" | nc -u -w1 $NODE_IP $STATS_PORT
-  fi
 else
   echo "Snapshot already present"
+fi
+
+if [ ! -z "$STATS_IP" ]; then
+  METRICS="/var/spool/ctlstore/metrics"
+  echo "{'startTime': $(($END - $START))}" > $METRICS
+  cat METRICS
 fi
