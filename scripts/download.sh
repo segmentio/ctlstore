@@ -34,8 +34,8 @@ else
   echo "Snapshot already present"
 fi
 
-if [ ! -z "$STATS_IP" ]; then
-  METRICS="/var/spool/ctlstore/metrics"
-  echo "{'startTime': $(($END - $START))}" > $METRICS
+if [ -z "$STATS_IP" ]; then
+  METRICS="/var/spool/ctlstore/metrics.json"
+  echo "{\"startTime\": $(($END - $START)), \"downloaded\": true}" > $METRICS
   cat $METRICS
 fi
