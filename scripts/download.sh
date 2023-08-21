@@ -37,5 +37,5 @@ fi
 if [ ! -z "$STATS_IP" ]; then
   METRICS="/var/spool/ctlstore/metrics"
   echo "{'startTime': $(($END - $START))}" > $METRICS
-  cat METRICS
+  cat $METRICS
 fi
