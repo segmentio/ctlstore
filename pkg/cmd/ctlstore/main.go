@@ -37,6 +37,8 @@ import (
 	"github.com/segmentio/ctlstore/pkg/utils"
 )
 
+var DebugEnabled = false
+
 type dogstatsdConfig struct {
 	Address    string        `conf:"address" help:"Address of the dogstatsd agent that will receive metrics"`
 	BufferSize int           `conf:"buffer-size" help:"Size of the statsd metrics buffer" validate:"min=0"`
@@ -203,6 +205,7 @@ func main() {
 func enableDebug() {
 	events.DefaultLogger.EnableDebug = true
 	events.DefaultLogger.EnableSource = true
+	DebugEnabled = true
 }
 
 func defaultDogstatsdConfig() dogstatsdConfig {
@@ -619,6 +622,9 @@ func newReflector(cliCfg reflectorCliConfig, isSupervisor bool, i int) (*reflect
 	if cliCfg.LedgerHealth.Disable {
 		events.Log("DEPRECATION NOTICE: use --disable-ecs-behavior instead of --disable to control this ledger monitor behavior")
 	}
+	id := fmt.Sprintf("%s-%d", path.Base(cliCfg.LDBPath), i)
+	l := events.NewLogger(events.DefaultHandler).With(events.Args{{"id", id}})
+	l.EnableDebug = cliCfg.Debug
 	return reflectorpkg.ReflectorFromConfig(reflectorpkg.ReflectorConfig{
 		LDBPath:         cliCfg.LDBPath,
 		ChangelogPath:   cliCfg.ChangelogPath,
@@ -649,6 +655,7 @@ func newReflector(cliCfg reflectorCliConfig, isSupervisor bool, i int) (*reflect
 		WALCheckpointThresholdSize: cliCfg.WALCheckpointThresholdSize,
 		WALCheckpointType:          cliCfg.WALCheckpointType,
 		BusyTimeoutMS:              cliCfg.BusyTimeoutMS,
-		ID:                         fmt.Sprintf("%s-%d", path.Base(cliCfg.LDBPath), i),
+		ID:                         id,
+		Logger:                     l,
 	})
 }

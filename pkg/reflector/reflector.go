@@ -73,6 +73,7 @@ type ReflectorConfig struct {
 	DoMonitorWAL      bool                     // optional
 	BusyTimeoutMS     int                      // optional
 	ID                string
+	Logger            *events.Logger
 }
 
 type starter interface {
@@ -179,8 +180,6 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 
 	events.Log("Max known ledger sequence: %{seq}d", maxKnownSeq)
 
-	logArgs := events.Args{{"id", config.ID}}
-
 	// TODO: check Upstream fields
 	stop := make(chan struct{})
 
@@ -195,7 +194,8 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	shovel := func() (*shovel, error) {
 		sqlDBWriter := &ldbwriter.SqlLdbWriter{Db: ldbDB,
 			ID:     config.ID,
-			Logger: events.NewLogger(events.DefaultHandler).With(events.Args{{"id", config.ID}})}
+			Logger: config.Logger,
+		}
 		var writer ldbwriter.LDBWriter = sqlDBWriter
 
 		var ldbWriteCallbacks []ldbwriter.LDBWriteCallback
@@ -253,7 +253,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 			abortOnSeqSkip:    true,
 			maxSeqOnStartup:   maxKnownSeq.Int64,
 			stop:              stop,
-			log:               events.NewLogger(events.DefaultHandler).With(logArgs),
+			log:               config.Logger,
 		}, nil
 	}
 
@@ -282,7 +282,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	return &Reflector{
 		shovel:        shovel,
 		ldb:           ldbDB,
-		logger:        events.NewLogger(events.DefaultHandler).With(logArgs),
+		logger:        config.Logger,
 		upstreamdb:    upstreamdb,
 		ledgerMonitor: ledgerMon,
 		stop:          stop,

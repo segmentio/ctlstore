@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/segmentio/ctlstore/pkg/ldb"
+	"github.com/segmentio/stats/v4"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -14,14 +15,13 @@ import (
 // The main benefit is relieving read pressure on a particular ldb file when it becomes inactive,
 // allowing sqlite maintenance
 type LDBRotatingReader struct {
-	active           int32
-	dbs              []RowRetriever
-	mu               sync.RWMutex
-	cancelWatcher    context.CancelFunc
-	rotationsPerHour RotationFrequency
-	schedule         []int8
-	now              func() time.Time
-	tickerInterval   time.Duration
+	active         int32
+	dbs            []RowRetriever
+	mu             sync.RWMutex
+	cancelWatcher  context.CancelFunc
+	schedule       []int8
+	now            func() time.Time
+	tickerInterval time.Duration
 }
 
 type RotationFrequency int
@@ -124,7 +124,10 @@ func (r *LDBRotatingReader) rotate(ctx context.Context) {
 			return
 		case <-ticker.C:
 			next := r.schedule[r.now().Minute()]
-			atomic.SwapInt32(&r.active, int32(next))
+			if int32(next) != atomic.LoadInt32(&r.active) {
+				atomic.StoreInt32(&r.active, int32(next))
+				stats.Incr("rotating_reader.rotate")
+			}
 		}
 	}
 }
