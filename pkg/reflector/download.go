@@ -3,8 +3,11 @@ package reflector
 import (
 	"bytes"
 	"compress/gzip"
+	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -29,6 +32,11 @@ type S3Downloader struct {
 	Key                 string
 	S3Client            S3Client
 	StartOverOnNotFound bool // whether we should rebuild LDB if snapshot not found
+}
+
+type DownloadMetric struct {
+	StartTime  string `json:"startTime"`
+	Downloaded string `json:"downloaded"`
 }
 
 func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
@@ -71,7 +79,47 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 	if compressedSize != nil {
 		events.Log("LDB inflated %d -> %d bytes", *compressedSize, n)
 	}
+
+	_ = d.emitMetricFromFile()
+
 	return
+}
+
+func (d *S3Downloader) emitMetricFromFile() error {
+	name := "/var/spool/ctlstore/metrics.json"
+	metricsFile, err := os.Open(name)
+	defer func() {
+		err = os.Remove(name)
+	}()
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		err = metricsFile.Close()
+	}()
+	if err != nil {
+		return err
+	}
+
+	b, err := ioutil.ReadAll(metricsFile)
+	if err != nil {
+		return err
+	}
+
+	var dm DownloadMetric
+
+	err = json.Unmarshal(b, &dm)
+	if err != nil {
+		return err
+	}
+
+	stats.Observe("init_snapshot_download_time", dm.StartTime, stats.Tag{
+		Name:  "downloaded",
+		Value: dm.Downloaded,
+	})
+
+	return nil
 }
 
 func (d *S3Downloader) getS3Client() (S3Client, error) {

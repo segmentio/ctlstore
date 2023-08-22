@@ -35,5 +35,5 @@ else
   echo "Snapshot already present"
 fi
 
-echo "{\"startTime\": $(($END - $START)), \"downloaded\": $DOWNLOADED}" > $METRICS
+echo "{\"startTime\": $(($END - $START)), \"downloaded\": \"$DOWNLOADED\"}" > $METRICS
 cat $METRICS
