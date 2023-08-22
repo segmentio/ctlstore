@@ -357,6 +357,9 @@ func TestCheckpointQuery(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(string(tt.cpType), func(t *testing.T) {
 			res, err := writer.Checkpoint(tt.cpType)
+			if err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
 			err = writer.ApplyDMLStatement(context.Background(), schema.NewTestDMLStatement("INSERT INTO foo VALUES('hello');"))
 			if err != nil {
 				t.Fatalf("expected no error, got %v", err)

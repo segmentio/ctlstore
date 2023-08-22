@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path"
 	"reflect"
 	"strings"
 	"sync"
@@ -306,7 +307,7 @@ func supervisor(ctx context.Context, args []string) {
 			return errors.Wrap(err, "ensure ldb dir")
 		}
 
-		reflector, err := newReflector(cliCfg.ReflectorConfig, true)
+		reflector, err := newReflector(cliCfg.ReflectorConfig, true, 0)
 		if err != nil {
 			return errors.Wrap(err, "build supervisor reflector")
 		}
@@ -473,7 +474,7 @@ func reflector(ctx context.Context, args []string) {
 		prometheusHandler: promHandler,
 	})
 	defer teardown()
-	reflector, err := newReflector(cliCfg, false)
+	reflector, err := newReflector(cliCfg, false, 0)
 	if err != nil {
 		events.Log("Fatal error starting Reflector: %{error}+v", err)
 		errs.IncrDefault(stats.T("op", "startup"))
@@ -524,7 +525,7 @@ func multiReflector(ctx context.Context, args []string) {
 		x.ChangelogSize = 0
 		go func(x reflectorCliConfig, idx int) {
 			defer wg.Done()
-			r, err := newReflector(x, false)
+			r, err := newReflector(x, false, idx)
 			if err != nil {
 				events.Log("Fatal error starting Reflector: %{error}+v", err)
 				errs.IncrDefault(stats.T("op", "startup"), stats.T("path", p))
@@ -613,7 +614,7 @@ func newSidecar(config sidecarConfig) (*sidecarpkg.Sidecar, error) {
 	})
 }
 
-func newReflector(cliCfg reflectorCliConfig, isSupervisor bool) (*reflectorpkg.Reflector, error) {
+func newReflector(cliCfg reflectorCliConfig, isSupervisor bool, i int) (*reflectorpkg.Reflector, error) {
 	if cliCfg.LedgerHealth.Disable {
 		events.Log("DEPRECATION NOTICE: use --disable-ecs-behavior instead of --disable to control this ledger monitor behavior")
 	}
@@ -647,5 +648,6 @@ func newReflector(cliCfg reflectorCliConfig, isSupervisor bool) (*reflectorpkg.R
 		WALCheckpointThresholdSize: cliCfg.WALCheckpointThresholdSize,
 		WALCheckpointType:          cliCfg.WALCheckpointType,
 		BusyTimeoutMS:              cliCfg.BusyTimeoutMS,
+		ID:                         fmt.Sprintf("%s-%d", path.Base(cliCfg.LDBPath), i),
 	})
 }

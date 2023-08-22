@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/segmentio/ctlstore/pkg/ldbwriter"
+	"github.com/segmentio/ctlstore/pkg/schema"
+	"github.com/segmentio/events/v2"
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/segmentio/ctlstore/pkg/ldbwriter"
-	"github.com/segmentio/ctlstore/pkg/schema"
 )
 
 // I totally overdid this test suite. I don't even know why.
@@ -26,6 +26,7 @@ type shovelTest struct {
 	check        func(*shovelTestContext)
 	expectErr    error
 	timeout      time.Duration
+	logArgs      events.Args
 }
 
 type shovelTestContext struct {
@@ -136,6 +137,7 @@ func TestShovel(t *testing.T) {
 				tcx.mockSource.returnErr = errTest
 			},
 			expectErr: errTest,
+			logArgs:   events.Args{{"test", "value"}},
 		},
 		{
 			desc:         "Polls at the specified interval",
@@ -200,6 +202,7 @@ func TestShovel(t *testing.T) {
 				}
 			},
 			expectErr: context.DeadlineExceeded,
+			logArgs:   events.Args{{"test", "value"}},
 		},
 	}
 
@@ -219,6 +222,7 @@ func TestShovel(t *testing.T) {
 				writer:       t1.writer,
 				pollInterval: t1.pollInterval,
 				pollTimeout:  pollTimeout,
+				logArgs:      t1.logArgs,
 			}
 
 			stctx := shovelTestContext{
