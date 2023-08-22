@@ -479,5 +479,5 @@ type noopStarter struct {
 func (n *noopStarter) Start(ctx context.Context) {}
 
 func (r *Reflector) log(format string, args ...interface{}) {
-	events.Log(format, argify(args, r.logArgs))
+	events.Log(format, argify(args, r.logArgs)...)
 }

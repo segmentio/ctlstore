@@ -256,12 +256,12 @@ func (w *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*PragmaWALR
 }
 
 func (w *SqlLdbWriter) log(format string, args ...interface{}) {
-	events.Log(format, argify(args, w.logArgs))
+	events.Log(format, argify(args, w.logArgs)...)
 }
 
 func (w *SqlLdbWriter) debug(format string, args ...interface{}) {
 	if events.DefaultLogger.EnableDebug {
-		events.Debug(format, argify(args, w.logArgs))
+		events.Debug(format, argify(args, w.logArgs)...)
 	}
 }
 
