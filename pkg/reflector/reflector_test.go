@@ -64,6 +64,7 @@ func TestShovelSequenceReset(t *testing.T) {
 		LedgerHealth: ledger.HealthConfig{
 			DisableECSBehavior: true,
 		},
+		Logger: events.DefaultLogger,
 	}
 	reflector, err := ReflectorFromConfig(cfg)
 	require.NoError(t, err)
@@ -153,6 +154,7 @@ func TestReflector(t *testing.T) {
 			DisableECSBehavior: true,
 			PollInterval:       10 * time.Second,
 		},
+		Logger: events.DefaultLogger,
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 

@@ -291,6 +291,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 }
 
 func (r *Reflector) Start(ctx context.Context) error {
+
 	r.logger.Log("Starting Reflector.")
 	go r.ledgerMonitor.Start(ctx)
 	go r.walMonitor.Start(ctx)
