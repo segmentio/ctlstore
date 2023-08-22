@@ -23,7 +23,7 @@ type shovel struct {
 	abortOnSeqSkip    bool
 	maxSeqOnStartup   int64
 	stop              chan struct{}
-	logArgs           events.Args
+	log               *events.Logger
 }
 
 func (s *shovel) Start(ctx context.Context) error {
@@ -45,7 +45,7 @@ func (s *shovel) Start(ctx context.Context) error {
 		// early exit here if the shovel should be stopped
 		select {
 		case <-s.stop:
-			s.log("Shovel stopping normally")
+			s.logger().Log("Shovel stopping normally")
 			return nil
 		default:
 		}
@@ -57,7 +57,7 @@ func (s *shovel) Start(ctx context.Context) error {
 		sctx, cancel = context.WithTimeout(ctx, s.pollTimeout)
 
 		stats.Incr("shovel.loop_enter")
-		s.debug("shovel polling...")
+		s.logger().Debug("shovel polling...")
 		st, err := s.source.Next(sctx)
 
 		if err != nil {
@@ -79,7 +79,7 @@ func (s *shovel) Start(ctx context.Context) error {
 			//
 
 			pollSleep := jitr.Jitter(s.pollInterval, s.jitterCoefficient)
-			s.debug("Poll sleep %{sleepTime}s", pollSleep)
+			s.logger().Debug("Poll sleep %{sleepTime}s", pollSleep)
 
 			select {
 			case <-ctx.Done():
@@ -91,12 +91,12 @@ func (s *shovel) Start(ctx context.Context) error {
 			continue
 		}
 
-		s.debug("Shovel applying %{statement}v", st)
+		s.logger().Debug("Shovel applying %{statement}v", st)
 
 		if lastSeq != 0 {
 			if st.Sequence > lastSeq+1 && st.Sequence.Int() > s.maxSeqOnStartup {
 				stats.Incr("shovel.skipped_sequence")
-				s.log("shovel skip sequence from:%{fromSeq}d to:%{toSeq}d", lastSeq, st.Sequence)
+				s.logger().Log("shovel skip sequence from:%{fromSeq}d to:%{toSeq}d", lastSeq, st.Sequence)
 
 				if s.abortOnSeqSkip {
 					// Mitigation for a bug that we haven't found yet
@@ -133,31 +133,15 @@ func (s *shovel) Close() error {
 	for _, closer := range s.closers {
 		err := closer.Close()
 		if err != nil {
-			s.log("shovel encountered error during close: %{error}s", err)
+			s.logger().Log("shovel encountered error during close: %{error}s", err)
 		}
 	}
 	return nil
 }
 
-func (s *shovel) log(format string, args ...interface{}) {
-	events.Log(format, argify(args, s.logArgs)...)
-}
-
-func argify(args []interface{}, logArgs interface{}) []interface{} {
-	if args == nil && logArgs == nil {
-		return nil
+func (s *shovel) logger() *events.Logger {
+	if s.log == nil {
+		s.log = events.DefaultLogger
 	}
-	if args == nil {
-		return []interface{}{logArgs}
-	}
-	if logArgs == nil {
-		return args
-	}
-	return append(args, logArgs)
-}
-
-func (s *shovel) debug(format string, args ...interface{}) {
-	if events.DefaultLogger.EnableDebug {
-		events.Debug(format, argify(args, s.logArgs)...)
-	}
+	return s.log
 }

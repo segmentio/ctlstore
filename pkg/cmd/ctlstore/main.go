@@ -545,7 +545,8 @@ func multiReflector(ctx context.Context, args []string) {
 	}
 
 	grp, grpCtx := errgroup.WithContext(ctx)
-	for _, r := range reflectors {
+	for _, reflector := range reflectors {
+		r := reflector
 		grp.Go(func() error {
 			return r.Start(grpCtx)
 		})

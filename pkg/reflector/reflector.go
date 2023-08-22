@@ -3,11 +3,8 @@ package reflector
 import (
 	"context"
 	"database/sql"
-	"database/sql/driver"
 	"encoding/base64"
 	"fmt"
-	"github.com/go-sql-driver/mysql"
-	"github.com/segmentio/go-sqlite3"
 	"io"
 	"net/url"
 	"os"
@@ -37,7 +34,7 @@ import (
 type Reflector struct {
 	shovel        func() (*shovel, error)
 	ldb           *sql.DB
-	logArgs       events.Args
+	logger        *events.Logger
 	upstreamdb    *sql.DB
 	ledgerMonitor *ledger.Monitor
 	walMonitor    starter
@@ -168,9 +165,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	}
 
 	// unique mysql driver so multiple reflectors don't clobber each other
-	driverName = fmt.Sprintf("%s_%[2]d_%[2]d", config.Upstream.Driver, uniq)
-	sql.Register(driverName, getDriver(driverName))
-	upstreamdb, err := sql.Open(driverName, dsn)
+	upstreamdb, err := sql.Open(config.Upstream.Driver, dsn)
 	if err != nil {
 		return nil, fmt.Errorf("Error when opening upstream DB (%v): %v", config.Upstream.Driver, err)
 	}
@@ -198,7 +193,9 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	// as a function allows recovering all the way back to initializing
 	// the and fetching the last known good sequence in the LDB.
 	shovel := func() (*shovel, error) {
-		sqlDBWriter := &ldbwriter.SqlLdbWriter{Db: ldbDB, ID: config.ID}
+		sqlDBWriter := &ldbwriter.SqlLdbWriter{Db: ldbDB,
+			ID:     config.ID,
+			Logger: events.NewLogger(events.DefaultHandler).With(events.Args{{"id", config.ID}})}
 		var writer ldbwriter.LDBWriter = sqlDBWriter
 
 		var ldbWriteCallbacks []ldbwriter.LDBWriteCallback
@@ -256,7 +253,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 			abortOnSeqSkip:    true,
 			maxSeqOnStartup:   maxKnownSeq.Int64,
 			stop:              stop,
-			logArgs:           logArgs,
+			log:               events.NewLogger(events.DefaultHandler).With(logArgs),
 		}, nil
 	}
 
@@ -285,7 +282,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	return &Reflector{
 		shovel:        shovel,
 		ldb:           ldbDB,
-		logArgs:       logArgs,
+		logger:        events.NewLogger(events.DefaultHandler).With(logArgs),
 		upstreamdb:    upstreamdb,
 		ledgerMonitor: ledgerMon,
 		stop:          stop,
@@ -293,18 +290,8 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	}, nil
 }
 
-func getDriver(name string) driver.Driver {
-	if strings.Contains(name, "mysql") {
-		return &mysql.MySQLDriver{}
-	}
-	if strings.Contains(name, "sqlite") {
-		return &sqlite3.SQLiteDriver{}
-	}
-	panic("unknown driver: " + name)
-}
-
 func (r *Reflector) Start(ctx context.Context) error {
-	r.log("Starting Reflector.")
+	r.logger.Log("Starting Reflector.")
 	go r.ledgerMonitor.Start(ctx)
 	go r.walMonitor.Start(ctx)
 	for {
@@ -314,7 +301,7 @@ func (r *Reflector) Start(ctx context.Context) error {
 				return errors.Wrap(err, "build shovel")
 			}
 			defer shovel.Close()
-			r.log("Shoveling...")
+			r.logger.Log("Shoveling...")
 			stats.Incr("reflector.shovel_start")
 			err = shovel.Start(ctx)
 			return errors.Wrap(err, "shovel")
@@ -322,7 +309,7 @@ func (r *Reflector) Start(ctx context.Context) error {
 		switch {
 		case errs.IsCanceled(err): // this is normal
 		case events.IsTermination(errors.Cause(err)): // this is normal
-			r.log("Reflector received termination signal")
+			r.logger.Log("Reflector received termination signal")
 		case err != nil:
 			switch {
 			case errors.Is("SkippedSequence", err):
@@ -332,7 +319,7 @@ func (r *Reflector) Start(ctx context.Context) error {
 			default:
 				errs.Incr("reflector.shovel_error")
 			}
-			r.log("Error encountered during shoveling: %{error}+v", err)
+			r.logger.Log("Error encountered during shoveling: %{error}+v", err)
 		}
 		select {
 		case <-r.stop:
@@ -352,7 +339,7 @@ func (r *Reflector) Stop() {
 func (r *Reflector) Close() error {
 	var err error
 
-	r.log("Close() reflector")
+	r.logger.Log("Close() reflector")
 
 	err = r.ldb.Close()
 	if err != nil {
@@ -477,7 +464,3 @@ type noopStarter struct {
 }
 
 func (n *noopStarter) Start(ctx context.Context) {}
-
-func (r *Reflector) log(format string, args ...interface{}) {
-	events.Log(format, argify(args, r.logArgs)...)
-}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-
 	"github.com/pkg/errors"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
@@ -39,8 +38,8 @@ type SqlLdbWriter struct {
 	Db       *sql.DB
 	LedgerTx *sql.Tx
 	// uniquely identify this SqlWriter
-	ID      string
-	logArgs events.Args
+	Logger *events.Logger
+	ID     string
 }
 
 // Applies a DML statement to the writer's db, updating the sequence
@@ -63,14 +62,7 @@ func (w *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schema.DML
 		// Applying a ledger transaction, so bring it into scope
 		tx = w.LedgerTx
 	}
-
-	if w.logArgs == nil {
-		if w.ID != "" {
-			w.logArgs = events.Args{{"id", w.ID}}
-		} else {
-			w.logArgs = events.Args{}
-		}
-	}
+	logger := w.logger()
 
 	// Handle begin ledger transaction control statements
 	if statement.Statement == schema.DMLTxBeginKey {
@@ -83,7 +75,7 @@ func (w *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schema.DML
 			return errors.New("invariant violation")
 		}
 		w.LedgerTx = tx
-		w.debug("Begin TX at %{sequence}v", statement.Sequence)
+		logger.Debug("Begin TX at %{sequence}v", statement.Sequence)
 	}
 
 	// Update the last update table.  This will allow the ldb reader
@@ -154,13 +146,13 @@ func (w *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schema.DML
 		if err != nil {
 			tx.Rollback()
 			errs.Incr("sql_ldb_writer.ledgerTx.commit.error", stats.T("id", w.ID))
-			w.log("Failed to commit Tx at seq %{seq}s: %{error}+v",
+			logger.Log("Failed to commit Tx at seq %{seq}s: %{error}+v",
 				statement.Sequence,
 				err)
 			return errors.Wrap(err, "commit multi-statement dml tx error")
 		}
 		stats.Incr("sql_ldb_writer.ledgerTx.commit.success", stats.T("id", w.ID))
-		w.debug("Committed TX at %{sequence}v", statement.Sequence)
+		logger.Debug("Committed TX at %{sequence}v", statement.Sequence)
 		w.LedgerTx = nil
 		return nil
 	}
@@ -175,7 +167,7 @@ func (w *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schema.DML
 
 	stats.Incr("sql_ldb_writer.exec.success", stats.T("id", w.ID))
 
-	w.debug("Applying DML[%{sequence}d]: '%{statement}s'",
+	logger.Debug("Applying DML[%{sequence}d]: '%{statement}s'",
 		statement.Sequence,
 		statement.Statement)
 
@@ -236,7 +228,7 @@ var (
 func (w *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*PragmaWALResult, error) {
 	res, err := w.Db.Query(fmt.Sprintf("PRAGMA wal_checkpoint(%s)", string(checkpointingType)))
 	if err != nil {
-		w.log("error in checkpointing, %{error}", err)
+		w.logger().Log("error in checkpointing, %{error}", err)
 		errs.Incr("sql_ldb_writer.wal_checkpoint.query.error", stats.T("id", w.ID))
 		return nil, err
 	}
@@ -246,7 +238,7 @@ func (w *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*PragmaWALR
 	if res.Next() {
 		err := res.Scan(&p.Busy, &p.Log, &p.Checkpointed)
 		if err != nil {
-			w.log("error in scanning checkpointing, %{error}")
+			w.logger().Log("error in scanning checkpointing, %{error}")
 			errs.Incr("sql_ldb_writer.wal_checkpoint.scan.error", stats.T("id", w.ID))
 			return nil, err
 		}
@@ -255,25 +247,9 @@ func (w *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*PragmaWALR
 	return &p, nil
 }
 
-func (w *SqlLdbWriter) log(format string, args ...interface{}) {
-	events.Log(format, argify(args, w.logArgs)...)
-}
-
-func (w *SqlLdbWriter) debug(format string, args ...interface{}) {
-	if events.DefaultLogger.EnableDebug {
-		events.Debug(format, argify(args, w.logArgs)...)
+func (w *SqlLdbWriter) logger() *events.Logger {
+	if w.Logger == nil {
+		w.Logger = events.DefaultLogger
 	}
-}
-
-func argify(args []interface{}, logArgs interface{}) []interface{} {
-	if args == nil && logArgs == nil {
-		return nil
-	}
-	if args == nil {
-		return []interface{}{logArgs}
-	}
-	if logArgs == nil {
-		return args
-	}
-	return append(args, logArgs)
+	return w.Logger
 }
