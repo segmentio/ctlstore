@@ -45,7 +45,7 @@ const (
 func defaultPaths(count int) []string {
 	paths := []string{defaultPath}
 	for i := 1; i < count; i++ {
-		paths = append(paths, fmt.Sprintf(ldbFormat, i))
+		paths = append(paths, fmt.Sprintf(ldbFormat, i+1))
 	}
 	return paths
 }

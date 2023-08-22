@@ -366,7 +366,7 @@ func TestPath(t *testing.T) {
 	}
 
 	for i := 1; i < 5; i++ {
-		if !strings.Contains(paths[i], strconv.Itoa(i)) {
+		if !strings.Contains(paths[i], strconv.Itoa(i+1)) {
 			t.Errorf("path %s should've contained its number, %d", paths[i], i)
 		}
 	}
