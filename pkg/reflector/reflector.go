@@ -184,7 +184,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 
 	err = emitMetricFromFile()
 	if err != nil {
-		return nil, errors.Wrap(err, "Fail to emit metric from file")
+		events.Debug("Failed to emit metric from file", err)
 	}
 
 	// TODO: check Upstream fields

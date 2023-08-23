@@ -18,6 +18,7 @@ require (
 	github.com/segmentio/errors-go v1.0.0
 	github.com/segmentio/events/v2 v2.3.2
 	github.com/segmentio/go-sqlite3 v1.12.0
+	github.com/segmentio/objconv v1.0.1
 	github.com/segmentio/stats/v4 v4.6.2
 	github.com/stretchr/testify v1.8.1
 )
@@ -31,7 +32,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/segmentio/fasthash v0.0.0-20180216231524-a72b379d632e // indirect
 	github.com/segmentio/go-snakecase v1.1.0 // indirect
-	github.com/segmentio/objconv v1.0.1 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
