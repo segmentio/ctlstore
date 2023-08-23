@@ -186,6 +186,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	if err != nil {
 		events.Debug("Failed to emit metric from file", err)
 	}
+	events.Log("Successfully emitted metric from file")
 
 	// TODO: check Upstream fields
 
@@ -321,7 +322,7 @@ func emitMetricFromFile() error {
 		return err
 	}
 
-	stats.Observe("init_snapshot_download_time", dm.StartTime, stats.Tag{
+	stats.Observe("reflector.init_snapshot_download_time", dm.StartTime, stats.Tag{
 		Name:  "downloaded",
 		Value: dm.Downloaded,
 	})
