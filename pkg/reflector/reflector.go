@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/url"
 	"os"
 	"strings"
@@ -25,6 +26,7 @@ import (
 	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	_ "github.com/segmentio/events/v2/log" // lets events actually log
+	"github.com/segmentio/objconv/json"
 	"github.com/segmentio/stats/v4"
 )
 
@@ -71,6 +73,11 @@ type ReflectorConfig struct {
 	WALCheckpointType ldbwriter.CheckpointType // optional
 	DoMonitorWAL      bool                     // optional
 	BusyTimeoutMS     int                      // optional
+}
+
+type DownloadMetric struct {
+	StartTime  string `json:"startTime"`
+	Downloaded string `json:"downloaded"`
 }
 
 type starter interface {
@@ -175,6 +182,11 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 
 	events.Log("Max known ledger sequence: %{seq}d", maxKnownSeq)
 
+	err = emitMetricFromFile()
+	if err != nil {
+		return nil, errors.Wrap(err, "Fail to emit metric from file")
+	}
+
 	// TODO: check Upstream fields
 
 	stop := make(chan struct{})
@@ -278,6 +290,43 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 		stop:          stop,
 		walMonitor:    walMon,
 	}, nil
+}
+
+func emitMetricFromFile() error {
+	name := "/var/spool/ctlstore/metrics.json"
+	metricsFile, err := os.Open(name)
+	defer func() {
+		err = os.Remove(name)
+	}()
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		err = metricsFile.Close()
+	}()
+	if err != nil {
+		return err
+	}
+
+	b, err := ioutil.ReadAll(metricsFile)
+	if err != nil {
+		return err
+	}
+
+	var dm DownloadMetric
+
+	err = json.Unmarshal(b, &dm)
+	if err != nil {
+		return err
+	}
+
+	stats.Observe("init_snapshot_download_time", dm.StartTime, stats.Tag{
+		Name:  "downloaded",
+		Value: dm.Downloaded,
+	})
+
+	return nil
 }
 
 func (r *Reflector) Start(ctx context.Context) error {
