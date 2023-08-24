@@ -133,15 +133,7 @@ func (r *LDBRotatingReader) rotate(ctx context.Context) {
 
 func isValid(rf RotationFrequency) bool {
 	switch rf {
-	case Every10:
-		fallthrough
-	case Every20:
-		fallthrough
-	case Every30:
-		fallthrough
-	case Every15:
-		fallthrough
-	case Every6:
+	case Every6, Every10, Every15, Every20, Every30:
 		return true
 	}
 	return false
