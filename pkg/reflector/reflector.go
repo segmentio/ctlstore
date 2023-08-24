@@ -324,7 +324,7 @@ func emitMetricFromFile() error {
 		return err
 	}
 
-	stats.Observe("reflector.init_snapshot_download_time", dm.StartTime, stats.Tag{
+	stats.Observe("ctlstore.reflector.init_snapshot_download_time", dm.StartTime, stats.Tag{
 		Name:  "downloaded",
 		Value: dm.Downloaded,
 	}, stats.Tag{
@@ -334,6 +334,7 @@ func emitMetricFromFile() error {
 		Name:  "concurrency",
 		Value: dm.Concurrency,
 	})
+	stats.Flush()
 
 	return nil
 }
