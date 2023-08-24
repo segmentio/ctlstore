@@ -35,7 +35,9 @@ fi
 
 i=2
 while [ "$i" -le $NUM_LDB ]; do
-    echo "creating copy $i"
+  if [ ! -f  ldb-$i.db ]; then
+    echo "creating copy ldb-$i.db"
     cp ldb.db ldb-$i.db
-    i=$(( i + 1 ))
+  fi
+  i=$(( i + 1 ))
 done
