@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/stats/v4"
-	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -17,8 +16,6 @@ import (
 type LDBRotatingReader struct {
 	active         int32
 	dbs            []RowRetriever
-	mu             sync.RWMutex
-	cancelWatcher  context.CancelFunc
 	schedule       []int8
 	now            func() time.Time
 	tickerInterval time.Duration
@@ -38,6 +35,7 @@ const (
 	// Every6 rotate on 6 minute marks in an hour
 	Every6 RotationFrequency = 6
 
+	// for simpler migration, the first ldb retains the original name
 	defaultPath = DefaultCtlstorePath + ldb.DefaultLDBFilename
 	ldbFormat   = DefaultCtlstorePath + "ldb-%d.db"
 )
@@ -112,6 +110,7 @@ func (r *LDBRotatingReader) GetRowByKey(ctx context.Context, out interface{}, fa
 	return r.dbs[atomic.LoadInt32(&r.active)].GetRowByKey(ctx, out, familyName, tableName, key...)
 }
 
+// rotate by default checks every 1 minute if the active db has changed according to schedule
 func (r *LDBRotatingReader) rotate(ctx context.Context) {
 	if r.tickerInterval == 0 {
 		r.tickerInterval = 1 * time.Minute
