@@ -75,7 +75,7 @@ type ReflectorConfig struct {
 }
 
 type DownloadMetric struct {
-	StartTime   string `json:"startTime"`
+	StartTime   int    `json:"startTime"`
 	Downloaded  string `json:"downloaded"`
 	Compressed  string `json:"compressed"`
 	Concurrency string `json:"concurrency"`
@@ -324,7 +324,7 @@ func emitMetricFromFile() error {
 		return err
 	}
 
-	stats.Observe("ctlstore.reflector.init_snapshot_download_time", dm.StartTime, stats.Tag{
+	stats.Observe("init_snapshot_download_time", dm.StartTime, stats.Tag{
 		Name:  "downloaded",
 		Value: dm.Downloaded,
 	}, stats.Tag{
@@ -334,7 +334,6 @@ func emitMetricFromFile() error {
 		Name:  "concurrency",
 		Value: dm.Concurrency,
 	})
-	stats.Flush()
 
 	return nil
 }
