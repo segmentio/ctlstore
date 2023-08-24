@@ -75,8 +75,10 @@ type ReflectorConfig struct {
 }
 
 type DownloadMetric struct {
-	StartTime  string `json:"startTime"`
-	Downloaded string `json:"downloaded"`
+	StartTime   string `json:"startTime"`
+	Downloaded  string `json:"downloaded"`
+	Compressed  string `json:"compressed"`
+	Concurrency string `json:"concurrency"`
 }
 
 type starter interface {
@@ -325,6 +327,12 @@ func emitMetricFromFile() error {
 	stats.Observe("reflector.init_snapshot_download_time", dm.StartTime, stats.Tag{
 		Name:  "downloaded",
 		Value: dm.Downloaded,
+	}, stats.Tag{
+		Name:  "compressed",
+		Value: dm.Compressed,
+	}, stats.Tag{
+		Name:  "concurrency",
+		Value: dm.Concurrency,
 	})
 
 	return nil
