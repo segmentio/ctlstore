@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"strings"
@@ -294,23 +293,24 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 }
 
 func emitMetricFromFile() error {
-	name := "/var/spool/ctlstore/metrics.json"
-	metricsFile, err := os.Open(name)
-	defer func() {
-		err = os.Remove(name)
-	}()
+	path := "/var/spool/ctlstore/metrics.json"
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+	}
+
+	metricsFile, err := os.Open(path)
 	if err != nil {
 		return err
 	}
 
 	defer func() {
-		err = metricsFile.Close()
+		metricsFile.Close()
+		os.Remove(path)
 	}()
-	if err != nil {
-		return err
-	}
 
-	b, err := ioutil.ReadAll(metricsFile)
+	b, err := io.ReadAll(metricsFile)
 	if err != nil {
 		return err
 	}
