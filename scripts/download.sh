@@ -4,18 +4,18 @@ set -eo pipefail
 
 CTLSTORE_BOOTSTRAP_URL=$1
 CONCURRENCY=${2:-20}
-STATS_IP=$3
-STATS_PORT=${4:-8125}
+NUM_LDB=${3:-1}
 
 TAGS="downloaded:false"
 START=$(date +%s)
 END=$(date +%s)
+
+mkdir -p /var/spool/ctlstore
+cd /var/spool/ctlstore
+
 if [ ! -f /var/spool/ctlstore/ldb.db ]; then
   # busybox does not support sub-second resolution
   START=$(date +%s)
-
-  mkdir -p /var/spool/ctlstore
-  cd /var/spool/ctlstore
   s5cmd -r 0 --log debug cp --concurrency $CONCURRENCY $CTLSTORE_BOOTSTRAP_URL .
 
   TAGS="downloaded:true"
@@ -26,7 +26,6 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
   fi
 
   TAGS="$TAGS,concurrency:$CONCURRENCY"
-
   mv snapshot.db ldb.db
   END=$(date +%s)
   echo "ldb.db ready in $(($END - $START)) seconds"
@@ -34,6 +33,9 @@ else
   echo "Snapshot already present"
 fi
 
-if [ ! -z "$STATS_IP" ]; then
-  echo -n "ctlstore.reflector.init_snapshot_download_time:$(($END - $START))|h|#$TAGS" | nc -u -w1 $NODE_IP $STATS_PORT
-fi
+i=2
+while [ "$i" -le $NUM_LDB ]; do
+    echo "creating copy $i"
+    cp ldb.db ldb-$i.db
+    i=$(( i + 1 ))
+done
