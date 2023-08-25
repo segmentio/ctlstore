@@ -185,7 +185,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 
 	err = emitMetricFromFile()
 	if err != nil {
-		events.Debug("Failed to emit metric from file", err)
+		events.Log("Failed to emit metric from file", err)
 	}
 	events.Log("Successfully emitted metric from file")
 
@@ -297,8 +297,11 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 func emitMetricFromFile() error {
 	path := "/var/spool/ctlstore/metrics.json"
 	if _, err := os.Stat(path); err != nil {
-		if os.IsNotExist(err) {
+		switch {
+		case os.IsNotExist(err):
 			return nil
+		default:
+			return err
 		}
 	}
 
