@@ -34,6 +34,13 @@ type (
 		value interface{}
 		tags  []stats.Tag
 	}
+
+	gaugeVal struct {
+		name  string
+		value interface{}
+		tags  []stats.Tag
+	}
+
 	counterKey struct {
 		name   string
 		family string
@@ -46,6 +53,7 @@ type (
 		cfg     Config
 		incr    counterKey
 		observe observation
+		set     gaugeVal
 	}
 )
 
@@ -55,6 +63,7 @@ const (
 	statEventTypeIncr
 	statEventTypeObserve
 	statEventTypeClose
+	statEventTypeGauge
 )
 
 var (
@@ -78,6 +87,21 @@ func Incr(name, family, table string) {
 		// eventChan is full, drop this stat
 		incrDroppedStats()
 	}
+}
+
+func Set(name string, value interface{}, tags ...stats.Tag) {
+	k := gaugeVal{
+		name:  name,
+		value: value,
+		tags:  tags,
+	}
+	select {
+	case eventChan <- statEvent{typ: statEventTypeGauge, set: k}:
+	default:
+		// eventChan is full, drop this stat
+		incrDroppedStats()
+	}
+
 }
 
 func Observe(name string, value interface{}, tags ...stats.Tag) {
@@ -207,6 +231,12 @@ func loop() {
 			// We're shutting down stats, so stop recording and flushing metrics.
 			case statEventTypeClose:
 				closed = true
+
+			case statEventTypeGauge:
+				if engine = lazyInitEngine(cfg, engine); engine == nil || closed {
+					continue
+				}
+				engine.Set(event.set.name, event.set.value, event.set.tags...)
 			}
 		}
 	}

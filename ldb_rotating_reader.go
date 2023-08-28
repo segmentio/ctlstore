@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/segmentio/ctlstore/pkg/globalstats"
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
@@ -129,6 +130,7 @@ func (r *LDBRotatingReader) rotate(ctx context.Context) {
 			if int32(next) != atomic.LoadInt32(&r.active) {
 				atomic.StoreInt32(&r.active, int32(next))
 				stats.Incr("rotating_reader.rotate")
+				globalstats.Set("rotating_reader.active", next)
 			}
 		}
 	}
