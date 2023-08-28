@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/segmentio/ctlstore/pkg/ldb"
+	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
 	"sync/atomic"
 	"time"
@@ -77,6 +78,7 @@ func rotatingReader(minutesPerRotation RotationPeriod, ldbPaths ...string) (*LDB
 	}
 	var r LDBRotatingReader
 	for _, p := range ldbPaths {
+		events.Log("Opening ldb %s for reading", p)
 		reader, err := newLDBReader(p)
 		if err != nil {
 			return nil, err

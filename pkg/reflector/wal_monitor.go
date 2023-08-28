@@ -94,7 +94,9 @@ func (m *WALMonitor) Start(ctx context.Context) {
 			}
 			return
 		}
-		stats.Set("wal-file-size", size)
+
+		ldbFileName := path.Base(m.walPath)
+		stats.Set("wal-file-size", size, stats.T("ldb", ldbFileName))
 
 		if size <= m.walCheckpointThresholdSize {
 			stats.Incr("wal-no-checkpoint")
@@ -117,7 +119,6 @@ func (m *WALMonitor) Start(ctx context.Context) {
 		if res.Busy == 1 {
 			isBusy = "true"
 		}
-		ldbFileName := path.Base(m.walPath)
 		stats.Set("wal-checkpoint-status", 1, stats.T("busy", isBusy), stats.T("ldb", ldbFileName))
 		stats.Set("wal-total-pages", res.Log, stats.T("ldb", ldbFileName))
 		stats.Set("wal-checkpointed-pages", res.Checkpointed, stats.T("ldb", ldbFileName))
