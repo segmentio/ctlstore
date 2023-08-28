@@ -3,6 +3,7 @@ package reflector
 import (
 	"context"
 	"os"
+	"path"
 	"time"
 
 	"github.com/segmentio/events/v2"
@@ -116,9 +117,10 @@ func (m *WALMonitor) Start(ctx context.Context) {
 		if res.Busy == 1 {
 			isBusy = "true"
 		}
-		stats.Set("wal-checkpoint-status", 1, stats.T("busy", isBusy))
-		stats.Set("wal-total-pages", res.Log)
-		stats.Set("wal-checkpointed-pages", res.Checkpointed)
+		ldbFileName := path.Base(m.walPath)
+		stats.Set("wal-checkpoint-status", 1, stats.T("busy", isBusy), stats.T("ldb", ldbFileName))
+		stats.Set("wal-total-pages", res.Log, stats.T("ldb", ldbFileName))
+		stats.Set("wal-checkpointed-pages", res.Checkpointed, stats.T("ldb", ldbFileName))
 
 		failedInARow = 0
 	})
