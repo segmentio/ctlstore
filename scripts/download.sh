@@ -32,5 +32,5 @@ else
   echo "Snapshot already present"
 fi
 
-echo "{\"startTime\": $(($END - $START)), \"downloaded\": \"$DOWNLOADED\", \"compressed\": \"$COMPRESSED\", \"concurrency\": \"$CONCURRENCY\"}" > $METRICS
+echo "{\"startTime\": $(($END - $START)), \"downloaded\": \"$DOWNLOADED\", \"compressed\": \"$COMPRESSED\"}" > $METRICS
 cat $METRICS

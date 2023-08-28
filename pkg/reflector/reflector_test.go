@@ -16,6 +16,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/ldbwriter"
 	"github.com/segmentio/ctlstore/pkg/ledger"
+	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	"github.com/stretchr/testify/require"
 )
@@ -219,4 +220,62 @@ func TestReflector(t *testing.T) {
 
 	err = reflector.Close()
 	require.NoError(t, err)
+}
+
+func TestEmitMetricFromFile(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		path    string
+		content string
+		perm    int
+		err     error
+	}{
+		{
+			"file does not exist doesn't return error",
+			"/var/spool/ctlstore/metrics.jso",
+			"{\"start\": \"6\", \"downloaded\": \"true\", \"compressed\": \"false\"}",
+			0664,
+			nil,
+		},
+		{
+			"file exist but unable to open",
+			"/var/spool/ctlstore/metrics.json",
+			"{\"startTime\": 6, \"downloaded\": \"true\", \"compressed\": \"false\"}",
+			064,
+			errors.New("permission denied"),
+		},
+		{
+			"invalid character",
+			"/var/spool/ctlstore/metrics.json",
+			"{\"startTime\": \"6, \"downloaded\": \"true\", \"compressed\": \"false\"}",
+			0664,
+			errors.New("invalid character"),
+		},
+		{
+			"invalid key",
+			"/var/spool/ctlstore/metrics.json",
+			"{\"start\": \"6\", \"downloaded\": \"true\", \"compressed\": \"false\"}",
+			0664,
+			errors.New("unknown field"),
+		},
+		{
+			"valid content",
+			"/var/spool/ctlstore/metrics.json",
+			"{\"startTime\": 6, \"downloaded\": \"true\", \"compressed\": \"false\"}",
+			0664,
+			nil,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			os.Remove("/var/spool/ctlstore/metrics.json")
+			err := os.WriteFile(test.path, []byte(test.content), os.FileMode(test.perm))
+			err = emitMetricFromFile()
+
+			if test.err == nil {
+				require.NoError(t, err)
+			} else {
+				require.Contains(t, err.Error(), test.err.Error())
+			}
+		})
+	}
 }

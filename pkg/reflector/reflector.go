@@ -1,9 +1,11 @@
 package reflector
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/url"
@@ -25,7 +27,7 @@ import (
 	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	_ "github.com/segmentio/events/v2/log" // lets events actually log
-	"github.com/segmentio/objconv/json"
+
 	"github.com/segmentio/stats/v4"
 )
 
@@ -75,10 +77,9 @@ type ReflectorConfig struct {
 }
 
 type DownloadMetric struct {
-	StartTime   int    `json:"startTime"`
-	Downloaded  string `json:"downloaded"`
-	Compressed  string `json:"compressed"`
-	Concurrency string `json:"concurrency"`
+	StartTime  int    `json:"startTime,omitempty"`
+	Downloaded string `json:"downloaded"`
+	Compressed string `json:"compressed"`
 }
 
 type starter interface {
@@ -322,21 +323,14 @@ func emitMetricFromFile() error {
 
 	var dm DownloadMetric
 
-	err = json.Unmarshal(b, &dm)
+	d := json.NewDecoder(bytes.NewReader(b))
+	d.DisallowUnknownFields()
+	err = d.Decode(&dm)
 	if err != nil {
 		return err
 	}
 
-	stats.Observe("init_snapshot_download_time", dm.StartTime, stats.Tag{
-		Name:  "downloaded",
-		Value: dm.Downloaded,
-	}, stats.Tag{
-		Name:  "compressed",
-		Value: dm.Compressed,
-	}, stats.Tag{
-		Name:  "concurrency",
-		Value: dm.Concurrency,
-	})
+	stats.Observe("init_snapshot_download_time", dm.StartTime, stats.T("downloaded", dm.Downloaded), stats.T("compressed", dm.Compressed))
 
 	return nil
 }
