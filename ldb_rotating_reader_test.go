@@ -74,7 +74,7 @@ func TestValidRotatingReader(t *testing.T) {
 		name   string
 		expErr string
 		paths  []string
-		rf     RotationFrequency
+		rp     RotationPeriod
 	}{
 		{
 			"1 ldb",
@@ -98,25 +98,31 @@ func TestValidRotatingReader(t *testing.T) {
 			"bad rotation",
 			"invalid rotation",
 			[]string{"path1", "path2"},
-			RotationFrequency(2),
+			RotationPeriod(2),
 		},
 		{
-			"more ldbs than freq",
+			"more ldbs than period, max",
 			"cannot have more",
-			[]string{"path1", "path2", "path3", "path4", "path5", "path6", "path7"},
+			[]string{"path1", "path2", "path3", "path4", "path5", "path6", "path7", "path8", "path9", "path10", "path11"},
 			Every6,
+		},
+		{
+			"more ldbs than period, min",
+			"cannot have more",
+			[]string{"path1", "path2", "path3"},
+			Every30,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := rotatingReader(tt.rf, tt.paths...)
+			_, err := rotatingReader(tt.rp, tt.paths...)
 			if err == nil {
 				t.Fatal("error expected, none found")
 			}
 
 			if !strings.Contains(err.Error(), tt.expErr) {
-				t.Error("Did not find right error")
+				t.Errorf("Did not find right error: got %v", err)
 			}
 		})
 	}

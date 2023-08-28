@@ -21,19 +21,20 @@ type LDBRotatingReader struct {
 	tickerInterval time.Duration
 }
 
-type RotationFrequency int
+// RotationPeriod how many minutes each reader is active for before rotating to the next
+type RotationPeriod int
 
 const (
 	// Every30 rotate on 30 minute mark in an hour
-	Every30 RotationFrequency = 30
+	Every30 RotationPeriod = 30
 	// Every20 rotate on 20 minute marks in an hour
-	Every20 RotationFrequency = 20
+	Every20 RotationPeriod = 20
 	// Every15 rotate on 15 minute marks in an hour
-	Every15 RotationFrequency = 15
+	Every15 RotationPeriod = 15
 	// Every10 rotate on 10 minute marks in an hour
-	Every10 RotationFrequency = 10
+	Every10 RotationPeriod = 10
 	// Every6 rotate on 6 minute marks in an hour
-	Every6 RotationFrequency = 6
+	Every6 RotationPeriod = 6
 
 	// for simpler migration, the first ldb retains the original name
 	defaultPath = DefaultCtlstorePath + ldb.DefaultLDBFilename
@@ -48,14 +49,14 @@ func defaultPaths(count int) []string {
 	return paths
 }
 
-// RotatingReader creates a new reader that rotates which ldb it reads from on a rotation frequency with the default location in /var/spool/ctlstore
-func RotatingReader(ctx context.Context, rotationsPerHour RotationFrequency, ldbsCount int) (RowRetriever, error) {
-	return CustomerRotatingReader(ctx, rotationsPerHour, defaultPaths(ldbsCount)...)
+// RotatingReader creates a new reader that rotates which ldb it reads from on a rotation period with the default location in /var/spool/ctlstore
+func RotatingReader(ctx context.Context, minutesPerRotation RotationPeriod, ldbsCount int) (RowRetriever, error) {
+	return CustomerRotatingReader(ctx, minutesPerRotation, defaultPaths(ldbsCount)...)
 }
 
-// CustomerRotatingReader creates a new reader that rotates which ldb it reads from on a rotation frequency
-func CustomerRotatingReader(ctx context.Context, rotationsPerHour RotationFrequency, ldbPaths ...string) (RowRetriever, error) {
-	r, err := rotatingReader(rotationsPerHour, ldbPaths...)
+// CustomerRotatingReader creates a new reader that rotates which ldb it reads from on a rotation period
+func CustomerRotatingReader(ctx context.Context, minutesPerRotation RotationPeriod, ldbPaths ...string) (RowRetriever, error) {
+	r, err := rotatingReader(minutesPerRotation, ldbPaths...)
 	if err != nil {
 		return nil, err
 	}
@@ -64,14 +65,14 @@ func CustomerRotatingReader(ctx context.Context, rotationsPerHour RotationFreque
 	return r, nil
 }
 
-func rotatingReader(rotationsPerHour RotationFrequency, ldbPaths ...string) (*LDBRotatingReader, error) {
+func rotatingReader(minutesPerRotation RotationPeriod, ldbPaths ...string) (*LDBRotatingReader, error) {
 	if len(ldbPaths) < 2 {
 		return nil, errors.New("RotatingReader requires more than 1 ldb")
 	}
-	if !isValid(rotationsPerHour) {
-		return nil, errors.New(fmt.Sprintf("invalid rotation frequency: %v", rotationsPerHour))
+	if !isValid(minutesPerRotation) {
+		return nil, errors.New(fmt.Sprintf("invalid rotation period: %v", minutesPerRotation))
 	}
-	if len(ldbPaths) > int(rotationsPerHour) {
+	if len(ldbPaths) > 60/int(minutesPerRotation) {
 		return nil, errors.New("cannot have more ldbs than rotations per hour")
 	}
 	var r LDBRotatingReader
@@ -86,7 +87,7 @@ func rotatingReader(rotationsPerHour RotationFrequency, ldbPaths ...string) (*LD
 	idx := 0
 	for i := 1; i < 61; i++ {
 		r.schedule[i-1] = int8(idx % len(ldbPaths))
-		if i%int(rotationsPerHour) == 0 {
+		if i%int(minutesPerRotation) == 0 {
 			idx++
 		}
 	}
@@ -131,7 +132,7 @@ func (r *LDBRotatingReader) rotate(ctx context.Context) {
 	}
 }
 
-func isValid(rf RotationFrequency) bool {
+func isValid(rf RotationPeriod) bool {
 	switch rf {
 	case Every6, Every10, Every15, Every20, Every30:
 		return true
