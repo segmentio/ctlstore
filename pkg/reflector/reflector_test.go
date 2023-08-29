@@ -274,6 +274,7 @@ func TestEmitMetricFromFile(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 			tempdir := t.TempDir()
 			f, err := os.CreateTemp(tempdir, test.fileName)
 			assert.NoError(t, err)
