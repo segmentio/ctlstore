@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/base64"
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -16,6 +17,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/ldbwriter"
 	"github.com/segmentio/ctlstore/pkg/ledger"
+	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	"github.com/stretchr/testify/require"
 )
@@ -219,4 +221,77 @@ func TestReflector(t *testing.T) {
 
 	err = reflector.Close()
 	require.NoError(t, err)
+}
+
+func TestEmitMetricFromFile(t *testing.T) {
+	for _, test := range []struct {
+		name     string
+		fileName string
+		extra    string
+		content  string
+		perm     int
+		err      error
+	}{
+		{
+			"file does not exist doesn't return error",
+			"1.jso",
+			"n",
+			"{\"startTime\": \"6\", \"downloaded\": \"true\", \"compressed\": \"false\"}",
+			0664,
+			nil,
+		},
+		{
+			"file exist but unable to open",
+			"2.json",
+			"",
+			"{\"startTime\": 6, \"downloaded\": \"true\", \"compressed\": \"false\"}",
+			064,
+			errors.New("permission denied"),
+		},
+		{
+			"invalid character",
+			"3.json",
+			"",
+			"{\"startTime\": \"6, \"downloaded\": \"true\", \"compressed\": \"false\"}",
+			0664,
+			errors.New("invalid character"),
+		},
+		{
+			"invalid key",
+			"4.json",
+			"",
+			"{\"start\": \"6\", \"downloaded\": \"true\", \"compressed\": \"false\"}",
+			0664,
+			errors.New("unknown field"),
+		},
+		{
+			"valid content",
+			"5.json",
+			"",
+			"{\"startTime\": 6, \"downloaded\": \"true\", \"compressed\": \"false\"}",
+			0664,
+			nil,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			tempdir := t.TempDir()
+			f, err := os.CreateTemp(tempdir, test.fileName)
+			assert.NoError(t, err)
+
+			_, err = f.Write([]byte(test.content))
+			assert.NoError(t, err)
+
+			err = os.Chmod(f.Name(), os.FileMode(test.perm))
+			assert.NoError(t, err)
+
+			err = emitMetricFromFile(f.Name() + test.extra)
+
+			if test.err == nil {
+				require.NoError(t, err)
+			} else {
+				require.Contains(t, err.Error(), test.err.Error())
+			}
+		})
+	}
 }
