@@ -184,7 +184,8 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 
 	events.Log("Max known ledger sequence: %{seq}d", maxKnownSeq)
 
-	err = emitMetricFromFile()
+	path := "/var/spool/ctlstore/metrics.json"
+	err = emitMetricFromFile(path)
 	if err != nil {
 		events.Log("Failed to emit metric from file", err)
 	}
@@ -295,8 +296,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	}, nil
 }
 
-func emitMetricFromFile() error {
-	path := "/var/spool/ctlstore/metrics.json"
+func emitMetricFromFile(path string) error {
 	if _, err := os.Stat(path); err != nil {
 		switch {
 		case os.IsNotExist(err):

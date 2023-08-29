@@ -225,59 +225,71 @@ func TestReflector(t *testing.T) {
 
 func TestEmitMetricFromFile(t *testing.T) {
 	for _, test := range []struct {
-		name    string
-		path    string
-		content string
-		perm    int
-		err     error
+		name     string
+		fileName string
+		extra    string
+		content  string
+		perm     int
+		err      error
 	}{
 		{
 			"file does not exist doesn't return error",
-			"/var/spool/ctlstore/metrics.jso",
-			"{\"start\": \"6\", \"downloaded\": \"true\", \"compressed\": \"false\"}",
+			"1.jso",
+			"n",
+			"{\"startTime\": \"6\", \"downloaded\": \"true\", \"compressed\": \"false\"}",
 			0664,
 			nil,
 		},
 		{
 			"file exist but unable to open",
-			"/var/spool/ctlstore/metrics.json",
+			"2.json",
+			"",
 			"{\"startTime\": 6, \"downloaded\": \"true\", \"compressed\": \"false\"}",
 			064,
 			errors.New("permission denied"),
 		},
 		{
 			"invalid character",
-			"/var/spool/ctlstore/metrics.json",
+			"3.json",
+			"",
 			"{\"startTime\": \"6, \"downloaded\": \"true\", \"compressed\": \"false\"}",
 			0664,
 			errors.New("invalid character"),
 		},
 		{
 			"invalid key",
-			"/var/spool/ctlstore/metrics.json",
+			"4.json",
+			"",
 			"{\"start\": \"6\", \"downloaded\": \"true\", \"compressed\": \"false\"}",
 			0664,
 			errors.New("unknown field"),
 		},
 		{
 			"valid content",
-			"/var/spool/ctlstore/metrics.json",
+			"5.json",
+			"",
 			"{\"startTime\": 6, \"downloaded\": \"true\", \"compressed\": \"false\"}",
 			0664,
 			nil,
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			os.Remove("/var/spool/ctlstore/metrics.json")
-			err := os.WriteFile(test.path, []byte(test.content), os.FileMode(test.perm))
+			tempdir := t.TempDir()
+			f, err := os.CreateTemp(tempdir, test.fileName)
 			assert.NoError(t, err)
 
-			err = emitMetricFromFile()
+			_, err = f.Write([]byte(test.content))
+			assert.NoError(t, err)
 
-			if err != nil {
-				require.Contains(t, err.Error(), test.err.Error())
-			} else {
+			err = os.Chmod(f.Name(), os.FileMode(test.perm))
+			assert.NoError(t, err)
+
+			err = emitMetricFromFile(f.Name() + test.extra)
+
+			if test.err == nil {
 				require.NoError(t, err)
+			} else {
+				require.Contains(t, err.Error(), test.err.Error())
 			}
 		})
 	}
