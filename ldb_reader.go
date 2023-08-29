@@ -28,6 +28,7 @@ import (
 // across multiple processes.
 type LDBReader struct {
 	Db                          *sql.DB
+	path                        string
 	pkCache                     map[string]schema.PrimaryKey // keyed by ldbTableName()
 	getRowByKeyStmtCache        map[string]*sql.Stmt         // keyed by ldbTableName()
 	getRowsByKeyPrefixStmtCache map[prefixCacheKey]*sql.Stmt
@@ -56,8 +57,7 @@ func newLDBReader(path string) (*LDBReader, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	return &LDBReader{Db: db}, nil
+	return &LDBReader{Db: db, path: path}, nil
 }
 
 func newVersionedLDBReader(dirPath string) (*LDBReader, error) {
@@ -349,7 +349,6 @@ func (reader *LDBReader) closeDB() error {
 	if reader.Db != nil {
 		return reader.Db.Close()
 	}
-
 	return nil
 }
 

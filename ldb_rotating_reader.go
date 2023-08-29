@@ -4,10 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/globalstats"
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
+	"path"
+	"strconv"
 	"sync/atomic"
 	"time"
 )
@@ -17,7 +20,7 @@ import (
 // allowing sqlite maintenance
 type LDBRotatingReader struct {
 	active         int32
-	dbs            []RowRetriever
+	dbs            []*LDBReader
 	schedule       []int8
 	now            func() time.Time
 	tickerInterval time.Duration
@@ -127,10 +130,30 @@ func (r *LDBRotatingReader) rotate(ctx context.Context) {
 			return
 		case <-ticker.C:
 			next := r.schedule[r.now().Minute()]
-			if int32(next) != atomic.LoadInt32(&r.active) {
+			last := atomic.LoadInt32(&r.active)
+
+			// move the next to active and close and reopen the last one
+			if int32(next) != last {
 				atomic.StoreInt32(&r.active, int32(next))
 				stats.Incr("rotating_reader.rotate")
 				globalstats.Set("rotating_reader.active", next)
+				err := r.dbs[last].Close()
+				if err != nil {
+					events.Log("failed to close LDBReader for %s on rotation: %{error}v", r.dbs[last].path, err)
+					errs.Incr("rotating_reader.closing_ldbreader", stats.T("id", strconv.Itoa(int(last))))
+					return
+				}
+
+				reader, err := newLDBReader(r.dbs[last].path)
+				if err != nil {
+					events.Log("failed to open LDBReader for %s on rotation: %{error}v", r.dbs[last].path, err)
+					errs.Incr("rotating_reader.opening_ldbreader",
+						stats.T("id", strconv.Itoa(int(last))),
+						stats.T("path", path.Base(r.dbs[last].path)))
+					return
+				}
+				r.dbs[last] = reader
+
 			}
 		}
 	}
