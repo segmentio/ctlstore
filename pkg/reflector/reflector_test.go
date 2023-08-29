@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/base64"
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -267,8 +268,10 @@ func TestEmitMetricFromFile(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			os.Remove("/var/spool/ctlstore/metrics.json")
 			err := os.WriteFile(test.path, []byte(test.content), os.FileMode(test.perm))
+			assert.NoError(t, err)
+			defer os.Remove("/var/spool/ctlstore/metrics.json")
+
 			err = emitMetricFromFile()
 
 			if test.err == nil {

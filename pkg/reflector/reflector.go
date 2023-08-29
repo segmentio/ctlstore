@@ -311,11 +311,6 @@ func emitMetricFromFile() error {
 		return err
 	}
 
-	defer func() {
-		metricsFile.Close()
-		os.Remove(path)
-	}()
-
 	b, err := io.ReadAll(metricsFile)
 	if err != nil {
 		return err
@@ -331,6 +326,11 @@ func emitMetricFromFile() error {
 	}
 
 	stats.Observe("init_snapshot_download_time", dm.StartTime, stats.T("downloaded", dm.Downloaded), stats.T("compressed", dm.Compressed))
+
+	defer func() {
+		metricsFile.Close()
+		os.Remove(path)
+	}()
 
 	return nil
 }
