@@ -274,10 +274,10 @@ func TestEmitMetricFromFile(t *testing.T) {
 
 			err = emitMetricFromFile()
 
-			if test.err == nil {
-				require.NoError(t, err)
-			} else {
+			if err != nil {
 				require.Contains(t, err.Error(), test.err.Error())
+			} else {
+				require.NoError(t, err)
 			}
 		})
 	}
