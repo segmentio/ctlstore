@@ -123,7 +123,18 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 				return nil, err
 			}
 		} else {
-			events.Log("LDB File %{file}s exists, skipping bootstrap.", config.LDBPath)
+			//events.Log("LDB File %{file}s exists, skipping bootstrap.", config.LDBPath)
+			// Bootstrap LDB regardless of existence
+			events.Log("LDB File %{file}s doesn't exist, beginning bootstrap...", config.LDBPath)
+			err = bootstrapLDB(ldbBootstrapConfig{
+				url:                 config.BootstrapURL,
+				path:                config.LDBPath,
+				restartOnS3NotFound: config.IsSupervisor, // allow supervisor to restart ldb
+				region:              config.BootstrapRegion,
+			})
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
