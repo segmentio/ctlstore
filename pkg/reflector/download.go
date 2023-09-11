@@ -86,7 +86,7 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 			return n, errors.Wrap(err, "copy snapshot")
 		}
 	}
-
+	events.Log("ldb.db ready in %s seconds (s3 client)", time.Now().Sub(start))
 	events.Log("LDB inflated %d -> %d bytes", numBytes, n)
 
 	return
