@@ -2,21 +2,26 @@ package reflector
 
 import (
 	"bytes"
-	"compress/gzip"
+	"context"
+	er "errors"
+	"fmt"
 	"io"
-	"net/http"
+	"os"
 	"strings"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/aws/smithy-go"
+	gzip "github.com/klauspost/pgzip"
+
+	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
-
-	"github.com/segmentio/ctlstore/pkg/errs"
 )
 
 type downloadTo interface {
@@ -33,60 +38,92 @@ type S3Downloader struct {
 
 func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 	client, err := d.getS3Client()
+	downloader := manager.NewDownloader(client, func(d *manager.Downloader) {
+		d.PartSize = 16 * 1024 * 1024 // 64MB per part
+		d.Concurrency = 11
+	})
 	if err != nil {
 		return -1, err
 	}
-	start := time.Now()
-	defer func() {
-		stats.Observe("snapshot_download_time", time.Now().Sub(start))
-	}()
-	obj, err := client.GetObject(&s3.GetObjectInput{
-		Bucket: aws.String(d.Bucket),
-		Key:    aws.String(d.Key),
-	})
+
+	tmpdir := os.TempDir()
+	file, err := os.CreateTemp(tmpdir, strings.TrimLeft(d.Key, "/"))
 	if err != nil {
-		switch err := err.(type) {
-		case awserr.RequestFailure:
-			if d.StartOverOnNotFound && err.StatusCode() == http.StatusNotFound {
-				// don't bother retrying. we'll start with a fresh ldb.
-				return -1, errors.WithTypes(errors.Wrap(err, "get s3 data"), errs.ErrTypePermanent)
+		return -1, errors.Wrap(err, "download snapshot into disk")
+	}
+	defer os.Remove(file.Name())
+
+	start := time.Now()
+	numBytes, err := downloader.Download(context.Background(), file, &s3.GetObjectInput{
+		Bucket: aws.String(d.Bucket),
+		Key:    aws.String(strings.TrimLeft(d.Key, "/")),
+	})
+	stats.Observe("snapshot_download_time", time.Now().Sub(start))
+
+	events.Log("downloading file with key: ", d.Key)
+
+	if err != nil {
+		var ae smithy.APIError
+		if er.As(err, &ae) {
+			switch ae.(type) {
+			case *types.NotFound:
+				if d.StartOverOnNotFound {
+					// don't bother retrying. we'll start with a fresh ldb.
+					return -1, errors.WithTypes(errors.Wrap(err, "get s3 data"), errs.ErrTypePermanent)
+				}
 			}
 		}
 		// retry
 		return -1, errors.WithTypes(errors.Wrap(err, "get s3 data"), errs.ErrTypeTemporary)
 	}
-	defer obj.Body.Close()
-	compressedSize := obj.ContentLength
-	var reader io.Reader = obj.Body
+
 	if strings.HasSuffix(d.Key, ".gz") {
-		reader, err = gzip.NewReader(reader)
+		n, err = Unzip(file, w)
 		if err != nil {
-			return n, errors.Wrap(err, "create gzip reader")
+			return n, errors.Wrap(err, "unzip snapshot")
+		}
+	} else {
+		n, err = io.Copy(w, file)
+		if err != nil {
+			return n, errors.Wrap(err, "copy snapshot")
 		}
 	}
-	n, err = io.Copy(w, reader)
-	if err != nil {
-		return n, errors.Wrap(err, "copy from s3 to writer")
-	}
-	if compressedSize != nil {
-		events.Log("LDB inflated %d -> %d bytes", *compressedSize, n)
-	}
+	events.Log("ldb.db ready in %s seconds (s3 client)", time.Now().Sub(start))
+	events.Log("LDB inflated %d -> %d bytes", numBytes, n)
 
 	return
+}
+
+func Unzip(src io.Reader, dest io.Writer) (int64, error) {
+	r, err := gzip.NewReader(src)
+	if err != nil {
+		return -1, err
+	}
+	defer r.Close()
+
+	n, err := io.Copy(dest, r)
+
+	if err != nil {
+		return -1, err
+	}
+
+	return n, nil
 }
 
 func (d *S3Downloader) getS3Client() (S3Client, error) {
 	if d.S3Client != nil {
 		return d.S3Client, nil
 	}
-	configs := []*aws.Config{}
-	if d.Region != "" {
-		configs = append(configs, &aws.Config{
-			Region: aws.String(d.Region),
-		})
+
+	cfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithRegion(d.Region), // Empty string will result in the region value being ignored
+	)
+
+	if err != nil {
+		panic(fmt.Sprintf("failed loading config, %v", err))
 	}
-	sess := session.Must(session.NewSession(configs...))
-	client := s3.New(sess)
+
+	client := s3.NewFromConfig(cfg)
 	return client, nil
 }
 

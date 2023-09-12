@@ -2,7 +2,6 @@ package reflector_test
 
 import (
 	"bytes"
-	"compress/gzip"
 	"io"
 	"io/ioutil"
 	"math/rand"
@@ -10,12 +9,16 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/aws/smithy-go"
+	gzip "github.com/klauspost/pgzip"
+	"github.com/stretchr/testify/require"
+
 	"github.com/segmentio/ctlstore/pkg/fakes"
 	"github.com/segmentio/ctlstore/pkg/reflector"
 	"github.com/segmentio/errors-go"
-	"github.com/stretchr/testify/require"
 )
 
 // Verifies error handling behavior when downloading from s3 fails.
@@ -37,7 +40,8 @@ func TestS3DownloadErrors(t *testing.T) {
 			s3Client: func() reflector.S3Client {
 				f := &fakes.FakeS3Client{}
 				f.GetObjectReturns(&s3.GetObjectOutput{
-					Body: ioutil.NopCloser(strings.NewReader("data")),
+					Body:          ioutil.NopCloser(strings.NewReader("data")),
+					ContentLength: 4,
 				}, nil)
 				return f
 			},
@@ -60,8 +64,9 @@ func TestS3DownloadErrors(t *testing.T) {
 			isSupervisor: true,
 			s3Client: func() reflector.S3Client {
 				f := &fakes.FakeS3Client{}
-				f.GetObjectReturns(nil, awserr.NewRequestFailure(
-					awserr.New("error-code", "error-message", errors.New("failure")), http.StatusNotFound, ""))
+				f.GetObjectReturns(nil, &types.NotFound{
+					Message: aws.String("failure"),
+				})
 				return f
 			},
 			err:      errors.New("failure"),
@@ -72,8 +77,9 @@ func TestS3DownloadErrors(t *testing.T) {
 			name: "temporary failure on 404 if not-supervisor",
 			s3Client: func() reflector.S3Client {
 				f := &fakes.FakeS3Client{}
-				f.GetObjectReturns(nil, awserr.NewRequestFailure(
-					awserr.New("error-code", "error-message", errors.New("failure")), http.StatusNotFound, ""))
+				f.GetObjectReturns(nil, &types.NotFound{
+					Message: aws.String("failure"),
+				})
 				return f
 			},
 			err:      errors.New("failure"),
@@ -84,8 +90,10 @@ func TestS3DownloadErrors(t *testing.T) {
 			name: "temporary failure",
 			s3Client: func() reflector.S3Client {
 				f := &fakes.FakeS3Client{}
-				f.GetObjectReturns(nil, awserr.NewRequestFailure(
-					awserr.New("error-code", "error-message", errors.New("failure")), http.StatusInternalServerError, ""))
+				f.GetObjectReturns(nil, &smithy.GenericAPIError{
+					Code:    string(rune(http.StatusInternalServerError)),
+					Message: "failure",
+				})
 				return f
 			},
 			err:      errors.New("failure"),
@@ -160,7 +168,7 @@ func TestS3Downloader(t *testing.T) {
 			contentLength := int64(len(toWrite))
 			fake.GetObjectReturns(&s3.GetObjectOutput{
 				Body:          ioutil.NopCloser(bytes.NewReader(toWrite)),
-				ContentLength: &contentLength,
+				ContentLength: contentLength,
 			}, nil)
 
 			sd := &reflector.S3Downloader{
@@ -171,7 +179,7 @@ func TestS3Downloader(t *testing.T) {
 			w := new(bytes.Buffer)
 			n, err := sd.DownloadTo(w)
 
-			arg := fake.GetObjectArgsForCall(0)
+			_, arg, _ := fake.GetObjectArgsForCall(0)
 
 			require.Equal(t, test.bucket, *arg.Bucket)
 			require.Equal(t, test.key, *arg.Key)
