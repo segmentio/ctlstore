@@ -56,9 +56,11 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 	start := time.Now()
 	numBytes, err := downloader.Download(context.Background(), file, &s3.GetObjectInput{
 		Bucket: aws.String(d.Bucket),
-		Key:    aws.String(d.Key),
+		Key:    aws.String(strings.TrimLeft(d.Key, "/")),
 	})
 	stats.Observe("snapshot_download_time", time.Now().Sub(start))
+
+	events.Log("downloading file with key: ", d.Key)
 
 	if err != nil {
 		var ae smithy.APIError
