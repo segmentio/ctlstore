@@ -39,8 +39,8 @@ type S3Downloader struct {
 func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 	client, err := d.getS3Client()
 	downloader := manager.NewDownloader(client, func(d *manager.Downloader) {
-		d.PartSize = 64 * 1024 * 1024 // 64MB per part
-		d.Concurrency = 5
+		d.PartSize = 16 * 1024 * 1024 // 64MB per part
+		d.Concurrency = 11
 	})
 	if err != nil {
 		return -1, err
