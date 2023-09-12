@@ -47,7 +47,7 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 	}
 
 	tmpdir := os.TempDir()
-	file, err := os.CreateTemp(tmpdir, d.Key)
+	file, err := os.CreateTemp(tmpdir, strings.TrimLeft(d.Key, "/"))
 	if err != nil {
 		return -1, errors.Wrap(err, "download snapshot into disk")
 	}
