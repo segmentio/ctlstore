@@ -1,8 +1,10 @@
 package supervisor
 
-import "github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
+import (
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+)
 
 //counterfeiter:generate -o fakes/s3_uploader.go . S3Uploader
-type S3Uploader interface {
-	s3manageriface.UploaderAPI
+type S3Client interface {
+	manager.UploadAPIClient
 }

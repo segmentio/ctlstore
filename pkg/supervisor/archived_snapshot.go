@@ -3,14 +3,17 @@ package supervisor
 import (
 	"bufio"
 	"context"
+	"crypto/sha256"
+	"fmt"
 	"io"
 	"net/url"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/pkg/errors"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
@@ -52,7 +55,7 @@ type s3Snapshot struct {
 	Bucket       string
 	Key          string
 	sendToS3Func sendToS3Func
-	s3Uploader   S3Uploader
+	s3Client     S3Client
 }
 
 func (c *s3Snapshot) Upload(ctx context.Context, path string) error {
@@ -71,6 +74,13 @@ func (c *s3Snapshot) Upload(ctx context.Context, path string) error {
 		key = key[1:]
 	}
 	var reader io.Reader = bufio.NewReaderSize(f, 1024*32) // use a 32K buffer for reading
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		events.Log("filed to generate snapshop hash value", err)
+	}
+	cs := string(h.Sum(nil))
+
 	var gpr *gzipCompressionReader
 	if strings.HasSuffix(key, ".gz") {
 		events.Log("Compressing s3 payload with GZIP")
@@ -80,7 +90,7 @@ func (c *s3Snapshot) Upload(ctx context.Context, path string) error {
 	events.Log("Uploading %{file}s (%d bytes) to %{bucket}s/%{key}s", path, size, c.Bucket, key)
 
 	start := time.Now()
-	if err = c.sendToS3(ctx, key, c.Bucket, reader); err != nil {
+	if err = c.sendToS3(ctx, key, c.Bucket, reader, cs); err != nil {
 		return errors.Wrap(err, "send to s3")
 	}
 	stats.Observe("ldb-upload-time", time.Since(start), stats.T("compressed", isCompressed(gpr)))
@@ -104,35 +114,56 @@ func isCompressed(gpr *gzipCompressionReader) string {
 	return "true"
 }
 
-func (c *s3Snapshot) sendToS3(ctx context.Context, key string, bucket string, body io.Reader) error {
+type BucketBasics struct {
+	S3Client S3Client
+}
+
+func (c *s3Snapshot) sendToS3(ctx context.Context, key string, bucket string, body io.Reader, cs string) error {
 	if c.sendToS3Func != nil {
 		return c.sendToS3Func(ctx, key, bucket, body)
 	}
-	ul, err := c.getS3Uploader()
+
+	client, err := c.getS3Client()
 	if err != nil {
 		return err
 	}
-	output, err := ul.UploadWithContext(ctx, &s3manager.UploadInput{
-		Bucket: &bucket,
-		Key:    &key,
-		Body:   body,
+
+	var basics = BucketBasics{
+		S3Client: client,
+	}
+	var partMiBs int64 = 16
+	uploader := manager.NewUploader(basics.S3Client, func(u *manager.Uploader) {
+		u.PartSize = partMiBs * 1024 * 1024
+	})
+
+	output, err := uploader.Upload(ctx, &s3.PutObjectInput{
+		Bucket:            &bucket,
+		Key:               &key,
+		Body:              body,
+		ChecksumAlgorithm: "sha256",
+		ChecksumSHA256:    &cs,
 	})
 	if err == nil {
 		events.Log("Wrote to S3 location: %s", output.Location)
+	} else {
+		events.Log("Couldn't upload s3 snapshot to %v:%v. Here's why: %v\n",
+			bucket, key, err)
 	}
 	return errors.Wrap(err, "upload with context")
 }
 
-func (c *s3Snapshot) getS3Uploader() (S3Uploader, error) {
-	if c.s3Uploader != nil {
-		return c.s3Uploader, nil
+func (c *s3Snapshot) getS3Client() (S3Client, error) {
+	if c.s3Client != nil {
+		return c.s3Client, nil
 	}
-	sess, err := session.NewSession()
+	cfg, err := config.LoadDefaultConfig(context.Background())
+
 	if err != nil {
-		return nil, errors.Wrap(err, "creating aws session")
+		panic(fmt.Sprintf("failed loading config, %v", err))
 	}
-	uploader := s3manager.NewUploader(sess)
-	return uploader, nil
+
+	client := s3.NewFromConfig(cfg)
+	return client, nil
 }
 
 func archivedSnapshotFromURL(URL string) (archivedSnapshot, error) {
