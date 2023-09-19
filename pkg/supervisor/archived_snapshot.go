@@ -75,8 +75,14 @@ func (c *s3Snapshot) Upload(ctx context.Context, path string) error {
 	}
 	var reader io.Reader = bufio.NewReaderSize(f, 1024*32) // use a 32K buffer for reading
 
+	ff, err := os.OpenFile(path, os.O_RDONLY, 0)
+	if err != nil {
+		return errors.Wrap(err, "opening file")
+	}
+	defer ff.Close()
+
 	h := sha256.New()
-	if _, err := io.Copy(h, f); err != nil {
+	if _, err := io.Copy(h, ff); err != nil {
 		events.Log("filed to generate snapshop hash value", err)
 	}
 	cs := string(h.Sum(nil))
