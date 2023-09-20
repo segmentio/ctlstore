@@ -120,8 +120,7 @@ func getCheckSum(path string) (string, error) {
 	}
 
 	cs := base64.StdEncoding.EncodeToString(h.Sum(nil))
-
-	events.Log("base64", cs)
+	events.Log("base64 encoding: %s", cs)
 
 	return cs, nil
 }
@@ -160,7 +159,9 @@ func (c *s3Snapshot) sendToS3(ctx context.Context, key string, bucket string, bo
 		Key:               &key,
 		Body:              body,
 		ChecksumAlgorithm: "sha256",
-		//ChecksumSHA256:    &cs,
+		Metadata: map[string]string{
+			"checksum": cs,
+		},
 	})
 	if err == nil {
 		events.Log("Wrote to S3 location: %s", output.Location)
