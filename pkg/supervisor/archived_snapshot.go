@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net/url"
@@ -117,7 +118,7 @@ func getCheckSum(path string) (string, error) {
 	if _, err := io.Copy(h, f); err != nil {
 		events.Log("failed to generate sha256", err)
 	}
-	cs := string(h.Sum(nil))
+	cs := hex.EncodeToString(h.Sum(nil))
 
 	return cs, nil
 }
