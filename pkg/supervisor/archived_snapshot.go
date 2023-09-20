@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"context"
 	"crypto/sha256"
-	"encoding/hex"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"net/url"
@@ -118,7 +118,10 @@ func getCheckSum(path string) (string, error) {
 	if _, err := io.Copy(h, f); err != nil {
 		events.Log("failed to generate sha256", err)
 	}
-	cs := hex.EncodeToString(h.Sum(nil))
+
+	cs := base64.StdEncoding.EncodeToString(h.Sum(nil))
+
+	events.Log("base64", cs)
 
 	return cs, nil
 }
@@ -157,7 +160,7 @@ func (c *s3Snapshot) sendToS3(ctx context.Context, key string, bucket string, bo
 		Key:               &key,
 		Body:              body,
 		ChecksumAlgorithm: "sha256",
-		ChecksumSHA256:    &cs,
+		//ChecksumSHA256:    &cs,
 	})
 	if err == nil {
 		events.Log("Wrote to S3 location: %s", output.Location)
