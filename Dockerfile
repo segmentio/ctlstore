@@ -25,6 +25,5 @@ RUN apk --no-cache add sqlite pigz
 COPY --from=0 /go/src/github.com/segmentio/ctlstore/scripts/download.sh .
 COPY --from=0 /bin/chamber /bin/chamber
 COPY --from=0 /bin/s5cmd /bin/s5cmd
-COPY --from=0 /bin/aws /bin/aws
 COPY --from=0 /usr/local/bin/ctlstore /usr/local/bin/
 COPY --from=0 /usr/local/bin/ctlstore-cli /usr/local/bin/
