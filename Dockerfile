@@ -5,6 +5,7 @@ ARG VERSION
 RUN apk --update add gcc git curl alpine-sdk libc6-compat ca-certificates sqlite \
   && curl -SsL https://github.com/segmentio/chamber/releases/download/v2.13.2/chamber-v2.13.2-linux-amd64 -o /bin/chamber \
   && curl -sL https://github.com/peak/s5cmd/releases/download/v2.1.0/s5cmd_2.1.0_Linux-64bit.tar.gz -o s5cmd.gz && tar -xzf s5cmd.gz -C /bin \
+  && curl -sL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip && unzip awscliv2.zip && ./aws/install \
   && chmod +x /bin/chamber \
   && chmod +x /bin/s5cmd
 
