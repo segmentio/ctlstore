@@ -2,8 +2,8 @@ FROM golang:1.20-alpine
 ENV SRC github.com/segmentio/ctlstore
 ARG VERSION
 
-RUN yum update && yum install perl-Digest-SHA
-RUN shasum -v
+#RUN yum update && yum install perl-Digest-SHA
+#RUN shasum -v
 
 RUN apk --update add gcc git curl alpine-sdk libc6-compat ca-certificates sqlite \
   && curl -SsL https://github.com/segmentio/chamber/releases/download/v2.13.2/chamber-v2.13.2-linux-amd64 -o /bin/chamber \
