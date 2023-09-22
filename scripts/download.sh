@@ -30,15 +30,15 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
 
   s5cmd -r 0 --log debug cp --concurrency $CONCURRENCY $CTLSTORE_BOOTSTRAP_URL .
 
-  SHASUM=$(shasum -a 256 $CTLSTORE_BOOTSTRAP_URL | cut -f1 -d\ | xxd -r -p | base64)
-  echo "Sha value of the downloaded file: $(($SHASUM))"
-
   DOWNLOADED="true"
   if [[ ${CTLSTORE_BOOTSTRAP_URL: -2} == gz ]]; then
     echo "Decompressing"
     pigz -d snapshot.db.gz
     COMPRESSED="true"
   fi
+
+  SHASUM=$(shasum -a 256 snapshot.db | cut -f1 -d\ | xxd -r -p | base64)
+  echo "Sha value of the downloaded file: $(($SHASUM))"
 
   mv snapshot.db ldb.db
   END=$(date +%s)
@@ -52,8 +52,8 @@ else
   BUCKET="$(echo $URL | grep / | cut -d/ -f1)"
   KEY="$(echo $URL | grep / | cut -d/ -f2)"
 
-#  SHASUM=$(shasum -a 256 ldb.db | cut -f1 -d\ | xxd -r -p | base64)
-#  echo "Sha value of the downloaded file: $(($SHASUM))"
+  SHASUM=$(shasum -a 256 ldb.db | cut -f1 -d\ | xxd -r -p | base64)
+  echo "Sha value of the downloaded file: $(($SHASUM))"
 
   aws s3api head-object \
     --bucket "${BUCKET}" \
