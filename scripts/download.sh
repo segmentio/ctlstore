@@ -45,7 +45,7 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
   echo "ldb.db ready in $(($END - $START)) seconds"
 else
 
-  CTLSTORE_BOOTSTRAP_URL="s3://segment-ctlstore-snapshots-stage/snapshot.db"
+  CTLSTORE_BOOTSTRAP_URL="s3://segment-ctlstore-snapshots-stage-euw1/snapshot.db"
 
   PREFIX="$(echo $CTLSTORE_BOOTSTRAP_URL | grep :// | sed -e's,^\(.*://\).*,\1,g')"
   URL="$(echo $CTLSTORE_BOOTSTRAP_URL | sed -e s,$PREFIX,,g)"
