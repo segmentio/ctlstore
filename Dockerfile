@@ -24,7 +24,8 @@ RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore/pkg/vers
   && cp ${GOPATH}/bin/ctlstore-cli /usr/local/bin
 
 FROM alpine
-RUN apk --no-cache add sqlite pigz
+RUN apk --no-cache add sqlite pigz py-pip \
+  && pip install s3cmd
 
 COPY --from=0 /go/src/github.com/segmentio/ctlstore/scripts/download.sh .
 COPY --from=0 /bin/chamber /bin/chamber
