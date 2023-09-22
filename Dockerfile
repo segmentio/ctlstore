@@ -23,7 +23,7 @@ RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore/pkg/vers
 #RUN yum -y install perl-Digest-SHA
 
 FROM alpine
-RUN apk --no-cache add sqlite pigz aws-cli py-pip \
+RUN apk --no-cache add sqlite pigz aws-cli py-pip perl-utils \
   && pip install s3cmd
 
 COPY --from=0 /go/src/github.com/segmentio/ctlstore/scripts/download.sh .
