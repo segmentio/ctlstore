@@ -64,7 +64,7 @@ else
   BUCKET="$(echo $URL | grep / | cut -d/ -f1)"
   KEY="$(echo $URL | grep / | cut -d/ -f2)"
 
-  SHASUM=$(shasum -a 256 ldb.db | cut -f1 -d\ | xxd -r -p | base64)
+  SHASUM=$(shasum -a 256 /var/spool/ctlstore/ldb.db | cut -f1 -d\ | xxd -r -p | base64)
   echo "Sha value of the downloaded file: $(($SHASUM))"
 
   aws s3api head-object \
