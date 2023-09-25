@@ -47,7 +47,7 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
 
   START_SHASUM=$(date +%s)
   SHASUM=$(shasum -a 256 snapshot.db | cut -f1 -d\ | xxd -r -p | base64)
-  echo "Sha value of the downloaded file: $(($SHASUM))"
+  echo "Sha value of the downloaded file: $SHASUM"
   END_SHASUM=$(date +%s)
   echo "Sha value calculation took $(($END - $START)) seconds"
 
@@ -65,7 +65,7 @@ else
   KEY="$(echo $URL | grep / | cut -d/ -f2)"
 
   SHASUM=$(shasum -a 256 /var/spool/ctlstore/ldb.db | cut -f1 -d\ | xxd -r -p | base64)
-  echo "Sha value of the downloaded file: $(($SHASUM))"
+  echo "Sha value of the downloaded file: $SHASUM"
 
   aws s3api head-object \
     --bucket "${BUCKET}" \
