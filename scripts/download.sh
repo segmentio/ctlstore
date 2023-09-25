@@ -24,11 +24,19 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
   BUCKET="$(echo $URL | grep / | cut -d/ -f1)"
   KEY="$(echo $URL | grep / | cut -d/ -f2)"
 
+
+  echo "Downloading head object from ${CTLSTORE_BOOTSTRAP_URL} before downloading the snapshot"
   aws s3api head-object \
     --bucket "${BUCKET}" \
     --key "${KEY}"
 
   s5cmd -r 0 --log debug cp --concurrency $CONCURRENCY $CTLSTORE_BOOTSTRAP_URL .
+
+  echo "Downloading head object from ${CTLSTORE_BOOTSTRAP_URL} after downloading the snapshot"
+  aws s3api head-object \
+    --bucket "${BUCKET}" \
+    --key "${KEY}"
+
 
   DOWNLOADED="true"
   if [[ ${CTLSTORE_BOOTSTRAP_URL: -2} == gz ]]; then
@@ -37,8 +45,12 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
     COMPRESSED="true"
   fi
 
+  START_SHASUM=$(date +%s)
   SHASUM=$(shasum -a 256 snapshot.db | cut -f1 -d\ | xxd -r -p | base64)
   echo "Sha value of the downloaded file: $(($SHASUM))"
+  END_SHASUM=$(date +%s)
+  echo "Sha value calculation took $(($END - $START)) seconds"
+
 
   mv snapshot.db ldb.db
   END=$(date +%s)
