@@ -11,7 +11,6 @@ CONCURRENCY=${2:-20}
 DOWNLOADED="false"
 COMPRESSED="false"
 METRICS="/var/spool/ctlstore/metrics.json"
-SHASUM=""
 
 START=$(date +%s)
 END=$(date +%s)
@@ -63,8 +62,12 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
     echo "Local snapshot checksum: $local_checksum"
 
     if [[ "$local_checksum" == "$checksum_before" ]] || [[ "$local_checksum" == "$checksum_after" ]]; then
-      echo "Checksum matches"
-      break
+#      echo "Checksum matches"
+#      break
+      echo "Checksum mismatch, retrying in 1 second"
+      DOWNLOADED="false"
+      COMPRESSED="false"
+      sleep 1
     else
       echo "Checksum mismatch, retrying in 1 second"
       DOWNLOADED="false"
