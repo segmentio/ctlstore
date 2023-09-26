@@ -21,7 +21,7 @@ download_snapshot() {
 }
 
 get_remote_checksum() {
-  remote_checksum=$(aws s3api head-object --bucket "${BUCKET}" --key "${KEY}" | jq -r '.Metadata.checksum')
+  remote_checksum=$(aws s3api head-object --bucket "${BUCKET}" --key "${KEY}" | jq -r '.Metadata.checksum // empty')
   echo "$remote_checksum"
 }
 
@@ -54,6 +54,11 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
       COMPRESSED="true"
     fi
 
+    if [ -z $checksum_after ]; then
+      echo "Checksum is null, skipping checksum validation"
+      break
+    fi
+
     local_checksum=$(shasum -a 256 snapshot.db | cut -f1 -d\ | xxd -r -p | base64)
     echo "Local snapshot checksum: $local_checksum"
 
@@ -71,7 +76,6 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
       echo "Failed to download intact snapshot after 5 attempts"
       exit 1
     fi
-
   done
 
   mv snapshot.db ldb.db
