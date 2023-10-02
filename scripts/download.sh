@@ -15,13 +15,9 @@ METRICS="/var/spool/ctlstore/metrics.json"
 START=$(date +%s)
 END=$(date +%s)
 
-download_snapshot() {
-  s5cmd -r 0 --log debug cp --concurrency $CONCURRENCY $CTLSTORE_BOOTSTRAP_URL .
-}
-
-get_remote_checksum() {
-  remote_checksum=$(aws s3api head-object --bucket "${BUCKET}" --key "${KEY}" | jq -r '.Metadata.checksum // empty')
-  echo "$remote_checksum"
+get_head_object() {
+ head_object=$(aws s3api head-object --bucket "${BUCKET}" --key "${KEY}")
+ echo "$head_object"
 }
 
 if [ ! -f /var/spool/ctlstore/ldb.db ]; then
@@ -31,51 +27,39 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
   mkdir -p /var/spool/ctlstore
   cd /var/spool/ctlstore
 
-  COUNTER=0
-  while true; do
-    COUNTER=$(($COUNTER+1))
+  echo "Downloading head object from ${CTLSTORE_BOOTSTRAP_URL}"
+  head_object=$(get_head_object)
 
-    echo "Downloading head object from ${CTLSTORE_BOOTSTRAP_URL}"
-    checksum_before=$(get_remote_checksum)
-    echo "Remote checksum before downloading snapshot: $checksum_before"
+  remote_checksum=$(jq -r '.Metadata.checksum // empty' <<< $head_object)
+  echo "Remote checksum: $remote_checksum"
 
-    echo "Downloading snapshot from ${CTLSTORE_BOOTSTRAP_URL}"
-    download_snapshot
+  remote_version=$(jq -r '.VersionId // empty' <<< $head_object)
+  echo "Remote version: $remote_version"
 
-    echo "Downloading head object from ${CTLSTORE_BOOTSTRAP_URL}"
-    checksum_after=$(get_remote_checksum)
-    echo "Remote checksum after downloading snapshot: $checksum_after"
+  echo "Downloading snapshot from ${CTLSTORE_BOOTSTRAP_URL} with VersionID: ${remote_version}"
+  s5cmd -r 0 --log debug cp --version-id $remote_version --concurrency $CONCURRENCY $CTLSTORE_BOOTSTRAP_URL .
 
-    DOWNLOADED="true"
-    if [[ ${CTLSTORE_BOOTSTRAP_URL: -2} == gz ]]; then
-      echo "Decompressing"
-      pigz -d snapshot.db.gz
-      COMPRESSED="true"
-    fi
+  DOWNLOADED="true"
+  if [[ ${CTLSTORE_BOOTSTRAP_URL: -2} == gz ]]; then
+    echo "Decompressing"
+    pigz -d snapshot.db.gz
+    COMPRESSED="true"
+  fi
 
-    if [ -z $checksum_after ]; then
-      echo "Checksum is null, skipping checksum validation"
-      break
-    fi
-
+  if [ -z $remote_checksum ]; then
+    echo "Remote checksum is null, skipping checksum validation"
+  else
     local_checksum=$(shasum -a 256 snapshot.db | cut -f1 -d\ | xxd -r -p | base64)
     echo "Local snapshot checksum: $local_checksum"
 
-    if [[ "$local_checksum" == "$checksum_before" ]] || [[ "$local_checksum" == "$checksum_after" ]]; then
+    if [[ "$local_checksum" == "$remote_checksum" ]]; then
       echo "Checksum matches"
-      break
     else
-      echo "Checksum mismatch, retrying in 1 second"
-      DOWNLOADED="false"
-      COMPRESSED="false"
-      sleep 1
-    fi
-
-    if [ $COUNTER -gt 5 ]; then
-      echo "Failed to download intact snapshot after 5 attempts"
+      echo "Checksum does not match"
+      echo "Failed to download intact snapshot"
       exit 1
     fi
-  done
+  fi
 
   mv snapshot.db ldb.db
   END=$(date +%s)
