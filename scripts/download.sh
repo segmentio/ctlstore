@@ -30,10 +30,10 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
   echo "Downloading head object from ${CTLSTORE_BOOTSTRAP_URL}"
   head_object=$(get_head_object)
 
-  remote_checksum=$(jq -r '.Metadata.checksum // empty' <<< $head_object)
+  remote_checksum=$(printf '%s\n' "$head_object" | jq -r '.Metadata.checksum // empty')
   echo "Remote checksum: $remote_checksum"
 
-  remote_version=$(jq -r '.VersionId // empty' <<< $head_object)
+  remote_version=$(printf '%s\n' "$head_object" | jq -r '.VersionId // empty')
   echo "Remote version: $remote_version"
 
   echo "Downloading snapshot from ${CTLSTORE_BOOTSTRAP_URL} with VersionID: ${remote_version}"
