@@ -49,7 +49,7 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
   if [ -z $remote_checksum ]; then
     echo "Remote checksum is null, skipping checksum validation"
   else
-    local_checksum=$(shasum -a 256 snapshot.db | cut -f1 -d\ | xxd -r -p | base64)
+    local_checksum=$(shasum snapshot.db | cut -f1 -d\ | xxd -r -p | base64)
     echo "Local snapshot checksum: $local_checksum"
 
     if [[ "$local_checksum" == "$remote_checksum" ]]; then

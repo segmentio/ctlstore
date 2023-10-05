@@ -3,7 +3,7 @@ package supervisor
 import (
 	"bufio"
 	"context"
-	"crypto/sha256"
+	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -114,7 +114,7 @@ func getCheckSum(path string) (string, error) {
 	}
 	defer f.Close()
 
-	h := sha256.New()
+	h := sha1.New()
 	if _, err := io.Copy(h, f); err != nil {
 		events.Log("failed to generate sha256", err)
 	}
