@@ -116,11 +116,11 @@ func getCheckSum(path string) (string, error) {
 
 	h := sha1.New()
 	if _, err := io.Copy(h, f); err != nil {
-		events.Log("failed to generate sha256", err)
+		events.Log("failed to generate sha1 of snapshot", err)
 	}
 
 	cs := base64.StdEncoding.EncodeToString(h.Sum(nil))
-	events.Log("base64 encoding: %s", cs)
+	events.Log("base64 encoding of sha1: %s", cs)
 
 	return cs, nil
 }

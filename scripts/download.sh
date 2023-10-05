@@ -14,6 +14,8 @@ METRICS="/var/spool/ctlstore/metrics.json"
 
 START=$(date +%s)
 END=$(date +%s)
+SHA_START=$(date +%s)
+SHA_END=$(date +%s)
 
 get_head_object() {
  head_object=$(aws s3api head-object --bucket "${BUCKET}" --key "${KEY}")
@@ -31,7 +33,7 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
   head_object=$(get_head_object)
 
   remote_checksum=$(printf '%s\n' "$head_object" | jq -r '.Metadata.checksum // empty')
-  echo "Remote checksum: $remote_checksum"
+  echo "Remote checksum in sha1: $remote_checksum"
 
   remote_version=$(printf '%s\n' "$head_object" | jq -r '.VersionId // empty')
   echo "Remote version: $remote_version"
@@ -46,11 +48,12 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
     COMPRESSED="true"
   fi
 
+  SHA_START=$(date +%s)
   if [ -z $remote_checksum ]; then
-    echo "Remote checksum is null, skipping checksum validation"
+    echo "Remote checksum sha1 is null, skipping checksum validation"
   else
     local_checksum=$(shasum snapshot.db | cut -f1 -d\ | xxd -r -p | base64)
-    echo "Local snapshot checksum: $local_checksum"
+    echo "Local snapshot checksum in sha1: $local_checksum"
 
     if [[ "$local_checksum" == "$remote_checksum" ]]; then
       echo "Checksum matches"
@@ -60,6 +63,8 @@ if [ ! -f /var/spool/ctlstore/ldb.db ]; then
       exit 1
     fi
   fi
+  SHA_END=$(date +%s)
+  echo "Local checksum calculation took $(($SHA_END - $SHA_START)) seconds"
 
   mv snapshot.db ldb.db
   END=$(date +%s)
