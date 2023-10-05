@@ -76,9 +76,9 @@ func (c *s3Snapshot) Upload(ctx context.Context, path string) error {
 	}
 	var reader io.Reader = bufio.NewReaderSize(f, 1024*32) // use a 32K buffer for reading
 
-	cs, err := getCheckSum(path)
+	cs, err := getChecksum(path)
 	if err != nil {
-		return errors.Wrap(err, "generate file CheckSum")
+		return errors.Wrap(err, "generate file Checksum")
 	}
 
 	var gpr *gzipCompressionReader
@@ -107,7 +107,7 @@ func (c *s3Snapshot) Upload(ctx context.Context, path string) error {
 	return nil
 }
 
-func getCheckSum(path string) (string, error) {
+func getChecksum(path string) (string, error) {
 	f, err := os.OpenFile(path, os.O_RDONLY, 0)
 	if err != nil {
 		return "", errors.Wrap(err, "opening file")
