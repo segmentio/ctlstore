@@ -5,121 +5,102 @@ import (
 	"context"
 	"sync"
 
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/segmentio/ctlstore/pkg/supervisor"
 )
 
-type FakeS3Uploader struct {
-	UploadStub        func(*s3manager.UploadInput, ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error)
-	uploadMutex       sync.RWMutex
-	uploadArgsForCall []struct {
-		arg1 *s3manager.UploadInput
-		arg2 []func(*s3manager.Uploader)
-	}
-	uploadReturns struct {
-		result1 *s3manager.UploadOutput
-		result2 error
-	}
-	uploadReturnsOnCall map[int]struct {
-		result1 *s3manager.UploadOutput
-		result2 error
-	}
-	UploadWithContextStub        func(context.Context, *s3manager.UploadInput, ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error)
-	uploadWithContextMutex       sync.RWMutex
-	uploadWithContextArgsForCall []struct {
+type FakeS3Client struct {
+	AbortMultipartUploadStub        func(context.Context, *s3.AbortMultipartUploadInput, ...func(*s3.Options)) (*s3.AbortMultipartUploadOutput, error)
+	abortMultipartUploadMutex       sync.RWMutex
+	abortMultipartUploadArgsForCall []struct {
 		arg1 context.Context
-		arg2 *s3manager.UploadInput
-		arg3 []func(*s3manager.Uploader)
+		arg2 *s3.AbortMultipartUploadInput
+		arg3 []func(*s3.Options)
 	}
-	uploadWithContextReturns struct {
-		result1 *s3manager.UploadOutput
+	abortMultipartUploadReturns struct {
+		result1 *s3.AbortMultipartUploadOutput
 		result2 error
 	}
-	uploadWithContextReturnsOnCall map[int]struct {
-		result1 *s3manager.UploadOutput
+	abortMultipartUploadReturnsOnCall map[int]struct {
+		result1 *s3.AbortMultipartUploadOutput
+		result2 error
+	}
+	CompleteMultipartUploadStub        func(context.Context, *s3.CompleteMultipartUploadInput, ...func(*s3.Options)) (*s3.CompleteMultipartUploadOutput, error)
+	completeMultipartUploadMutex       sync.RWMutex
+	completeMultipartUploadArgsForCall []struct {
+		arg1 context.Context
+		arg2 *s3.CompleteMultipartUploadInput
+		arg3 []func(*s3.Options)
+	}
+	completeMultipartUploadReturns struct {
+		result1 *s3.CompleteMultipartUploadOutput
+		result2 error
+	}
+	completeMultipartUploadReturnsOnCall map[int]struct {
+		result1 *s3.CompleteMultipartUploadOutput
+		result2 error
+	}
+	CreateMultipartUploadStub        func(context.Context, *s3.CreateMultipartUploadInput, ...func(*s3.Options)) (*s3.CreateMultipartUploadOutput, error)
+	createMultipartUploadMutex       sync.RWMutex
+	createMultipartUploadArgsForCall []struct {
+		arg1 context.Context
+		arg2 *s3.CreateMultipartUploadInput
+		arg3 []func(*s3.Options)
+	}
+	createMultipartUploadReturns struct {
+		result1 *s3.CreateMultipartUploadOutput
+		result2 error
+	}
+	createMultipartUploadReturnsOnCall map[int]struct {
+		result1 *s3.CreateMultipartUploadOutput
+		result2 error
+	}
+	PutObjectStub        func(context.Context, *s3.PutObjectInput, ...func(*s3.Options)) (*s3.PutObjectOutput, error)
+	putObjectMutex       sync.RWMutex
+	putObjectArgsForCall []struct {
+		arg1 context.Context
+		arg2 *s3.PutObjectInput
+		arg3 []func(*s3.Options)
+	}
+	putObjectReturns struct {
+		result1 *s3.PutObjectOutput
+		result2 error
+	}
+	putObjectReturnsOnCall map[int]struct {
+		result1 *s3.PutObjectOutput
+		result2 error
+	}
+	UploadPartStub        func(context.Context, *s3.UploadPartInput, ...func(*s3.Options)) (*s3.UploadPartOutput, error)
+	uploadPartMutex       sync.RWMutex
+	uploadPartArgsForCall []struct {
+		arg1 context.Context
+		arg2 *s3.UploadPartInput
+		arg3 []func(*s3.Options)
+	}
+	uploadPartReturns struct {
+		result1 *s3.UploadPartOutput
+		result2 error
+	}
+	uploadPartReturnsOnCall map[int]struct {
+		result1 *s3.UploadPartOutput
 		result2 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeS3Uploader) Upload(arg1 *s3manager.UploadInput, arg2 ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
-	fake.uploadMutex.Lock()
-	ret, specificReturn := fake.uploadReturnsOnCall[len(fake.uploadArgsForCall)]
-	fake.uploadArgsForCall = append(fake.uploadArgsForCall, struct {
-		arg1 *s3manager.UploadInput
-		arg2 []func(*s3manager.Uploader)
-	}{arg1, arg2})
-	stub := fake.UploadStub
-	fakeReturns := fake.uploadReturns
-	fake.recordInvocation("Upload", []interface{}{arg1, arg2})
-	fake.uploadMutex.Unlock()
-	if stub != nil {
-		return stub(arg1, arg2...)
-	}
-	if specificReturn {
-		return ret.result1, ret.result2
-	}
-	return fakeReturns.result1, fakeReturns.result2
-}
-
-func (fake *FakeS3Uploader) UploadCallCount() int {
-	fake.uploadMutex.RLock()
-	defer fake.uploadMutex.RUnlock()
-	return len(fake.uploadArgsForCall)
-}
-
-func (fake *FakeS3Uploader) UploadCalls(stub func(*s3manager.UploadInput, ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error)) {
-	fake.uploadMutex.Lock()
-	defer fake.uploadMutex.Unlock()
-	fake.UploadStub = stub
-}
-
-func (fake *FakeS3Uploader) UploadArgsForCall(i int) (*s3manager.UploadInput, []func(*s3manager.Uploader)) {
-	fake.uploadMutex.RLock()
-	defer fake.uploadMutex.RUnlock()
-	argsForCall := fake.uploadArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2
-}
-
-func (fake *FakeS3Uploader) UploadReturns(result1 *s3manager.UploadOutput, result2 error) {
-	fake.uploadMutex.Lock()
-	defer fake.uploadMutex.Unlock()
-	fake.UploadStub = nil
-	fake.uploadReturns = struct {
-		result1 *s3manager.UploadOutput
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FakeS3Uploader) UploadReturnsOnCall(i int, result1 *s3manager.UploadOutput, result2 error) {
-	fake.uploadMutex.Lock()
-	defer fake.uploadMutex.Unlock()
-	fake.UploadStub = nil
-	if fake.uploadReturnsOnCall == nil {
-		fake.uploadReturnsOnCall = make(map[int]struct {
-			result1 *s3manager.UploadOutput
-			result2 error
-		})
-	}
-	fake.uploadReturnsOnCall[i] = struct {
-		result1 *s3manager.UploadOutput
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FakeS3Uploader) UploadWithContext(arg1 context.Context, arg2 *s3manager.UploadInput, arg3 ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
-	fake.uploadWithContextMutex.Lock()
-	ret, specificReturn := fake.uploadWithContextReturnsOnCall[len(fake.uploadWithContextArgsForCall)]
-	fake.uploadWithContextArgsForCall = append(fake.uploadWithContextArgsForCall, struct {
+func (fake *FakeS3Client) AbortMultipartUpload(arg1 context.Context, arg2 *s3.AbortMultipartUploadInput, arg3 ...func(*s3.Options)) (*s3.AbortMultipartUploadOutput, error) {
+	fake.abortMultipartUploadMutex.Lock()
+	ret, specificReturn := fake.abortMultipartUploadReturnsOnCall[len(fake.abortMultipartUploadArgsForCall)]
+	fake.abortMultipartUploadArgsForCall = append(fake.abortMultipartUploadArgsForCall, struct {
 		arg1 context.Context
-		arg2 *s3manager.UploadInput
-		arg3 []func(*s3manager.Uploader)
+		arg2 *s3.AbortMultipartUploadInput
+		arg3 []func(*s3.Options)
 	}{arg1, arg2, arg3})
-	stub := fake.UploadWithContextStub
-	fakeReturns := fake.uploadWithContextReturns
-	fake.recordInvocation("UploadWithContext", []interface{}{arg1, arg2, arg3})
-	fake.uploadWithContextMutex.Unlock()
+	stub := fake.AbortMultipartUploadStub
+	fakeReturns := fake.abortMultipartUploadReturns
+	fake.recordInvocation("AbortMultipartUpload", []interface{}{arg1, arg2, arg3})
+	fake.abortMultipartUploadMutex.Unlock()
 	if stub != nil {
 		return stub(arg1, arg2, arg3...)
 	}
@@ -129,58 +110,328 @@ func (fake *FakeS3Uploader) UploadWithContext(arg1 context.Context, arg2 *s3mana
 	return fakeReturns.result1, fakeReturns.result2
 }
 
-func (fake *FakeS3Uploader) UploadWithContextCallCount() int {
-	fake.uploadWithContextMutex.RLock()
-	defer fake.uploadWithContextMutex.RUnlock()
-	return len(fake.uploadWithContextArgsForCall)
+func (fake *FakeS3Client) AbortMultipartUploadCallCount() int {
+	fake.abortMultipartUploadMutex.RLock()
+	defer fake.abortMultipartUploadMutex.RUnlock()
+	return len(fake.abortMultipartUploadArgsForCall)
 }
 
-func (fake *FakeS3Uploader) UploadWithContextCalls(stub func(context.Context, *s3manager.UploadInput, ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error)) {
-	fake.uploadWithContextMutex.Lock()
-	defer fake.uploadWithContextMutex.Unlock()
-	fake.UploadWithContextStub = stub
+func (fake *FakeS3Client) AbortMultipartUploadCalls(stub func(context.Context, *s3.AbortMultipartUploadInput, ...func(*s3.Options)) (*s3.AbortMultipartUploadOutput, error)) {
+	fake.abortMultipartUploadMutex.Lock()
+	defer fake.abortMultipartUploadMutex.Unlock()
+	fake.AbortMultipartUploadStub = stub
 }
 
-func (fake *FakeS3Uploader) UploadWithContextArgsForCall(i int) (context.Context, *s3manager.UploadInput, []func(*s3manager.Uploader)) {
-	fake.uploadWithContextMutex.RLock()
-	defer fake.uploadWithContextMutex.RUnlock()
-	argsForCall := fake.uploadWithContextArgsForCall[i]
+func (fake *FakeS3Client) AbortMultipartUploadArgsForCall(i int) (context.Context, *s3.AbortMultipartUploadInput, []func(*s3.Options)) {
+	fake.abortMultipartUploadMutex.RLock()
+	defer fake.abortMultipartUploadMutex.RUnlock()
+	argsForCall := fake.abortMultipartUploadArgsForCall[i]
 	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
 }
 
-func (fake *FakeS3Uploader) UploadWithContextReturns(result1 *s3manager.UploadOutput, result2 error) {
-	fake.uploadWithContextMutex.Lock()
-	defer fake.uploadWithContextMutex.Unlock()
-	fake.UploadWithContextStub = nil
-	fake.uploadWithContextReturns = struct {
-		result1 *s3manager.UploadOutput
+func (fake *FakeS3Client) AbortMultipartUploadReturns(result1 *s3.AbortMultipartUploadOutput, result2 error) {
+	fake.abortMultipartUploadMutex.Lock()
+	defer fake.abortMultipartUploadMutex.Unlock()
+	fake.AbortMultipartUploadStub = nil
+	fake.abortMultipartUploadReturns = struct {
+		result1 *s3.AbortMultipartUploadOutput
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeS3Uploader) UploadWithContextReturnsOnCall(i int, result1 *s3manager.UploadOutput, result2 error) {
-	fake.uploadWithContextMutex.Lock()
-	defer fake.uploadWithContextMutex.Unlock()
-	fake.UploadWithContextStub = nil
-	if fake.uploadWithContextReturnsOnCall == nil {
-		fake.uploadWithContextReturnsOnCall = make(map[int]struct {
-			result1 *s3manager.UploadOutput
+func (fake *FakeS3Client) AbortMultipartUploadReturnsOnCall(i int, result1 *s3.AbortMultipartUploadOutput, result2 error) {
+	fake.abortMultipartUploadMutex.Lock()
+	defer fake.abortMultipartUploadMutex.Unlock()
+	fake.AbortMultipartUploadStub = nil
+	if fake.abortMultipartUploadReturnsOnCall == nil {
+		fake.abortMultipartUploadReturnsOnCall = make(map[int]struct {
+			result1 *s3.AbortMultipartUploadOutput
 			result2 error
 		})
 	}
-	fake.uploadWithContextReturnsOnCall[i] = struct {
-		result1 *s3manager.UploadOutput
+	fake.abortMultipartUploadReturnsOnCall[i] = struct {
+		result1 *s3.AbortMultipartUploadOutput
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeS3Uploader) Invocations() map[string][][]interface{} {
+func (fake *FakeS3Client) CompleteMultipartUpload(arg1 context.Context, arg2 *s3.CompleteMultipartUploadInput, arg3 ...func(*s3.Options)) (*s3.CompleteMultipartUploadOutput, error) {
+	fake.completeMultipartUploadMutex.Lock()
+	ret, specificReturn := fake.completeMultipartUploadReturnsOnCall[len(fake.completeMultipartUploadArgsForCall)]
+	fake.completeMultipartUploadArgsForCall = append(fake.completeMultipartUploadArgsForCall, struct {
+		arg1 context.Context
+		arg2 *s3.CompleteMultipartUploadInput
+		arg3 []func(*s3.Options)
+	}{arg1, arg2, arg3})
+	stub := fake.CompleteMultipartUploadStub
+	fakeReturns := fake.completeMultipartUploadReturns
+	fake.recordInvocation("CompleteMultipartUpload", []interface{}{arg1, arg2, arg3})
+	fake.completeMultipartUploadMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeS3Client) CompleteMultipartUploadCallCount() int {
+	fake.completeMultipartUploadMutex.RLock()
+	defer fake.completeMultipartUploadMutex.RUnlock()
+	return len(fake.completeMultipartUploadArgsForCall)
+}
+
+func (fake *FakeS3Client) CompleteMultipartUploadCalls(stub func(context.Context, *s3.CompleteMultipartUploadInput, ...func(*s3.Options)) (*s3.CompleteMultipartUploadOutput, error)) {
+	fake.completeMultipartUploadMutex.Lock()
+	defer fake.completeMultipartUploadMutex.Unlock()
+	fake.CompleteMultipartUploadStub = stub
+}
+
+func (fake *FakeS3Client) CompleteMultipartUploadArgsForCall(i int) (context.Context, *s3.CompleteMultipartUploadInput, []func(*s3.Options)) {
+	fake.completeMultipartUploadMutex.RLock()
+	defer fake.completeMultipartUploadMutex.RUnlock()
+	argsForCall := fake.completeMultipartUploadArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeS3Client) CompleteMultipartUploadReturns(result1 *s3.CompleteMultipartUploadOutput, result2 error) {
+	fake.completeMultipartUploadMutex.Lock()
+	defer fake.completeMultipartUploadMutex.Unlock()
+	fake.CompleteMultipartUploadStub = nil
+	fake.completeMultipartUploadReturns = struct {
+		result1 *s3.CompleteMultipartUploadOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeS3Client) CompleteMultipartUploadReturnsOnCall(i int, result1 *s3.CompleteMultipartUploadOutput, result2 error) {
+	fake.completeMultipartUploadMutex.Lock()
+	defer fake.completeMultipartUploadMutex.Unlock()
+	fake.CompleteMultipartUploadStub = nil
+	if fake.completeMultipartUploadReturnsOnCall == nil {
+		fake.completeMultipartUploadReturnsOnCall = make(map[int]struct {
+			result1 *s3.CompleteMultipartUploadOutput
+			result2 error
+		})
+	}
+	fake.completeMultipartUploadReturnsOnCall[i] = struct {
+		result1 *s3.CompleteMultipartUploadOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeS3Client) CreateMultipartUpload(arg1 context.Context, arg2 *s3.CreateMultipartUploadInput, arg3 ...func(*s3.Options)) (*s3.CreateMultipartUploadOutput, error) {
+	fake.createMultipartUploadMutex.Lock()
+	ret, specificReturn := fake.createMultipartUploadReturnsOnCall[len(fake.createMultipartUploadArgsForCall)]
+	fake.createMultipartUploadArgsForCall = append(fake.createMultipartUploadArgsForCall, struct {
+		arg1 context.Context
+		arg2 *s3.CreateMultipartUploadInput
+		arg3 []func(*s3.Options)
+	}{arg1, arg2, arg3})
+	stub := fake.CreateMultipartUploadStub
+	fakeReturns := fake.createMultipartUploadReturns
+	fake.recordInvocation("CreateMultipartUpload", []interface{}{arg1, arg2, arg3})
+	fake.createMultipartUploadMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeS3Client) CreateMultipartUploadCallCount() int {
+	fake.createMultipartUploadMutex.RLock()
+	defer fake.createMultipartUploadMutex.RUnlock()
+	return len(fake.createMultipartUploadArgsForCall)
+}
+
+func (fake *FakeS3Client) CreateMultipartUploadCalls(stub func(context.Context, *s3.CreateMultipartUploadInput, ...func(*s3.Options)) (*s3.CreateMultipartUploadOutput, error)) {
+	fake.createMultipartUploadMutex.Lock()
+	defer fake.createMultipartUploadMutex.Unlock()
+	fake.CreateMultipartUploadStub = stub
+}
+
+func (fake *FakeS3Client) CreateMultipartUploadArgsForCall(i int) (context.Context, *s3.CreateMultipartUploadInput, []func(*s3.Options)) {
+	fake.createMultipartUploadMutex.RLock()
+	defer fake.createMultipartUploadMutex.RUnlock()
+	argsForCall := fake.createMultipartUploadArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeS3Client) CreateMultipartUploadReturns(result1 *s3.CreateMultipartUploadOutput, result2 error) {
+	fake.createMultipartUploadMutex.Lock()
+	defer fake.createMultipartUploadMutex.Unlock()
+	fake.CreateMultipartUploadStub = nil
+	fake.createMultipartUploadReturns = struct {
+		result1 *s3.CreateMultipartUploadOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeS3Client) CreateMultipartUploadReturnsOnCall(i int, result1 *s3.CreateMultipartUploadOutput, result2 error) {
+	fake.createMultipartUploadMutex.Lock()
+	defer fake.createMultipartUploadMutex.Unlock()
+	fake.CreateMultipartUploadStub = nil
+	if fake.createMultipartUploadReturnsOnCall == nil {
+		fake.createMultipartUploadReturnsOnCall = make(map[int]struct {
+			result1 *s3.CreateMultipartUploadOutput
+			result2 error
+		})
+	}
+	fake.createMultipartUploadReturnsOnCall[i] = struct {
+		result1 *s3.CreateMultipartUploadOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeS3Client) PutObject(arg1 context.Context, arg2 *s3.PutObjectInput, arg3 ...func(*s3.Options)) (*s3.PutObjectOutput, error) {
+	fake.putObjectMutex.Lock()
+	ret, specificReturn := fake.putObjectReturnsOnCall[len(fake.putObjectArgsForCall)]
+	fake.putObjectArgsForCall = append(fake.putObjectArgsForCall, struct {
+		arg1 context.Context
+		arg2 *s3.PutObjectInput
+		arg3 []func(*s3.Options)
+	}{arg1, arg2, arg3})
+	stub := fake.PutObjectStub
+	fakeReturns := fake.putObjectReturns
+	fake.recordInvocation("PutObject", []interface{}{arg1, arg2, arg3})
+	fake.putObjectMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeS3Client) PutObjectCallCount() int {
+	fake.putObjectMutex.RLock()
+	defer fake.putObjectMutex.RUnlock()
+	return len(fake.putObjectArgsForCall)
+}
+
+func (fake *FakeS3Client) PutObjectCalls(stub func(context.Context, *s3.PutObjectInput, ...func(*s3.Options)) (*s3.PutObjectOutput, error)) {
+	fake.putObjectMutex.Lock()
+	defer fake.putObjectMutex.Unlock()
+	fake.PutObjectStub = stub
+}
+
+func (fake *FakeS3Client) PutObjectArgsForCall(i int) (context.Context, *s3.PutObjectInput, []func(*s3.Options)) {
+	fake.putObjectMutex.RLock()
+	defer fake.putObjectMutex.RUnlock()
+	argsForCall := fake.putObjectArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeS3Client) PutObjectReturns(result1 *s3.PutObjectOutput, result2 error) {
+	fake.putObjectMutex.Lock()
+	defer fake.putObjectMutex.Unlock()
+	fake.PutObjectStub = nil
+	fake.putObjectReturns = struct {
+		result1 *s3.PutObjectOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeS3Client) PutObjectReturnsOnCall(i int, result1 *s3.PutObjectOutput, result2 error) {
+	fake.putObjectMutex.Lock()
+	defer fake.putObjectMutex.Unlock()
+	fake.PutObjectStub = nil
+	if fake.putObjectReturnsOnCall == nil {
+		fake.putObjectReturnsOnCall = make(map[int]struct {
+			result1 *s3.PutObjectOutput
+			result2 error
+		})
+	}
+	fake.putObjectReturnsOnCall[i] = struct {
+		result1 *s3.PutObjectOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeS3Client) UploadPart(arg1 context.Context, arg2 *s3.UploadPartInput, arg3 ...func(*s3.Options)) (*s3.UploadPartOutput, error) {
+	fake.uploadPartMutex.Lock()
+	ret, specificReturn := fake.uploadPartReturnsOnCall[len(fake.uploadPartArgsForCall)]
+	fake.uploadPartArgsForCall = append(fake.uploadPartArgsForCall, struct {
+		arg1 context.Context
+		arg2 *s3.UploadPartInput
+		arg3 []func(*s3.Options)
+	}{arg1, arg2, arg3})
+	stub := fake.UploadPartStub
+	fakeReturns := fake.uploadPartReturns
+	fake.recordInvocation("UploadPart", []interface{}{arg1, arg2, arg3})
+	fake.uploadPartMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2, arg3...)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeS3Client) UploadPartCallCount() int {
+	fake.uploadPartMutex.RLock()
+	defer fake.uploadPartMutex.RUnlock()
+	return len(fake.uploadPartArgsForCall)
+}
+
+func (fake *FakeS3Client) UploadPartCalls(stub func(context.Context, *s3.UploadPartInput, ...func(*s3.Options)) (*s3.UploadPartOutput, error)) {
+	fake.uploadPartMutex.Lock()
+	defer fake.uploadPartMutex.Unlock()
+	fake.UploadPartStub = stub
+}
+
+func (fake *FakeS3Client) UploadPartArgsForCall(i int) (context.Context, *s3.UploadPartInput, []func(*s3.Options)) {
+	fake.uploadPartMutex.RLock()
+	defer fake.uploadPartMutex.RUnlock()
+	argsForCall := fake.uploadPartArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeS3Client) UploadPartReturns(result1 *s3.UploadPartOutput, result2 error) {
+	fake.uploadPartMutex.Lock()
+	defer fake.uploadPartMutex.Unlock()
+	fake.UploadPartStub = nil
+	fake.uploadPartReturns = struct {
+		result1 *s3.UploadPartOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeS3Client) UploadPartReturnsOnCall(i int, result1 *s3.UploadPartOutput, result2 error) {
+	fake.uploadPartMutex.Lock()
+	defer fake.uploadPartMutex.Unlock()
+	fake.UploadPartStub = nil
+	if fake.uploadPartReturnsOnCall == nil {
+		fake.uploadPartReturnsOnCall = make(map[int]struct {
+			result1 *s3.UploadPartOutput
+			result2 error
+		})
+	}
+	fake.uploadPartReturnsOnCall[i] = struct {
+		result1 *s3.UploadPartOutput
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeS3Client) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.uploadMutex.RLock()
-	defer fake.uploadMutex.RUnlock()
-	fake.uploadWithContextMutex.RLock()
-	defer fake.uploadWithContextMutex.RUnlock()
+	fake.abortMultipartUploadMutex.RLock()
+	defer fake.abortMultipartUploadMutex.RUnlock()
+	fake.completeMultipartUploadMutex.RLock()
+	defer fake.completeMultipartUploadMutex.RUnlock()
+	fake.createMultipartUploadMutex.RLock()
+	defer fake.createMultipartUploadMutex.RUnlock()
+	fake.putObjectMutex.RLock()
+	defer fake.putObjectMutex.RUnlock()
+	fake.uploadPartMutex.RLock()
+	defer fake.uploadPartMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value
@@ -188,7 +439,7 @@ func (fake *FakeS3Uploader) Invocations() map[string][][]interface{} {
 	return copiedInvocations
 }
 
-func (fake *FakeS3Uploader) recordInvocation(key string, args []interface{}) {
+func (fake *FakeS3Client) recordInvocation(key string, args []interface{}) {
 	fake.invocationsMutex.Lock()
 	defer fake.invocationsMutex.Unlock()
 	if fake.invocations == nil {
@@ -200,4 +451,4 @@ func (fake *FakeS3Uploader) recordInvocation(key string, args []interface{}) {
 	fake.invocations[key] = append(fake.invocations[key], args)
 }
 
-var _ supervisor.S3Uploader = new(FakeS3Uploader)
+var _ supervisor.S3Client = new(FakeS3Client)
