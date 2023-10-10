@@ -241,7 +241,15 @@ func (reader *LDBReader) GetRowsByKeyPrefixLike(ctx context.Context, familyName 
 	if len(key) == 0 {
 		globalstats.Incr("full-table-scans", familyName, tableName)
 	}
-	rows, err := stmt.QueryContext(ctx, key...)
+	// Initialize a slice to hold the modified keys
+	var modifiedKeys []interface{}
+
+	for _, k := range key {
+		// Modify each key to include % characters
+		modifiedKey := "%" + k.(string) + "%" // Ensure k is converted to a string
+		modifiedKeys = append(modifiedKeys, modifiedKey)
+	}
+	rows, err := stmt.QueryContext(ctx, modifiedKeys...)
 	switch {
 	case err == nil:
 		cols, err := schema.DBColumnMetaFromRows(rows)
@@ -298,6 +306,8 @@ func (reader *LDBReader) getRowsByKeyPrefixStmtLike(ctx context.Context, pk sche
 		}
 	}
 	qs := strings.Join(qsTokens, " ")
+	events.Log("query string is %v", qs)
+	events.Log("query token string is %v", qsTokens)
 	stmt, err := reader.Db.PrepareContext(ctx, qs)
 	if err == nil {
 		reader.getRowsByKeyPrefixStmtCache[pck] = stmt
