@@ -294,13 +294,13 @@ func (reader *LDBReader) getRowsByKeyPrefixStmtLike(ctx context.Context, pk sche
 	}
 	if numKeys > 0 {
 		qsTokens = append(qsTokens, "WHERE")
+		events.Log("pk fields %v", pk.Fields)
 		for i := 0; i < numKeys; i++ {
-			pkField := pk.Fields[i]
 			if i > 0 {
 				qsTokens = append(qsTokens, "AND")
 			}
 			qsTokens = append(qsTokens,
-				pkField.Name,
+				"target_id",
 				"LIKE",
 				"?")
 		}
