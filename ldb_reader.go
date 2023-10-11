@@ -200,7 +200,7 @@ func (reader *LDBReader) GetRowsByKeyPrefix(ctx context.Context, familyName stri
 
 // GetRowsByKeyPrefixLike returns a *Rows iterator that will supply all of the rows in
 // the family and table match the supplied primary key prefix.
-func (reader *LDBReader) GetRowsByKeyPrefixLike(ctx context.Context, familyName string, tableName string, key ...interface{}) (*Rows, error) {
+func (reader *LDBReader) GetRowsByKeyPrefixLike(ctx context.Context, familyName string, tableName string, key interface{}) (*Rows, error) {
 	ctx = discardContext()
 	start := time.Now()
 	defer func() {
@@ -227,28 +227,28 @@ func (reader *LDBReader) GetRowsByKeyPrefixLike(ctx context.Context, familyName 
 	if pk.Zero() {
 		return nil, ErrTableHasNoPrimaryKey
 	}
-	if len(key) > len(pk.Fields) {
-		return nil, errors.New("too many keys supplied for table's primary key")
-	}
-	err = convertKeyBeforeQuery(pk, key)
+	//if len(key) > len(pk.Fields) {
+	//	return nil, errors.New("too many keys supplied for table's primary key")
+	//}
+	err = convertOneKeyBeforeQuery(pk, key)
 	if err != nil {
 		return nil, err
 	}
-	stmt, err := reader.getRowsByKeyPrefixStmtLike(ctx, pk, ldbTable, len(key))
+	stmt, err := reader.getRowsByKeyPrefixStmtLike(ctx, pk, ldbTable, 1)
 	if err != nil {
 		return nil, err
 	}
-	if len(key) == 0 {
-		globalstats.Incr("full-table-scans", familyName, tableName)
-	}
+	//if len(key) == 0 {
+	//	globalstats.Incr("full-table-scans", familyName, tableName)
+	//}
 	// Initialize a slice to hold the modified keys
 	var modifiedKeys []interface{}
 
-	for _, k := range key {
-		// Modify each key to include % characters
-		modifiedKey := "%" + k.(string) + "%" // Ensure k is converted to a string
-		modifiedKeys = append(modifiedKeys, modifiedKey)
-	}
+	//for _, k := range key {
+	// Modify each key to include % characters
+	modifiedKey := "%" + key.(string) + "%" // Ensure k is converted to a string
+	modifiedKeys = append(modifiedKeys, modifiedKey)
+	//}
 	rows, err := stmt.QueryContext(ctx, modifiedKeys...)
 	switch {
 	case err == nil:
@@ -295,17 +295,22 @@ func (reader *LDBReader) getRowsByKeyPrefixStmtLike(ctx context.Context, pk sche
 	if numKeys > 0 {
 		qsTokens = append(qsTokens, "WHERE")
 		events.Log("pk fields %v", pk.Fields)
-		for i := 0; i < numKeys; i++ {
-			pkField := pk.Fields[2]
-			events.Log("pk fields %v", pk.Fields[i])
-			if i > 0 {
-				qsTokens = append(qsTokens, "AND")
-			}
-			qsTokens = append(qsTokens,
-				pkField.Name,
-				"LIKE",
-				"?")
-		}
+		//for i := 0; i < numKeys; i++ {
+		pkField := pk.Fields[2]
+		events.Log("pk fields %v", pk.Fields[2])
+		//if i > 0 {
+		//	qsTokens = append(qsTokens, "AND")
+		//}
+		//operator := "="
+		/* for targetId using like operator */
+		//if i == 2 {
+		//	operator = "LIKE"
+		//}
+		qsTokens = append(qsTokens,
+			pkField.Name,
+			"LIKE",
+			"?")
+		//}
 	}
 	qs := strings.Join(qsTokens, " ")
 	events.Log("query string is %v", qs)
@@ -506,6 +511,26 @@ func convertKeyBeforeQuery(pk schema.PrimaryKey, key []interface{}) error {
 	return nil
 }
 
+// ensure that a supplied key is converted appropriately with respect
+// to the type of each PK column.
+func convertOneKeyBeforeQuery(pk schema.PrimaryKey, key interface{}) error {
+	//for i, k := range key {
+	// sanity check on th elength of the pk field type slice
+	//if i >= len(pk.Types) {
+	//	return errors.New("insufficient key field type data")
+	//}
+	pkt := pk.Types[2]
+	switch k := key.(type) {
+	case string:
+		switch pkt {
+		case schema.FTBinary, schema.FTByteString:
+			// convert the key from a string -> []byte so that the
+			// types match, otherwise it won't find the row.
+			key = []byte(k)
+		}
+	}
+	return nil
+}
 func (reader *LDBReader) lock() {
 	reader.mu.Lock()
 }
