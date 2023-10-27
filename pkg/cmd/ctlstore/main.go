@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/segmentio/conf"
-	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	_ "github.com/segmentio/events/v2/sigevents"
 	"github.com/segmentio/stats/v4"

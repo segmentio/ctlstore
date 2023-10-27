@@ -12,7 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
 
