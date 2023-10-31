@@ -71,6 +71,7 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 	if compressedSize != nil {
 		events.Log("LDB inflated %d -> %d bytes", *compressedSize, n)
 	}
+
 	return
 }
 

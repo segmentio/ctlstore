@@ -1,9 +1,11 @@
 package reflector
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/url"
@@ -25,6 +27,7 @@ import (
 	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	_ "github.com/segmentio/events/v2/log" // lets events actually log
+
 	"github.com/segmentio/stats/v4"
 )
 
@@ -74,6 +77,12 @@ type ReflectorConfig struct {
 	BusyTimeoutMS     int                      // optional
 	ID                string
 	Logger            *events.Logger
+}
+
+type DownloadMetric struct {
+	StartTime  int    `json:"startTime,omitempty"`
+	Downloaded string `json:"downloaded"`
+	Compressed string `json:"compressed"`
 }
 
 type starter interface {
@@ -179,6 +188,13 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	}
 
 	events.Log("Max known ledger sequence: %{seq}d", maxKnownSeq)
+
+	path := "/var/spool/ctlstore/metrics.json"
+	err = emitMetricFromFile(path)
+	if err != nil {
+		events.Log("Failed to emit metric from file", err)
+	}
+	events.Log("Successfully emitted metric from file")
 
 	// TODO: check Upstream fields
 	stop := make(chan struct{})
@@ -288,6 +304,45 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 		stop:          stop,
 		walMonitor:    walMon,
 	}, nil
+}
+
+func emitMetricFromFile(path string) error {
+	if _, err := os.Stat(path); err != nil {
+		switch {
+		case os.IsNotExist(err):
+			return nil
+		default:
+			return err
+		}
+	}
+
+	metricsFile, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+
+	b, err := io.ReadAll(metricsFile)
+	if err != nil {
+		return err
+	}
+
+	var dm DownloadMetric
+
+	d := json.NewDecoder(bytes.NewReader(b))
+	d.DisallowUnknownFields()
+	err = d.Decode(&dm)
+	if err != nil {
+		return err
+	}
+
+	stats.Observe("init_snapshot_download_time", dm.StartTime, stats.T("downloaded", dm.Downloaded), stats.T("compressed", dm.Compressed))
+
+	defer func() {
+		metricsFile.Close()
+		os.Remove(path)
+	}()
+
+	return nil
 }
 
 func (r *Reflector) Start(ctx context.Context) error {
