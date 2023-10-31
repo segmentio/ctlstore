@@ -3,11 +3,11 @@ package reflector
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/ldbwriter"
 	"github.com/segmentio/ctlstore/pkg/schema"
 )
@@ -55,7 +55,7 @@ func (s *mockDmlSource) Next(ctx context.Context) (statement schema.DMLStatement
 
 	select {
 	case <-ctx.Done():
-		return schema.DMLStatement{}, ctx.Err()
+		return schema.DMLStatement{}, errors.Wrap(ctx.Err(), "timeout!")
 	case <-time.After(s.delayFor):
 	}
 
@@ -203,10 +203,10 @@ func TestShovel(t *testing.T) {
 		},
 	}
 
-	for _, t1 := range tests {
+	for _, tt := range tests {
+		t1 := tt
 		t.Run(t1.desc, func(t *testing.T) {
 			t.Parallel()
-
 			ctx := context.Background()
 
 			pollTimeout := t1.pollTimeout
@@ -254,7 +254,7 @@ func TestShovel(t *testing.T) {
 			}
 
 			returnedErr := shov.Start(stctx.ctx)
-			if returnedErr != t1.expectErr {
+			if errors.Cause(returnedErr) != t1.expectErr {
 				t.Fatalf("Unexpected error from shovel.Start(): %v", returnedErr)
 			}
 
