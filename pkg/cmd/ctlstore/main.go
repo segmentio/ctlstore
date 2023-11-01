@@ -57,6 +57,7 @@ type reflectorCliConfig struct {
 	BootstrapRegion            string                   `conf:"bootstrap-region" help:"If specified, indicates which region in which the S3 bucket lives"`
 	PollInterval               time.Duration            `conf:"poll-interval" help:"How often to pull the upstream" validate:"nonzero"`
 	PollJitterCoefficient      float64                  `conf:"poll-jitter-coefficient" help:"Coefficient for poll jittering"`
+	PollTimeout                time.Duration            `conf:"poll-timeout" help:"How long to poll from the source before canceling"`
 	QueryBlockSize             int                      `conf:"query-block-size" help:"Number of ledger entries to get at once"`
 	Debug                      bool                     `conf:"debug" help:"Turns on debug logging"`
 	LedgerHealth               ledgerHealthConfig       `conf:"ledger-latency" help:"Configure ledger latency behavior"`
@@ -483,6 +484,7 @@ func defaultReflectorCLIConfig(isSupervisor bool) reflectorCliConfig {
 		PollJitterCoefficient: 0.25,
 		QueryBlockSize:        100,
 		Dogstatsd:             defaultDogstatsdConfig(),
+		PollTimeout:           5 * time.Second,
 		LedgerHealth: ledgerHealthConfig{
 			Disable:                 false,
 			MaxHealthyLatency:       time.Minute,
@@ -552,7 +554,7 @@ func newReflector(cliCfg reflectorCliConfig, isSupervisor bool) (*reflectorpkg.R
 			PollInterval:          cliCfg.PollInterval,
 			PollJitterCoefficient: cliCfg.PollJitterCoefficient,
 			QueryBlockSize:        cliCfg.QueryBlockSize,
-			PollTimeout:           5 * time.Second,
+			PollTimeout:           cliCfg.PollTimeout,
 		},
 		WALPollInterval:            cliCfg.WALPollInterval,
 		DoMonitorWAL:               cliCfg.WALPollInterval > 0,
