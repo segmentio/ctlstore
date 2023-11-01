@@ -1,6 +1,8 @@
 package ctldb
 
-import "net/url"
+import (
+	"net/url"
+)
 
 func SetCtldbDSNParameters(dsn string) (string, error) {
 	var err error

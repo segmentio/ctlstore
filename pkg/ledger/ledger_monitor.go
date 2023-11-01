@@ -3,6 +3,7 @@ package ledger
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -12,7 +13,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecs"
-	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
 
@@ -77,7 +77,7 @@ func (m *Monitor) Start(ctx context.Context) {
 		err := func() error {
 			latency, err := m.latencyFunc(ctx)
 			if err != nil {
-				return errors.Wrap(err, "get ledger latency")
+				return fmt.Errorf("get ledger latency: %w", err)
 			}
 			// always instrument ledger latency even if ECS behavior is disabled.
 			stats.Set("reflector-ledger-latency", latency)
@@ -86,13 +86,13 @@ func (m *Monitor) Start(ctx context.Context) {
 				case latency <= m.cfg.MaxHealthyLatency && (health == nil || *health != true):
 					// set a healthy attribute
 					if err := m.setHealthAttribute(ctx, m.cfg.HealthyAttributeValue); err != nil {
-						return errors.Wrap(err, "set healthy")
+						return fmt.Errorf("set healthy: %w", err)
 					}
 					health = pointer.ToBool(true)
 				case latency > m.cfg.MaxHealthyLatency && (health == nil || *health != false):
 					// set an unhealthy attribute
 					if err := m.setHealthAttribute(ctx, m.cfg.UnhealthyAttributeValue); err != nil {
-						return errors.Wrap(err, "set unhealthy")
+						return fmt.Errorf("set unhealthy: %w", err)
 					}
 					health = pointer.ToBool(false)
 				}
@@ -110,8 +110,8 @@ func (m *Monitor) Start(ctx context.Context) {
 		switch {
 		case err == nil:
 		case errs.IsCanceled(err):
-			// context is done, just let it fall through
-		case errors.Is("temporary", err) && temporaryErrorLimit > 0:
+		// context is done, just let it fall through
+		case errors.Is(err, temporaryError{}):
 			// don't increment error metric for a temporary error
 			temporaryErrorLimit--
 			events.Log("Temporary monitor ledger latency error: %s", err)
@@ -128,11 +128,11 @@ func (m *Monitor) setHealthAttribute(ctx context.Context, attrValue string) erro
 	events.Log("Setting ECS instance attribute: %s=%s", m.cfg.AttributeName, attrValue)
 	ecsMeta, err := m.getECSMetadata(ctx)
 	if err != nil {
-		return errors.Wrap(err, "get ecs metadata")
+		return fmt.Errorf("get ecs metadata: %w", err)
 	}
 	clusterARN, err := m.buildClusterARN(ecsMeta)
 	if err != nil {
-		return errors.Wrap(err, "build cluster ARN")
+		return fmt.Errorf("build cluster ARN: %w", err)
 	}
 	events.Log("Putting attribute name=%{attName}v value=%{attValue}v targetID=%{targetID}v targetType=%{targetType}v",
 		m.cfg.AttributeName, attrValue, ecsMeta.ContainerInstanceArn, ecsContainerInstanceTargetType)
@@ -149,7 +149,7 @@ func (m *Monitor) setHealthAttribute(ctx context.Context, attrValue string) erro
 		Cluster: aws.String(clusterARN),
 	})
 	if err != nil {
-		return errors.Wrap(err, "put attributes")
+		return fmt.Errorf("put attributes: %w", err)
 	}
 	return nil
 }
@@ -171,7 +171,7 @@ func (m *Monitor) buildClusterARN(meta EcsMetadata) (arn string, err error) {
 		}
 		accountID, err := meta.accountID()
 		if err != nil {
-			return errors.Wrap(err, "get account id")
+			return fmt.Errorf("get account id: %w", err)
 		}
 		cluster := meta.Cluster
 		arn = fmt.Sprintf("arn:aws:ecs:%s:%s:cluster/%s", region, accountID, cluster)
@@ -189,17 +189,24 @@ func (m *Monitor) getECSMetadata(ctx context.Context) (meta EcsMetadata, err err
 		if err != nil {
 			// signal that this is a temporary error and we can retry a number of times before
 			// we start reporting errors.
-			return errors.WithTypes(errors.Wrap(err, "get ecs metadata"), "temporary")
+			return temporaryError{fmt.Errorf("get ecs metadata: %w", err)}
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
 			b, _ := ioutil.ReadAll(resp.Body)
-			return errors.Errorf("could not get ecs metadata: [%d]: %s", resp.StatusCode, b)
+			return fmt.Errorf("could not get ecs metadata: [%d]: %s", resp.StatusCode, b)
 		}
 		if err = json.NewDecoder(resp.Body).Decode(&meta); err != nil {
-			return errors.Wrap(err, "read metadata")
+			return fmt.Errorf("read metadata: %w", err)
 		}
 		return nil
 	}()
 	return meta, err
+}
+
+type temporaryError struct{ error }
+
+func (te temporaryError) Is(err error) bool {
+	_, ok := err.(temporaryError)
+	return ok
 }

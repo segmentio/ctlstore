@@ -1,6 +1,8 @@
 package schema
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 type DBColumnMeta struct {
 	Name string

@@ -60,6 +60,33 @@ CREATE TABLE locks (
 INSERT INTO locks VALUES('ledger', 0);
 
 ` + LimiterDBSchemaUp,
+	"sqlite": `
+
+CREATE TABLE families (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	name VARCHAR(191) NOT NULL UNIQUE
+);
+
+CREATE TABLE mutators (
+	writer VARCHAR(191) NOT NULL PRIMARY KEY,
+	secret VARCHAR(255),
+	cookie BLOB(1024) NOT NULL,
+	clock INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE ctlstore_dml_ledger (
+	seq INTEGER PRIMARY KEY AUTOINCREMENT,
+	leader_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
+	statement TEXT NOT NULL
+);
+
+CREATE TABLE locks (
+	id VARCHAR(191) NOT NULL PRIMARY KEY,
+	clock INTEGER NOT NULL DEFAULT 0
+);
+
+INSERT INTO locks VALUES('ledger', 0);
+` + LimiterDBSchemaUp,
 	"sqlite3": `
 
 CREATE TABLE families (

@@ -18,7 +18,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/segmentio/cli v0.5.1
 	github.com/segmentio/conf v1.1.0
-	github.com/segmentio/errors-go v1.0.0
 	github.com/segmentio/events/v2 v2.3.2
 	github.com/segmentio/go-sqlite3 v1.12.0
 	github.com/segmentio/stats/v4 v4.6.2

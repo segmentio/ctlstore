@@ -1,6 +1,7 @@
 package reflector
 
 import (
+	"errors"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -8,7 +9,6 @@ import (
 	"time"
 
 	"github.com/segmentio/ctlstore/pkg/errs"
-	"github.com/segmentio/errors-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -62,7 +62,7 @@ func TestBoostrapLDB(t *testing.T) {
 			name: "temporary failure",
 			dl: &fakeDownloadTo{
 				res: []readerErr{
-					{e: errors.WithTypes(errors.New("failure"), errs.ErrTypeTemporary)},
+					{e: errs.ErrTypeTemporary{errors.New("failure")}},
 					{r: strings.NewReader(ldbContent)},
 				},
 			},
@@ -72,10 +72,10 @@ func TestBoostrapLDB(t *testing.T) {
 			name: "max temporary failures",
 			dl: &fakeDownloadTo{
 				res: []readerErr{
-					{e: errors.WithTypes(errors.New("failure"), errs.ErrTypeTemporary)},
-					{e: errors.WithTypes(errors.New("failure"), errs.ErrTypeTemporary)},
-					{e: errors.WithTypes(errors.New("failure"), errs.ErrTypeTemporary)},
-					{e: errors.WithTypes(errors.New("failure"), errs.ErrTypeTemporary)},
+					{e: errs.ErrTypeTemporary{errors.New("failure")}},
+					{e: errs.ErrTypeTemporary{errors.New("failure")}},
+					{e: errs.ErrTypeTemporary{errors.New("failure")}},
+					{e: errs.ErrTypeTemporary{errors.New("failure")}},
 					{r: strings.NewReader(ldbContent)},
 				},
 			},
@@ -85,11 +85,11 @@ func TestBoostrapLDB(t *testing.T) {
 			name: "too many temporary failures", // max retries edge case
 			dl: &fakeDownloadTo{
 				res: []readerErr{
-					{e: errors.WithTypes(errors.New("failure"), errs.ErrTypeTemporary)},
-					{e: errors.WithTypes(errors.New("failure"), errs.ErrTypeTemporary)},
-					{e: errors.WithTypes(errors.New("failure"), errs.ErrTypeTemporary)},
-					{e: errors.WithTypes(errors.New("failure"), errs.ErrTypeTemporary)},
-					{e: errors.WithTypes(errors.New("failure"), errs.ErrTypeTemporary)},
+					{e: errs.ErrTypeTemporary{errors.New("failure")}},
+					{e: errs.ErrTypeTemporary{errors.New("failure")}},
+					{e: errs.ErrTypeTemporary{errors.New("failure")}},
+					{e: errs.ErrTypeTemporary{errors.New("failure")}},
+					{e: errs.ErrTypeTemporary{errors.New("failure")}},
 					{r: strings.NewReader(ldbContent)},
 				},
 			},
@@ -100,7 +100,7 @@ func TestBoostrapLDB(t *testing.T) {
 			name: "permanent failure",
 			dl: &fakeDownloadTo{
 				res: []readerErr{
-					{e: errors.WithTypes(errors.New("failure"), errs.ErrTypePermanent)},
+					{e: errs.ErrTypePermanent{errors.New("failure")}},
 				},
 			},
 			fc: "",
@@ -109,10 +109,10 @@ func TestBoostrapLDB(t *testing.T) {
 			name: "permanent failure with retries before it",
 			dl: &fakeDownloadTo{
 				res: []readerErr{
-					{e: errors.WithTypes(errors.New("failure"), errs.ErrTypeTemporary)},
-					{e: errors.WithTypes(errors.New("failure"), errs.ErrTypeTemporary)},
-					{e: errors.WithTypes(errors.New("failure"), errs.ErrTypeTemporary)},
-					{e: errors.WithTypes(errors.New("failure"), errs.ErrTypePermanent)},
+					{e: errs.ErrTypeTemporary{errors.New("failure")}},
+					{e: errs.ErrTypeTemporary{errors.New("failure")}},
+					{e: errs.ErrTypeTemporary{errors.New("failure")}},
+					{e: errs.ErrTypeTemporary{errors.New("failure")}},
 				},
 			},
 			fc: "",
@@ -137,18 +137,4 @@ func TestBoostrapLDB(t *testing.T) {
 			}
 		})
 	}
-}
-
-// verifies the wrapping behavior of errors-go
-func TestErrorsGoTypes(t *testing.T) {
-	// verify when the outer error is typed
-	err := errors.New("root cause")
-	err = errors.WithTypes(err, "Temporary")
-	require.True(t, errors.Is("Temporary", err))
-
-	// verify when the inner error is typed
-	err = errors.New("root cause")
-	err = errors.WithTypes(err, "Temporary")
-	err = errors.Wrap(err, "wrapped")
-	require.True(t, errors.Is("Temporary", err))
 }

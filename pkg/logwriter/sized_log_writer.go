@@ -1,10 +1,9 @@
 package logwriter
 
 import (
+	"errors"
 	"os"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 const sizedLogWriterDefaultMode os.FileMode = 0644

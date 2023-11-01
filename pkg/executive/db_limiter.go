@@ -3,10 +3,11 @@ package executive
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/limits"
 	"github.com/segmentio/ctlstore/pkg/schema"
@@ -55,11 +56,11 @@ func newDBLimiter(db *sql.DB, dbType string, defaultTableLimit limits.SizeLimits
 // request that includes some tables that are not over their limits.
 func (l *dbLimiter) allowed(ctx context.Context, tx *sql.Tx, lr limiterRequest) (bool, error) {
 	if err := l.checkTableSizes(ctx, lr); err != nil {
-		return false, errors.Wrap(err, "check table sizes")
+		return false, fmt.Errorf("check table sizes: %w", err)
 	}
 	allowed, err := l.checkWriterRates(ctx, tx, lr)
 	if err != nil {
-		return false, errors.Wrap(err, "check writer rates")
+		return false, fmt.Errorf("check writer rates: %w", err)
 	}
 	return allowed, nil
 }
@@ -80,7 +81,7 @@ func (l *dbLimiter) checkWriterRates(ctx context.Context, tx *sql.Tx, lr limiter
 	var amount int64
 	err := row.Scan(&amount)
 	if err != nil && err != sql.ErrNoRows {
-		return false, errors.Wrap(err, "select from writer_usage")
+		return false, fmt.Errorf("select from writer_usage: %w", err)
 	}
 	amount += int64(numMutations)
 	if err == sql.ErrNoRows {
@@ -88,11 +89,11 @@ func (l *dbLimiter) checkWriterRates(ctx context.Context, tx *sql.Tx, lr limiter
 		res, err := tx.ExecContext(ctx, "INSERT INTO writer_usage (bucket,writer_name,amount) VALUES (?,?,?)",
 			bucket, lr.writerName, amount)
 		if err != nil {
-			return false, errors.Wrap(err, "insert into writer_usage")
+			return false, fmt.Errorf("insert into writer_usage: %w", err)
 		}
 		rowsAffected, err := res.RowsAffected()
 		if err != nil {
-			return false, errors.Wrap(err, "affected rows from insert into writer_usage")
+			return false, fmt.Errorf("affected rows from insert into writer_usage: %w", err)
 		}
 		if rowsAffected == 0 {
 			return false, errors.New("insert into writer_usage failed (no rows updated)")
@@ -102,11 +103,11 @@ func (l *dbLimiter) checkWriterRates(ctx context.Context, tx *sql.Tx, lr limiter
 		res, err := tx.ExecContext(ctx, "UPDATE writer_usage SET amount=? where bucket=? and writer_name=?",
 			amount, bucket, lr.writerName)
 		if err != nil {
-			return false, errors.Wrap(err, "update writer_usage")
+			return false, fmt.Errorf("update writer_usage: %w", err)
 		}
 		rowsAffected, err := res.RowsAffected()
 		if err != nil {
-			return false, errors.Wrap(err, "affected rows from update writer_usage")
+			return false, fmt.Errorf("affected rows from update writer_usage: %w", err)
 		}
 		if rowsAffected == 0 {
 			return false, errors.New("updating writer_usage failed (no rows updated)")
@@ -138,7 +139,7 @@ func (l *dbLimiter) checkTableSizes(ctx context.Context, lr limiterRequest) erro
 func (l *dbLimiter) start(ctx context.Context) error {
 	events.Log("Starting the db limiter")
 	if err := l.tableSizer.start(ctx); err != nil {
-		return errors.Wrap(err, "could not start sizer")
+		return fmt.Errorf("could not start sizer: %w", err)
 	}
 	instrumentUpdateErr := func(err error) {
 		errs.IncrDefault(stats.Tag{Name: "op", Value: "update-limits"})
@@ -146,7 +147,7 @@ func (l *dbLimiter) start(ctx context.Context) error {
 	// we always require an initial update of limit config from the db
 	if err := l.refreshWriterLimits(ctx); err != nil {
 		instrumentUpdateErr(err)
-		return errors.Wrap(err, "refresh writer limits")
+		return fmt.Errorf("refresh writer limits: %w", err)
 	}
 	// after we've done one refreshWriterLimits successfully, we'll do the rest async
 	go utils.CtxLoop(ctx, defaultRefreshPeriod, func() {
@@ -171,11 +172,11 @@ func (l *dbLimiter) deleteOldUsageData(ctx context.Context) error {
 
 	res, err := l.db.ExecContext(ctx, "delete from writer_usage where bucket < ?", deleteEpoch)
 	if err != nil {
-		return errors.Wrap(err, "could not delete from writer_usage table")
+		return fmt.Errorf("could not delete from writer_usage table: %w", err)
 	}
 	rows, err := res.RowsAffected()
 	if err != nil {
-		return errors.Wrap(err, "could not get rows affected after deleting from writer_usage")
+		return fmt.Errorf("could not get rows affected after deleting from writer_usage: %w", err)
 	}
 	if rows > 0 {
 		events.Log("deleted %{rows}d rows from the writer_usage table", rows)
@@ -189,7 +190,7 @@ func (l *dbLimiter) deleteOldUsageData(ctx context.Context) error {
 func (l *dbLimiter) refreshWriterLimits(ctx context.Context) error {
 	rows, err := l.db.QueryContext(ctx, "select writer_name, max_rows_per_minute FROM max_writer_rates")
 	if err != nil {
-		return errors.Wrap(err, "could not query max_writer_rates")
+		return fmt.Errorf("could not query max_writer_rates: %w", err)
 	}
 	defer rows.Close()
 	writerLimits := make(map[string]int64)
@@ -197,20 +198,20 @@ func (l *dbLimiter) refreshWriterLimits(ctx context.Context) error {
 		var writerName string
 		var maxRowsPerMinute int64
 		if err = rows.Scan(&writerName, &maxRowsPerMinute); err != nil {
-			return errors.Wrap(err, "could not scan max_writer_rates")
+			return fmt.Errorf("could not scan max_writer_rates: %w", err)
 		}
 		// we need to convert the max rows per minute to the rate for the period which we're checking
 
 		rateLimit := limits.RateLimit{Amount: maxRowsPerMinute, Period: time.Minute}
 		adjustedRate, err := rateLimit.AdjustAmount(l.defaultWriterLimit.Period)
 		if err != nil {
-			return errors.Wrap(err, "adjust found rate limit")
+			return fmt.Errorf("adjust found rate limit: %w", err)
 		}
 		events.Debug("adjusted %v limit from %v/%v to %v/%v", writerName, maxRowsPerMinute, time.Minute, adjustedRate, l.defaultWriterLimit.Period)
 		writerLimits[writerName] = adjustedRate
 	}
 	if err := rows.Err(); err != nil {
-		return errors.Wrap(err, "rows err after scanning")
+		return fmt.Errorf("rows err after scanning: %w", err)
 	}
 	// update the shared data while locked
 	l.mut.Lock()

@@ -1,6 +1,8 @@
 package executive
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type statusWriter struct {
 	writer http.ResponseWriter

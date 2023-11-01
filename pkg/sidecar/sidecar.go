@@ -3,6 +3,8 @@ package sidecar
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,7 +12,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/segmentio/ctlstore"
-	"github.com/segmentio/errors-go"
 	"github.com/segmentio/stats/v4"
 	"github.com/segmentio/stats/v4/httpstats"
 )
@@ -44,6 +45,8 @@ type (
 	}
 )
 
+var errLimitExceeded = errors.New("limit exceeded")
+
 func (k Key) ToValue() interface{} {
 	switch {
 	case k.Binary != nil:
@@ -73,7 +76,7 @@ func New(config Config) (*Sidecar, error) {
 			err := fn(w, r)
 			switch {
 			case err == nil:
-			case errors.Is("limit-exceeded", err):
+			case errors.Is(err, errLimitExceeded):
 				w.WriteHeader(http.StatusRequestedRangeNotSatisfiable)
 			default:
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -105,7 +108,7 @@ func (s *Sidecar) Start(ctx context.Context) error {
 	}
 	defer srv.Close()
 	err := srv.ListenAndServe()
-	return errors.Wrap(err, "listen and serve")
+	return fmt.Errorf("listen and serve: %w", err)
 }
 
 func (s *Sidecar) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -123,7 +126,7 @@ func (s *Sidecar) statsHandler(delegate http.Handler) http.Handler {
 func (s *Sidecar) getLedgerLatency(w http.ResponseWriter, r *http.Request) error {
 	duration, err := s.reader.GetLedgerLatency(r.Context())
 	if err != nil {
-		return errors.Wrap(err, "get ledger latency")
+		return fmt.Errorf("get ledger latency: %w", err)
 	}
 	res := map[string]interface{}{
 		"value": duration.Seconds(),
@@ -134,7 +137,7 @@ func (s *Sidecar) getLedgerLatency(w http.ResponseWriter, r *http.Request) error
 
 func (s *Sidecar) healthcheck(w http.ResponseWriter, r *http.Request) error {
 	_, err := s.reader.GetLedgerLatency(r.Context())
-	return errors.Wrap(err, "healthcheck")
+	return fmt.Errorf("healthcheck: %w", err)
 }
 
 func (s *Sidecar) ping(w http.ResponseWriter, r *http.Request) error {
@@ -150,7 +153,7 @@ func (s *Sidecar) getRowsByKeyPrefix(w http.ResponseWriter, r *http.Request) err
 	var rr ReadRequest
 	err := json.NewDecoder(r.Body).Decode(&rr)
 	if err != nil {
-		return errors.Wrap(err, "decode body")
+		return fmt.Errorf("decode body: %w", err)
 	}
 	res := make([]interface{}, 0)
 	rows, err := s.reader.GetRowsByKeyPrefix(r.Context(), family, table, keysToInterface(rr.Key)...)
@@ -162,12 +165,12 @@ func (s *Sidecar) getRowsByKeyPrefix(w http.ResponseWriter, r *http.Request) err
 		out := make(map[string]interface{})
 		err = rows.Scan(out)
 		if err != nil {
-			return errors.Wrap(err, "scan")
+			return fmt.Errorf("scan: %w", err)
 		}
 		res = append(res, out)
 		if s.maxRows > 0 && len(res) > s.maxRows {
-			err = errors.Errorf("max row count (%d) exceeded", s.maxRows)
-			err = errors.WithTypes(err, "limit-exceeded")
+			err = fmt.Errorf("max row count (%d) exceeded", s.maxRows)
+			err = fmt.Errorf("%w: %v", errLimitExceeded, err)
 			return err
 		}
 	}
@@ -188,7 +191,7 @@ func (s *Sidecar) getRowByKey(w http.ResponseWriter, r *http.Request) error {
 	var rr ReadRequest
 	err := json.NewDecoder(r.Body).Decode(&rr)
 	if err != nil {
-		return errors.Wrap(err, "decode body")
+		return fmt.Errorf("decode body: %w", err)
 	}
 
 	out := make(map[string]interface{})

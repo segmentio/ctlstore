@@ -17,7 +17,6 @@ import (
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/ldbwriter"
 	"github.com/segmentio/ctlstore/pkg/ledger"
-	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	"github.com/stretchr/testify/require"
 )

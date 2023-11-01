@@ -2,6 +2,7 @@ package executive
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -13,7 +14,7 @@ import (
 	"github.com/segmentio/stats/v4"
 
 	"github.com/gorilla/mux"
-	"github.com/pkg/errors"
+
 	"github.com/segmentio/events/v2"
 )
 
@@ -186,7 +187,7 @@ func (ee *ExecutiveEndpoint) handleTableSchemaRoute(w http.ResponseWriter, r *ht
 	switch {
 	case err == nil:
 		// do nothing, no error
-	case errors.Cause(err) == ErrTableDoesNotExist:
+	case errors.Is(err, ErrTableDoesNotExist):
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	default:
@@ -573,29 +574,16 @@ func writeErrorResponse(e error, w http.ResponseWriter) {
 	status := http.StatusInternalServerError
 	resBody := e.Error()
 
-	cause := errors.Cause(e)
-	// first check for generic error values
-	switch cause {
-	case ErrWriterAlreadyExists:
+	switch {
+	case errors.Is(e, ErrWriterAlreadyExists):
 		status = http.StatusConflict
 	default:
-		// if no generic error values matched, check the error types as well
-		switch cause.(type) {
-		case *errs.ConflictError:
-			status = http.StatusConflict
-		case *errs.BadRequestError:
-			status = http.StatusBadRequest
-		case *errs.NotFoundError:
-			status = http.StatusNotFound
-		case *errs.RateLimitExceededErr:
-			status = http.StatusTooManyRequests
-		case *errs.InsufficientStorageErr:
-			status = http.StatusInsufficientStorage
-		default:
-			status = http.StatusInternalServerError
+		var coder errs.StatusCoder
+		if errors.As(e, &coder) {
+			status = coder.StatusCode()
 		}
-
 	}
+
 	w.WriteHeader(status)
 	_, _ = w.Write([]byte(resBody))
 

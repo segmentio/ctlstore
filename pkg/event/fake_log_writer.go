@@ -4,11 +4,11 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"sync/atomic"
 	"time"
 
-	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 )
 
@@ -27,7 +27,7 @@ type fakeLogWriter struct {
 func (w *fakeLogWriter) writeN(ctx context.Context, n int) error {
 	f, err := os.Create(w.path)
 	if err != nil {
-		return errors.Wrap(err, "create file")
+		return fmt.Errorf("create file: %w", err)
 	}
 	defer func() {
 		events.Debug("Done writing %{num}d events", n)
@@ -56,10 +56,10 @@ func (w *fakeLogWriter) writeN(ctx context.Context, n int) error {
 		atomic.AddInt64(&w.seq, 1)
 		err := json.NewEncoder(bw).Encode(entry)
 		if err != nil {
-			return errors.Wrap(err, "write event")
+			return fmt.Errorf("write event: %w", err)
 		}
 		if err := bw.Flush(); err != nil {
-			return errors.Wrap(err, "flush")
+			return fmt.Errorf("flush: %w", err)
 		}
 		time.Sleep(w.delay)
 
@@ -67,7 +67,7 @@ func (w *fakeLogWriter) writeN(ctx context.Context, n int) error {
 		if w.rotateAfterBytes > 0 {
 			info, err := os.Stat(w.path)
 			if err != nil {
-				return errors.Wrap(err, "stat path")
+				return fmt.Errorf("stat path: %w", err)
 			}
 			// fmt.Println(info.Size(), w.rotateAfterBytes)
 			if info.Size() > int64(w.rotateAfterBytes) {
@@ -83,14 +83,14 @@ func (w *fakeLogWriter) writeN(ctx context.Context, n int) error {
 			events.Debug("Rotating log file..")
 			these = 0
 			if err := f.Close(); err != nil {
-				return errors.Wrap(err, "close during rotation")
+				return fmt.Errorf("close during rotation: %w", err)
 			}
 			if err := os.Remove(f.Name()); err != nil {
-				return errors.Wrap(err, "remove file")
+				return fmt.Errorf("remove file: %w", err)
 			}
 			f, err = os.Create(w.path)
 			if err != nil {
-				return errors.Wrap(err, "rotate into new file")
+				return fmt.Errorf("rotate into new file: %w", err)
 			}
 			bw = bufio.NewWriter(f)
 			atomic.AddInt64(&w.rotations, 1)

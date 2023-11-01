@@ -1,6 +1,8 @@
 package ledger
 
-import "time"
+import (
+	"time"
+)
 
 func WithCheckCallback(fn func()) MonitorOpt {
 	return func(m *Monitor) {

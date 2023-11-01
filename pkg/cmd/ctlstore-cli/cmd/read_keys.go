@@ -10,7 +10,6 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/segmentio/cli"
 	"github.com/segmentio/ctlstore"
 )
@@ -48,7 +47,7 @@ var cliReadKeys = &cli.CommandFunc{
 		}
 		reader, err := ctlstore.ReaderForPath(ldbPath)
 		if err != nil {
-			return errors.Wrap(err, "ldb reader for path")
+			return fmt.Errorf("ldb reader for path: %w", err)
 		}
 		defer reader.Close()
 		resMap := make(map[string]interface{})
@@ -108,7 +107,7 @@ func parseKey(key string) (interface{}, error) {
 	}
 	hex, err := hex.DecodeString(parts[1])
 	if err != nil {
-		return nil, errors.Errorf("could not parse '%s' as hex", parts[1])
+		return nil, fmt.Errorf("could not parse '%s' as hex", parts[1])
 	}
 	return hex, nil
 }

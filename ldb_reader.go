@@ -3,6 +3,7 @@ package ctlstore
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,7 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
 
@@ -64,14 +64,14 @@ func newVersionedLDBReader(dirPath string) (*LDBReader, error) {
 	// To initialize this reader, we must first load an LDB:
 	last, err := lookupLastLDBSync(dirPath)
 	if err != nil {
-		return nil, errors.Wrap(err, "checking last ldb sync")
+		return nil, fmt.Errorf("checking last ldb sync: %w", err)
 	}
 	if last == 0 {
 		return nil, fmt.Errorf("no LDB in path (%s)", dirPath)
 	}
 	err = reader.switchLDB(dirPath, last)
 	if err != nil {
-		return nil, errors.Wrap(err, "switching ldbs")
+		return nil, fmt.Errorf("switching ldbs: %w", err)
 	}
 
 	// Then we can defer to the watcher goroutine to swap this
@@ -133,7 +133,7 @@ func (reader *LDBReader) GetLedgerLatency(ctx context.Context) (time.Duration, e
 	case err == sql.ErrNoRows:
 		return 0, ErrNoLedgerUpdates
 	case err != nil:
-		return 0, errors.Wrap(err, "get ledger latency")
+		return 0, fmt.Errorf("get ledger latency: %w", err)
 	default:
 		return time.Now().Sub(timestamp), nil
 	}
@@ -281,7 +281,7 @@ func (reader *LDBReader) GetRowByKey(
 	if err != nil {
 		// See NOTE above about why this cache is getting cleared
 		reader.invalidatePKCache(ldbTable) // assumes RLock is held
-		err = errors.Wrap(err, "query target row error")
+		err = fmt.Errorf("query target row error: %w", err)
 		return
 	}
 	defer rows.Close()
@@ -306,7 +306,7 @@ func (reader *LDBReader) GetRowByKey(
 	err = scanFunc(rows)
 
 	if err != nil {
-		err = errors.Wrap(err, "target row scan error")
+		err = fmt.Errorf("target row scan error: %w", err)
 	} else {
 		err = rows.Err()
 	}
@@ -430,7 +430,7 @@ func (reader *LDBReader) getPrimaryKey(ctx context.Context, ldbTable string) (sc
 		const qs = "SELECT name,type FROM pragma_table_info(?) WHERE pk > 0 ORDER BY pk ASC"
 		rows, err := reader.Db.QueryContext(ctx, qs, ldbTable)
 		if err != nil {
-			return schema.PrimaryKeyZero, errors.Wrap(err, "query pragma_table_info error")
+			return schema.PrimaryKeyZero, fmt.Errorf("query pragma_table_info error: %w", err)
 		}
 		defer rows.Close()
 
@@ -441,14 +441,14 @@ func (reader *LDBReader) getPrimaryKey(ctx context.Context, ldbTable string) (sc
 			var ftString string
 			err = rows.Scan(&name, &ftString)
 			if err != nil {
-				return schema.PrimaryKeyZero, errors.WithStack(err)
+				return schema.PrimaryKeyZero, fmt.Errorf("scan: %w", err)
 			}
 			rawFieldNames = append(rawFieldNames, name)
 			rawFieldTypes = append(rawFieldTypes, ftString)
 		}
 		err = rows.Err()
 		if err != nil {
-			return schema.PrimaryKeyZero, errors.WithStack(err)
+			return schema.PrimaryKeyZero, fmt.Errorf("rows err: %w", err)
 		}
 
 		pk, err := schema.NewPKFromRawNamesAndTypes(rawFieldNames, rawFieldTypes)
@@ -622,14 +622,14 @@ func (reader *LDBReader) switchLDB(dirPath string, timestamp int64) error {
 
 	db, err := newLDB(fullPath)
 	if err != nil {
-		return errors.Wrap(err, "new ldb")
+		return fmt.Errorf("new ldb: %w", err)
 	}
 
 	reader.mu.Lock()
 	defer reader.mu.Unlock()
 
 	if err = reader.closeDB(); err != nil {
-		return errors.Wrap(err, "closing db")
+		return fmt.Errorf("closing db: %w", err)
 	}
 
 	reader.Db = db
@@ -668,7 +668,7 @@ func lookupLastLDBSync(dirPath string) (int64, error) {
 		// dirPath + ["<timestamp>", ldb.DefaultLDBFilename]
 		localPath, err := filepath.Rel(dirPath, filePath)
 		if err != nil {
-			return errors.Wrapf(err, "base path (%s)", filePath)
+			return fmt.Errorf("base path (%s): %w", filePath, err)
 		}
 		fields := strings.Split(localPath, "/")
 
@@ -691,7 +691,7 @@ func lookupLastLDBSync(dirPath string) (int64, error) {
 		return nil
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "filepath walk")
+		return 0, fmt.Errorf("filepath walk: %w", err)
 	}
 
 	return lastSync, nil

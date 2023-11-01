@@ -2,13 +2,14 @@ package reflector
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"io"
 	"time"
 
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/ldbwriter"
 	"github.com/segmentio/ctlstore/pkg/schema"
-	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
 )
@@ -101,9 +102,7 @@ func (s *shovel) Start(ctx context.Context) error {
 				if s.abortOnSeqSkip {
 					// Mitigation for a bug that we haven't found yet
 					stats.Incr("shovel.skipped_sequence_abort")
-					err = errors.New("shovel skipped sequence")
-					err = errors.WithTypes(err, "SkippedSequence")
-					return err
+					return errSkippedSequence
 				}
 			}
 		}
@@ -112,7 +111,7 @@ func (s *shovel) Start(ctx context.Context) error {
 		err = s.writer.ApplyDMLStatement(ctx, st)
 		if err != nil {
 			errs.Incr("shovel.apply_statement.error")
-			return errors.Wrapf(err, "ledger seq: %d", st.Sequence)
+			return fmt.Errorf("ledger seq: %d: %w", st.Sequence, err)
 		}
 
 		lastSeq = st.Sequence
@@ -128,6 +127,8 @@ func (s *shovel) Start(ctx context.Context) error {
 		}
 	}
 }
+
+var errSkippedSequence = errors.New("shovel skipped sequence")
 
 func (s *shovel) Close() error {
 	for _, closer := range s.closers {

@@ -1,6 +1,8 @@
 package utils
 
-import "sync/atomic"
+import (
+	"sync/atomic"
+)
 
 type AtomicBool int32
 

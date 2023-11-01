@@ -2,12 +2,12 @@ package heartbeat
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/utils"
 	"github.com/segmentio/events/v2"
@@ -50,7 +50,7 @@ func HeartbeatFromConfig(config HeartbeatConfig) (*Heartbeat, error) {
 		writerSecret: config.WriterSecret,
 	}
 	if err := heartbeat.init(); err != nil {
-		return nil, errors.Wrap(err, "init heartbeat")
+		return nil, fmt.Errorf("init heartbeat: %w", err)
 	}
 	return heartbeat, nil
 }
@@ -87,19 +87,19 @@ func (h *Heartbeat) pulse(ctx context.Context) {
 		})
 		req, err := http.NewRequest(http.MethodPost, h.executive+"/families/"+h.family+"/mutations", body)
 		if err != nil {
-			return errors.Wrap(err, "build mutation request")
+			return fmt.Errorf("build mutation request: %w", err)
 		}
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("ctlstore-writer", h.writerName)
 		req.Header.Set("ctlstore-secret", h.writerSecret)
 		resp, err := client.Do(req)
 		if err != nil {
-			return errors.Wrap(err, "make mutation request")
+			return fmt.Errorf("make mutation request: %w", err)
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
 			b, _ := ioutil.ReadAll(resp.Body)
-			return errors.Errorf("could not make mutation request: %d: %s", resp.StatusCode, b)
+			return fmt.Errorf("could not make mutation request: %d: %s", resp.StatusCode, b)
 		}
 		events.Log("Heartbeat: %v", heartbeat)
 		return nil
@@ -117,28 +117,28 @@ func (h *Heartbeat) init() error {
 	body := strings.NewReader(h.writerSecret)
 	res, err := http.Post(h.executive+"/writers/"+h.writerName, "text/plain", body)
 	if err != nil {
-		return errors.Wrap(err, "register writer")
+		return fmt.Errorf("register writer: %w", err)
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
 		b, _ := ioutil.ReadAll(res.Body)
-		return errors.Errorf("could not register writer: %d: %s", res.StatusCode, b)
+		return fmt.Errorf("could not register writer: %d: %s", res.StatusCode, b)
 	}
 
 	// setup the family ------------
 
 	req, err := http.NewRequest(http.MethodPost, h.executive+"/families/"+h.family, nil)
 	if err != nil {
-		return errors.Wrap(err, "create family request")
+		return fmt.Errorf("create family request: %w", err)
 	}
 	res, err = client.Do(req)
 	if err != nil {
-		return errors.Wrap(err, "make family request")
+		return fmt.Errorf("make family request: %w", err)
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusConflict {
 		b, _ := ioutil.ReadAll(res.Body)
-		return errors.Errorf("could not make family request: %v: %s", res.StatusCode, b)
+		return fmt.Errorf("could not make family request: %v: %s", res.StatusCode, b)
 	}
 
 	// setup the table -------------
@@ -152,17 +152,17 @@ func (h *Heartbeat) init() error {
 	}
 	req, err = http.NewRequest(http.MethodPost, h.executive+"/families/"+h.family+"/tables/"+h.table, utils.NewJsonReader(tableDef))
 	if err != nil {
-		return errors.Wrap(err, "create table request")
+		return fmt.Errorf("create table request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	res, err = client.Do(req)
 	if err != nil {
-		return errors.Wrap(err, "make table request")
+		return fmt.Errorf("make table request: %w", err)
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusConflict {
 		b, _ := ioutil.ReadAll(res.Body)
-		return errors.Errorf("could not make table request: %v: %s", res.StatusCode, b)
+		return fmt.Errorf("could not make table request: %v: %s", res.StatusCode, b)
 	}
 
 	return nil
