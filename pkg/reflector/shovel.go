@@ -61,11 +61,12 @@ func (s *shovel) Start(ctx context.Context) error {
 		st, err := s.source.Next(sctx)
 
 		if err != nil {
-			if err != context.DeadlineExceeded && err != errNoNewStatements {
+			causeErr := errors.Cause(err)
+			if causeErr != context.DeadlineExceeded && causeErr != errNoNewStatements {
 				return err
 			}
 
-			if err == context.DeadlineExceeded {
+			if causeErr == context.DeadlineExceeded {
 				errs.Incr("shovel.deadline_exceeded")
 			}
 

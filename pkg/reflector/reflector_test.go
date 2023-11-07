@@ -226,7 +226,7 @@ func TestReflector(t *testing.T) {
 }
 
 func TestEmitMetricFromFile(t *testing.T) {
-	for _, test := range []struct {
+	for _, tt := range []struct {
 		name     string
 		fileName string
 		extra    string
@@ -275,6 +275,7 @@ func TestEmitMetricFromFile(t *testing.T) {
 			nil,
 		},
 	} {
+		test := tt
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 			tempdir := t.TempDir()
