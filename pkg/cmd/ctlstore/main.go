@@ -520,13 +520,16 @@ func multiReflector(ctx context.Context, args []string) {
 	var wg sync.WaitGroup
 	errChan := make(chan error, len(cliCfg.MultiReflector.LDBPaths))
 	wg.Add(len(cliCfg.MultiReflector.LDBPaths))
-	for i, path := range cliCfg.MultiReflector.LDBPaths {
-		p := path
+	for i, ldbPath := range cliCfg.MultiReflector.LDBPaths {
+		p := ldbPath
 		x := cliCfg
 		x.LDBPath = p
-		// no changelog in this mode
-		x.ChangelogPath = ""
-		x.ChangelogSize = 0
+		if i > 0 {
+			events.Log("changelog only created for 1st ldb path: %{path}, skipping #%{num}d", cliCfg.MultiReflector.LDBPaths[0], i+1)
+			x.ChangelogPath = ""
+			x.ChangelogSize = 0
+
+		}
 		go func(x reflectorCliConfig, idx int) {
 			defer wg.Done()
 			r, err := newReflector(x, false, idx)
