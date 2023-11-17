@@ -107,7 +107,6 @@ func (c *fileChangelog) start(ctx context.Context) error {
 				// we are also watching the parent dir of the changelog in order
 				// to correctly detect file rotation.
 				if event.Name == c.path {
-					events.Debug("FS event: %{op}s", event)
 					select {
 					case fsNotifyCh <- event:
 					case <-ctx.Done():
@@ -160,7 +159,6 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 					return
 				}
 				event := entry.event()
-				events.Debug("Read sequence %{seq}d", event.Sequence)
 				c.send(ctx, eventErr{event: event})
 			}
 
@@ -198,7 +196,6 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 				if err != io.EOF {
 					return errors.Wrap(err, "read bytes")
 				}
-				events.Debug("EOF. Waiting for more content...")
 				select {
 				case <-time.After(time.Second):
 					events.Debug("Manually checking log")
@@ -211,7 +208,6 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 				case event := <-fsNotifyCh:
 					switch event.Op {
 					case fsnotify.Write:
-						events.Debug("Update detected")
 						continue
 					case fsnotify.Create:
 						events.Debug("New changelog created. Consuming the rest of current one...")

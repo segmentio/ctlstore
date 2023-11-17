@@ -2,6 +2,7 @@ package event
 
 import (
 	"context"
+	"strings"
 
 	"github.com/segmentio/errors-go"
 )
@@ -69,7 +70,19 @@ func (i *Iterator) Next(ctx context.Context) (event Event, err error) {
 			return event, ErrOutOfSync
 		}
 	}
-	return
+	return event, err
+}
+
+// NextForFamilyTable blocks and returns the next event that matches the specified family and table
+func (i *Iterator) NextForFamilyTable(ctx context.Context, family, table string) (event Event, err error) {
+	for {
+		event, err = i.Next(ctx)
+		if err != nil ||
+			(strings.EqualFold(event.RowUpdate.FamilyName, family) && strings.EqualFold(event.RowUpdate.TableName, table)) {
+			break
+		}
+	}
+	return event, err
 }
 
 func (i *Iterator) Close() error {
