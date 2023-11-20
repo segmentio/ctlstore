@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestIteratorNext(t *testing.T) {
+func TestIterator(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -36,7 +36,7 @@ func TestIteratorNext(t *testing.T) {
 	}
 }
 
-func TestIteratorNextForFamilyTable(t *testing.T) {
+func TestFilteredIterator(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -63,7 +63,7 @@ func TestIteratorNextForFamilyTable(t *testing.T) {
 		})
 	}
 
-	iter, err := NewIterator(ctx, "test file", func(i *Iterator) {
+	iter, err := NewFilteredIterator(ctx, "test file", "numbers", "even", func(i *Iterator) {
 		i.changelog = changelog
 	})
 	require.NoError(t, err)
@@ -72,7 +72,7 @@ func TestIteratorNextForFamilyTable(t *testing.T) {
 		require.NoError(t, err)
 	}()
 	for i := 0; i < numEvents/2; i++ {
-		event, err := iter.NextForFamilyTable(ctx, "numbers", "even")
+		event, err := iter.Next(ctx)
 		require.NoError(t, err)
 		require.EqualValues(t, i*2, event.Sequence)
 	}
@@ -128,11 +128,11 @@ func TestIteratorSkippedEvent(t *testing.T) {
 	require.EqualValues(t, 4, event.Sequence)
 }
 
-func TestIteratorNextForFamilyTableReturnsErrForSkippedEvent(t *testing.T) {
+func TestFilteredIteratorSkippedEvent(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	iter, err := NewIterator(ctx, "test file", func(i *Iterator) {
+	iter, err := NewFilteredIterator(ctx, "test file", "foo", "bar", func(i *Iterator) {
 		i.changelog = &fakeChangelog{
 			ers: []eventErr{
 				{event: Event{Sequence: 0}},
@@ -147,7 +147,7 @@ func TestIteratorNextForFamilyTableReturnsErrForSkippedEvent(t *testing.T) {
 		require.NoError(t, err)
 	}()
 	// even if fam/tbl filter does not match we need to return errors
-	event, err := iter.NextForFamilyTable(ctx, "foo", "bar")
+	event, err := iter.Next(ctx)
 	require.EqualValues(t, 3, event.Sequence)
 	require.EqualError(t, err, "out of sync with changelog. invalidate caches please.")
 }
