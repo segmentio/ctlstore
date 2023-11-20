@@ -18,6 +18,7 @@ DOWNLOADED="false"
 COMPRESSED="false"
 METRICS="/var/spool/ctlstore/metrics.json"
 
+# busybox does not support sub-second resolution
 START=$(date +%s)
 END=$(date +%s)
 SHA_START=$(date +%s)
@@ -71,7 +72,6 @@ check_sha() {
 }
 
 if [ ! -f /var/spool/ctlstore/ldb.db ]; then
-  # busybox does not support sub-second resolution
   mkdir -p /var/spool/ctlstore
   cd /var/spool/ctlstore
 

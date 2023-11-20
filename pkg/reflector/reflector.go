@@ -138,8 +138,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	var changeBuffer sqlite.SQLChangeBuffer
 
 	// use a unique driver name to prevent database/sql panics.
-	uniq := atomic.AddInt64(&driverNameSequence, 1)
-	driverName = fmt.Sprintf("%s_%d", ldb.LDBDatabaseDriver, uniq)
+	driverName = fmt.Sprintf("%s_%d", ldb.LDBDatabaseDriver, atomic.AddInt64(&driverNameSequence, 1))
 	err := sqlite.RegisterSQLiteWatch(driverName, &changeBuffer)
 	if err != nil {
 		return nil, err
@@ -174,7 +173,6 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 		}
 	}
 
-	// unique mysql driver so multiple reflectors don't clobber each other
 	upstreamdb, err := sql.Open(config.Upstream.Driver, dsn)
 	if err != nil {
 		return nil, fmt.Errorf("Error when opening upstream DB (%v): %v", config.Upstream.Driver, err)
@@ -247,7 +245,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 		}
 
 		lastSeq, err := ldb.FetchSeqFromLdb(context.TODO(), ldbDB)
-		events.Log("Latest seq from ldb: %d", lastSeq.Int())
+		events.Log("Latest seq from %s: %d", config.ID, lastSeq.Int())
 		if err != nil {
 			return nil, fmt.Errorf("Error when fetching last sequence from LDB: %v", err)
 		}

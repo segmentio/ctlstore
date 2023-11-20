@@ -50,7 +50,6 @@ var (
 type RowRetriever interface {
 	GetRowsByKeyPrefix(ctx context.Context, familyName string, tableName string, key ...interface{}) (*Rows, error)
 	GetRowByKey(ctx context.Context, out interface{}, familyName string, tableName string, key ...interface{}) (found bool, err error)
-	SlowQuery(iter int)
 }
 
 func newLDBReader(path string) (*LDBReader, error) {
@@ -318,28 +317,6 @@ func (reader *LDBReader) GetRowByKey(
 	}
 
 	return
-}
-
-func (reader *LDBReader) SlowQuery(iter int) {
-
-	start := time.Now()
-	defer func() {
-		globalstats.Observe("slow_query", time.Now().Sub(start))
-	}()
-	q := fmt.Sprintf(`WITH RECURSIVE r(i) AS (
-			  VALUES(0)
-			  UNION ALL
-			  SELECT i FROM r
-			  LIMIT %d
-			)
-			SELECT i FROM r WHERE i = 1;
-		`, iter)
-
-	_, err := reader.Db.Exec(q)
-
-	if err != nil {
-		events.Log("failed to run slow query: %{err}s", err)
-	}
 }
 
 func (reader *LDBReader) Close() error {

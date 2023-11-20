@@ -117,10 +117,6 @@ func (r *LDBRotatingReader) GetRowByKey(ctx context.Context, out interface{}, fa
 	return r.dbs[atomic.LoadInt32(&r.active)].GetRowByKey(ctx, out, familyName, tableName, key...)
 }
 
-func (r *LDBRotatingReader) SlowQuery(iter int) {
-	r.dbs[atomic.LoadInt32(&r.active)].SlowQuery(iter)
-}
-
 // rotate by default checks every 1 minute if the active db has changed according to schedule
 func (r *LDBRotatingReader) rotate(ctx context.Context) {
 	if r.tickerInterval == 0 {
