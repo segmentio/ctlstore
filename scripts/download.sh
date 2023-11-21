@@ -7,16 +7,15 @@ PREFIX="$(echo $CTLSTORE_BOOTSTRAP_URL | grep :// | sed -e's,^\(.*://\).*,\1,g')
 URL="$(echo $CTLSTORE_BOOTSTRAP_URL | sed -e s,$PREFIX,,g)"
 BUCKET="$(echo $URL | grep / | cut -d/ -f1)"
 KEY="$(echo $URL | grep / | cut -d/ -f2)"
+CTLSTORE_DIR="/var/spool/ctlstore"
 CONCURRENCY=${2:-20}
-
 NUM_LDB=${3:-1}
-
-mkdir -p /var/spool/ctlstore
-cd /var/spool/ctlstore
-
 DOWNLOADED="false"
 COMPRESSED="false"
-METRICS="/var/spool/ctlstore/metrics.json"
+METRICS="$CTLSTORE_DIR/metrics.json"
+
+mkdir -p $CTLSTORE_DIR
+cd $CTLSTORE_DIR
 
 # busybox does not support sub-second resolution
 START=$(date +%s)
@@ -29,7 +28,11 @@ get_head_object() {
   echo "$head_object"
 }
 
-#
+cleanup() {
+  echo "Removing snapshot.db"
+  rm -f $CTLSTORE_DIR/snapshot.*
+}
+
 download_snapshot() {
   echo "Downloading head object from ${CTLSTORE_BOOTSTRAP_URL}"
   head_object=$(get_head_object)
@@ -46,7 +49,7 @@ download_snapshot() {
   DOWNLOADED="true"
   if [[ ${CTLSTORE_BOOTSTRAP_URL: -2} == gz ]]; then
     echo "Decompressing"
-    pigz -d snapshot.db.gz
+    pigz -df snapshot.db.gz
     COMPRESSED="true"
   fi
 }
@@ -64,6 +67,7 @@ check_sha() {
     else
       echo "Checksum does not match"
       echo "Failed to download intact snapshot"
+      cleanup
       exit 1
     fi
   fi
@@ -71,10 +75,8 @@ check_sha() {
   echo "Local checksum calculation took $(($SHA_END - $SHA_START)) seconds"
 }
 
-if [ ! -f /var/spool/ctlstore/ldb.db ]; then
-  mkdir -p /var/spool/ctlstore
-  cd /var/spool/ctlstore
-
+if [ ! -f "$CTLSTORE_DIR/ldb.db" ]; then
+  echo "No ldb found, downloading snapshot"
   download_snapshot
   check_sha
 
@@ -101,9 +103,9 @@ while [ "$i" -le $NUM_LDB ]; do
 
   # make sure it's not already downloaded
   if [ ! -f ldb-$i.db ]; then
-
+    echo "Preparing ldb-$i.db"
     # download the snapshot if it's not present
-    if [ ! -f /var/spool/ctlstore/snapshot.db ]; then
+    if [ ! -f "$CTLSTORE_DIR/snapshot.db" ]; then
       download_snapshot
       check_sha
     fi
@@ -114,10 +116,7 @@ while [ "$i" -le $NUM_LDB ]; do
   i=$((i + 1))
 done
 
-if [ -f /var/spool/ctlstore/snapshot.db ]; then
-  echo "removing snapshot.db"
-  rm snapshot.db
-fi
+cleanup
 
 echo "{\"startTime\": $(($END - $START)), \"downloaded\": \"$DOWNLOADED\", \"compressed\": \"$COMPRESSED\"}" >$METRICS
 cat $METRICS
