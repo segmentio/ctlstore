@@ -96,8 +96,8 @@ func (i *Iterator) Close() error {
 // the error, and then just invalidate the cache the same way you would with ErrOutOfSync.
 // As time goes on, we'll know a little bit better how to operate this under real-world
 // conditions.
-func NewFilteredIterator(ctx context.Context, changelogPath, family, table string, opts IteratorOpt) (*FilteredIterator, error) {
-	iter, err := NewIterator(ctx, changelogPath, opts)
+func NewFilteredIterator(ctx context.Context, changelogPath, family, table string, opts ...IteratorOpt) (*FilteredIterator, error) {
+	iter, err := NewIterator(ctx, changelogPath, opts...)
 	if err != nil {
 		return nil, err
 	}
