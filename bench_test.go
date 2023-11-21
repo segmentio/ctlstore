@@ -24,7 +24,7 @@ func BenchmarkLDBQueryBaseline(b *testing.B) {
 	defer os.RemoveAll(tmpDir)
 
 	ldbPath := filepath.Join(tmpDir, "tmp.db")
-	localDB, err := sql.Open("sqlite3", ldbPath)
+	localDB, err := sql.Open("sqlite", ldbPath)
 	if err != nil {
 		b.Fatalf("Unexpected error opening LDB: %v", err)
 	}
@@ -94,7 +94,7 @@ func BenchmarkGetRowByKey(b *testing.B) {
 	defer teardown()
 
 	ldbPath := filepath.Join(testTmpDir, "tmp.db")
-	localDB, err := sql.Open("sqlite3", ldbPath)
+	localDB, err := sql.Open("sqlite", ldbPath)
 	if err != nil {
 		b.Fatalf("Unexpected error opening LDB: %v", err)
 	}

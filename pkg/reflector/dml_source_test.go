@@ -46,7 +46,7 @@ func (u *sqlDmlSourceTestUtil) AddStatement(statement string) string {
 
 func TestSqlDmlSource(t *testing.T) {
 	ctx := context.Background()
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	require.NoError(t, err)
 
 	srcutil := &sqlDmlSourceTestUtil{db: db, t: t}

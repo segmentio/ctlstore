@@ -55,7 +55,7 @@ func TestLDBTestUtilCreateTableAndInsertRows(t *testing.T) {
 
 	for i, testCase := range suite {
 		t.Run(fmt.Sprintf("[%d]%s", i, testCase.desc), func(t *testing.T) {
-			db, err := sql.Open("sqlite3", ":memory:")
+			db, err := sql.Open("sqlite", ":memory:")
 			if err != nil {
 				t.Fatalf("Unexpected error: %+v", err)
 			}
@@ -115,7 +115,7 @@ func TestLDBTestUtilCreateTableAndInsertRows(t *testing.T) {
 }
 
 func TestLDBTestUtilReset(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	if err != nil {
 		t.Fatalf("Unexpected error: %+v", err)
 	}

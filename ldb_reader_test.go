@@ -397,7 +397,7 @@ func TestLDBReaderEmptyFileHandling(t *testing.T) {
 	dbPath, teardown := ldb.NewLDBTmpPath(t)
 	defer teardown()
 
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		t.Fatalf("Couldn't open SQLite db, error %v", err)
 	}
@@ -415,7 +415,7 @@ func TestLDBReaderEmptyFileHandling(t *testing.T) {
 		t.Errorf("Expected %v, got %v", want, got)
 	}
 
-	db2, err := sql.Open("sqlite3", dbPath)
+	db2, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		t.Fatalf("Couldn't open SQLite db, error %v", err)
 	}
@@ -454,7 +454,7 @@ func TestLDBReaderPing(t *testing.T) {
 	dbPath, teardown := ldb.NewLDBTmpPath(t)
 	defer teardown()
 
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		t.Fatalf("Couldn't open SQLite db, error %v", err)
 	}
@@ -530,7 +530,7 @@ func generateVersionedLDB(t *testing.T, path string, timestamp int64) {
 	require.NoError(os.Mkdir(dirPath, 0755))
 
 	dbPath := filepath.Join(dirPath, "ldb.db")
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite", dbPath)
 	require.NoError(err)
 
 	// Initialize the ctlstore LDB tables:

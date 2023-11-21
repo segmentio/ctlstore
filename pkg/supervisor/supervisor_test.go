@@ -66,7 +66,7 @@ func TestSupervisor(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	ldb, err := sql.Open("sqlite3", ldbDbPath+"?_journal_mode=wal&cache=shared")
+	ldb, err := sql.Open("sqlite", ldbDbPath+"?_journal_mode=wal&cache=shared")
 	require.NoError(t, err)
 
 	err = ldbpkg.EnsureLdbInitialized(ctx, ldb)
@@ -147,7 +147,7 @@ func TestSupervisor(t *testing.T) {
 	stoppedCh <- struct{}{}
 	handleFatalities()
 
-	archDb, err := sql.Open("sqlite3", archivePath)
+	archDb, err := sql.Open("sqlite", archivePath)
 	require.NoError(t, err)
 
 	row := archDb.QueryRow(
@@ -173,7 +173,7 @@ func TestSupervisorSnapshotReflectorCtl(t *testing.T) {
 	ldbDbPath := filepath.Join(tmpPath, "ldb.db")
 	archivePath := filepath.Join(tmpPath, "archive.db")
 
-	ldb, err := sql.Open("sqlite3", ldbDbPath+"?_journal_mode=wal&cache=shared")
+	ldb, err := sql.Open("sqlite", ldbDbPath+"?_journal_mode=wal&cache=shared")
 	require.NoError(t, err)
 	err = ldbpkg.EnsureLdbInitialized(ctx, ldb)
 	require.NoError(t, err)

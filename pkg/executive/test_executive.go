@@ -33,7 +33,7 @@ func NewTestExecutiveService(bindTo string) (*TestExecutiveService, error) {
 		return nil, err
 	}
 
-	db, err := sql.Open("sqlite3", filepath.Join(tmpDir, "ctldb.db"))
+	db, err := sql.Open("sqlite", filepath.Join(tmpDir, "ctldb.db"))
 	if err != nil {
 		return nil, err
 	}
