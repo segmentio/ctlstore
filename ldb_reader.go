@@ -28,6 +28,7 @@ import (
 // across multiple processes.
 type LDBReader struct {
 	Db                          *sql.DB
+	path                        string
 	pkCache                     map[string]schema.PrimaryKey // keyed by ldbTableName()
 	getRowByKeyStmtCache        map[string]*sql.Stmt         // keyed by ldbTableName()
 	getRowsByKeyPrefixStmtCache map[prefixCacheKey]*sql.Stmt
@@ -46,13 +47,17 @@ var (
 	ErrNoLedgerUpdates      = errors.New("no ledger updates have been received yet")
 )
 
+type RowRetriever interface {
+	GetRowsByKeyPrefix(ctx context.Context, familyName string, tableName string, key ...interface{}) (*Rows, error)
+	GetRowByKey(ctx context.Context, out interface{}, familyName string, tableName string, key ...interface{}) (found bool, err error)
+}
+
 func newLDBReader(path string) (*LDBReader, error) {
 	db, err := newLDB(path)
 	if err != nil {
 		return nil, err
 	}
-
-	return &LDBReader{Db: db}, nil
+	return &LDBReader{Db: db, path: path}, nil
 }
 
 func newVersionedLDBReader(dirPath string) (*LDBReader, error) {
@@ -344,7 +349,6 @@ func (reader *LDBReader) closeDB() error {
 	if reader.Db != nil {
 		return reader.Db.Close()
 	}
-
 	return nil
 }
 
@@ -369,7 +373,7 @@ func (reader *LDBReader) Ping(ctx context.Context) bool {
 // to the type of each PK column.
 func convertKeyBeforeQuery(pk schema.PrimaryKey, key []interface{}) error {
 	for i, k := range key {
-		// sanity check on th elength of the pk field type slice
+		// sanity check on the length of the pk field type slice
 		if i >= len(pk.Types) {
 			return errors.New("insufficient key field type data")
 		}

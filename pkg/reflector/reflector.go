@@ -37,6 +37,7 @@ import (
 type Reflector struct {
 	shovel        func() (*shovel, error)
 	ldb           *sql.DB
+	logger        *events.Logger
 	upstreamdb    *sql.DB
 	ledgerMonitor *ledger.Monitor
 	walMonitor    starter
@@ -74,6 +75,8 @@ type ReflectorConfig struct {
 	WALCheckpointType ldbwriter.CheckpointType // optional
 	DoMonitorWAL      bool                     // optional
 	BusyTimeoutMS     int                      // optional
+	ID                string
+	Logger            *events.Logger
 }
 
 type DownloadMetric struct {
@@ -192,7 +195,6 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	events.Log("Successfully emitted metric from file")
 
 	// TODO: check Upstream fields
-
 	stop := make(chan struct{})
 
 	// This is a function so that initialization can be redone each
@@ -204,7 +206,10 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	// as a function allows recovering all the way back to initializing
 	// the and fetching the last known good sequence in the LDB.
 	shovel := func() (*shovel, error) {
-		sqlDBWriter := &ldbwriter.SqlLdbWriter{Db: ldbDB}
+		sqlDBWriter := &ldbwriter.SqlLdbWriter{Db: ldbDB,
+			ID:     config.ID,
+			Logger: config.Logger,
+		}
 		var writer ldbwriter.LDBWriter = sqlDBWriter
 
 		var ldbWriteCallbacks []ldbwriter.LDBWriteCallback
@@ -240,6 +245,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 		}
 
 		lastSeq, err := ldb.FetchSeqFromLdb(context.TODO(), ldbDB)
+		events.Log("Latest seq from %s: %d", config.ID, lastSeq.Int())
 		if err != nil {
 			return nil, fmt.Errorf("Error when fetching last sequence from LDB: %v", err)
 		}
@@ -261,6 +267,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 			abortOnSeqSkip:    true,
 			maxSeqOnStartup:   maxKnownSeq.Int64,
 			stop:              stop,
+			log:               config.Logger,
 		}, nil
 	}
 
@@ -289,6 +296,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 	return &Reflector{
 		shovel:        shovel,
 		ldb:           ldbDB,
+		logger:        config.Logger,
 		upstreamdb:    upstreamdb,
 		ledgerMonitor: ledgerMon,
 		stop:          stop,
@@ -336,7 +344,8 @@ func emitMetricFromFile(path string) error {
 }
 
 func (r *Reflector) Start(ctx context.Context) error {
-	events.Log("Starting Reflector.")
+
+	r.logger.Log("Starting Reflector.")
 	go r.ledgerMonitor.Start(ctx)
 	go r.walMonitor.Start(ctx)
 	for {
@@ -346,7 +355,7 @@ func (r *Reflector) Start(ctx context.Context) error {
 				return errors.Wrap(err, "build shovel")
 			}
 			defer shovel.Close()
-			events.Log("Shoveling...")
+			r.logger.Log("Shoveling...")
 			stats.Incr("reflector.shovel_start")
 			err = shovel.Start(ctx)
 			return errors.Wrap(err, "shovel")
@@ -354,7 +363,7 @@ func (r *Reflector) Start(ctx context.Context) error {
 		switch {
 		case errs.IsCanceled(err): // this is normal
 		case events.IsTermination(errors.Cause(err)): // this is normal
-			events.Log("Reflector received termination signal")
+			r.logger.Log("Reflector received termination signal")
 		case err != nil:
 			switch {
 			case errors.Is("SkippedSequence", err):
@@ -364,7 +373,7 @@ func (r *Reflector) Start(ctx context.Context) error {
 			default:
 				errs.Incr("reflector.shovel_error")
 			}
-			events.Log("Error encountered during shoveling: %{error}+v", err)
+			r.logger.Log("Error encountered during shoveling: %{error}+v", err)
 		}
 		select {
 		case <-r.stop:
@@ -384,7 +393,7 @@ func (r *Reflector) Stop() {
 func (r *Reflector) Close() error {
 	var err error
 
-	events.Log("Close() reflector")
+	r.logger.Log("Close() reflector")
 
 	err = r.ldb.Close()
 	if err != nil {

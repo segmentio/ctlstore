@@ -5,9 +5,14 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path"
+	"reflect"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/segmentio/conf"
 	"github.com/segmentio/errors-go"
@@ -31,6 +36,8 @@ import (
 	"github.com/segmentio/ctlstore/pkg/units"
 	"github.com/segmentio/ctlstore/pkg/utils"
 )
+
+var DebugEnabled = false
 
 type dogstatsdConfig struct {
 	Address    string        `conf:"address" help:"Address of the dogstatsd agent that will receive metrics"`
@@ -67,6 +74,11 @@ type reflectorCliConfig struct {
 	WALCheckpointThresholdSize int                      `conf:"wal-checkpoint-threshold-size" help:"Performs a checkpoint after the WAL file exceeds this size in bytes"`
 	WALCheckpointType          ldbwriter.CheckpointType `conf:"wal-checkpoint-type" help:"what type of checkpoint to manually perform once the wal size is exceeded"`
 	BusyTimeoutMS              int                      `conf:"busy-timeout-ms" help:"Set a busy timeout on the connection string for sqlite in milliseconds"`
+	MultiReflector             multiReflectorConfig     `conf:"multi-reflector" help:"Configuration for running multiple reflectors at once"`
+}
+
+type multiReflectorConfig struct {
+	LDBPaths []string `conf:"ldb-paths" help:"list of ldbs, each ldb is managed by a unique reflector" validate:"nonzero"`
 }
 
 type executiveCliConfig struct {
@@ -152,6 +164,7 @@ func main() {
 		Commands: []conf.Command{
 			{Name: "version", Help: "Get the ctlstore version"},
 			{Name: "reflector", Help: "Run the ctlstore Reflector"},
+			{Name: "multi-reflector", Help: "Run the ctlstore Reflector in multi mode"},
 			{Name: "sidecar", Help: "Run the ctlstore Sidecar"},
 			{Name: "executive", Help: "Run the ctlstore Executive service"},
 			{Name: "supervisor", Help: "Run the ctlstore Supervisor service"},
@@ -171,6 +184,8 @@ func main() {
 		fmt.Println(ctlstore.Version)
 	case "reflector":
 		reflector(ctx, args)
+	case "multi-reflector":
+		multiReflector(ctx, args)
 	case "sidecar":
 		sidecar(ctx, args)
 	case "executive":
@@ -191,6 +206,7 @@ func main() {
 func enableDebug() {
 	events.DefaultLogger.EnableDebug = true
 	events.DefaultLogger.EnableSource = true
+	DebugEnabled = true
 }
 
 func defaultDogstatsdConfig() dogstatsdConfig {
@@ -295,7 +311,7 @@ func supervisor(ctx context.Context, args []string) {
 			return errors.Wrap(err, "ensure ldb dir")
 		}
 
-		reflector, err := newReflector(cliCfg.ReflectorConfig, true)
+		reflector, err := newReflector(cliCfg.ReflectorConfig, true, 0)
 		if err != nil {
 			return errors.Wrap(err, "build supervisor reflector")
 		}
@@ -462,13 +478,93 @@ func reflector(ctx context.Context, args []string) {
 		prometheusHandler: promHandler,
 	})
 	defer teardown()
-	reflector, err := newReflector(cliCfg, false)
+	reflector, err := newReflector(cliCfg, false, 0)
 	if err != nil {
 		events.Log("Fatal error starting Reflector: %{error}+v", err)
 		errs.IncrDefault(stats.T("op", "startup"))
 		return
 	}
 	reflector.Start(ctx)
+}
+
+func multiReflector(ctx context.Context, args []string) {
+	cliCfg := defaultReflectorCLIConfig(false)
+	loadConfig(&cliCfg, "reflector", args)
+
+	if cliCfg.Debug {
+		enableDebug()
+	}
+
+	var promHandler *prometheus.Handler
+	if len(cliCfg.MetricsBind) > 0 {
+		promHandler = &prometheus.Handler{}
+
+		http.Handle("/metrics", promHandler)
+
+		go func() {
+			events.Log("Serving Prometheus metrics on %s", cliCfg.MetricsBind)
+			err := http.ListenAndServe(cliCfg.MetricsBind, nil)
+			if err != nil {
+				events.Log("Failed to served Prometheus metrics: %s", err)
+			}
+		}()
+	}
+	_, teardown := configureDogstatsd(ctx, dogstatsdOpts{
+		config:            cliCfg.Dogstatsd,
+		statsPrefix:       "reflector",
+		prometheusHandler: promHandler,
+	})
+	defer teardown()
+
+	reflectors := make([]*reflectorpkg.Reflector, len(cliCfg.MultiReflector.LDBPaths))
+	var wg sync.WaitGroup
+	errChan := make(chan error, len(cliCfg.MultiReflector.LDBPaths))
+	wg.Add(len(cliCfg.MultiReflector.LDBPaths))
+	for i, ldbPath := range cliCfg.MultiReflector.LDBPaths {
+		p := ldbPath
+		x := cliCfg
+		x.LDBPath = p
+		if i > 0 {
+			events.Log("changelog only created for 1st ldb path: %{path}, skipping #%{num}d", cliCfg.MultiReflector.LDBPaths[0], i+1)
+			x.ChangelogPath = ""
+			x.ChangelogSize = 0
+
+		}
+		go func(x reflectorCliConfig, idx int) {
+			defer wg.Done()
+			r, err := newReflector(x, false, idx)
+			if err != nil {
+				events.Log("Fatal error starting Reflector: %{error}+v", err)
+				errs.IncrDefault(stats.T("op", "startup"), stats.T("path", p))
+				errChan <- err
+				return
+			}
+			reflectors[idx] = r
+		}(x, i)
+	}
+
+	wg.Wait()
+
+	select {
+	case <-errChan:
+		return
+	default:
+	}
+
+	grp, grpCtx := errgroup.WithContext(ctx)
+	for _, reflector := range reflectors {
+		r := reflector
+		grp.Go(func() error {
+			return r.Start(grpCtx)
+		})
+	}
+
+	err := grp.Wait()
+	if err != nil {
+		events.Log("reflectors ended in error %{error}v", err)
+		errs.Incr("multi.shutdown", stats.T("err", reflect.ValueOf(err).Type().String()))
+		return
+	}
 }
 
 func defaultReflectorCLIConfig(isSupervisor bool) reflectorCliConfig {
@@ -527,10 +623,13 @@ func newSidecar(config sidecarConfig) (*sidecarpkg.Sidecar, error) {
 	})
 }
 
-func newReflector(cliCfg reflectorCliConfig, isSupervisor bool) (*reflectorpkg.Reflector, error) {
+func newReflector(cliCfg reflectorCliConfig, isSupervisor bool, i int) (*reflectorpkg.Reflector, error) {
 	if cliCfg.LedgerHealth.Disable {
 		events.Log("DEPRECATION NOTICE: use --disable-ecs-behavior instead of --disable to control this ledger monitor behavior")
 	}
+	id := fmt.Sprintf("%s-%d", path.Base(cliCfg.LDBPath), i)
+	l := events.NewLogger(events.DefaultHandler).With(events.Args{{"id", id}})
+	l.EnableDebug = cliCfg.Debug
 	return reflectorpkg.ReflectorFromConfig(reflectorpkg.ReflectorConfig{
 		LDBPath:         cliCfg.LDBPath,
 		ChangelogPath:   cliCfg.ChangelogPath,
@@ -561,5 +660,7 @@ func newReflector(cliCfg reflectorCliConfig, isSupervisor bool) (*reflectorpkg.R
 		WALCheckpointThresholdSize: cliCfg.WALCheckpointThresholdSize,
 		WALCheckpointType:          cliCfg.WALCheckpointType,
 		BusyTimeoutMS:              cliCfg.BusyTimeoutMS,
+		ID:                         id,
+		Logger:                     l,
 	})
 }

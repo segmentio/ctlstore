@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-
 	"github.com/pkg/errors"
 	"github.com/segmentio/events/v2"
 	"github.com/segmentio/stats/v4"
@@ -38,41 +37,45 @@ type LDBWriteMetadata struct {
 type SqlLdbWriter struct {
 	Db       *sql.DB
 	LedgerTx *sql.Tx
+	// uniquely identify this SqlWriter
+	Logger *events.Logger
+	ID     string
 }
 
 // Applies a DML statement to the writer's db, updating the sequence
 // tracking table in the same transaction
-func (writer *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schema.DMLStatement) error {
+func (w *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schema.DMLStatement) error {
 	var tx *sql.Tx
 	var err error
 
-	stats.Incr("sql_ldb_writer.apply")
+	stats.Incr("sql_ldb_writer.apply", stats.T("id", w.ID))
 
 	// Fill in the tx var
-	if writer.LedgerTx == nil {
+	if w.LedgerTx == nil {
 		// Not applying a ledger transaction, so need a local transaction
-		tx, err = writer.Db.Begin()
+		tx, err = w.Db.Begin()
 		if err != nil {
-			errs.Incr("sql_ldb_writer.begin_tx.error")
+			errs.Incr("sql_ldb_writer.begin_tx.error", stats.T("id", w.ID))
 			return errors.Wrap(err, "open tx error")
 		}
 	} else {
 		// Applying a ledger transaction, so bring it into scope
-		tx = writer.LedgerTx
+		tx = w.LedgerTx
 	}
+	logger := w.logger()
 
 	// Handle begin ledger transaction control statements
 	if statement.Statement == schema.DMLTxBeginKey {
-		if writer.LedgerTx != nil {
+		if w.LedgerTx != nil {
 			// Attempted to open a transaction without committing the last one,
 			// which is a violation of our invariants. Something is very, very
 			// wrong with the ledger processing.
 			tx.Rollback()
-			errs.Incr("sql_ldb_writer.ledgerTx.begin_invariant_violation")
+			errs.Incr("sql_ldb_writer.ledgerTx.begin_invariant_violation", stats.T("id", w.ID))
 			return errors.New("invariant violation")
 		}
-		writer.LedgerTx = tx
-		events.Debug("Begin TX at %{sequence}v", statement.Sequence)
+		w.LedgerTx = tx
+		logger.Debug("Begin TX at %{sequence}v", statement.Sequence)
 	}
 
 	// Update the last update table.  This will allow the ldb reader
@@ -84,7 +87,7 @@ func (writer *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schem
 	_, err = tx.Exec(qs, ldb.LDBLastLedgerUpdateColumn, statement.Timestamp)
 	if err != nil {
 		tx.Rollback()
-		errs.Incr("sql_ldb_writer.upsert_last_update.error")
+		errs.Incr("sql_ldb_writer.upsert_last_update.error", stats.T("id", w.ID))
 		return errors.Wrap(err, "update last_update")
 	}
 
@@ -103,7 +106,7 @@ func (writer *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schem
 	res, err := tx.Exec(qs, statement.Sequence.Int())
 	if err != nil {
 		tx.Rollback()
-		errs.Incr("sql_ldb_writer.upsert_seq.error")
+		errs.Incr("sql_ldb_writer.upsert_seq.error", stats.T("id", w.ID))
 		return errors.Wrap(err, "update seq tracker error")
 	}
 
@@ -111,12 +114,12 @@ func (writer *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schem
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
 		tx.Rollback()
-		errs.Incr("sql_ldb_writer.upsert_seq.rows_affected_error")
+		errs.Incr("sql_ldb_writer.upsert_seq.rows_affected_error", stats.T("id", w.ID))
 		return errors.Wrap(err, "update seq tracker rows affected error")
 	}
 	if rowsAffected == 0 {
 		tx.Rollback()
-		errs.Incr("sql_ldb_writer.upsert_seq.replay_detected")
+		errs.Incr("sql_ldb_writer.upsert_seq.replay_detected", stats.T("id", w.ID))
 		return errors.New("update seq tracker replay detected")
 	}
 
@@ -130,27 +133,27 @@ func (writer *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schem
 
 	// Handle end ledger transaction control statements
 	if statement.Statement == schema.DMLTxEndKey {
-		if writer.LedgerTx == nil {
+		if w.LedgerTx == nil {
 			// Attempted to commit a transaction when there is no transaction
 			// open, which is a violation of our invariants. Something is very,
 			// very wrong with the ledger processing!
 			tx.Rollback()
-			errs.Incr("sql_ldb_writer.ledgerTx.end_invariant_violation")
+			errs.Incr("sql_ldb_writer.ledgerTx.end_invariant_violation", stats.T("id", w.ID))
 			return errors.New("invariant violation")
 		}
 
 		err = tx.Commit()
 		if err != nil {
 			tx.Rollback()
-			errs.Incr("sql_ldb_writer.ledgerTx.commit.error")
-			events.Log("Failed to commit Tx at seq %{seq}s: %{error}+v",
+			errs.Incr("sql_ldb_writer.ledgerTx.commit.error", stats.T("id", w.ID))
+			logger.Log("Failed to commit Tx at seq %{seq}s: %{error}+v",
 				statement.Sequence,
 				err)
 			return errors.Wrap(err, "commit multi-statement dml tx error")
 		}
-		stats.Incr("sql_ldb_writer.ledgerTx.commit.success")
-		events.Debug("Committed TX at %{sequence}v", statement.Sequence)
-		writer.LedgerTx = nil
+		stats.Incr("sql_ldb_writer.ledgerTx.commit.success", stats.T("id", w.ID))
+		logger.Debug("Committed TX at %{sequence}v", statement.Sequence)
+		w.LedgerTx = nil
 		return nil
 	}
 
@@ -158,37 +161,37 @@ func (writer *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schem
 	_, err = tx.Exec(statement.Statement)
 	if err != nil {
 		tx.Rollback()
-		errs.Incr("sql_ldb_writer.exec.error")
+		errs.Incr("sql_ldb_writer.exec.error", stats.T("id", w.ID))
 		return errors.Wrap(err, "exec dml statement error")
 	}
 
-	stats.Incr("sql_ldb_writer.exec.success")
+	stats.Incr("sql_ldb_writer.exec.success", stats.T("id", w.ID))
 
-	events.Debug("Applying DML[%{sequence}d]: '%{statement}s'",
+	logger.Debug("Applying DML[%{sequence}d]: '%{statement}s'",
 		statement.Sequence,
 		statement.Statement)
 
 	// Commit if not inside a ledger transaction, since that would be
 	// a single statement transaction.
-	if writer.LedgerTx == nil {
+	if w.LedgerTx == nil {
 		err = tx.Commit()
 		if err != nil {
 			tx.Rollback()
-			errs.Incr("sql_ldb_writer.single.commit.error")
-			errs.Incr("sql_ldb_writer.commit.error")
+			errs.Incr("sql_ldb_writer.single.commit.error", stats.T("id", w.ID))
+			errs.Incr("sql_ldb_writer.commit.error", stats.T("id", w.ID))
 			return errors.Wrap(err, "commit one-statement dml tx error")
 		}
 	}
 
-	stats.Incr("sql_ldb_writer.commit.success")
+	stats.Incr("sql_ldb_writer.commit.success", stats.T("id", w.ID))
 
 	return nil
 }
 
-func (writer *SqlLdbWriter) Close() error {
-	if writer.LedgerTx != nil {
-		writer.LedgerTx.Rollback()
-		writer.LedgerTx = nil
+func (w *SqlLdbWriter) Close() error {
+	if w.LedgerTx != nil {
+		w.LedgerTx.Rollback()
+		w.LedgerTx = nil
 	}
 	return nil
 }
@@ -222,11 +225,11 @@ var (
 // Checkpoint initiates a wal checkpoint, returning stats on the checkpoint's progress
 // see https://www.sqlite.org/pragma.html#pragma_wal_checkpoint for more details
 // requires write access
-func (writer *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*PragmaWALResult, error) {
-	res, err := writer.Db.Query(fmt.Sprintf("PRAGMA wal_checkpoint(%s)", string(checkpointingType)))
+func (w *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*PragmaWALResult, error) {
+	res, err := w.Db.Query(fmt.Sprintf("PRAGMA wal_checkpoint(%s)", string(checkpointingType)))
 	if err != nil {
-		events.Log("error in checkpointing, %{error}", err)
-		errs.Incr("sql_ldb_writer.wal_checkpoint.query.error")
+		w.logger().Log("error in checkpointing, %{error}", err)
+		errs.Incr("sql_ldb_writer.wal_checkpoint.query.error", stats.T("id", w.ID))
 		return nil, err
 	}
 
@@ -235,11 +238,18 @@ func (writer *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*Pragm
 	if res.Next() {
 		err := res.Scan(&p.Busy, &p.Log, &p.Checkpointed)
 		if err != nil {
-			events.Log("error in scanning checkpointing, %{error}", err)
-			errs.Incr("sql_ldb_writer.wal_checkpoint.scan.error")
+			w.logger().Log("error in scanning checkpointing, %{error}")
+			errs.Incr("sql_ldb_writer.wal_checkpoint.scan.error", stats.T("id", w.ID))
 			return nil, err
 		}
 	}
 	p.Type = checkpointingType
 	return &p, nil
+}
+
+func (w *SqlLdbWriter) logger() *events.Logger {
+	if w.Logger == nil {
+		w.Logger = events.DefaultLogger
+	}
+	return w.Logger
 }
