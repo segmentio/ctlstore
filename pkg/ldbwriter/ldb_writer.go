@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 
 	"github.com/segmentio/ctlstore/pkg/errs"
@@ -72,7 +72,7 @@ func (writer *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schem
 			return errors.New("invariant violation")
 		}
 		writer.LedgerTx = tx
-		events.Debug("Begin TX at %{sequence}v", statement.Sequence)
+		log.EventDebug("Begin TX at %{sequence}v", statement.Sequence)
 	}
 
 	// Update the last update table.  This will allow the ldb reader
@@ -143,13 +143,13 @@ func (writer *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schem
 		if err != nil {
 			tx.Rollback()
 			errs.Incr("sql_ldb_writer.ledgerTx.commit.error")
-			events.Log("Failed to commit Tx at seq %{seq}s: %{error}+v",
+			log.EventLog("Failed to commit Tx at seq %{seq}s: %{error}+v",
 				statement.Sequence,
 				err)
 			return errors.Wrap(err, "commit multi-statement dml tx error")
 		}
 		stats.Incr("sql_ldb_writer.ledgerTx.commit.success")
-		events.Debug("Committed TX at %{sequence}v", statement.Sequence)
+		log.EventDebug("Committed TX at %{sequence}v", statement.Sequence)
 		writer.LedgerTx = nil
 		return nil
 	}
@@ -164,7 +164,7 @@ func (writer *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schem
 
 	stats.Incr("sql_ldb_writer.exec.success")
 
-	events.Debug("Applying DML[%{sequence}d]: '%{statement}s'",
+	log.EventDebug("Applying DML[%{sequence}d]: '%{statement}s'",
 		statement.Sequence,
 		statement.Statement)
 
@@ -225,7 +225,7 @@ var (
 func (writer *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*PragmaWALResult, error) {
 	res, err := writer.Db.Query(fmt.Sprintf("PRAGMA wal_checkpoint(%s)", string(checkpointingType)))
 	if err != nil {
-		events.Log("error in checkpointing, %{error}", err)
+		log.EventLog("error in checkpointing, %{error}", err)
 		errs.Incr("sql_ldb_writer.wal_checkpoint.query.error")
 		return nil, err
 	}
@@ -235,7 +235,7 @@ func (writer *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*Pragm
 	if res.Next() {
 		err := res.Scan(&p.Busy, &p.Log, &p.Checkpointed)
 		if err != nil {
-			events.Log("error in scanning checkpointing, %{error}", err)
+			log.EventLog("error in scanning checkpointing, %{error}", err)
 			errs.Incr("sql_ldb_writer.wal_checkpoint.scan.error")
 			return nil, err
 		}

@@ -11,8 +11,8 @@ import (
 
 	"github.com/segmentio/conf"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events/v2"
-	_ "github.com/segmentio/events/v2/sigevents"
+	"github.com/segmentio/log"
+	_ "github.com/segmentio/log/sigusrdebug"
 	"github.com/segmentio/stats/v4"
 	"github.com/segmentio/stats/v4/datadog"
 	"github.com/segmentio/stats/v4/procstats"
@@ -222,7 +222,7 @@ func configureDogstatsd(ctx context.Context, opts dogstatsdOpts) (dd *datadog.Cl
 		})
 		stats.Register(dd)
 
-		events.Log("Setup dogstatsd with addr:%{addr}s, buffersize:%{buffersize}d, prefix:%{pfx}s, version:%{version}s",
+		log.EventLog("Setup dogstatsd with addr:%{addr}s, buffersize:%{buffersize}d, prefix:%{pfx}s, version:%{version}s",
 			config.Address, config.BufferSize, opts.statsPrefix, ctlstore.Version)
 	}
 
@@ -314,7 +314,7 @@ func supervisor(ctx context.Context, args []string) {
 		return nil
 	}()
 	if err != nil && !errs.IsCanceled(err) {
-		events.Log("Fatal Supervisor error: %{error}+v", err)
+		log.EventLog("Fatal Supervisor error: %{error}+v", err)
 		errs.IncrDefault(stats.T("op", "startup"))
 	}
 }
@@ -346,7 +346,7 @@ func heartbeat(ctx context.Context, args []string) {
 		Table:             cliCfg.TableName,
 	})
 	if err != nil {
-		events.Log("Fatal error starting heartbeat: %+v", err)
+		log.EventLog("Fatal error starting heartbeat: %+v", err)
 		errs.IncrDefault(stats.T("op", "startup"))
 		return
 	}
@@ -369,7 +369,7 @@ func executive(ctx context.Context, args []string) {
 
 	loadConfig(&cliCfg, "executive", args)
 
-	events.Log("running with max/warn: %v %v", cliCfg.MaxTableSize, cliCfg.WarnTableSize)
+	log.EventLog("running with max/warn: %v %v", cliCfg.MaxTableSize, cliCfg.WarnTableSize)
 
 	if cliCfg.Debug {
 		enableDebug()
@@ -398,7 +398,7 @@ func executive(ctx context.Context, args []string) {
 	})
 	if err != nil {
 		errs.IncrDefault(stats.T("op", "startup"))
-		events.Log("Fatal error starting Executive: %{error}+v", err)
+		log.EventLog("Fatal error starting Executive: %{error}+v", err)
 		return
 	}
 	defer executive.Close()
@@ -407,7 +407,7 @@ func executive(ctx context.Context, args []string) {
 		if errors.Cause(err) != context.Canceled {
 			errs.IncrDefault(stats.T("op", "service shutdown"))
 		}
-		events.Log("executive quit: %v", err)
+		log.EventLog("executive quit: %v", err)
 	}
 }
 
@@ -428,7 +428,7 @@ func sidecar(ctx context.Context, args []string) {
 	}
 	sidecar, err := newSidecar(config)
 	if err != nil {
-		events.Log("Fatal error starting sidecar: %{error}+v", err)
+		log.EventLog("Fatal error starting sidecar: %{error}+v", err)
 		errs.IncrDefault(stats.T("op", "startup"))
 		return
 	}
@@ -449,10 +449,10 @@ func reflector(ctx context.Context, args []string) {
 		http.Handle("/metrics", promHandler)
 
 		go func() {
-			events.Log("Serving Prometheus metrics on %s", cliCfg.MetricsBind)
+			log.EventLog("Serving Prometheus metrics on %s", cliCfg.MetricsBind)
 			err := http.ListenAndServe(cliCfg.MetricsBind, nil)
 			if err != nil {
-				events.Log("Failed to served Prometheus metrics: %s", err)
+				log.EventLog("Failed to served Prometheus metrics: %s", err)
 			}
 		}()
 	}
@@ -464,7 +464,7 @@ func reflector(ctx context.Context, args []string) {
 	defer teardown()
 	reflector, err := newReflector(cliCfg, false)
 	if err != nil {
-		events.Log("Fatal error starting Reflector: %{error}+v", err)
+		log.EventLog("Fatal error starting Reflector: %{error}+v", err)
 		errs.IncrDefault(stats.T("op", "startup"))
 		return
 	}
@@ -529,7 +529,7 @@ func newSidecar(config sidecarConfig) (*sidecarpkg.Sidecar, error) {
 
 func newReflector(cliCfg reflectorCliConfig, isSupervisor bool) (*reflectorpkg.Reflector, error) {
 	if cliCfg.LedgerHealth.Disable {
-		events.Log("DEPRECATION NOTICE: use --disable-ecs-behavior instead of --disable to control this ledger monitor behavior")
+		log.EventLog("DEPRECATION NOTICE: use --disable-ecs-behavior instead of --disable to control this ledger monitor behavior")
 	}
 	return reflectorpkg.ReflectorFromConfig(reflectorpkg.ReflectorConfig{
 		LDBPath:         cliCfg.LDBPath,

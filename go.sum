@@ -115,6 +115,8 @@ github.com/segmentio/go-snakecase v1.1.0 h1:ZJO4SNKKV0MjGOv0LHnixxN5FYv1JKBnVXEu
 github.com/segmentio/go-snakecase v1.1.0/go.mod h1:jk1miR5MS7Na32PZUykG89Arm+1BUSYhuGR6b7+hJto=
 github.com/segmentio/go-sqlite3 v1.12.0 h1:NG3Hdja6V/dDz1uYCapBJCobL+nQLwn6b8Z28DLOU0s=
 github.com/segmentio/go-sqlite3 v1.12.0/go.mod h1:ARXycbQZSoCAgThy5syFIL2aXbrKF3tE1DEHfOkxh1g=
+github.com/segmentio/log v0.4.0 h1:yW3rP0hgRbYocYCWAzTRRRPztp/5EjMXpgJaS9TgcPo=
+github.com/segmentio/log v0.4.0/go.mod h1:lrlHKGKcvVm4/d7hL6rfuPipZqL20ifZL5+zFtUxx3s=
 github.com/segmentio/objconv v1.0.1 h1:QjfLzwriJj40JibCV3MGSEiAoXixbp4ybhwfTB8RXOM=
 github.com/segmentio/objconv v1.0.1/go.mod h1:auayaH5k3137Cl4SoXTgrzQcuQDmvuVtZgS0fb1Ahys=
 github.com/segmentio/stats/v4 v4.6.2 h1:++YfKPTOPTZxE1DvavnpeBvB3hlDIm7IM+ULFzbCxCU=

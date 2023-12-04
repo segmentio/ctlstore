@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 
 	"github.com/segmentio/ctlstore/pkg/errs"
@@ -596,7 +596,7 @@ func (reader *LDBReader) watchForLDBs(ctx context.Context, dirPath string, last 
 		case <-ticker.C:
 			fsLast, err := lookupLastLDBSync(dirPath)
 			if err != nil {
-				events.Log("failed checking for last LDB sync: %{error}+v", err)
+				log.EventLog("failed checking for last LDB sync: %{error}+v", err)
 				errs.Incr("check-last-ldb-sync")
 				continue
 			}
@@ -605,12 +605,12 @@ func (reader *LDBReader) watchForLDBs(ctx context.Context, dirPath string, last 
 			if fsLast <= last {
 				continue
 			}
-			events.Log("found new LDB (%d > %d), switching...", fsLast, last)
+			log.EventLog("found new LDB (%d > %d), switching...", fsLast, last)
 			last = fsLast
 
 			err = reader.switchLDB(dirPath, last)
 			if err != nil {
-				events.Log("failed switching to new LDB: %{error}+v", err)
+				log.EventLog("failed switching to new LDB: %{error}+v", err)
 				errs.Incr("switch-ldb")
 			}
 		}
@@ -673,13 +673,13 @@ func lookupLastLDBSync(dirPath string) (int64, error) {
 		fields := strings.Split(localPath, "/")
 
 		if len(fields) != 2 || fields[1] != ldb.DefaultLDBFilename {
-			events.Log("ignoring unexpected file in LDB path (%+v)", fields)
+			log.EventLog("ignoring unexpected file in LDB path (%+v)", fields)
 			errs.Incr("unexpected-local-file")
 			return nil
 		}
 		timestamp, err := strconv.ParseInt(fields[0], 10, 64)
 		if err != nil {
-			events.Log("ignoring file with invalid timestamp in LDB path (%+v)", fields)
+			log.EventLog("ignoring file with invalid timestamp in LDB path (%+v)", fields)
 			errs.Incr("invalid-timestamp-local-file")
 			return nil
 		}

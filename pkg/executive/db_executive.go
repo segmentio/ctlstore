@@ -15,8 +15,8 @@ import (
 	"github.com/segmentio/ctlstore/pkg/scanfunc"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
-	"github.com/segmentio/events/v2"
 	"github.com/segmentio/go-sqlite3"
+	"github.com/segmentio/log"
 )
 
 const dmlLedgerTableName = "ctlstore_dml_ledger"
@@ -184,8 +184,8 @@ func (e *dbExecutive) CreateTable(familyName string, tableName string, fieldName
 		return err
 	}
 
-	events.Debug("[CreateTable %{tableName}s] ctldb DDL: %{ddl}s", tableName, ddl)
-	events.Debug("[CreateTable %{tableName}s] log DDL: %{ddl}s", tableName, logDDL)
+	log.EventDebug("[CreateTable %{tableName}s] ctldb DDL: %{ddl}s", tableName, ddl)
+	log.EventDebug("[CreateTable %{tableName}s] log DDL: %{ddl}s", tableName, logDDL)
 
 	tx, err := e.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -223,7 +223,7 @@ func (e *dbExecutive) CreateTable(familyName string, tableName string, fieldName
 		return err
 	}
 
-	events.Log("Successfully created new table `%{tableName}s` at seq %{seq}v", tableName, seq)
+	log.EventLog("Successfully created new table `%{tableName}s` at seq %{seq}v", tableName, seq)
 
 	return nil
 }
@@ -303,8 +303,8 @@ func (e *dbExecutive) AddFields(familyName string, tableName string, fieldNames 
 		if err != nil {
 			return err
 		}
-		events.Debug("[CreateTable %{tableName}s] ctldb DDL: %{ddl}s", tableName, ddl)
-		events.Debug("[CreateTable %{tableName}s] log DDL: %{ddl}s", tableName, logDDL)
+		log.EventDebug("[CreateTable %{tableName}s] ctldb DDL: %{ddl}s", tableName, ddl)
+		log.EventDebug("[CreateTable %{tableName}s] log DDL: %{ddl}s", tableName, logDDL)
 		// create a func here to make rollback semantics a bit easier
 		err = func() error {
 			tx, err := e.DB.BeginTx(ctx, nil)
@@ -345,7 +345,7 @@ func (e *dbExecutive) AddFields(familyName string, tableName string, fieldNames 
 			if err != nil {
 				return errors.Wrap(err, "commit tx")
 			}
-			events.Log("Successfully created new field `%{fieldName}s %{fieldType}v` on table %{tableName}s at seq %{seq}v", fieldName, fieldType, tableName, seq)
+			log.EventLog("Successfully created new field `%{fieldName}s %{fieldType}v` on table %{tableName}s at seq %{seq}v", fieldName, fieldType, tableName, seq)
 			return nil
 		}()
 		if err != nil {
@@ -588,7 +588,7 @@ func (e *dbExecutive) Mutate(
 		// Execute the actual DML write
 		_, err = tx.ExecContext(ctx, dmlSQL)
 		if err != nil {
-			events.Log("dml exec error, Request: %{req}+v SQL: %{sql}s", req, dmlSQL)
+			log.EventLog("dml exec error, Request: %{req}+v SQL: %{sql}s", req, dmlSQL)
 			return errors.Wrap(err, "dml exec error")
 		}
 
@@ -611,7 +611,7 @@ func (e *dbExecutive) Mutate(
 		return errors.Wrap(err, "commit failed")
 	}
 
-	events.Debug(
+	log.EventDebug(
 		"Mutate success on family %{familyName}s "+
 			"applied %{mutationCount}d mutations "+
 			"at seq %{lastSeq}d "+
@@ -910,7 +910,7 @@ func (e *dbExecutive) UpdateTableSizeLimit(limit limits.TableSizeLimit) error {
 func (e *dbExecutive) DeleteTableSizeLimit(ft schema.FamilyTable) error {
 	ctx, cancel := e.ctx()
 	defer cancel()
-	events.Log("deleting from max table sizes where f=%v and t=%v", ft.Family, ft.Table)
+	log.EventLog("deleting from max table sizes where f=%v and t=%v", ft.Family, ft.Table)
 	resp, err := e.DB.ExecContext(ctx, "delete from max_table_sizes where family_name=? and table_name=?",
 		ft.Family, ft.Table)
 	if err != nil {
@@ -1043,8 +1043,8 @@ func (e *dbExecutive) DropTable(table schema.FamilyTable) error {
 
 	logDDL := dmlLogTbl.DropTableDDL()
 
-	events.Debug("[DropTable %{tableName}s] ctldb DDL: %{ddl}s", table, ddl)
-	events.Debug("[DropTable %{tableName}s] log DDL: %{ddl}s", table, logDDL)
+	log.EventDebug("[DropTable %{tableName}s] ctldb DDL: %{ddl}s", table, ddl)
+	log.EventDebug("[DropTable %{tableName}s] log DDL: %{ddl}s", table, logDDL)
 
 	tx, err := e.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -1078,7 +1078,7 @@ func (e *dbExecutive) DropTable(table schema.FamilyTable) error {
 		return errors.Wrap(err, "error committing transaction")
 	}
 
-	events.Log("Successfully dropped `%{tableName}s` at seq %{seq}v", table.String(), seq)
+	log.EventLog("Successfully dropped `%{tableName}s` at seq %{seq}v", table.String(), seq)
 
 	return nil
 }
@@ -1115,8 +1115,8 @@ func (e *dbExecutive) ClearTable(table schema.FamilyTable) error {
 
 	logDDL := dmlLogTbl.ClearTableDDL()
 
-	events.Debug("[ClearTable %{tableName}s] ctldb DDL: %{ddl}s", table, ddl)
-	events.Debug("[ClearTable %{tableName}s] log DDL: %{ddl}s", table, logDDL)
+	log.EventDebug("[ClearTable %{tableName}s] ctldb DDL: %{ddl}s", table, ddl)
+	log.EventDebug("[ClearTable %{tableName}s] log DDL: %{ddl}s", table, logDDL)
 
 	tx, err := e.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -1150,7 +1150,7 @@ func (e *dbExecutive) ClearTable(table schema.FamilyTable) error {
 		return errors.Wrap(err, "error committing transaction")
 	}
 
-	events.Log("Successfully deleted all rows from `%{tableName}s` at seq %{seq}v", table.String(), seq)
+	log.EventLog("Successfully deleted all rows from `%{tableName}s` at seq %{seq}v", table.String(), seq)
 
 	return nil
 }
@@ -1159,7 +1159,7 @@ func (e *dbExecutive) ReadFamilyTableNames(family schema.FamilyName) (tables []s
 	ctx, cancel := e.ctx()
 	defer cancel()
 
-	events.Debug("reading family table names where f=%s", family)
+	log.EventDebug("reading family table names where f=%s", family)
 	rows, err := e.DB.QueryContext(ctx, fmt.Sprintf(`select table_name from information_schema.tables where table_name like '%s___%%'`, family.String()))
 	if err != nil {
 		return nil, errors.Wrap(err, "error reading family table names")

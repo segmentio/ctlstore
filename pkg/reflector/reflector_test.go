@@ -18,7 +18,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/ldbwriter"
 	"github.com/segmentio/ctlstore/pkg/ledger"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/stretchr/testify/require"
 )
 
@@ -193,7 +193,7 @@ func TestReflector(t *testing.T) {
 	go func() {
 		close(waitCh)
 		reflector.Start(ctx)
-		events.Log("Reflector terminated")
+		log.EventLog("Reflector terminated")
 		atomic.AddInt64(&isTerminated, 1)
 	}()
 	<-waitCh

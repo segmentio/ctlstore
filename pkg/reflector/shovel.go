@@ -9,7 +9,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/ldbwriter"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 )
 
@@ -44,7 +44,7 @@ func (s *shovel) Start(ctx context.Context) error {
 		// early exit here if the shovel should be stopped
 		select {
 		case <-s.stop:
-			events.Log("Shovel stopping normally")
+			log.EventLog("Shovel stopping normally")
 			return nil
 		default:
 		}
@@ -56,7 +56,7 @@ func (s *shovel) Start(ctx context.Context) error {
 		sctx, cancel = context.WithTimeout(ctx, s.pollTimeout)
 
 		stats.Incr("shovel.loop_enter")
-		events.Debug("shovel polling...")
+		log.EventDebug("shovel polling...")
 		st, err := s.source.Next(sctx)
 
 		if err != nil {
@@ -79,7 +79,7 @@ func (s *shovel) Start(ctx context.Context) error {
 			//
 
 			pollSleep := jitr.Jitter(s.pollInterval, s.jitterCoefficient)
-			events.Debug("Poll sleep %{sleepTime}s", pollSleep)
+			log.EventDebug("Poll sleep %{sleepTime}s", pollSleep)
 
 			select {
 			case <-ctx.Done():
@@ -91,12 +91,12 @@ func (s *shovel) Start(ctx context.Context) error {
 			continue
 		}
 
-		events.Debug("Shovel applying %{statement}v", st)
+		log.EventDebug("Shovel applying %{statement}v", st)
 
 		if lastSeq != 0 {
 			if st.Sequence > lastSeq+1 && st.Sequence.Int() > s.maxSeqOnStartup {
 				stats.Incr("shovel.skipped_sequence")
-				events.Log("shovel skip sequence from:%{fromSeq}d to:%{toSeq}d", lastSeq, st.Sequence)
+				log.EventLog("shovel skip sequence from:%{fromSeq}d to:%{toSeq}d", lastSeq, st.Sequence)
 
 				if s.abortOnSeqSkip {
 					// Mitigation for a bug that we haven't found yet
@@ -133,7 +133,7 @@ func (s *shovel) Close() error {
 	for _, closer := range s.closers {
 		err := closer.Close()
 		if err != nil {
-			events.Log("shovel encountered error during close: %{error}s", err)
+			log.EventLog("shovel encountered error during close: %{error}s", err)
 		}
 	}
 	return nil

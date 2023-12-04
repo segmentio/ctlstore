@@ -6,7 +6,7 @@ import (
 
 	"github.com/segmentio/ctlstore/pkg/changelog"
 	"github.com/segmentio/ctlstore/pkg/schema"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 )
 
 type ChangelogCallback struct {
@@ -20,7 +20,7 @@ func (c *ChangelogCallback) LDBWritten(ctx context.Context, data LDBWriteMetadat
 		if err != nil {
 			// This is expected because it'll capture tables like ctlstore_dml_ledger,
 			// which aren't tables this cares about.
-			events.Debug("Skipped logging change to %{tableName}s, can't decode table: %{error}v",
+			log.EventDebug("Skipped logging change to %{tableName}s, can't decode table: %{error}v",
 				change.TableName,
 				err)
 			continue
@@ -28,7 +28,7 @@ func (c *ChangelogCallback) LDBWritten(ctx context.Context, data LDBWriteMetadat
 
 		keys, err := change.ExtractKeys(data.DB)
 		if err != nil {
-			events.Log("Skipped logging change to %{tableName}, can't extract keys: %{error}v",
+			log.EventLog("Skipped logging change to %{tableName}, can't extract keys: %{error}v",
 				change.TableName,
 				err)
 			continue
@@ -43,7 +43,7 @@ func (c *ChangelogCallback) LDBWritten(ctx context.Context, data LDBWriteMetadat
 				Key:    key,
 			})
 			if err != nil {
-				events.Log("Skipped logging change to %{family}s.%{table}s:%{key}v: %{err}v",
+				log.EventLog("Skipped logging change to %{family}s.%{table}s:%{key}v: %{err}v",
 					fam, tbl, key, err)
 				continue
 			}

@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 
 	"github.com/segmentio/ctlstore/pkg/errs"
@@ -64,10 +64,10 @@ func NewMonitor(cfg MonitorConfig, checkpointTester checkpointTesterFunc, opts .
 // Start runs the wal file size check and sqlite checkpoint check on PollInterval's cadence
 // this method blocks
 func (m *WALMonitor) Start(ctx context.Context) {
-	events.Log("WAL monitor starting")
-	defer events.Log("WAL monitor stopped")
+	log.EventLog("WAL monitor starting")
+	defer log.EventLog("WAL monitor stopped")
 	if m.walPath == "" {
-		events.Log("Not monitoring the WAL because its path is not set")
+		log.EventLog("Not monitoring the WAL because its path is not set")
 		return
 	}
 	loopCtx, cancel := context.WithCancel(ctx)
@@ -83,11 +83,11 @@ func (m *WALMonitor) Start(ctx context.Context) {
 		}
 		size, err := fn(m.walPath)
 		if err != nil {
-			events.Log("error retrieving wal stat, %s", err)
+			log.EventLog("error retrieving wal stat, %s", err)
 			failedInARow++
 			if failedInARow >= m.consecutiveMaxErrors {
 				// cancel to prevent log spamming
-				events.Log("canceling WAL size monitoring due to consistent error, %s", err)
+				log.EventLog("canceling WAL size monitoring due to consistent error, %s", err)
 				errs.Incr("reflector.wal_monitor.persistent_stat_error")
 				cancel()
 			}
@@ -102,11 +102,11 @@ func (m *WALMonitor) Start(ctx context.Context) {
 
 		res, err := m.cpTesterFunc()
 		if err != nil {
-			events.Log("error checking wal's checkpoint status, %s", err)
+			log.EventLog("error checking wal's checkpoint status, %s", err)
 			failedInARow++
 			if failedInARow >= m.consecutiveMaxErrors {
 				// cancel to prevent log spamming
-				events.Log("canceling WAL checkpoint monitoring due to consistent error, %s", err)
+				log.EventLog("canceling WAL checkpoint monitoring due to consistent error, %s", err)
 				errs.Incr("reflector.wal_monitor.persistent_checkpoint_error")
 				cancel()
 			}

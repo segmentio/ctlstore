@@ -10,7 +10,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/reflector"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 )
 
@@ -59,7 +59,7 @@ func SupervisorFromConfig(config SupervisorConfig) (Supervisor, error) {
 }
 
 func (s *supervisor) snapshot(ctx context.Context) error {
-	events.Log("Taking a snapshot")
+	log.EventLog("Taking a snapshot")
 	s.reflectorCtl.Stop(ctx)
 	defer s.reflectorCtl.Start(ctx)
 	if err := s.checkpointLDB(); err != nil {
@@ -110,13 +110,13 @@ func (s *supervisor) checkpointLDB() error {
 	if err != nil {
 		return errors.Wrap(err, "locking database")
 	}
-	events.Log("Acquired write lock on %{srcDb}s", s.LDBPath)
+	log.EventLog("Acquired write lock on %{srcDb}s", s.LDBPath)
 	_, err = conn.ExecContext(ctx, "COMMIT;")
 	if err != nil {
 		return errors.Wrap(err, "commit")
 	}
-	events.Log("Released write lock on %{srcDb}s", s.LDBPath)
-	events.Log("Checkpointed WAL on %{srcDb}s", s.LDBPath)
+	log.EventLog("Released write lock on %{srcDb}s", s.LDBPath)
+	log.EventLog("Checkpointed WAL on %{srcDb}s", s.LDBPath)
 	return nil
 }
 
@@ -126,9 +126,9 @@ func (s *supervisor) incrementSnapshotErrorMetric(value int) {
 
 func (s *supervisor) Start(ctx context.Context) {
 	s.incrementSnapshotErrorMetric(0) // initialize the metric since it's sparse
-	events.Log("Starting supervisor")
+	log.EventLog("Starting supervisor")
 	s.reflectorCtl.Start(ctx)
-	defer events.Log("Stopped Supervisor")
+	defer log.EventLog("Stopped Supervisor")
 	sleepDur := s.SleepDuration
 	for {
 		// Wait for the reflector to make changes to its LDB before stopping it.  Sometimes
@@ -153,14 +153,14 @@ func (s *supervisor) Start(ctx context.Context) {
 			// reset to default
 			sleepDur = s.SleepDuration
 		case <-ctx.Done():
-			events.Log("Supervisor exiting because context done (err=%v)", ctx.Err())
+			log.EventLog("Supervisor exiting because context done (err=%v)", ctx.Err())
 			// Outer context is done, aborting everything
 			return
 		}
 		err := s.snapshot(ctx)
 		if err != nil && errors.Cause(err) != context.Canceled {
 			s.incrementSnapshotErrorMetric(1)
-			events.Log("Error taking snapshot: %{error}+v", err)
+			log.EventLog("Error taking snapshot: %{error}+v", err)
 			// Use a shorter sleep duration for faster retries
 			sleepDur = s.BreatheDuration
 		}

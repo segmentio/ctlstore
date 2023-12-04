@@ -14,7 +14,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 )
 
 // ExecutiveEndpoint is an HTTP 'wrapper' for ExecutiveInterface
@@ -317,7 +317,7 @@ func (ee *ExecutiveEndpoint) handleStatusRoute(w http.ResponseWriter, r *http.Re
 	err := ee.HealthChecker.HealthCheck()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		events.Log("Health check failure: %{error}+v", err)
+		log.EventLog("Health check failure: %{error}+v", err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -599,7 +599,7 @@ func writeErrorResponse(e error, w http.ResponseWriter) {
 	w.WriteHeader(status)
 	_, _ = w.Write([]byte(resBody))
 
-	events.Log("Error Status %{status}v, Reason: %{reason}v, Internal Error: %{error}+v",
+	log.EventLog("Error Status %{status}v, Reason: %{reason}v, Internal Error: %{error}+v",
 		status, resBody, e.Error())
 
 	return
