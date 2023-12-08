@@ -202,6 +202,7 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 			// loop and read as many lines as possible.
 			for {
 				err = readEvents(logCount)
+				logCount = 0
 				if err != io.EOF {
 					return errors.Wrap(err, "read bytes")
 				}
@@ -210,7 +211,8 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 					//events.Debug("Manually checking log")
 					continue
 				case err := <-fsErrCh:
-					if err := readEvents(logCount); err != io.EOF {
+					events.Debug("err channel: %{error}s", err)
+					if err := readEvents(-1); err != io.EOF {
 						events.Log("could not consume rest of file: %{error}s", err)
 					}
 					return errors.Wrap(err, "watcher error")
