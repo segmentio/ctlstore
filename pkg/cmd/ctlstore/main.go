@@ -78,7 +78,7 @@ type reflectorCliConfig struct {
 }
 
 type multiReflectorConfig struct {
-	LDBPaths []string `conf:"ldb-paths" help:"list of ldbs, each ldb is managed by a unique reflector" validate:"nonzero"`
+	LDBPaths []string `conf:"ldb-paths" help:"list of ldbs, each ldb is managed by a unique reflector"`
 }
 
 type executiveCliConfig struct {
@@ -493,6 +493,10 @@ func multiReflector(ctx context.Context, args []string) {
 
 	if cliCfg.Debug {
 		enableDebug()
+	}
+
+	if len(cliCfg.MultiReflector.LDBPaths) <= 1 {
+		panic("multi-reflector mode requires at least 2 ldb paths")
 	}
 
 	var promHandler *prometheus.Handler
