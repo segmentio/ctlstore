@@ -65,7 +65,6 @@ func NewIterator(ctx context.Context, changelogPath string, opts ...IteratorOpt)
 // Next blocks and returns the next event
 func (i *Iterator) Next(ctx context.Context) (event Event, err error) {
 	event, err = i.changelog.next(ctx)
-	events.Log("next cur seq: %d", event.Sequence)
 	if err != nil {
 		events.Log("seq: %d left with err %v", event.Sequence, err)
 		return event, err
@@ -73,7 +72,6 @@ func (i *Iterator) Next(ctx context.Context) (event Event, err error) {
 	previous := i.previous
 	i.previous = &event
 	if previous != nil {
-		events.Log("next prev seq: %d", previous.Sequence)
 		if previous.Sequence != event.Sequence-1 {
 			//			events.Log("out of sync sequences (cur.seq-1 should equal prev.seq), prev: %+v cur: %+v", previous, event)
 			events.Log("out of sync, prev: %d cur: %d", previous.Sequence, event.Sequence)

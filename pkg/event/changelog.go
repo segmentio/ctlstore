@@ -127,6 +127,7 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
+	logCount := 0
 	// each iteration opens the file and reads until it is rotated.
 	for ctx.Err() == nil {
 		// Read as much as possible until you hit EOF.  Then wait for a notification
@@ -144,10 +145,11 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 				}
 			}()
 			events.Debug("Opening changelog...")
+			logCount = 2 // log first read seq # from new file
 
 			br := bufio.NewReaderSize(f, 60*1024)
 
-			handleEventData := func(b []byte) {
+			handleEventData := func(b []byte, logSeq bool) {
 				if len(b) == 0 {
 					// don't bother
 					return
@@ -159,11 +161,14 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 					return
 				}
 				event := entry.event()
+				if logSeq {
+					events.Log("event seq read: %d", event.Sequence)
+				}
 				c.send(ctx, eventErr{event: event})
 			}
 
 			var buffer bytes.Buffer
-			readEvents := func() error {
+			readEvents := func(c int) error {
 				for {
 					b, err := br.ReadBytes('\n')
 
@@ -179,7 +184,11 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 					// check to see if the buffer ends with a newline
 					if buffer.Len() > 0 {
 						if buffer.Bytes()[buffer.Len()-1] == '\n' {
-							handleEventData(buffer.Bytes())
+							shouldLog := c < 0 || c > 0
+							if c > 0 {
+								c--
+							}
+							handleEventData(buffer.Bytes(), shouldLog)
 							buffer.Reset()
 						}
 					}
@@ -192,7 +201,7 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 
 			// loop and read as many lines as possible.
 			for {
-				err = readEvents()
+				err = readEvents(logCount)
 				if err != io.EOF {
 					return errors.Wrap(err, "read bytes")
 				}
@@ -201,7 +210,7 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 					//events.Debug("Manually checking log")
 					continue
 				case err := <-fsErrCh:
-					if err := readEvents(); err != io.EOF {
+					if err := readEvents(logCount); err != io.EOF {
 						events.Log("could not consume rest of file: %{error}s", err)
 					}
 					return errors.Wrap(err, "watcher error")
@@ -211,7 +220,7 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 						continue
 					case fsnotify.Create:
 						events.Debug("New changelog created. Consuming the rest of current one...")
-						err := readEvents()
+						err := readEvents(-1)
 						if err != io.EOF {
 							return errors.Wrap(err, "consume rest of changelog")
 						}
