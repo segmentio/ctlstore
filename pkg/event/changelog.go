@@ -140,6 +140,7 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 				return errors.Wrap(err, "open changelog")
 			}
 			defer func() {
+				events.Debug("Closing changelog...")
 				if err := f.Close(); err != nil {
 					errs.Incr("changelog-errors", stats.T("op", "close file"))
 					events.Log("Could not close changelog file: %{error}s", err)
