@@ -128,6 +128,7 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 	defer cancel()
 
 	logCount := 0
+	prevSeq := int64(-1)
 	// each iteration opens the file and reads until it is rotated.
 	for ctx.Err() == nil {
 		// Read as much as possible until you hit EOF.  Then wait for a notification
@@ -145,7 +146,7 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 				}
 			}()
 			events.Debug("Opening changelog...")
-			logCount = 2 // log first read seq # from new file
+			logCount = 3 // log first read seq # from new file
 
 			br := bufio.NewReaderSize(f, 60*1024)
 
@@ -162,8 +163,10 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 				}
 				event := entry.event()
 				if logSeq {
-					events.Log("event seq read: %d", event.Sequence)
+					events.Log("prev event seq: %d", prevSeq)
+					events.Log("cur event seq: %d", event.Sequence)
 				}
+				prevSeq = event.Sequence
 				c.send(ctx, eventErr{event: event})
 			}
 
@@ -226,7 +229,7 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 						if err != io.EOF {
 							return errors.Wrap(err, "consume rest of changelog")
 						}
-						events.Debug("Restarting reader")
+						events.Debug("Restarting reader, last seq from old file: %d", prevSeq)
 						return nil
 					}
 				case <-ctx.Done():
