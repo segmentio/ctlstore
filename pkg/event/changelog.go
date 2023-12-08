@@ -198,7 +198,7 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 				}
 				select {
 				case <-time.After(time.Second):
-					events.Debug("Manually checking log")
+					//events.Debug("Manually checking log")
 					continue
 				case err := <-fsErrCh:
 					if err := readEvents(); err != io.EOF {

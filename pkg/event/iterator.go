@@ -2,6 +2,7 @@ package event
 
 import (
 	"context"
+	"github.com/segmentio/events/v2"
 	"strings"
 
 	"github.com/segmentio/errors-go"
@@ -71,6 +72,7 @@ func (i *Iterator) Next(ctx context.Context) (event Event, err error) {
 	i.previous = &event
 	if previous != nil {
 		if previous.Sequence != event.Sequence-1 {
+			events.Log("out of sync sequences (cur-1 should equal prev), prev: %d cur: %d", previous.Sequence, event.Sequence)
 			// we have an out of order changelog
 			return event, ErrOutOfSync
 		}
