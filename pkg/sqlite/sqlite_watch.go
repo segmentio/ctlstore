@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+
 	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/scanfunc"

@@ -22,6 +22,8 @@ type CallbackWriter struct {
 	transactionChanges []sqlite.SQLiteWatchChange
 }
 
+// TODO: write a small struct with a couple receiver methods to make the below code more clean & simple
+
 func (w *CallbackWriter) ApplyDMLStatement(ctx context.Context, statement schema.DMLStatement) error {
 	err := w.Delegate.ApplyDMLStatement(ctx, statement)
 	if err != nil {
@@ -30,8 +32,18 @@ func (w *CallbackWriter) ApplyDMLStatement(ctx context.Context, statement schema
 
 	// If beginning a transaction then start accumulating changes
 	if statement.Statement == schema.DMLTxBeginKey {
-		w.transactionChanges = make([]sqlite.SQLiteWatchChange, 0)
-		stats.Set("ldb_changes_accumulated", len(w.transactionChanges))
+		if w.transactionChanges == nil {
+			w.transactionChanges = make([]sqlite.SQLiteWatchChange, 0)
+		} else {
+			if len(w.transactionChanges) > 0 {
+				// This should never happen, but just in case...
+				stats.Add("ldb_changes_abandoned", len(w.transactionChanges))
+				events.Log("error: abandoned %{count}d changes from incomplete transaction", len(w.transactionChanges))
+			}
+			// Reset to size 0, but keep the underlying array
+			w.transactionChanges = w.transactionChanges[:0]
+		}
+		stats.Set("ldb_changes_accumulated", 0)
 		return nil
 	}
 
@@ -43,7 +55,8 @@ func (w *CallbackWriter) ApplyDMLStatement(ctx context.Context, statement schema
 			// Transaction done! Send out the accumulated changes
 			changes = append(w.transactionChanges, changes...)
 			stats.Set("ldb_changes_accumulated", len(changes))
-			w.transactionChanges = nil
+			// Reset to size 0, but keep the underlying array
+			w.transactionChanges = w.transactionChanges[:0]
 		} else {
 			// Transaction isn't over yet, save the latest changes
 			w.transactionChanges = append(w.transactionChanges, changes...)
