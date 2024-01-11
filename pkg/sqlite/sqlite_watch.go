@@ -3,8 +3,8 @@ package sqlite
 import (
 	"context"
 	"database/sql"
-
 	"github.com/pkg/errors"
+	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/ctlstore/pkg/scanfunc"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/go-sqlite3"
@@ -39,6 +39,11 @@ func RegisterSQLiteWatch(dbName string, buffer *SQLChangeBuffer) error {
 				cnt := pud.Count()
 				var newRow []interface{}
 				var oldRow []interface{}
+
+				// Don't bother propagating updates of our internal bookkeeping tables
+				if ldb.IsInternalTable(pud.TableName) {
+					return
+				}
 
 				if pud.Op == sqlite3.SQLITE_UPDATE || pud.Op == sqlite3.SQLITE_DELETE {
 					oldRow = make([]interface{}, cnt)
