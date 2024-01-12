@@ -16,6 +16,7 @@ type entry struct {
 func (e entry) event() Event {
 	return Event{
 		Sequence: e.Seq,
+		Type:     e.Type,
 		RowUpdate: RowUpdate{
 			FamilyName: e.Family,
 			TableName:  e.Table,

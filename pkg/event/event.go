@@ -3,6 +3,7 @@ package event
 // Event is the type that the Iterator produces
 type Event struct {
 	Sequence  int64
+	Type      string
 	RowUpdate RowUpdate
 }
 
