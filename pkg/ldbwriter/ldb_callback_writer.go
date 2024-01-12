@@ -16,51 +16,76 @@ type CallbackWriter struct {
 	DB        *sql.DB
 	Delegate  LDBWriter
 	Callbacks []LDBWriteCallback
-	// Buffer between SQLite Callback and our code
+	// Buffer between SQLite preupdate Hook and this code
 	ChangeBuffer *sqlite.SQLChangeBuffer
 	// Accumulated changes across multiple ApplyDMLStatement calls
 	transactionChanges []sqlite.SQLiteWatchChange
 }
 
-// TODO: write a small struct with a couple receiver methods to make the below code more clean & simple
+func (w *CallbackWriter) InTransaction() bool {
+	return w.transactionChanges != nil
+}
 
+func (w *CallbackWriter) BeginTransaction() {
+	if w.transactionChanges == nil {
+		w.transactionChanges = make([]sqlite.SQLiteWatchChange, 0)
+	} else {
+		if len(w.transactionChanges) > 0 {
+			// This should never happen, but just in case...
+			stats.Add("ldb_changes_abandoned", len(w.transactionChanges))
+			events.Log("error: abandoned %{count}d changes from incomplete transaction", len(w.transactionChanges))
+		}
+		// Reset to size 0, but keep the underlying array
+		w.transactionChanges = w.transactionChanges[:0]
+	}
+	stats.Set("ldb_changes_accumulated", 0)
+}
+
+// Transaction done! Return the accumulated changes including the latest ones
+func (w *CallbackWriter) EndTransaction(changes *[]sqlite.SQLiteWatchChange) {
+	*changes = append(w.transactionChanges, *changes...)
+	stats.Set("ldb_changes_accumulated", len(*changes))
+	// Reset to size 0, but keep the underlying array
+	w.transactionChanges = w.transactionChanges[:0]
+}
+
+// Transaction isn't over yet, save the latest changes
+func (w *CallbackWriter) AccumulateChanges(changes []sqlite.SQLiteWatchChange) {
+	w.transactionChanges = append(w.transactionChanges, changes...)
+	stats.Set("ldb_changes_accumulated", len(w.transactionChanges))
+}
+
+// ApplyDMLStatement
+//
+// It is not obvious, but this code executes synchronously:
+//  1. Delegate.AppyDMLStatement executes the DML statement against the SQLite LDB.
+//     (WARNING: That's what the code is wired up to do today, January 2024, though the Delegate
+//     could be doing other things since the code is so flexible.)
+//  2. When SQLite processes the statement it invokes our preupdate hook (see sqlite_watch.go).
+//  3. Our preupdate hook writes the changes to the change buffer.
+//  4. The code returns here, and we decide whether to process the change buffer immediately or
+//     wait until the end of the ledger transaction.
 func (w *CallbackWriter) ApplyDMLStatement(ctx context.Context, statement schema.DMLStatement) error {
 	err := w.Delegate.ApplyDMLStatement(ctx, statement)
 	if err != nil {
 		return err
 	}
 
-	// If beginning a transaction then start accumulating changes
+	// If beginning a transaction then start accumulating changes, don't send them out yet
 	if statement.Statement == schema.DMLTxBeginKey {
-		if w.transactionChanges == nil {
-			w.transactionChanges = make([]sqlite.SQLiteWatchChange, 0)
-		} else {
-			if len(w.transactionChanges) > 0 {
-				// This should never happen, but just in case...
-				stats.Add("ldb_changes_abandoned", len(w.transactionChanges))
-				events.Log("error: abandoned %{count}d changes from incomplete transaction", len(w.transactionChanges))
-			}
-			// Reset to size 0, but keep the underlying array
-			w.transactionChanges = w.transactionChanges[:0]
-		}
-		stats.Set("ldb_changes_accumulated", 0)
+		w.BeginTransaction()
 		return nil
 	}
 
 	changes := w.ChangeBuffer.Pop()
 
-	// Are we in a transaction?
-	if w.transactionChanges != nil {
+	if w.InTransaction() {
 		if statement.Statement == schema.DMLTxEndKey {
-			// Transaction done! Send out the accumulated changes
-			changes = append(w.transactionChanges, changes...)
-			stats.Set("ldb_changes_accumulated", len(changes))
-			// Reset to size 0, but keep the underlying array
-			w.transactionChanges = w.transactionChanges[:0]
+			// Transaction done, let's send what we have accumulated
+			w.EndTransaction(&changes)
 		} else {
-			// Transaction isn't over yet, save the latest changes
-			w.transactionChanges = append(w.transactionChanges, changes...)
-			stats.Set("ldb_changes_accumulated", len(w.transactionChanges))
+			// Transaction not over, continue accumulating
+			w.AccumulateChanges(changes)
 			return nil
 		}
 	}

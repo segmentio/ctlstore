@@ -84,7 +84,7 @@ func TestCallbackWriter_ApplyDMLStatement(t *testing.T) {
 		wantErr                    bool
 	}{
 		{
-			name: "Test 1",
+			name: "Test one bare statement",
 			args: args{
 				ctx:        ctx,
 				statements: []schema.DMLStatement{schema.NewTestDMLStatement("INSERT INTO foo VALUES('dummy');")},
@@ -94,7 +94,7 @@ func TestCallbackWriter_ApplyDMLStatement(t *testing.T) {
 			wantErr:                    false,
 		},
 		{
-			name: "Test 2",
+			name: "Test three bare statements",
 			args: args{
 				ctx: ctx,
 				statements: []schema.DMLStatement{
@@ -109,7 +109,7 @@ func TestCallbackWriter_ApplyDMLStatement(t *testing.T) {
 			wantErr:                    false,
 		},
 		{
-			name: "Test 3",
+			name: "Test three statements in a ledger transaction",
 			args: args{
 				ctx: ctx,
 				statements: []schema.DMLStatement{
@@ -123,6 +123,22 @@ func TestCallbackWriter_ApplyDMLStatement(t *testing.T) {
 			// since it's a transaction, we expect only one callback, and it should have all 3 updates
 			expectedCallbacks:          1,
 			expectedUpdatesPerCallback: 3,
+			wantErr:                    false,
+		},
+		{
+			name: "Test two statements in a ledger transaction",
+			args: args{
+				ctx: ctx,
+				statements: []schema.DMLStatement{
+					schema.NewTestDMLStatement(schema.DMLTxBeginKey),
+					schema.NewTestDMLStatement("INSERT INTO foo VALUES('blue');"),
+					schema.NewTestDMLStatement("INSERT INTO foo VALUES('green');"),
+					schema.NewTestDMLStatement(schema.DMLTxEndKey),
+				},
+			},
+			// since it's a transaction, we expect only one callback, and it should have all 3 updates
+			expectedCallbacks:          1,
+			expectedUpdatesPerCallback: 2,
 			wantErr:                    false,
 		},
 	}
