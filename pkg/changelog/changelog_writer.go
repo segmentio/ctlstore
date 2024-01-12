@@ -2,6 +2,7 @@ package changelog
 
 import (
 	"encoding/json"
+	"github.com/segmentio/ctlstore/pkg/sqlite"
 
 	"github.com/pkg/errors"
 	"github.com/segmentio/events/v2"
@@ -17,6 +18,7 @@ type (
 	}
 	ChangelogEntry struct {
 		Seq    int64
+		Type   sqlite.ChangeType
 		Family string
 		Table  string
 		Key    []interface{}
@@ -30,11 +32,13 @@ func NewChangelogEntry(seq int64, family string, table string, key []interface{}
 func (w *ChangelogWriter) WriteChange(e ChangelogEntry) error {
 	structure := struct {
 		Seq    int64         `json:"seq"`
+		Type   string        `json:"type"`
 		Family string        `json:"family"`
 		Table  string        `json:"table"`
 		Key    []interface{} `json:"key"`
 	}{
 		e.Seq,
+		e.Type.String(),
 		e.Family,
 		e.Table,
 		e.Key,
