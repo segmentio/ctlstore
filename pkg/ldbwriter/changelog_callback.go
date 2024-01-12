@@ -37,10 +37,12 @@ func (c *ChangelogCallback) LDBWritten(ctx context.Context, data LDBWriteMetadat
 		for _, key := range keys {
 			seq := atomic.AddInt64(&c.Seq, 1)
 			err = c.ChangelogWriter.WriteChange(changelog.ChangelogEntry{
-				Seq:    seq,
-				Family: fam.Name,
-				Table:  tbl.Name,
-				Key:    key,
+				Seq:       seq,
+				Op:        changelog.MapSQLiteOpToChangeOp(change.Op),
+				LedgerSeq: data.Statement.Sequence,
+				Family:    fam.Name,
+				Table:     tbl.Name,
+				Key:       key,
 			})
 			if err != nil {
 				events.Log("Skipped logging change to %{family}s.%{table}s:%{key}v: %{err}v",

@@ -10,16 +10,6 @@ import (
 	"github.com/segmentio/go-sqlite3"
 )
 
-type ChangeType int
-
-const (
-	CHANGE_INSERT ChangeType = iota
-	CHANGE_UPDATE
-	CHANGE_DELETE
-	CHANGE_UNKNOWN
-	// Add other statement types here
-)
-
 type (
 	SQLiteWatchChange struct {
 		Op           int
@@ -27,7 +17,6 @@ type (
 		TableName    string
 		OldRowID     int64
 		NewRowID     int64
-		Type         ChangeType
 		OldRow       []interface{}
 		NewRow       []interface{}
 	}
@@ -38,33 +27,6 @@ type (
 		Value interface{} `json:"value"`
 	}
 )
-
-// Map SQLite's update operation types to our own internal type
-func determineChangeType(op int) ChangeType {
-	switch op {
-	case sqlite3.SQLITE_INSERT:
-		return CHANGE_INSERT
-	case sqlite3.SQLITE_UPDATE:
-		return CHANGE_UPDATE
-	case sqlite3.SQLITE_DELETE:
-		return CHANGE_DELETE
-	default:
-		return CHANGE_UNKNOWN
-	}
-}
-
-func (c ChangeType) String() string {
-	switch c {
-	case CHANGE_INSERT:
-		return "insert"
-	case CHANGE_UPDATE:
-		return "update"
-	case CHANGE_DELETE:
-		return "delete"
-	default:
-		return "N/A"
-	}
-}
 
 // Registers a hook against dbName that will populate the passed buffer with
 // sqliteWatchChange messages each time a change is executed against the
@@ -107,7 +69,6 @@ func RegisterSQLiteWatch(dbName string, buffer *SQLChangeBuffer) error {
 					NewRowID:     pud.NewRowID,
 					OldRow:       oldRow,
 					NewRow:       newRow,
-					Type:         determineChangeType(pud.Op),
 				})
 			})
 			return nil

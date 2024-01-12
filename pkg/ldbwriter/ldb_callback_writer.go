@@ -23,7 +23,7 @@ type CallbackWriter struct {
 }
 
 func (w *CallbackWriter) InTransaction() bool {
-	return w.transactionChanges != nil
+	return len(w.transactionChanges) > 0
 }
 
 func (w *CallbackWriter) BeginTransaction() {

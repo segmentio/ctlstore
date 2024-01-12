@@ -31,6 +31,7 @@ type LDBWriteMetadata struct {
 	DB        *sql.DB
 	Statement schema.DMLStatement
 	Changes   []sqlite.SQLiteWatchChange
+	// TODO: sequence
 }
 
 // ldbWriter applies statements to a SQL database
