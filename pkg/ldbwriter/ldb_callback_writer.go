@@ -59,7 +59,7 @@ func (w *CallbackWriter) AccumulateChanges(changes []sqlite.SQLiteWatchChange) {
 //
 // It is not obvious, but this code executes synchronously:
 //  1. Delegate.AppyDMLStatement executes the DML statement against the SQLite LDB.
-//     (WARNING: That's what the code is wired up to do today, January 2024, though the Delegate
+//     (⚠️ WARNING: That's what the code is wired up to do today, January 2024, though the Delegate
 //     could be doing other things since the code is so flexible.)
 //  2. When SQLite processes the statement it invokes our preupdate hook (see sqlite_watch.go).
 //  3. Our preupdate hook writes the changes to the change buffer.
