@@ -3,7 +3,7 @@ package event
 // entry represents a single row in the changelog
 // e.g.
 //
-//	{"seq":1,"family":"fam","table":"foo","key":[{"name":"id","type":"int","value":1}]}
+//	{"seq":1,"family":"fam","type":"insert","table":"foo","key":[{"name":"id","type":"int","value":1}]}
 type entry struct {
 	Seq    int64  `json:"seq"`
 	Type   string `json:"type"`
