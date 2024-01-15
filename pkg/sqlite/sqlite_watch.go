@@ -12,13 +12,14 @@ import (
 
 type (
 	SQLiteWatchChange struct {
-		Op           int
-		DatabaseName string
-		TableName    string
-		OldRowID     int64
-		NewRowID     int64
-		OldRow       []interface{}
-		NewRow       []interface{}
+		Op             int
+		DatabaseName   string
+		TableName      string
+		OldRowID       int64
+		NewRowID       int64
+		OldRow         []interface{}
+		NewRow         []interface{}
+		LedgerSequence schema.DMLSequence
 	}
 	// pkAndMeta is a primary key value with name and type metadata to boot
 	pkAndMeta struct {

@@ -55,12 +55,13 @@ type (
 		WriteLine WriteLine
 	}
 	ChangelogEntry struct {
-		Seq       int64
-		Op        ChangeOp
-		Family    string
-		Table     string
-		Key       []interface{}
-		LedgerSeq schema.DMLSequence
+		Seq         int64
+		Op          ChangeOp
+		Family      string
+		Table       string
+		Key         []interface{}
+		LedgerSeq   schema.DMLSequence
+		Transaction bool
 	}
 )
 
@@ -70,15 +71,17 @@ func NewChangelogEntry(seq int64, family string, table string, key []interface{}
 
 func (w *ChangelogWriter) WriteChange(e ChangelogEntry) error {
 	structure := struct {
-		Seq       int64         `json:"seq"`
-		LedgerSeq int64         `json:"ledgerSeq"`
-		Op        string        `json:"op"`
-		Family    string        `json:"family"`
-		Table     string        `json:"table"`
-		Key       []interface{} `json:"key"`
+		Seq         int64         `json:"seq"`
+		LedgerSeq   int64         `json:"ledgerSeq"`
+		Transaction bool          `json:"tx"`
+		Op          string        `json:"op"`
+		Family      string        `json:"family"`
+		Table       string        `json:"table"`
+		Key         []interface{} `json:"key"`
 	}{
 		e.Seq,
 		e.LedgerSeq.Int(),
+		e.Transaction,
 		e.Op.String(),
 		e.Family,
 		e.Table,

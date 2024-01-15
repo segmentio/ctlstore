@@ -136,9 +136,27 @@ func TestCallbackWriter_ApplyDMLStatement(t *testing.T) {
 					schema.NewTestDMLStatement(schema.DMLTxEndKey),
 				},
 			},
-			// since it's a transaction, we expect only one callback, and it should have all 3 updates
+			// since it's a transaction, we expect only one callback, and it should have all 2 updates
 			expectedCallbacks:          1,
 			expectedUpdatesPerCallback: 2,
+			wantErr:                    false,
+		},
+		{
+			name: "Test 4 statements in a ledger transaction, using REPLACE INTO",
+			args: args{
+				ctx: ctx,
+				statements: []schema.DMLStatement{
+					schema.NewTestDMLStatement(schema.DMLTxBeginKey),
+					schema.NewTestDMLStatement("REPLACE INTO foo('bar') VALUES('lion');"),
+					schema.NewTestDMLStatement("REPLACE INTO foo('bar') VALUES('green');"),
+					schema.NewTestDMLStatement("REPLACE INTO foo('bar') VALUES('boston');"),
+					schema.NewTestDMLStatement("REPLACE INTO foo('bar') VALUES('detroit')"),
+					schema.NewTestDMLStatement(schema.DMLTxEndKey),
+				},
+			},
+			// since it's a transaction, we expect only one callback, and it should have all 4 updates
+			expectedCallbacks:          1,
+			expectedUpdatesPerCallback: 4,
 			wantErr:                    false,
 		},
 	}
