@@ -5,7 +5,6 @@ type Event struct {
 	Sequence       int64
 	LedgerSequence int64
 	Transaction    bool
-	Op             string
 	RowUpdate      RowUpdate
 }
 

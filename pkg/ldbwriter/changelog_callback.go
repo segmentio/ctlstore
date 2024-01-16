@@ -38,7 +38,6 @@ func (c *ChangelogCallback) LDBWritten(ctx context.Context, data LDBWriteMetadat
 			seq := atomic.AddInt64(&c.Seq, 1)
 			err = c.ChangelogWriter.WriteChange(changelog.ChangelogEntry{
 				Seq:         seq,
-				Op:          changelog.MapSQLiteOpToChangeOp(change.Op),
 				LedgerSeq:   change.LedgerSequence,
 				Transaction: data.Transaction,
 				Family:      fam.Name,

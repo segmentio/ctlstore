@@ -35,12 +35,14 @@ func (w *CallbackWriter) beginTransaction(ledgerSequence schema.DMLSequence) {
 			len(w.transactionChanges), ledgerSequence)
 	}
 	w.transactionChanges = make([]sqlite.SQLiteWatchChange, 0)
+	// TODO: Figure out if we wanna use a gauge or a counter here
 	stats.Set("ldb_changes_accumulated", 0)
 }
 
 // Transaction done! Return the accumulated changes including the latest ones
 func (w *CallbackWriter) endTransaction(changes *[]sqlite.SQLiteWatchChange) {
 	*changes = append(w.transactionChanges, *changes...)
+	// TODO: Figure out if we wanna use a gauge or a counter here
 	stats.Set("ldb_changes_accumulated", len(*changes))
 	w.transactionChanges = nil
 }
@@ -48,6 +50,7 @@ func (w *CallbackWriter) endTransaction(changes *[]sqlite.SQLiteWatchChange) {
 // Transaction isn't over yet, save the latest changes
 func (w *CallbackWriter) accumulateChanges(changes []sqlite.SQLiteWatchChange) {
 	w.transactionChanges = append(w.transactionChanges, changes...)
+	// TODO: Figure out if we wanna use a gauge or a counter here
 	stats.Set("ldb_changes_accumulated", len(w.transactionChanges))
 }
 
