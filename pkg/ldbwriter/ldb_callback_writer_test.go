@@ -177,7 +177,7 @@ func TestCallbackWriter_ApplyDMLStatement(t *testing.T) {
 					schema.NewTestDMLStatement(schema.DMLTxEndKey),
 				},
 			},
-			// since it's a transaction, we expect only one callback, and it should have all 3 updates
+			// since these are transactions, we expect two callbacks, and each should have all 3 updates
 			expectedCallbacks:          2,
 			expectedUpdatesPerCallback: 3,
 			wantErr:                    false,
