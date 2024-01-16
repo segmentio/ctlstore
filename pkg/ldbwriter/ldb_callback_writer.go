@@ -3,8 +3,6 @@ package ldbwriter
 import (
 	"context"
 	"database/sql"
-	"fmt"
-
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlite"
 	"github.com/segmentio/events/v2"
@@ -96,12 +94,9 @@ func (w *CallbackWriter) ApplyDMLStatement(ctx context.Context, statement schema
 		}
 	}
 
-	// DEBUG:
-	fmt.Printf("CallbackWriter.ApplyDMLStatement: invoking callback: len(changes)=%d statement.ledgerSequence=%d\n", len(changes), statement.Sequence)
-	//fmt.Printf("CallbackWriter.ApplyDMLStatement: len(changes)=%d changes=%+v\n", len(changes), changes)
 	stats.Observe("ldb_changes_written", len(changes))
 	for _, callback := range w.Callbacks {
-		events.Debug("Writing DML callback for %{cb}T", callback)
+		events.Debug("Writing DML callback for %{cb}T with %{changeCount}d changes", callback, len(changes))
 		callback.LDBWritten(ctx, LDBWriteMetadata{
 			DB:          w.DB,
 			Statement:   statement,

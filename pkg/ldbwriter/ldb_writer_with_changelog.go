@@ -19,6 +19,8 @@ type LDBWriterWithChangelog struct {
 	Seq             int64
 }
 
+// ⚠️ WARNING: This code is not used except in a unit test.
+// See ldb_callback_writer.go for the real code and more description.
 //
 // NOTE: How does the changelog work?
 //
@@ -33,7 +35,6 @@ type LDBWriterWithChangelog struct {
 // This is pretty complex, but after enumerating about 8 different options, it
 // ended up actually being the most simple. Other options involved not-so-great
 // options like parsing SQL or maintaining triggers on every table.
-//
 func (w *LDBWriterWithChangelog) ApplyDMLStatement(ctx context.Context, statement schema.DMLStatement) error {
 	err := w.LdbWriter.ApplyDMLStatement(ctx, statement)
 	if err != nil {
