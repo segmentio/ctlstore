@@ -17,6 +17,7 @@ type TestUpdateCallbackHandler struct {
 	Changes []sqlite.SQLiteWatchChange
 }
 
+// Record the changes propagated from ApplyDMLStatement
 func (u *TestUpdateCallbackHandler) LDBWritten(ctx context.Context, data LDBWriteMetadata) {
 	// The [:0] slice operation will reuse the underlying array of u.Changes if it's large enough
 	// to hold all elements of data.Changes, otherwise it will allocate a new one.
@@ -142,7 +143,7 @@ func TestCallbackWriter_ApplyDMLStatement(t *testing.T) {
 			wantErr:                    false,
 		},
 		{
-			name: "Test 4 statements in a ledger transaction, using REPLACE INTO",
+			name: "Test four statements in a ledger transaction, using REPLACE INTO",
 			args: args{
 				ctx: ctx,
 				statements: []schema.DMLStatement{
@@ -157,6 +158,28 @@ func TestCallbackWriter_ApplyDMLStatement(t *testing.T) {
 			// since it's a transaction, we expect only one callback, and it should have all 4 updates
 			expectedCallbacks:          1,
 			expectedUpdatesPerCallback: 4,
+			wantErr:                    false,
+		},
+		{
+			name: "Test six statements in two ledger transactions",
+			args: args{
+				ctx: ctx,
+				statements: []schema.DMLStatement{
+					schema.NewTestDMLStatement(schema.DMLTxBeginKey),
+					schema.NewTestDMLStatement("INSERT INTO foo VALUES('cat');"),
+					schema.NewTestDMLStatement("INSERT INTO foo VALUES('dog');"),
+					schema.NewTestDMLStatement("INSERT INTO foo VALUES('hamster');"),
+					schema.NewTestDMLStatement(schema.DMLTxEndKey),
+					schema.NewTestDMLStatement(schema.DMLTxBeginKey),
+					schema.NewTestDMLStatement("INSERT INTO foo VALUES('fish');"),
+					schema.NewTestDMLStatement("INSERT INTO foo VALUES('rabbit');"),
+					schema.NewTestDMLStatement("INSERT INTO foo VALUES('ferret');"),
+					schema.NewTestDMLStatement(schema.DMLTxEndKey),
+				},
+			},
+			// since it's a transaction, we expect only one callback, and it should have all 3 updates
+			expectedCallbacks:          2,
+			expectedUpdatesPerCallback: 3,
 			wantErr:                    false,
 		},
 	}
