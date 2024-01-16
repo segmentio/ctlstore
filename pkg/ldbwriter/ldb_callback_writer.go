@@ -33,23 +33,19 @@ func (w *CallbackWriter) beginTransaction(ledgerSequence schema.DMLSequence) {
 			len(w.transactionChanges), ledgerSequence)
 	}
 	w.transactionChanges = make([]sqlite.SQLiteWatchChange, 0)
-	// TODO: Figure out if we wanna use a gauge or a counter here
-	stats.Set("ldb_changes_accumulated", 0)
 }
 
 // Transaction done! Return the accumulated changes including the latest ones
-func (w *CallbackWriter) endTransaction(changes *[]sqlite.SQLiteWatchChange) {
-	*changes = append(w.transactionChanges, *changes...)
-	// TODO: Figure out if we wanna use a gauge or a counter here
-	stats.Set("ldb_changes_accumulated", len(*changes))
+func (w *CallbackWriter) endTransaction(changes []sqlite.SQLiteWatchChange) (transactionChanges []sqlite.SQLiteWatchChange) {
+	w.accumulateChanges(changes)
+	transactionChanges = w.transactionChanges
 	w.transactionChanges = nil
+	return
 }
 
 // Transaction isn't over yet, save the latest changes
 func (w *CallbackWriter) accumulateChanges(changes []sqlite.SQLiteWatchChange) {
 	w.transactionChanges = append(w.transactionChanges, changes...)
-	// TODO: Figure out if we wanna use a gauge or a counter here
-	stats.Set("ldb_changes_accumulated", len(w.transactionChanges))
 }
 
 // ApplyDMLStatement
@@ -86,7 +82,7 @@ func (w *CallbackWriter) ApplyDMLStatement(ctx context.Context, statement schema
 		transaction = true
 		if statement.Statement == schema.DMLTxEndKey {
 			// Transaction done, let's send what we have accumulated
-			w.endTransaction(&changes)
+			changes = w.endTransaction(changes)
 		} else {
 			// Transaction not over, continue accumulating
 			w.accumulateChanges(changes)
