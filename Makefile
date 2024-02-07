@@ -3,7 +3,7 @@ LDFLAGS     := -ldflags='-X "github.com/segmentio/ctlstore/pkg/version.version=$
 DOCKER_REPO := 528451384384.dkr.ecr.us-west-2.amazonaws.com/ctlstore
 Q=
 
-GOTESTFLAGS = -race -count 1
+GOTESTFLAGS = -tags="sqlite_preupdate_hook" -race -count 1
 
 export GO111MODULE?=on
 
@@ -21,11 +21,11 @@ clean:
 
 .PHONY: install
 install:
-	$Qgo install ./pkg/cmd/ctlstore
+	$Qgo install -tags="sqlite_preupdate_hook" ./pkg/cmd/ctlstore
 
 .PHONY: build
 build: deps
-	$Qgo build -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=${VERSION} -X github.com/segmentio/ctlstore/pkg/globalstats.version=${VERSION}" -o ./bin/ctlstore ./pkg/cmd/ctlstore
+	$Qgo build -tags="sqlite_preupdate_hook" -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=${VERSION} -X github.com/segmentio/ctlstore/pkg/globalstats.version=${VERSION}" -o ./bin/ctlstore ./pkg/cmd/ctlstore
 
 .PHONY: docker
 docker:
@@ -54,11 +54,11 @@ release-stable: docker
 
 .PHONY: vet
 vet:
-	$Qgo vet ./...
+	$Qgo vet -tags=sqlite3_preupdate_hook ./...
 
 .PHONY: generate
 generate:
-	$Qgo generate ./...
+	$Qgo generate -tags=sqlite3_preupdate_hook ./...
 
 .PHONY: fmtcheck
 fmtchk:
@@ -75,4 +75,3 @@ test:
 .PHONY: bench
 bench:
 	$Qgo test $(GOTESTFLAGS) -bench .
-

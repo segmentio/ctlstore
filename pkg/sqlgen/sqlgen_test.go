@@ -12,9 +12,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/segmentio/ctlstore/pkg/ctldb"
 	"github.com/segmentio/ctlstore/pkg/schema"
-	_ "github.com/segmentio/go-sqlite3"
 )
 
 func TestMetaTableAsCreateTableDDL(t *testing.T) {

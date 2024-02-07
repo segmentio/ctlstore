@@ -12,10 +12,10 @@ RUN apk --update add gcc git curl alpine-sdk libc6-compat ca-certificates sqlite
 COPY . /go/src/${SRC}
 WORKDIR /go/src/${SRC}
 RUN go mod vendor
-RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=$VERSION" ${SRC}/pkg/cmd/ctlstore \
+RUN CGO_ENABLED=1 go install -tags sqlite_preupdate_hook -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=$VERSION" ${SRC}/pkg/cmd/ctlstore \
   && cp ${GOPATH}/bin/ctlstore /usr/local/bin
 
-RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=$VERSION" ${SRC}/pkg/cmd/ctlstore-cli \
+RUN CGO_ENABLED=1 go install -tags sqlite_preupdate_hook -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=$VERSION" ${SRC}/pkg/cmd/ctlstore-cli \
   && cp ${GOPATH}/bin/ctlstore-cli /usr/local/bin
 
 FROM alpine

@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/scanfunc"
 	"github.com/segmentio/ctlstore/pkg/schema"
-	"github.com/segmentio/go-sqlite3"
 )
 
 type (

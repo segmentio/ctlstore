@@ -6,10 +6,10 @@ import (
 	"fmt"
 
 	"github.com/go-sql-driver/mysql"
+	sqlite "github.com/mattn/go-sqlite3"
 	mysql2 "github.com/segmentio/ctlstore/pkg/mysql"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	sqlite2 "github.com/segmentio/ctlstore/pkg/sqlite"
-	sqlite "github.com/segmentio/go-sqlite3"
 )
 
 type sqlDBInfo interface {

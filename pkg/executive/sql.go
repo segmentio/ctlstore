@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"strings"
 
-	_ "github.com/segmentio/go-sqlite3" // gives us sqlite3 everywhere
+	_ "github.com/mattn/go-sqlite3" // gives us sqlite3 everywhere
 )
 
 // SQLDBClient allows generalizing several database/sql types
