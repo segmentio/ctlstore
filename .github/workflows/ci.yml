@@ -116,5 +116,3 @@ jobs:
             --push \
             .
       - run: echo "GHCR PUBLISH SUCCESSFUL"
-
-
