@@ -204,7 +204,7 @@ func (e *dbExecutive) CreateTable(familyName string, tableName string, fieldName
 	}
 	defer dlw.Close()
 
-	seq, err := dlw.Add(ctx, logDDL)
+	seq, err := dlw.Add(ctx, logDDL, familyName, tableName)
 	if err != nil {
 		return errors.Wrap(err, "apply dml")
 	}
@@ -319,12 +319,12 @@ func (e *dbExecutive) AddFields(familyName string, tableName string, fieldNames 
 			}
 
 			// We first write the column modification to the DML ledger within the transaction.
-			// It's important that this is done befored the DDL is applied to the ctldb, as
+			// It's important that this is done before the DDL is applied to the ctldb, as
 			// the DDL is not able to be rolled back. In this way, if the DDL fails, the DML
 			// can be rolled back.
 			dlw := dmlLedgerWriter{Tx: tx, TableName: dmlLedgerTableName}
 			defer dlw.Close()
-			seq, err := dlw.Add(ctx, logDDL)
+			seq, err := dlw.Add(ctx, logDDL, familyName, tableName)
 			if err != nil {
 				return errors.Wrap(err, "add dml")
 			}
@@ -585,15 +585,15 @@ func (e *dbExecutive) Mutate(
 			return &errs.BadRequestError{Err: "Request generated too large of a DML statement"}
 		}
 
-		// Execute the actual DML write
+		// Execute the actual DML write (to mirror tables in Ctldb)
 		_, err = tx.ExecContext(ctx, dmlSQL)
 		if err != nil {
 			events.Log("dml exec error, Request: %{req}+v SQL: %{sql}s", req, dmlSQL)
 			return errors.Wrap(err, "dml exec error")
 		}
 
-		// Now record it in the log table
-		lastSeq, err = dlw.Add(ctx, dmlSQL)
+		// Now record it in the ledger table
+		lastSeq, err = dlw.Add(ctx, dmlSQL, req.FamilyName.String(), req.TableName.String())
 		if err != nil {
 			return errors.Wrap(err, "log write error")
 		}
@@ -1068,7 +1068,7 @@ func (e *dbExecutive) DropTable(table schema.FamilyTable) error {
 		return errors.Wrap(err, "error running drop command")
 	}
 
-	seq, err := dlw.Add(ctx, logDDL)
+	seq, err := dlw.Add(ctx, logDDL, famName.String(), tblName.String())
 	if err != nil {
 		return errors.Wrap(err, "error inserting drop command into ledger")
 	}
@@ -1140,7 +1140,7 @@ func (e *dbExecutive) ClearTable(table schema.FamilyTable) error {
 		return errors.Wrap(err, "error running delete command")
 	}
 
-	seq, err := dlw.Add(ctx, logDDL)
+	seq, err := dlw.Add(ctx, logDDL, famName.String(), tblName.String())
 	if err != nil {
 		return errors.Wrap(err, "error inserting delete command into ledger")
 	}

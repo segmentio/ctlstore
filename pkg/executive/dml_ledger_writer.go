@@ -18,19 +18,21 @@ type dmlLedgerWriter struct {
 	_stmt     *sql.Stmt
 }
 
+// TODO(sharding): figure out what we are doing for ledger transactions
 func (w *dmlLedgerWriter) BeginTx(ctx context.Context) (seq schema.DMLSequence, err error) {
-	return w.Add(ctx, schema.DMLTxBeginKey)
+	return w.Add(ctx, schema.DMLTxBeginKey, "", "")
 }
 
+// TODO(sharding): figure out what we are doing for ledger transactions
 func (w *dmlLedgerWriter) CommitTx(ctx context.Context) (seq schema.DMLSequence, err error) {
-	return w.Add(ctx, schema.DMLTxEndKey)
+	return w.Add(ctx, schema.DMLTxEndKey, "", "")
 }
 
 // Writes an entry to the DML log, returning the sequence or an error
 // if any occurs.
-func (w *dmlLedgerWriter) Add(ctx context.Context, statement string) (seq schema.DMLSequence, err error) {
+func (w *dmlLedgerWriter) Add(ctx context.Context, statement, family, table string) (seq schema.DMLSequence, err error) {
 	if w._stmt == nil {
-		qs := sqlgen.SqlSprintf("INSERT INTO $1 (statement) VALUES(?)", w.TableName)
+		qs := sqlgen.SqlSprintf("INSERT INTO $1 (statement, family_name, table_name) VALUES(?, ?, ?)", w.TableName)
 		stmt, err := w.Tx.PrepareContext(ctx, qs)
 		if err != nil {
 			errs.Incr("dml_ledger_writer.prepare.error")
@@ -39,7 +41,7 @@ func (w *dmlLedgerWriter) Add(ctx context.Context, statement string) (seq schema
 		w._stmt = stmt
 	}
 
-	res, err := w._stmt.ExecContext(ctx, statement)
+	res, err := w._stmt.ExecContext(ctx, statement, family, table)
 	if err != nil {
 		errs.Incr("dml_ledger_writer.exec.error")
 		return

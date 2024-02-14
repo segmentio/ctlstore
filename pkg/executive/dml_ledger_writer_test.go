@@ -43,7 +43,8 @@ func TestDMLLogWriterAdd(t *testing.T) {
 
 			seqs := []schema.DMLSequence{}
 			for _, stString := range testCase.statements {
-				seq, err := w.Add(ctx, stString)
+				// TODO(sharding): update this test to use the family and table?
+				seq, err := w.Add(ctx, stString, "", "")
 				if err != nil {
 					t.Fatalf("Unexpected error: %v", err)
 				}

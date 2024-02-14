@@ -22,11 +22,11 @@ CREATE TABLE ctlstore_dml_ledger (
 	seq INTEGER AUTO_INCREMENT PRIMARY KEY,
 	leader_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
 	tx_id BIGINT,
-	family VARCHAR(191),
-	table VARCHAR(191),
+	family_name VARCHAR(191),
+	table_name VARCHAR(191),
 	statement MEDIUMTEXT NOT NULL,
-	KEY idx_family(family),
-	KEY idx_table(table)
+	KEY idx_family(family_name),
+	KEY idx_table(table_name)
 );
 
 DROP TABLE IF EXISTS locks;
