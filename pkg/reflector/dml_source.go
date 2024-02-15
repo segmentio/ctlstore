@@ -45,7 +45,7 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 		}
 
 		// table layout is: seq, leader_ts, statement
-		qs := sqlgen.SqlSprintf("SELECT seq, leader_ts, statement FROM $1 WHERE seq > ? ORDER BY seq LIMIT $2",
+		qs := sqlgen.SqlSprintf("SELECT seq, leader_ts, statement, family_name, table_name FROM $1 WHERE seq > ? ORDER BY seq LIMIT $2",
 			source.ledgerTableName,
 			fmt.Sprintf("%d", blocksize))
 
@@ -62,9 +62,11 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 		defer rows.Close()
 
 		row := struct {
-			seq       int64
-			leaderTs  string // this is a string b/c the driver errors when trying to Scan into a *time.Time.
-			statement string
+			seq        int64
+			leaderTs   string // this is a string b/c the driver errors when trying to Scan into a *time.Time.
+			statement  string
+			familyName string
+			tableName  string
 		}{}
 
 		for {
@@ -76,7 +78,7 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 				break
 			}
 
-			err = rows.Scan(&row.seq, &row.leaderTs, &row.statement)
+			err = rows.Scan(&row.seq, &row.leaderTs, &row.statement, &row.familyName, &row.tableName)
 			if err != nil {
 				return statement, errors.Wrap(err, "scan row")
 			}
@@ -91,9 +93,11 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 			}
 
 			dmlst := schema.DMLStatement{
-				Sequence:  schema.DMLSequence(row.seq),
-				Statement: row.statement,
-				Timestamp: timestamp,
+				Sequence:   schema.DMLSequence(row.seq),
+				Statement:  row.statement,
+				Timestamp:  timestamp,
+				FamilyName: schema.FamilyName{Name: row.familyName},
+				TableName:  schema.TableName{Name: row.tableName},
 			}
 
 			source.buffer = append(source.buffer, dmlst)

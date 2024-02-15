@@ -23,7 +23,9 @@ func (u *sqlDmlSourceTestUtil) InitializeDB() {
 		CREATE TABLE ctlstore_dml_ledger (
 			seq INTEGER PRIMARY KEY AUTOINCREMENT,
 			leader_ts INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			statement VARCHAR($1)
+			statement VARCHAR($1),
+		    family_name VARCHAR(191) NOT NULL DEFAULT '',
+		    table_name VARCHAR(191) NOT NULL DEFAULT ''
 	 	);
 	 	INSERT INTO ctlstore_dml_ledger (statement) VALUES('');
 		DELETE FROM ctlstore_dml_ledger;

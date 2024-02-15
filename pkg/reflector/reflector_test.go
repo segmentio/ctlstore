@@ -168,7 +168,9 @@ func TestReflector(t *testing.T) {
 		CREATE TABLE ctlstore_dml_ledger (
 			seq INTEGER PRIMARY KEY AUTOINCREMENT,
 			leader_ts INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			statement VARCHAR(786432)
+			statement VARCHAR(786432),
+			family_name VARCHAR(191) NOT NULL DEFAULT '',
+			table_name VARCHAR(191) NOT NULL DEFAULT ''
 		);
 	`)
 	require.NoError(t, err)
