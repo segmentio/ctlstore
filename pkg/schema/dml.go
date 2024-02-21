@@ -40,8 +40,8 @@ func NewTestDMLStatementWithSharding(statement string, familyName FamilyName, ta
 		Statement:  statement,
 		Sequence:   nextTestDmlSeq(),
 		Timestamp:  time.Now(),
-		FamilyName: FamilyName(familyName),
-		TableName:  TableName(tableName),
+		FamilyName: familyName,
+		TableName:  tableName,
 	}
 
 }

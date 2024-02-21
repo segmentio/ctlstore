@@ -60,6 +60,8 @@ type reflectorCliConfig struct {
 	UpstreamDriver             string                   `conf:"upstream-driver" help:"Upstream driver name (e.g. sqlite3)" validate:"nonzero"`
 	UpstreamDSN                string                   `conf:"upstream-dsn" help:"Upstream DSN (e.g. path to file if sqlite3)" validate:"nonzero"`
 	UpstreamLedgerTable        string                   `conf:"upstream-ledger-table" help:"Table on the upstream to look for statement ledger"`
+	UpstreamShardingFamily     string                   `conf:"upstream-sharding-family" help:"Sharding family(s) reflector is targeting"`
+	UpstreamShardingTable      string                   `conf:"upstream-sharding-table" help:"Sharding tables(s) reflector is targeting"`
 	BootstrapURL               string                   `conf:"bootstrap-url" help:"Bootstraps LDB from an S3 URL"`
 	BootstrapRegion            string                   `conf:"bootstrap-region" help:"If specified, indicates which region in which the S3 bucket lives"`
 	PollInterval               time.Duration            `conf:"poll-interval" help:"How often to pull the upstream" validate:"nonzero"`
@@ -573,18 +575,20 @@ func multiReflector(ctx context.Context, args []string) {
 
 func defaultReflectorCLIConfig(isSupervisor bool) reflectorCliConfig {
 	config := reflectorCliConfig{
-		LDBPath:               "",
-		ChangelogPath:         "",
-		ChangelogSize:         1 * 1024 * 1024,
-		UpstreamDriver:        "",
-		UpstreamDSN:           "",
-		UpstreamLedgerTable:   "ctlstore_dml_ledger",
-		BootstrapURL:          "",
-		PollInterval:          1 * time.Second,
-		PollJitterCoefficient: 0.25,
-		QueryBlockSize:        100,
-		Dogstatsd:             defaultDogstatsdConfig(),
-		PollTimeout:           5 * time.Second,
+		LDBPath:                "",
+		ChangelogPath:          "",
+		ChangelogSize:          1 * 1024 * 1024,
+		UpstreamDriver:         "",
+		UpstreamDSN:            "",
+		UpstreamLedgerTable:    "ctlstore_dml_ledger",
+		UpstreamShardingFamily: "flagon2,cob",
+		UpstreamShardingTable:  "flagon2___flags,cob___kvs",
+		BootstrapURL:           "",
+		PollInterval:           1 * time.Second,
+		PollJitterCoefficient:  0.25,
+		QueryBlockSize:         100,
+		Dogstatsd:              defaultDogstatsdConfig(),
+		PollTimeout:            5 * time.Second,
 		LedgerHealth: ledgerHealthConfig{
 			Disable:                 false,
 			MaxHealthyLatency:       time.Minute,
@@ -654,6 +658,8 @@ func newReflector(cliCfg reflectorCliConfig, isSupervisor bool, i int) (*reflect
 			Driver:                cliCfg.UpstreamDriver,
 			DSN:                   cliCfg.UpstreamDSN,
 			LedgerTable:           cliCfg.UpstreamLedgerTable,
+			ShardingFamily:        cliCfg.UpstreamShardingFamily,
+			ShardingTable:         cliCfg.UpstreamShardingTable,
 			PollInterval:          cliCfg.PollInterval,
 			PollJitterCoefficient: cliCfg.PollJitterCoefficient,
 			QueryBlockSize:        cliCfg.QueryBlockSize,

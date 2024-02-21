@@ -114,3 +114,36 @@ func TestSqlDmlSource(t *testing.T) {
 		t.Fatal("Expected a context error or an interrupted error")
 	}
 }
+
+func TestPrepareFamilyString(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "Single family",
+			input:    "family1",
+			expected: "('family1')",
+		},
+		{
+			name:     "Multiple families",
+			input:    "family1,family2,family3",
+			expected: "('family1', 'family2', 'family3')",
+		},
+		{
+			name:     "No families",
+			input:    "",
+			expected: "('')",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			output := prepareFamilyString(tt.input)
+			if output != tt.expected {
+				t.Errorf("prepareFamilyString(%q) = %q, want %q", tt.input, output, tt.expected)
+			}
+		})
+	}
+}

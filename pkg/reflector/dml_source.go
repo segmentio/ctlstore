@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -29,6 +30,8 @@ type sqlDmlSource struct {
 	db               *sql.DB
 	lastSequence     schema.DMLSequence
 	ledgerTableName  string
+	shardingFamily   string
+	shardingTable    string
 	queryBlockSize   int
 	buffer           []schema.DMLStatement
 	scanLoopCallBack func()
@@ -44,10 +47,8 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 			blocksize = defaultQueryBlockSize
 		}
 
-		// table layout is: seq, leader_ts, statement
-		qs := sqlgen.SqlSprintf("SELECT seq, leader_ts, statement, family_name, table_name FROM $1 WHERE seq > ? ORDER BY seq LIMIT $2",
-			source.ledgerTableName,
-			fmt.Sprintf("%d", blocksize))
+		// table layout is: seq, leader_ts, statement, family_name, table_name
+		qs := generateSQLQuery(source.ledgerTableName, source.shardingFamily, source.shardingTable, blocksize)
 
 		// HMM: do we lean too hard on the LIMIT here? in the loop below
 		// we'll end up spinning if the DB keeps feeding us data
@@ -125,4 +126,26 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 
 	err = errNoNewStatements
 	return
+}
+
+// Helper function to generate the SQL query
+func generateSQLQuery(ledgerTableName, shardingFamily, shardingTable string, blocksize int) string {
+	if shardingFamily != "" {
+		familiesStr := prepareFamilyString(shardingFamily)
+		return sqlgen.SqlSprintf("SELECT seq, leader_ts, statement, family_name, table_name FROM $1 WHERE seq > ? AND family IN $2 ORDER BY seq LIMIT $4",
+			ledgerTableName,
+			familiesStr,
+			shardingTable,
+			fmt.Sprintf("%d", blocksize))
+	} else {
+		return sqlgen.SqlSprintf("SELECT seq, leader_ts, statement, family_name, table_name FROM $1 WHERE seq > ? ORDER BY seq LIMIT $3",
+			ledgerTableName,
+			shardingTable,
+			fmt.Sprintf("%d", blocksize))
+	}
+}
+
+// Helper function to prepare the family string for SQL query
+func prepareFamilyString(families string) string {
+	return "('" + strings.ReplaceAll(families, ",", "', '") + "')"
 }
