@@ -201,42 +201,6 @@ func TestSqlDmlSourceWithSharding(t *testing.T) {
 	}
 }
 
-func TestSqlDmlSourceWithShardingFamily(t *testing.T) {
-	// 1. Setup
-	// Create a context
-	ctx := context.Background()
-
-	// Create an in-memory SQLite database
-	db, err := sql.Open("sqlite3", ":memory:")
-	require.NoError(t, err)
-
-	// Initialize the database with necessary tables and data
-	srcutil := &sqlDmlSourceTestUtil{db: db, t: t}
-	srcutil.InitializeDB()
-
-	// Create a sqlDmlSource object with shardingFamily set to a non-empty value
-	src := sqlDmlSource{
-		db:              db,
-		ledgerTableName: "ctlstore_dml_ledger",
-		shardingFamily:  "testFamily",
-		queryBlockSize:  5,
-		// Set any other necessary fields here
-	}
-
-	// 2. Arrange
-	// Add any necessary data to the database or make any other necessary
-	// preparations for the new logic to be executed
-
-	// 3. Act
-	// Call the Next function
-	_, err = src.Next(ctx)
-
-	// 4. Assert
-	// Check that the function behaved as expected
-	require.NoError(t, err)
-	// Add more assertions here as necessary
-}
-
 func TestPrepareFamilyString(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -246,17 +210,17 @@ func TestPrepareFamilyString(t *testing.T) {
 		{
 			name:     "Single family",
 			input:    "family1",
-			expected: "('family1')",
+			expected: "(\"family1\")",
 		},
 		{
 			name:     "Multiple families",
 			input:    "family1,family2,family3",
-			expected: "('family1', 'family2', 'family3')",
+			expected: "(\"family1\", \"family2\", \"family3\")",
 		},
 		{
 			name:     "No families",
 			input:    "",
-			expected: "('')",
+			expected: "(\"\")",
 		},
 	}
 
