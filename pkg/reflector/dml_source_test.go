@@ -46,6 +46,14 @@ func (u *sqlDmlSourceTestUtil) AddStatement(statement string) string {
 	return statement
 }
 
+func (u *sqlDmlSourceTestUtil) AddStatementWithFamilyAndTable(statement, familyName, tableName string) string {
+	_, err := u.db.Exec("INSERT INTO ctlstore_dml_ledger (statement, family_name, table_name) VALUES(?, ?, ?)", statement, familyName, tableName)
+	if err != nil {
+		u.t.Fatalf("Failed to insert statement %v with family %v and table %v, error: %v", statement, familyName, tableName, err)
+	}
+	return statement
+}
+
 func TestSqlDmlSource(t *testing.T) {
 	ctx := context.Background()
 	db, err := sql.Open("sqlite3", ":memory:")
@@ -113,6 +121,120 @@ func TestSqlDmlSource(t *testing.T) {
 	if !foundError {
 		t.Fatal("Expected a context error or an interrupted error")
 	}
+}
+
+func TestSqlDmlSourceWithSharding(t *testing.T) {
+	ctx := context.Background()
+	db, err := sql.Open("sqlite3", ":memory:")
+	require.NoError(t, err)
+
+	srcutil := &sqlDmlSourceTestUtil{db: db, t: t}
+	srcutil.InitializeDB()
+
+	queryBlockSize := 5
+	src := sqlDmlSource{
+		db:              db,
+		ledgerTableName: "ctlstore_dml_ledger",
+		shardingFamily:  "foo",
+		shardingTable:   "bar",
+		queryBlockSize:  queryBlockSize,
+	}
+
+	_, err = src.Next(ctx)
+	require.Equal(t, errNoNewStatements, err)
+
+	var ststr string
+	var ststr1 string
+	// Add statements for two different families
+	for i := 0; i < queryBlockSize*2; i++ {
+		ststr = srcutil.AddStatementWithFamilyAndTable("INSERT INTO foo___bar VALUES('hi mom')", "foo", "bar")
+		ststr1 = srcutil.AddStatementWithFamilyAndTable("INSERT INTO foo1___bar1 VALUES('hi mom')", "foo1", "bar1")
+	}
+
+	var lastSeq int64
+	for i := 0; i < queryBlockSize*2; i++ {
+		st, err := src.Next(ctx)
+		require.NoError(t, err)
+		require.Equal(t, ststr, st.Statement)
+		require.NotEqual(t, ststr1, st.Statement)
+		require.True(t, st.Sequence.Int() > lastSeq)
+		lastSeq = st.Sequence.Int()
+		// The initial sequence number is 1，and the addition of the statements takes turn between 'foo' and 'foo1',
+		// so the sequence number should be even for 'foo' and odd for 'foo1'
+		require.Equal(t, lastSeq%2, int64(0))
+	}
+
+	_, err = src.Next(ctx)
+	require.Equal(t, errNoNewStatements, err)
+
+	srcutil.AddStatement("INSERT INTO foo___bar VALUES('hi bro')")
+
+	// Context cancellation handled properly
+	ctx, cancel := context.WithTimeout(ctx, 50*time.Millisecond)
+	defer cancel()
+	loopCounter := 0
+	src.scanLoopCallBack = func() {
+		if loopCounter == 1 {
+			cancel()
+		}
+		loopCounter++
+	}
+	foundError := false
+	for i := 0; i < 2; i++ {
+		_, err = src.Next(ctx)
+		cause := errors.Cause(err)
+		switch {
+		case cause == nil:
+		case cause == context.Canceled:
+			foundError = true
+			break
+			// the db driver will at some point return an error with
+			// the value "interrupted" instead of returning
+			// context.Canceled().  Sigh.
+		case cause.Error() == "interrupted":
+			foundError = true
+			break
+		}
+	}
+	if !foundError {
+		t.Fatal("Expected a context error or an interrupted error")
+	}
+}
+
+func TestSqlDmlSourceWithShardingFamily(t *testing.T) {
+	// 1. Setup
+	// Create a context
+	ctx := context.Background()
+
+	// Create an in-memory SQLite database
+	db, err := sql.Open("sqlite3", ":memory:")
+	require.NoError(t, err)
+
+	// Initialize the database with necessary tables and data
+	srcutil := &sqlDmlSourceTestUtil{db: db, t: t}
+	srcutil.InitializeDB()
+
+	// Create a sqlDmlSource object with shardingFamily set to a non-empty value
+	src := sqlDmlSource{
+		db:              db,
+		ledgerTableName: "ctlstore_dml_ledger",
+		shardingFamily:  "testFamily",
+		queryBlockSize:  5,
+		// Set any other necessary fields here
+	}
+
+	// 2. Arrange
+	// Add any necessary data to the database or make any other necessary
+	// preparations for the new logic to be executed
+
+	// 3. Act
+	// Call the Next function
+	_, err = src.Next(ctx)
+
+	// 4. Assert
+	// Check that the function behaved as expected
+	require.NoError(t, err)
+	// Add more assertions here as necessary
 }
 
 func TestPrepareFamilyString(t *testing.T) {

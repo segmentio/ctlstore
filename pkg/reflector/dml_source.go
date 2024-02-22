@@ -132,7 +132,7 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 func generateSQLQuery(ledgerTableName, shardingFamily, shardingTable string, blocksize int) string {
 	if shardingFamily != "" {
 		familiesStr := prepareFamilyString(shardingFamily)
-		return sqlgen.SqlSprintf("SELECT seq, leader_ts, statement, family_name, table_name FROM $1 WHERE seq > ? AND family IN $2 ORDER BY seq LIMIT $4",
+		return sqlgen.SqlSprintf("SELECT seq, leader_ts, statement, family_name, table_name FROM $1 WHERE seq > ? AND family_name IN $2 ORDER BY seq LIMIT $4",
 			ledgerTableName,
 			familiesStr,
 			shardingTable,
@@ -147,5 +147,5 @@ func generateSQLQuery(ledgerTableName, shardingFamily, shardingTable string, blo
 
 // Helper function to prepare the family string for SQL query
 func prepareFamilyString(families string) string {
-	return "('" + strings.ReplaceAll(families, ",", "', '") + "')"
+	return "(\"" + strings.ReplaceAll(families, ",", "\", \"") + "\")"
 }
