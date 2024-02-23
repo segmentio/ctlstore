@@ -124,83 +124,170 @@ func TestSqlDmlSource(t *testing.T) {
 }
 
 func TestSqlDmlSourceWithSharding(t *testing.T) {
-	ctx := context.Background()
-	db, err := sql.Open("sqlite3", ":memory:")
-	require.NoError(t, err)
-
-	srcutil := &sqlDmlSourceTestUtil{db: db, t: t}
-	srcutil.InitializeDB()
-
 	queryBlockSize := 5
-	src := sqlDmlSource{
-		db:              db,
-		ledgerTableName: "ctlstore_dml_ledger",
-		shardingFamily:  "foo",
-		shardingTable:   "foo___bar",
-		queryBlockSize:  queryBlockSize,
+
+	foobar := "INSERT INTO foo___bar VALUES('hi mom')"
+	foobar1 := "INSERT INTO foo___bar1 VALUES('hi mom')"
+	foo1bar1 := "INSERT INTO foo1___bar1 VALUES('hi mom')"
+	foo1bar := "INSERT INTO foo1___bar VALUES('hi mom')"
+
+	statements := []struct {
+		statement string
+		family    string
+		table     string
+	}{
+		{statement: foobar, family: "foo", table: "bar"},
+		{statement: foobar1, family: "foo", table: "bar1"},
+		{statement: foo1bar1, family: "foo1", table: "bar1"},
+		{statement: foo1bar, family: "foo1", table: "bar"},
 	}
 
-	_, err = src.Next(ctx)
-	require.Equal(t, errNoNewStatements, err)
-
-	var ststr string
-	var ststr1 string
-	var ststr2 string
-	// Add statements for two different families
-	for i := 0; i < queryBlockSize*2; i++ {
-		ststr = srcutil.AddStatementWithFamilyAndTable("INSERT INTO foo___bar VALUES('hi mom')", "foo", "bar")
-		ststr1 = srcutil.AddStatementWithFamilyAndTable("INSERT INTO foo___bar1 VALUES('hi mom')", "foo", "bar1")
-		ststr2 = srcutil.AddStatementWithFamilyAndTable("INSERT INTO foo1___bar1 VALUES('hi mom')", "foo1", "bar1")
+	testCases := []struct {
+		name              string
+		shardingFamily    string
+		shardingTable     string
+		stContains        []string
+		stNotContains     []string
+		seqModContains    []int64
+		seqModNotContains []int64
+		expectedErr       error
+	}{
+		{
+			name:              "Single family single table",
+			shardingFamily:    "foo",
+			shardingTable:     "foo___bar",
+			stContains:        []string{foobar},
+			stNotContains:     []string{foobar1, foo1bar1, foo1bar},
+			seqModContains:    []int64{0},
+			seqModNotContains: []int64{1, 2, 3},
+			expectedErr:       nil,
+		},
+		{
+			name:              "Single family multiple tables",
+			shardingFamily:    "foo",
+			shardingTable:     "foo___bar,foo___bar1",
+			stContains:        []string{foobar, foobar1},
+			stNotContains:     []string{foo1bar1, foo1bar},
+			seqModContains:    []int64{0, 1},
+			seqModNotContains: []int64{2, 3},
+			expectedErr:       nil,
+		},
+		{
+			name:              "Multiple families multiple tables",
+			shardingFamily:    "foo,foo1",
+			shardingTable:     "foo___bar,foo1___bar1",
+			stContains:        []string{foobar, foo1bar1},
+			stNotContains:     []string{foo1bar, foobar1},
+			seqModContains:    []int64{0, 2},
+			seqModNotContains: []int64{1, 3},
+			expectedErr:       nil,
+		},
+		{
+			name:              "All families all tables",
+			shardingFamily:    "foo,foo1",
+			shardingTable:     "foo___bar,foo___bar1,foo1___bar1,foo1___bar",
+			stContains:        []string{foobar, foobar1, foo1bar1, foo1bar},
+			stNotContains:     []string{},
+			seqModContains:    []int64{0, 1, 2, 3},
+			seqModNotContains: []int64{},
+			expectedErr:       nil,
+		},
+		{
+			name:              "No family no table",
+			shardingFamily:    "",
+			shardingTable:     "",
+			stContains:        []string{foobar, foobar1, foo1bar1, foo1bar},
+			stNotContains:     []string{},
+			seqModContains:    []int64{0, 1, 2, 3},
+			seqModNotContains: []int64{},
+			expectedErr:       nil,
+		},
+		{
+			name:              "Single family no table",
+			shardingFamily:    "foo",
+			shardingTable:     "",
+			stContains:        []string{},
+			stNotContains:     []string{foobar, foobar1, foo1bar1, foo1bar},
+			seqModContains:    []int64{},
+			seqModNotContains: []int64{0, 1, 2, 3},
+			expectedErr:       nil,
+		},
 	}
 
-	var lastSeq int64
-	for i := 0; i < queryBlockSize*2; i++ {
-		st, err := src.Next(ctx)
-		require.NoError(t, err)
-		require.Equal(t, ststr, st.Statement)
-		require.NotEqual(t, ststr1, st.Statement)
-		require.NotEqual(t, ststr2, st.Statement)
-		require.True(t, st.Sequence.Int() > lastSeq)
-		lastSeq = st.Sequence.Int()
-		// The initial sequence number is 1，and the addition of the statements takes turn among 'foo___bar',
-		// 'foo___bar1' and 'foo1___bar1', so the sequence number should be 2, 5, 8, 11... for 'foo___bar'
-		require.Equal(t, (lastSeq-2)%3, int64(0))
-	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			db, err := sql.Open("sqlite3", ":memory:")
+			require.NoError(t, err)
 
-	_, err = src.Next(ctx)
-	require.Equal(t, errNoNewStatements, err)
+			srcutil := &sqlDmlSourceTestUtil{db: db, t: t}
+			srcutil.InitializeDB()
 
-	srcutil.AddStatement("INSERT INTO foo___bar VALUES('hi bro')")
+			src := sqlDmlSource{
+				db:              db,
+				ledgerTableName: "ctlstore_dml_ledger",
+				shardingFamily:  tt.shardingFamily,
+				shardingTable:   tt.shardingTable,
+				queryBlockSize:  queryBlockSize,
+			}
 
-	// Context cancellation handled properly
-	ctx, cancel := context.WithTimeout(ctx, 50*time.Millisecond)
-	defer cancel()
-	loopCounter := 0
-	src.scanLoopCallBack = func() {
-		if loopCounter == 1 {
-			cancel()
-		}
-		loopCounter++
-	}
-	foundError := false
-	for i := 0; i < 2; i++ {
-		_, err = src.Next(ctx)
-		cause := errors.Cause(err)
-		switch {
-		case cause == nil:
-		case cause == context.Canceled:
-			foundError = true
-			break
-			// the db driver will at some point return an error with
-			// the value "interrupted" instead of returning
-			// context.Canceled().  Sigh.
-		case cause.Error() == "interrupted":
-			foundError = true
-			break
-		}
-	}
-	if !foundError {
-		t.Fatal("Expected a context error or an interrupted error")
+			_, err = src.Next(ctx)
+			require.Equal(t, errNoNewStatements, err)
+
+			for i := 0; i < queryBlockSize*len(statements); i++ {
+				for j := 0; j < len(statements); j++ {
+					_ = srcutil.AddStatementWithFamilyAndTable(statements[j].statement, statements[j].family, statements[j].table)
+				}
+			}
+
+			var lastSeq int64
+			for i := 0; i < queryBlockSize*len(statements)*len(tt.stContains); i++ {
+				st, err := src.Next(ctx)
+				require.NoError(t, err)
+				require.Contains(t, tt.stContains, st.Statement)
+				require.NotContains(t, tt.stNotContains, st.Statement)
+				require.True(t, st.Sequence.Int() > lastSeq)
+				lastSeq = st.Sequence.Int()
+				require.Contains(t, tt.seqModContains, (lastSeq-2)%int64(len(statements)))
+				require.NotContains(t, tt.seqModNotContains, (lastSeq-2)%int64(len(statements)))
+			}
+
+			_, err = src.Next(ctx)
+			require.Equal(t, errNoNewStatements, err)
+
+			srcutil.AddStatement("INSERT INTO foo___bar VALUES('hi bro')")
+
+			// Context cancellation handled properly
+			ctx, cancel := context.WithTimeout(ctx, 50*time.Millisecond)
+			defer cancel()
+			loopCounter := 0
+			src.scanLoopCallBack = func() {
+				if loopCounter == 1 {
+					cancel()
+				}
+				loopCounter++
+			}
+			foundError := false
+			for i := 0; i < 2; i++ {
+				_, err = src.Next(ctx)
+				cause := errors.Cause(err)
+				switch {
+				case cause == nil:
+				case cause == context.Canceled:
+					foundError = true
+					break
+					// the db driver will at some point return an error with
+					// the value "interrupted" instead of returning
+					// context.Canceled().  Sigh.
+				case cause.Error() == "interrupted":
+					foundError = true
+					break
+				}
+			}
+			if !foundError {
+				t.Fatal("Expected a context error or an interrupted error")
+			}
+		})
 	}
 }
 
