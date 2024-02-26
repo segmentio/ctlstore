@@ -2,7 +2,7 @@ package executive
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -10,11 +10,11 @@ import (
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/limits"
 	"github.com/segmentio/ctlstore/pkg/schema"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
-	"github.com/segmentio/events/v2"
 )
 
 // ExecutiveEndpoint is an HTTP 'wrapper' for ExecutiveInterface
@@ -42,7 +42,7 @@ func (ee *ExecutiveEndpoint) handleFamilyRoute(w http.ResponseWriter, r *http.Re
 }
 
 func (ee *ExecutiveEndpoint) handleTablesRoute(w http.ResponseWriter, r *http.Request) {
-	rawBody, err := ioutil.ReadAll(r.Body)
+	rawBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		writeErrorResponse(err, w)
 		return
@@ -68,7 +68,7 @@ func (ee *ExecutiveEndpoint) handleTableRoute(w http.ResponseWriter, r *http.Req
 	familyName := vars["familyName"]
 	tableName := vars["tableName"]
 
-	rawBody, err := ioutil.ReadAll(r.Body)
+	rawBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		writeErrorResponse(err, w)
 		return
@@ -142,7 +142,7 @@ func (ee *ExecutiveEndpoint) handleCookieRoute(w http.ResponseWriter, r *http.Re
 		return
 	}
 	if r.Method == "POST" {
-		rawBody, err := ioutil.ReadAll(r.Body)
+		rawBody, err := io.ReadAll(r.Body)
 		if err != nil {
 			writeErrorResponse(err, w)
 			return
@@ -206,7 +206,7 @@ func (ee *ExecutiveEndpoint) handleWritersRoute(w http.ResponseWriter, r *http.R
 	vars := mux.Vars(r)
 
 	if r.Method == "POST" {
-		rawBody, err := ioutil.ReadAll(r.Body)
+		rawBody, err := io.ReadAll(r.Body)
 		if err != nil {
 			writeErrorResponse(err, w)
 			return
@@ -251,7 +251,7 @@ func (ee *ExecutiveEndpoint) handleMutationsRoute(w http.ResponseWriter, r *http
 			} `json:"mutations"`
 		}{}
 
-		rawBody, err := ioutil.ReadAll(r.Body)
+		rawBody, err := io.ReadAll(r.Body)
 		if err != nil {
 			writeErrorResponse(err, w)
 			return
@@ -317,7 +317,7 @@ func (ee *ExecutiveEndpoint) handleStatusRoute(w http.ResponseWriter, r *http.Re
 	err := ee.HealthChecker.HealthCheck()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		events.Log("Health check failure: %{error}+v", err)
+		log.EventLog("Health check failure: %{error}+v", err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -599,7 +599,7 @@ func writeErrorResponse(e error, w http.ResponseWriter) {
 	w.WriteHeader(status)
 	_, _ = w.Write([]byte(resBody))
 
-	events.Log("Error Status %{status}v, Reason: %{reason}v, Internal Error: %{error}+v",
+	log.EventLog("Error Status %{status}v, Reason: %{reason}v, Internal Error: %{error}+v",
 		status, resBody, e.Error())
 
 	return

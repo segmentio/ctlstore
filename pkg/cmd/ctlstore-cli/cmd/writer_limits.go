@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"text/tabwriter"
@@ -37,7 +37,7 @@ var cliWriterLimits = &cli.CommandSet{
 				bailResponse(resp, "could not read limits")
 			}
 			var wrl limits.WriterRateLimits
-			b, err := ioutil.ReadAll(resp.Body)
+			b, err := io.ReadAll(resp.Body)
 			if err != nil {
 				bail("could not read response: %s", err)
 			}

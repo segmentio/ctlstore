@@ -3,13 +3,14 @@ package reflector
 import (
 	"context"
 	"io"
+	"log/slog"
 	"time"
 
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/ldbwriter"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 )
 
@@ -23,7 +24,7 @@ type shovel struct {
 	abortOnSeqSkip    bool
 	maxSeqOnStartup   int64
 	stop              chan struct{}
-	log               *events.Logger
+	log               *slog.Logger
 }
 
 func (s *shovel) Start(ctx context.Context) error {
@@ -45,7 +46,7 @@ func (s *shovel) Start(ctx context.Context) error {
 		// early exit here if the shovel should be stopped
 		select {
 		case <-s.stop:
-			s.logger().Log("Shovel stopping normally")
+			s.logger().Info("Shovel stopping normally")
 			return nil
 		default:
 		}
@@ -80,7 +81,7 @@ func (s *shovel) Start(ctx context.Context) error {
 			//
 
 			pollSleep := jitr.Jitter(s.pollInterval, s.jitterCoefficient)
-			s.logger().Debug("Poll sleep %{sleepTime}s", pollSleep)
+			s.logger().Debug("Poll sleep", "time", pollSleep)
 
 			select {
 			case <-ctx.Done():
@@ -92,12 +93,12 @@ func (s *shovel) Start(ctx context.Context) error {
 			continue
 		}
 
-		s.logger().Debug("Shovel applying %{statement}v", st)
+		s.logger().Debug("Shovel applying statement", "stmt", st)
 
 		if lastSeq != 0 {
 			if st.Sequence > lastSeq+1 && st.Sequence.Int() > s.maxSeqOnStartup {
 				stats.Incr("shovel.skipped_sequence")
-				s.logger().Log("shovel skip sequence from:%{fromSeq}d to:%{toSeq}d", lastSeq, st.Sequence)
+				s.logger().Info("shovel skip sequence", "from", lastSeq, "to", st.Sequence)
 
 				if s.abortOnSeqSkip {
 					// Mitigation for a bug that we haven't found yet
@@ -134,15 +135,15 @@ func (s *shovel) Close() error {
 	for _, closer := range s.closers {
 		err := closer.Close()
 		if err != nil {
-			s.logger().Log("shovel encountered error during close: %{error}s", err)
+			s.logger().Error("shovel encountered error during close", "err", err)
 		}
 	}
 	return nil
 }
 
-func (s *shovel) logger() *events.Logger {
+func (s *shovel) logger() *slog.Logger {
 	if s.log == nil {
-		s.log = events.DefaultLogger
+		s.log = log.Default()
 	}
 	return s.log
 }

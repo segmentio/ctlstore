@@ -16,7 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/pkg/errors"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 
 	"github.com/segmentio/ctlstore/pkg/utils"
@@ -83,11 +83,11 @@ func (c *s3Snapshot) Upload(ctx context.Context, path string) error {
 
 	var gpr *gzipCompressionReader
 	if strings.HasSuffix(key, ".gz") {
-		events.Log("Compressing s3 payload with GZIP")
+		log.EventLog("Compressing s3 payload with GZIP")
 		gpr = newGZIPCompressionReader(reader)
 		reader = gpr
 	}
-	events.Log("Uploading %{file}s (%d bytes) to %{bucket}s/%{key}s", path, size, c.Bucket, key)
+	log.EventLog("Uploading %{file}s (%d bytes) to %{bucket}s/%{key}s", path, size, c.Bucket, key)
 
 	start := time.Now()
 	if err = c.sendToS3(ctx, key, c.Bucket, reader, cs); err != nil {
@@ -95,13 +95,13 @@ func (c *s3Snapshot) Upload(ctx context.Context, path string) error {
 	}
 	stats.Observe("ldb-upload-time", time.Since(start), stats.T("compressed", isCompressed(gpr)))
 
-	events.Log("Successfully uploaded %{file}s to %{bucket}s/%{key}s", path, c.Bucket, key)
+	log.EventLog("Successfully uploaded %{file}s to %{bucket}s/%{key}s", path, c.Bucket, key)
 	if gpr != nil {
 		stats.Set("ldb-size-bytes-compressed", gpr.bytesRead)
 		if size > 0 {
 			ratio := 1 - (float64(gpr.bytesRead) / float64(size))
 			stats.Set("s3-compression-ratio", ratio)
-			events.Log("Compression reduced %d -> %d bytes (%0.2f %%)", size, gpr.bytesRead, ratio*100)
+			log.EventLog("Compression reduced %d -> %d bytes (%0.2f %%)", size, gpr.bytesRead, ratio*100)
 		}
 	}
 	return nil
@@ -116,11 +116,11 @@ func getChecksum(path string) (string, error) {
 
 	h := sha1.New()
 	if _, err := io.Copy(h, f); err != nil {
-		events.Log("failed to generate sha1 of snapshot", err)
+		log.EventLog("failed to generate sha1 of snapshot", err)
 	}
 
 	cs := base64.StdEncoding.EncodeToString(h.Sum(nil))
-	events.Log("base64 encoding of sha1: %s", cs)
+	log.EventLog("base64 encoding of sha1: %s", cs)
 
 	return cs, nil
 }
@@ -164,9 +164,9 @@ func (c *s3Snapshot) sendToS3(ctx context.Context, key string, bucket string, bo
 		},
 	})
 	if err == nil {
-		events.Log("Wrote to S3 location: %s", output.Location)
+		log.EventLog("Wrote to S3 location: %s", output.Location)
 	} else {
-		events.Log("Couldn't upload s3 snapshot to %v:%v. Here's why: %v\n",
+		log.EventLog("Couldn't upload s3 snapshot to %v:%v. Here's why: %v\n",
 			bucket, key, err)
 	}
 	return errors.Wrap(err, "upload with context")
@@ -193,10 +193,10 @@ func archivedSnapshotFromURL(URL string) (archivedSnapshot, error) {
 	}
 	switch parsed.Scheme {
 	case "s3":
-		events.Log("Using s3 destination for snapshots bucket=%v", parsed.Host)
+		log.EventLog("Using s3 destination for snapshots bucket=%v", parsed.Host)
 		return &s3Snapshot{Bucket: parsed.Host, Key: parsed.Path}, nil
 	case "file":
-		events.Log("Using local FS destination for snapshots file=%v", parsed.Path)
+		log.EventLog("Using local FS destination for snapshots file=%v", parsed.Path)
 		return &localSnapshot{parsed.Path}, nil
 	default:
 		return nil, errors.Errorf("Unknown scheme %s", parsed.Scheme)

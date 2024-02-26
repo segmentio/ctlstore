@@ -8,7 +8,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/changelog"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlite"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 )
 
 type LDBWriterWithChangelog struct {
@@ -19,7 +19,6 @@ type LDBWriterWithChangelog struct {
 	Seq             int64
 }
 
-//
 // NOTE: How does the changelog work?
 //
 // This is sort of the crux of how the changelog comes together. The Reflector
@@ -33,7 +32,6 @@ type LDBWriterWithChangelog struct {
 // This is pretty complex, but after enumerating about 8 different options, it
 // ended up actually being the most simple. Other options involved not-so-great
 // options like parsing SQL or maintaining triggers on every table.
-//
 func (w *LDBWriterWithChangelog) ApplyDMLStatement(ctx context.Context, statement schema.DMLStatement) error {
 	err := w.LdbWriter.ApplyDMLStatement(ctx, statement)
 	if err != nil {
@@ -45,7 +43,7 @@ func (w *LDBWriterWithChangelog) ApplyDMLStatement(ctx context.Context, statemen
 		if err != nil {
 			// This is expected because it'll capture tables like ctlstore_dml_ledger,
 			// which aren't tables this cares about.
-			events.Debug("Skipped logging change to %{tableName}s, can't decode table: %{error}v",
+			log.EventDebug("Skipped logging change to %{tableName}s, can't decode table: %{error}v",
 				change.TableName,
 				err)
 			continue
@@ -53,7 +51,7 @@ func (w *LDBWriterWithChangelog) ApplyDMLStatement(ctx context.Context, statemen
 
 		keys, err := change.ExtractKeys(w.DB)
 		if err != nil {
-			events.Log("Skipped logging change to %{tableName}, can't extract keys: %{error}v",
+			log.EventLog("Skipped logging change to %{tableName}, can't extract keys: %{error}v",
 				change.TableName,
 				err)
 			continue
@@ -68,7 +66,7 @@ func (w *LDBWriterWithChangelog) ApplyDMLStatement(ctx context.Context, statemen
 				Key:    key,
 			})
 			if err != nil {
-				events.Log("Skipped logging change to %{family}s.%{table}s:%{key}v: %{err}v",
+				log.EventLog("Skipped logging change to %{family}s.%{table}s:%{key}v: %{err}v",
 					fam, tbl, key, err)
 				continue
 			}

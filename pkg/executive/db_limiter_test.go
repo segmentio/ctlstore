@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"sync/atomic"
@@ -66,7 +65,7 @@ func testDBLimiter(t *testing.T, dbType string) {
 		resp := w.Result()
 		defer resp.Body.Close()
 		if expectedCode != resp.StatusCode {
-			b, _ := ioutil.ReadAll(resp.Body)
+			b, _ := io.ReadAll(resp.Body)
 			require.Failf(t, "request failed", "Expected %d, got %d: %s", expectedCode, resp.StatusCode, b)
 		}
 	}

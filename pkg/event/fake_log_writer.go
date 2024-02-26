@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 )
 
 type fakeLogWriter struct {
@@ -30,7 +30,7 @@ func (w *fakeLogWriter) writeN(ctx context.Context, n int) error {
 		return errors.Wrap(err, "create file")
 	}
 	defer func() {
-		events.Debug("Done writing %{num}d events", n)
+		log.EventDebug("Done writing %{num}d events", n)
 		if err == nil {
 			err = f.Close()
 		}
@@ -71,7 +71,7 @@ func (w *fakeLogWriter) writeN(ctx context.Context, n int) error {
 			}
 			// fmt.Println(info.Size(), w.rotateAfterBytes)
 			if info.Size() > int64(w.rotateAfterBytes) {
-				events.Log("Rotation required (file size is %{bytes}d seq=%{seq}d)", info.Size(), atomic.LoadInt64(&w.seq))
+				log.EventLog("Rotation required (file size is %{bytes}d seq=%{seq}d)", info.Size(), atomic.LoadInt64(&w.seq))
 				doRotate = true
 			}
 		}
@@ -80,7 +80,7 @@ func (w *fakeLogWriter) writeN(ctx context.Context, n int) error {
 		}
 
 		if doRotate {
-			events.Debug("Rotating log file..")
+			log.EventDebug("Rotating log file..")
 			these = 0
 			if err := f.Close(); err != nil {
 				return errors.Wrap(err, "close during rotation")

@@ -78,7 +78,7 @@ func newMutationRequest(famName schema.FamilyName, req ExecutiveMutationRequest)
 }
 
 // Returns the request Values as a slice in the order specified by the
-//fieldOrder param. An error will be returned if a field is missing.
+// fieldOrder param. An error will be returned if a field is missing.
 func (r *mutationRequest) valuesByOrder(fieldOrder []schema.FieldName) ([]interface{}, error) {
 	values := []interface{}{}
 	for _, fn := range fieldOrder {

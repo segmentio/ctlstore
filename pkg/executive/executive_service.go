@@ -16,7 +16,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/limits"
 	"github.com/segmentio/ctlstore/pkg/utils"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 )
 
@@ -78,7 +78,7 @@ func (s *executiveService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	defer ep.Close()
 
-	events.Debug("Request: %{request}+v", cR)
+	log.EventDebug("Request: %{request}+v", cR)
 	ep.Handler().ServeHTTP(w, cR)
 }
 
@@ -99,21 +99,21 @@ func (s *executiveService) Start(ctx context.Context, bind string) error {
 	h := &http.Server{Addr: bind, Handler: s}
 
 	go func() {
-		events.Log("Listening on %{addr}s...", bind)
+		log.EventLog("Listening on %{addr}s...", bind)
 		if err := h.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			events.Log("Error listening: %{error}+v", err)
+			log.EventLog("Error listening: %{error}+v", err)
 		} else {
-			events.Log("Server stopped.")
+			log.EventLog("Server stopped.")
 		}
 	}()
 
 	<-stop
-	events.Log("Shutting down the server...")
+	log.EventLog("Shutting down the server...")
 	sctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	if err := h.Shutdown(sctx); err != nil {
-		events.Log("Shutdown error: %{error}+v", err)
+		log.EventLog("Shutdown error: %{error}+v", err)
 	}
 
 	return nil
@@ -130,7 +130,7 @@ func (s *executiveService) instrumentLedgerRowCount(ctx context.Context) {
 	row := s.ctldb.QueryRowContext(ctx, "select table_rows from information_schema.tables where table_name=?", dmlLedgerTableName)
 	var rowCount int64
 	if err := row.Scan(&rowCount); err != nil {
-		events.Log("Could not scan ledger row count: %s", err)
+		log.EventLog("Could not scan ledger row count: %s", err)
 		errs.IncrDefault(stats.Tag{Name: "op", Value: "instrument-ledger-row-count"})
 		return
 	}

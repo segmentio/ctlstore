@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -35,7 +34,7 @@ func TestSupervisorParsingSnapshotURL(t *testing.T) {
 }
 
 func TestSupervisor(t *testing.T) {
-	tmpPath, err := ioutil.TempDir("", "")
+	tmpPath, err := os.MkdirTemp("", "")
 	require.NoError(t, err)
 	defer os.RemoveAll(tmpPath)
 
@@ -166,7 +165,7 @@ func TestSupervisorSnapshotReflectorCtl(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	tmpPath, err := ioutil.TempDir("", "")
+	tmpPath, err := os.MkdirTemp("", "")
 	require.NoError(t, err)
 	defer os.RemoveAll(tmpPath)
 

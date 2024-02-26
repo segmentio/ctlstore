@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log/slog"
+
 	"github.com/pkg/errors"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 
 	"github.com/segmentio/ctlstore/pkg/errs"
@@ -38,7 +40,7 @@ type SqlLdbWriter struct {
 	Db       *sql.DB
 	LedgerTx *sql.Tx
 	// uniquely identify this SqlWriter
-	Logger *events.Logger
+	Logger *slog.Logger
 	ID     string
 }
 
@@ -75,7 +77,7 @@ func (w *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schema.DML
 			return errors.New("invariant violation")
 		}
 		w.LedgerTx = tx
-		logger.Debug("Begin TX at %{sequence}v", statement.Sequence)
+		logger.Debug("Begin TX", "sequence", statement.Sequence)
 	}
 
 	// Update the last update table.  This will allow the ldb reader
@@ -146,13 +148,13 @@ func (w *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schema.DML
 		if err != nil {
 			tx.Rollback()
 			errs.Incr("sql_ldb_writer.ledgerTx.commit.error", stats.T("id", w.ID))
-			logger.Log("Failed to commit Tx at seq %{seq}s: %{error}+v",
-				statement.Sequence,
-				err)
+			logger.Error(fmt.Sprintf("Failed to commit Tx at seq %v: %+v", statement.Sequence, err),
+				"sequence", statement.Sequence,
+				"err", err)
 			return errors.Wrap(err, "commit multi-statement dml tx error")
 		}
 		stats.Incr("sql_ldb_writer.ledgerTx.commit.success", stats.T("id", w.ID))
-		logger.Debug("Committed TX at %{sequence}v", statement.Sequence)
+		logger.Debug("Committed TX", "sequence", statement.Sequence)
 		w.LedgerTx = nil
 		return nil
 	}
@@ -167,9 +169,9 @@ func (w *SqlLdbWriter) ApplyDMLStatement(_ context.Context, statement schema.DML
 
 	stats.Incr("sql_ldb_writer.exec.success", stats.T("id", w.ID))
 
-	logger.Debug("Applying DML[%{sequence}d]: '%{statement}s'",
-		statement.Sequence,
-		statement.Statement)
+	logger.Debug(fmt.Sprintf("Applying DML[%d]: '%s'", statement.Sequence, statement.Statement),
+		"sequence", statement.Sequence,
+		"stmt", statement.Statement)
 
 	// Commit if not inside a ledger transaction, since that would be
 	// a single statement transaction.
@@ -228,7 +230,7 @@ var (
 func (w *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*PragmaWALResult, error) {
 	res, err := w.Db.Query(fmt.Sprintf("PRAGMA wal_checkpoint(%s)", string(checkpointingType)))
 	if err != nil {
-		w.logger().Log("error in checkpointing, %{error}", err)
+		w.logger().Error("error in checkpointing", "err", err)
 		errs.Incr("sql_ldb_writer.wal_checkpoint.query.error", stats.T("id", w.ID))
 		return nil, err
 	}
@@ -238,7 +240,7 @@ func (w *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*PragmaWALR
 	if res.Next() {
 		err := res.Scan(&p.Busy, &p.Log, &p.Checkpointed)
 		if err != nil {
-			w.logger().Log("error in scanning checkpointing, %{error}")
+			w.logger().Error("error in scanning checkpointing", "err", err)
 			errs.Incr("sql_ldb_writer.wal_checkpoint.scan.error", stats.T("id", w.ID))
 			return nil, err
 		}
@@ -247,9 +249,9 @@ func (w *SqlLdbWriter) Checkpoint(checkpointingType CheckpointType) (*PragmaWALR
 	return &p, nil
 }
 
-func (w *SqlLdbWriter) logger() *events.Logger {
+func (w *SqlLdbWriter) logger() *slog.Logger {
 	if w.Logger == nil {
-		w.Logger = events.DefaultLogger
+		w.Logger = log.Default()
 	}
 	return w.Logger
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/utils"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 )
 
@@ -68,7 +68,7 @@ func (r *ReflectorCtl) Start(ctx context.Context) {
 			Value: "start",
 		})
 	}()
-	events.Log("Starting reflector")
+	log.EventLog("Starting reflector")
 	r.assertNotClosed()
 	r.initLifecycle(ctx)
 	result := make(chan error)
@@ -98,7 +98,7 @@ func (r *ReflectorCtl) Stop(ctx context.Context) {
 			Value: "stop",
 		})
 	}()
-	events.Log("Stopping reflector")
+	log.EventLog("Stopping reflector")
 	r.assertNotClosed()
 	r.initLifecycle(ctx)
 	result := make(chan error)
@@ -138,7 +138,7 @@ func (r *ReflectorCtl) lifecycle(appCtx context.Context) {
 		select {
 		case <-appCtx.Done():
 			// the application is quitting
-			events.Log("reflectorCtl stopping due to context err=%v", appCtx.Err())
+			log.EventLog("reflectorCtl stopping due to context err=%v", appCtx.Err())
 			return
 		case msg := <-r.messages:
 			// another goroutine has asked for the reflector to either

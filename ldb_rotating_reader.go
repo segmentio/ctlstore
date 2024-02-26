@@ -4,15 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/segmentio/ctlstore/pkg/errs"
-	"github.com/segmentio/ctlstore/pkg/globalstats"
-	"github.com/segmentio/ctlstore/pkg/ldb"
-	"github.com/segmentio/events/v2"
-	"github.com/segmentio/stats/v4"
 	"path"
 	"strconv"
 	"sync/atomic"
 	"time"
+
+	"github.com/segmentio/ctlstore/pkg/errs"
+	"github.com/segmentio/ctlstore/pkg/globalstats"
+	"github.com/segmentio/ctlstore/pkg/ldb"
+	"github.com/segmentio/log"
+	"github.com/segmentio/stats/v4"
 )
 
 // LDBRotatingReader reads data from multiple LDBs on a rotating schedule.
@@ -82,7 +83,7 @@ func rotatingReader(minutesPerRotation RotationPeriod, ldbPaths ...string) (*LDB
 	}
 	var r LDBRotatingReader
 	for _, p := range ldbPaths {
-		events.Log("Opening ldb %s for reading", p)
+		log.EventLog("Opening ldb %s for reading", p)
 		reader, err := newLDBReader(p)
 		if err != nil {
 			return nil, err
@@ -139,14 +140,14 @@ func (r *LDBRotatingReader) rotate(ctx context.Context) {
 				globalstats.Set("rotating_reader.active", next)
 				err := r.dbs[last].Close()
 				if err != nil {
-					events.Log("failed to close LDBReader for %s on rotation: %{error}v", r.dbs[last].path, err)
+					log.EventLog("failed to close LDBReader for %s on rotation: %{error}v", r.dbs[last].path, err)
 					errs.Incr("rotating_reader.closing_ldbreader", stats.T("id", strconv.Itoa(int(last))))
 					return
 				}
 
 				reader, err := newLDBReader(r.dbs[last].path)
 				if err != nil {
-					events.Log("failed to open LDBReader for %s on rotation: %{error}v", r.dbs[last].path, err)
+					log.EventLog("failed to open LDBReader for %s on rotation: %{error}v", r.dbs[last].path, err)
 					errs.Incr("rotating_reader.opening_ldbreader",
 						stats.T("id", strconv.Itoa(int(last))),
 						stats.T("path", path.Base(r.dbs[last].path)))

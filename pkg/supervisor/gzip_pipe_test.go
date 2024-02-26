@@ -16,12 +16,12 @@ func TestGZIPPipeReader(t *testing.T) {
 	input := "hello world"
 	var reader io.Reader = strings.NewReader(input)
 	reader = newGZIPCompressionReader(reader)
-	deflated, err := ioutil.ReadAll(reader)
+	deflated, err := io.ReadAll(reader)
 	require.NoError(t, err)
 
 	reader, err = gzip.NewReader(bytes.NewReader(deflated))
 	require.NoError(t, err)
-	inflated, err := ioutil.ReadAll(reader)
+	inflated, err := io.ReadAll(reader)
 	require.NoError(t, err)
 	require.EqualValues(t, input, string(inflated))
 }
@@ -58,7 +58,7 @@ func TestGZIPPipeReaderErr(t *testing.T) {
 				closeErr: test.closeErr,
 			}
 			reader := newGZIPCompressionReader(fake)
-			_, err := ioutil.ReadAll(reader)
+			_, err := io.ReadAll(reader)
 			if test.expected == nil {
 				require.NoError(t, err)
 			} else {
@@ -80,7 +80,7 @@ func TestIOPipes(t *testing.T) {
 	// verify that the entire payload is read uncompressed
 
 	reader = bytes.NewReader(data)
-	deflated, err := ioutil.ReadAll(reader)
+	deflated, err := io.ReadAll(reader)
 	require.NoError(t, err)
 	require.Equal(t, bufSize, len(deflated))
 
@@ -101,13 +101,13 @@ func TestIOPipes(t *testing.T) {
 		}())
 	}()
 
-	deflated, err = ioutil.ReadAll(pr)
+	deflated, err = io.ReadAll(pr)
 	require.NoError(t, err)
 	require.True(t, len(deflated) < bufSize, "source=%d res=%d", bufSize, len(deflated))
 
 	reader, err = gzip.NewReader(bytes.NewReader(deflated))
 	require.NoError(t, err)
-	inflated, err := ioutil.ReadAll(reader)
+	inflated, err := io.ReadAll(reader)
 	require.NoError(t, err)
 	require.EqualValues(t, data, inflated)
 }

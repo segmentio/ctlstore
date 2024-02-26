@@ -11,7 +11,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/limits"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/utils"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 )
 
@@ -114,7 +114,7 @@ func (l *dbLimiter) checkWriterRates(ctx context.Context, tx *sql.Tx, lr limiter
 	}
 	writerLimit := l.limitForWriter(lr.writerName)
 	allowed := amount <= writerLimit
-	events.Debug("limiter: writer:%v writerLimit:%v amount:%v allowed:%v", lr.writerName, writerLimit, amount, allowed)
+	log.Debug("limiter", "writer", lr.writerName, "writerLimit", writerLimit, "amount", amount, "allowed", allowed)
 	return allowed, nil
 }
 
@@ -136,7 +136,7 @@ func (l *dbLimiter) checkTableSizes(ctx context.Context, lr limiterRequest) erro
 
 // start initializes the db limiter and spawns necessary goroutines
 func (l *dbLimiter) start(ctx context.Context) error {
-	events.Log("Starting the db limiter")
+	log.EventLog("Starting the db limiter")
 	if err := l.tableSizer.start(ctx); err != nil {
 		return errors.Wrap(err, "could not start sizer")
 	}
@@ -151,14 +151,14 @@ func (l *dbLimiter) start(ctx context.Context) error {
 	// after we've done one refreshWriterLimits successfully, we'll do the rest async
 	go utils.CtxLoop(ctx, defaultRefreshPeriod, func() {
 		if err := l.refreshWriterLimits(ctx); err != nil {
-			events.Log("could not update limits: %{error}s", err)
+			log.EventLog("could not update limits: %{error}s", err)
 			instrumentUpdateErr(err)
 		}
 	})
 	// also, periodically try to clean up the writer_usage table.
 	go utils.CtxLoop(ctx, defaultDeleteUsagePeriod, func() {
 		if err := l.deleteOldUsageData(ctx); err != nil {
-			events.Log("could not collect garbage %{error}s", err)
+			log.EventLog("could not collect garbage %{error}s", err)
 			errs.IncrDefault(stats.Tag{Name: "op", Value: "limiter-collect-garbage"})
 		}
 	})
@@ -178,7 +178,7 @@ func (l *dbLimiter) deleteOldUsageData(ctx context.Context) error {
 		return errors.Wrap(err, "could not get rows affected after deleting from writer_usage")
 	}
 	if rows > 0 {
-		events.Log("deleted %{rows}d rows from the writer_usage table", rows)
+		log.EventLog("deleted %{rows}d rows from the writer_usage table", rows)
 	}
 	stats.Add("writer-usage-rows-deleted", rows)
 	return nil
@@ -206,7 +206,7 @@ func (l *dbLimiter) refreshWriterLimits(ctx context.Context) error {
 		if err != nil {
 			return errors.Wrap(err, "adjust found rate limit")
 		}
-		events.Debug("adjusted %v limit from %v/%v to %v/%v", writerName, maxRowsPerMinute, time.Minute, adjustedRate, l.defaultWriterLimit.Period)
+		log.EventDebug("adjusted %v limit from %v/%v to %v/%v", writerName, maxRowsPerMinute, time.Minute, adjustedRate, l.defaultWriterLimit.Period)
 		writerLimits[writerName] = adjustedRate
 	}
 	if err := rows.Err(); err != nil {

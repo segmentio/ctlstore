@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/url"
 	"os"
 	"strings"
@@ -26,7 +27,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/sqlite"
 	"github.com/segmentio/errors-go"
 	"github.com/segmentio/events/v2"
-	_ "github.com/segmentio/events/v2/log" // lets events actually log
+	"github.com/segmentio/log"
 
 	"github.com/segmentio/stats/v4"
 )
@@ -37,7 +38,7 @@ import (
 type Reflector struct {
 	shovel        func() (*shovel, error)
 	ldb           *sql.DB
-	logger        *events.Logger
+	logger        *slog.Logger
 	upstreamdb    *sql.DB
 	ledgerMonitor *ledger.Monitor
 	walMonitor    starter
@@ -76,7 +77,7 @@ type ReflectorConfig struct {
 	DoMonitorWAL      bool                     // optional
 	BusyTimeoutMS     int                      // optional
 	ID                string
-	Logger            *events.Logger
+	Logger            *slog.Logger
 }
 
 type DownloadMetric struct {
@@ -106,13 +107,13 @@ var driverNameSequence int64
 // ReflectorFromConfig instantiates a Reflector instance using the
 // configuration specified by a ReflectorConfig instance
 func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
-	events.Log("Config: %{config}s", config.Printable())
+	log.EventLog("Config: %{config}s", config.Printable())
 
 	if config.BootstrapURL != "" {
 		if _, err := os.Stat(config.LDBPath); err != nil {
 			switch {
 			case os.IsNotExist(err):
-				events.Log("LDB File %{file}s doesn't exist, beginning bootstrap...", config.LDBPath)
+				log.EventLog("LDB File %{file}s doesn't exist, beginning bootstrap...", config.LDBPath)
 				err = bootstrapLDB(ldbBootstrapConfig{
 					url:                 config.BootstrapURL,
 					path:                config.LDBPath,
@@ -126,7 +127,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 				return nil, err
 			}
 		} else {
-			events.Log("LDB File %{file}s exists, skipping bootstrap.", config.LDBPath)
+			log.EventLog("LDB File %{file}s exists, skipping bootstrap.", config.LDBPath)
 		}
 	}
 
@@ -185,14 +186,14 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 		return nil, errors.Wrap(err, "find max seq from ledger")
 	}
 
-	events.Log("Max known ledger sequence: %{seq}d", maxKnownSeq)
+	log.EventLog("Max known ledger sequence: %{seq}d", maxKnownSeq)
 
 	path := "/var/spool/ctlstore/metrics.json"
 	err = emitMetricFromFile(path)
 	if err != nil {
-		events.Log("Failed to emit metric from file", err)
+		log.EventLog("Failed to emit metric from file", err)
 	}
-	events.Log("Successfully emitted metric from file")
+	log.EventLog("Successfully emitted metric from file")
 
 	// TODO: check Upstream fields
 	stop := make(chan struct{})
@@ -226,7 +227,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 			ldbWriteCallbacks = append(ldbWriteCallbacks, &ldbwriter.ChangelogCallback{
 				ChangelogWriter: clw,
 			})
-			events.Log("Writing changelog to %{path}s", config.ChangelogPath)
+			log.EventLog("Writing changelog to %{path}s", config.ChangelogPath)
 		}
 
 		if config.LDBWriteCallback != nil {
@@ -245,7 +246,7 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 		}
 
 		lastSeq, err := ldb.FetchSeqFromLdb(context.TODO(), ldbDB)
-		events.Log("Latest seq from %s: %d", config.ID, lastSeq.Int())
+		log.EventLog("Latest seq from %s: %d", config.ID, lastSeq.Int())
 		if err != nil {
 			return nil, fmt.Errorf("Error when fetching last sequence from LDB: %v", err)
 		}
@@ -345,7 +346,7 @@ func emitMetricFromFile(path string) error {
 
 func (r *Reflector) Start(ctx context.Context) error {
 
-	r.logger.Log("Starting Reflector.")
+	r.logger.Info("Starting Reflector.")
 	go r.ledgerMonitor.Start(ctx)
 	go r.walMonitor.Start(ctx)
 	for {
@@ -355,15 +356,16 @@ func (r *Reflector) Start(ctx context.Context) error {
 				return errors.Wrap(err, "build shovel")
 			}
 			defer shovel.Close()
-			r.logger.Log("Shoveling...")
+			r.logger.Info("Shoveling...")
 			stats.Incr("reflector.shovel_start")
 			err = shovel.Start(ctx)
 			return errors.Wrap(err, "shovel")
 		}()
 		switch {
 		case errs.IsCanceled(err): // this is normal
+		// true if we got a SIGTERM
 		case events.IsTermination(errors.Cause(err)): // this is normal
-			r.logger.Log("Reflector received termination signal")
+			r.logger.Info("Reflector received termination signal")
 		case err != nil:
 			switch {
 			case errors.Is("SkippedSequence", err):
@@ -373,7 +375,7 @@ func (r *Reflector) Start(ctx context.Context) error {
 			default:
 				errs.Incr("reflector.shovel_error")
 			}
-			r.logger.Log("Error encountered during shoveling: %{error}+v", err)
+			r.logger.Error("Error encountered during shoveling", "err", err)
 		}
 		select {
 		case <-r.stop:
@@ -393,7 +395,7 @@ func (r *Reflector) Stop() {
 func (r *Reflector) Close() error {
 	var err error
 
-	r.logger.Log("Close() reflector")
+	r.logger.Info("Close() reflector")
 
 	err = r.ldb.Close()
 	if err != nil {
@@ -425,7 +427,7 @@ func bootstrapLDB(cfg ldbBootstrapConfig) error {
 		shortURL = shortURL[:256]
 	}
 
-	events.Log("Bootstrap: %{url}s (region:%{region}q) to %{path}s", shortURL, cfg.region, cfg.path)
+	log.EventLog("Bootstrap: %{url}s (region:%{region}q) to %{path}s", shortURL, cfg.region, cfg.path)
 
 	parsed, err := url.Parse(cfg.url)
 	if err != nil {
@@ -490,21 +492,21 @@ func bootstrapLDB(cfg ldbBootstrapConfig) error {
 			if err != nil {
 				return err
 			}
-			events.Log("Bootstrap: Downloaded %{bytes}d bytes", bytes)
+			log.EventLog("Bootstrap: Downloaded %{bytes}d bytes", bytes)
 			return nil
 		case errors.Is(errs.ErrTypeTemporary, err):
 			incrError("temporary")
-			events.Log("Temporary error trying to download snapshot: %{error}s", err)
+			log.EventLog("Temporary error trying to download snapshot: %{error}s", err)
 			delay := cfg.retryDelay
 			if delay == 0 {
 				delay = time.Second
 			}
-			events.Log("Retrying in %{delay}s", delay)
+			log.EventLog("Retrying in %{delay}s", delay)
 			time.Sleep(delay)
 		case errors.Is(errs.ErrTypePermanent, err):
 			incrError("permanent")
-			events.Log("Could not download snapshot: %{error}s", err)
-			events.Log("Starting with a new LDB")
+			log.EventLog("Could not download snapshot: %{error}s", err)
+			log.EventLog("Starting with a new LDB")
 			return nil
 		default:
 			incrError("generic")

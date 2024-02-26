@@ -1,6 +1,6 @@
 module github.com/segmentio/ctlstore
 
-go 1.20
+go 1.21
 
 require (
 	github.com/AlekSi/pointer v1.0.0
@@ -21,6 +21,7 @@ require (
 	github.com/segmentio/errors-go v1.0.0
 	github.com/segmentio/events/v2 v2.3.2
 	github.com/segmentio/go-sqlite3 v1.14.22-segment
+	github.com/segmentio/log v0.7.0
 	github.com/segmentio/stats/v4 v4.6.2
 	github.com/stretchr/testify v1.8.1
 	golang.org/x/sync v0.3.0

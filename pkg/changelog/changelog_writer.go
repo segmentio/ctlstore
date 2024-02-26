@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/pkg/errors"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 )
 
 type (
@@ -45,7 +45,7 @@ func (w *ChangelogWriter) WriteChange(e ChangelogEntry) error {
 		return errors.Wrap(err, "error marshalling json")
 	}
 
-	events.Debug("changelogWriter.WriteChange: %{family}s.%{table}s => %{key}v",
+	log.EventDebug("changelogWriter.WriteChange: %{family}s.%{table}s => %{key}v",
 		e.Family, e.Table, e.Key)
 
 	return w.WriteLine.WriteLine(string(bytes))

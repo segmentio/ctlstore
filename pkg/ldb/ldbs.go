@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync/atomic"
@@ -45,7 +44,7 @@ var (
 var testTmpSeq int64 = 0
 
 func LDBForTestWithPath(t testing.TB) (res *sql.DB, teardown func(), path string) {
-	tmpDir, err := ioutil.TempDir("", "ldb-for-test")
+	tmpDir, err := os.MkdirTemp("", "ldb-for-test")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +93,7 @@ func EnsureLdbInitialized(ctx context.Context, db *sql.DB) error {
 }
 
 func NewLDBTmpPath(t *testing.T) (string, func()) {
-	path, err := ioutil.TempDir("", "ldb-tmp-path")
+	path, err := os.MkdirTemp("", "ldb-tmp-path")
 	if err != nil {
 		t.Fatal(err)
 	}

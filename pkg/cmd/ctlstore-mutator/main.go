@@ -9,7 +9,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -111,7 +111,7 @@ func main() {
 			}
 			defer resp.Body.Close()
 			if resp.StatusCode != http.StatusOK {
-				b, _ = ioutil.ReadAll(resp.Body)
+				b, _ = io.ReadAll(resp.Body)
 				return fmt.Errorf("could not make mutation request: %d: %s", resp.StatusCode, b)
 			}
 			return nil
@@ -137,7 +137,7 @@ func setup(cfg config, url string) error {
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		b, _ := ioutil.ReadAll(res.Body)
+		b, _ := io.ReadAll(res.Body)
 		return fmt.Errorf("could register writer: %v: %s", res.StatusCode, b)
 	}
 
@@ -154,7 +154,7 @@ func setup(cfg config, url string) error {
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusConflict {
-		b, _ := ioutil.ReadAll(res.Body)
+		b, _ := io.ReadAll(res.Body)
 		return fmt.Errorf("could not make family request: %v: %s", res.StatusCode, b)
 	}
 
@@ -184,7 +184,7 @@ func setup(cfg config, url string) error {
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusConflict {
-		b, _ := ioutil.ReadAll(res.Body)
+		b, _ := io.ReadAll(res.Body)
 		return fmt.Errorf("could not make table request: %v: %s", res.StatusCode, b)
 	}
 

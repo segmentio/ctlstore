@@ -11,7 +11,7 @@ import (
 
 	"github.com/segmentio/ctlstore/pkg/version"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 )
 
@@ -142,7 +142,7 @@ func Initialize(ctx context.Context, cfg Config) {
 
 	// Validate that all config values are valid.
 	if cfg.FlushEvery < 0 {
-		events.Log("Could not initialize ctlstore global stats: %{error}s", errors.New("flush rate must be a positive duration"))
+		log.EventLog("Could not initialize ctlstore global stats: %{error}s", errors.New("flush rate must be a positive duration"))
 		return
 	}
 

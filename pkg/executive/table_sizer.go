@@ -12,7 +12,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/limits"
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/utils"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 )
 
@@ -41,7 +41,7 @@ func newTableSizer(ctldb *sql.DB, dbType string, defaultTableLimit limits.SizeLi
 	// the table sizer does not work for sqlite3 databases.
 	enabled := dbType != "sqlite3"
 	if !enabled {
-		events.Log("Table sizer is disabled due to dbType=%s", dbType)
+		log.EventLog("Table sizer is disabled due to dbType=%s", dbType)
 	}
 	return &tableSizer{
 		enabled:                 enabled,
@@ -68,7 +68,7 @@ func (s *tableSizer) tableOK(ft schema.FamilyTable) (found bool, err error) {
 	if !tableFound {
 		// we don't know about it yet. this is normal when a new table has been created
 		// and the sizer has not yet refreshed its table size map.
-		events.Debug("received table size check about unknown table '%s'", ft)
+		log.EventDebug("received table size check about unknown table '%s'", ft)
 		errs.Incr("table-sizer-unknown-table", ft.Tag())
 		return false, nil
 	}
@@ -95,10 +95,10 @@ func (s *tableSizer) tableOK(ft schema.FamilyTable) (found bool, err error) {
 // poll period.
 func (s *tableSizer) start(ctx context.Context) error {
 	if !s.enabled {
-		events.Log("Table sizer not starting b/c it is disabled")
+		log.EventLog("Table sizer not starting b/c it is disabled")
 		return nil
 	}
-	events.Log("starting table sizer with a period of %v", s.pollPeriod)
+	log.EventLog("starting table sizer with a period of %v", s.pollPeriod)
 	doRefresh := func() error {
 		err := s.refresh(ctx)
 		if err != nil {
@@ -111,7 +111,7 @@ func (s *tableSizer) start(ctx context.Context) error {
 	}
 	go utils.CtxLoop(ctx, s.pollPeriod, func() {
 		if err := doRefresh(); err != nil {
-			events.Log("could not refresh table sizer: %{err}v", err)
+			log.EventLog("could not refresh table sizer: %{err}v", err)
 		}
 	})
 	return nil
@@ -189,7 +189,7 @@ func (s *tableSizer) getSizes(ctx context.Context) (map[schema.FamilyTable]int64
 		}
 		stats.Set("table-sizes", amount, stats.T("family", ft.Family), stats.T("table", ft.Table))
 		res[ft] = amount
-		events.Debug("table sizer: %v=%v", name, amount)
+		log.EventDebug("table sizer: %v=%v", name, amount)
 	}
 	return res, rows.Err()
 }

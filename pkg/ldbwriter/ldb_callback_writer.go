@@ -6,7 +6,7 @@ import (
 
 	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/ctlstore/pkg/sqlite"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 )
 
 // CallbackWriter is an LDBWriter that delegates to another
@@ -25,7 +25,7 @@ func (w *CallbackWriter) ApplyDMLStatement(ctx context.Context, statement schema
 	}
 	changes := w.ChangeBuffer.Pop()
 	for _, callback := range w.Callbacks {
-		events.Debug("Writing DML callback for %{cb}T", callback)
+		log.EventDebug("Writing DML callback for %{cb}T", callback)
 		callback.LDBWritten(ctx, LDBWriteMetadata{
 			DB:        w.DB,
 			Statement: statement,

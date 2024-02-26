@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -13,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 
 	"github.com/segmentio/ctlstore/pkg/errs"
@@ -68,8 +68,8 @@ func NewLedgerMonitor(cfg HealthConfig, llf latencyFunc, opts ...MonitorOpt) (*M
 }
 
 func (m *Monitor) Start(ctx context.Context) {
-	events.Log("Ledger monitor starting")
-	defer events.Log("Ledger monitor stopped")
+	log.EventLog("Ledger monitor starting")
+	defer log.EventLog("Ledger monitor stopped")
 	var health *bool // pointer for tri-state logic
 	temporaryErrorLimit := 3
 	utils.CtxFireLoopTicker(ctx, m.tickerFunc(), func() {
@@ -114,18 +114,18 @@ func (m *Monitor) Start(ctx context.Context) {
 		case errors.Is("temporary", err) && temporaryErrorLimit > 0:
 			// don't increment error metric for a temporary error
 			temporaryErrorLimit--
-			events.Log("Temporary monitor ledger latency error: %s", err)
+			log.EventLog("Temporary monitor ledger latency error: %s", err)
 			stats.Incr("ledger-monitor-temporary-errors")
 		default:
 			// this is an error that must be instrumented
-			events.Log("Could not monitor ledger latency: %s", err)
+			log.EventLog("Could not monitor ledger latency: %s", err)
 			errs.IncrDefault(stats.Tag{Name: "op", Value: "monitor-ledger-latency"})
 		}
 	})
 }
 
 func (m *Monitor) setHealthAttribute(ctx context.Context, attrValue string) error {
-	events.Log("Setting ECS instance attribute: %s=%s", m.cfg.AttributeName, attrValue)
+	log.EventLog("Setting ECS instance attribute: %s=%s", m.cfg.AttributeName, attrValue)
 	ecsMeta, err := m.getECSMetadata(ctx)
 	if err != nil {
 		return errors.Wrap(err, "get ecs metadata")
@@ -134,7 +134,7 @@ func (m *Monitor) setHealthAttribute(ctx context.Context, attrValue string) erro
 	if err != nil {
 		return errors.Wrap(err, "build cluster ARN")
 	}
-	events.Log("Putting attribute name=%{attName}v value=%{attValue}v targetID=%{targetID}v targetType=%{targetType}v",
+	log.EventLog("Putting attribute name=%{attName}v value=%{attValue}v targetID=%{targetID}v targetType=%{targetType}v",
 		m.cfg.AttributeName, attrValue, ecsMeta.ContainerInstanceArn, ecsContainerInstanceTargetType)
 	client := m.getECSClient()
 	_, err = client.PutAttributes(&ecs.PutAttributesInput{
@@ -193,7 +193,7 @@ func (m *Monitor) getECSMetadata(ctx context.Context) (meta EcsMetadata, err err
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
-			b, _ := ioutil.ReadAll(resp.Body)
+			b, _ := io.ReadAll(resp.Body)
 			return errors.Errorf("could not get ecs metadata: [%d]: %s", resp.StatusCode, b)
 		}
 		if err = json.NewDecoder(resp.Body).Decode(&meta); err != nil {

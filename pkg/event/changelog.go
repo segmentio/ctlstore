@@ -13,7 +13,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 )
 
@@ -69,7 +69,7 @@ func (c *fileChangelog) start(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			if err := watcher.Close(); err != nil {
-				events.Log("Could not close watcher: %{err}s", err)
+				log.EventLog("Could not close watcher: %{err}s", err)
 			}
 		}
 	}()
@@ -88,7 +88,7 @@ func (c *fileChangelog) start(ctx context.Context) error {
 		for {
 			select {
 			case err := <-watcher.Errors:
-				events.Log("FS err: %{err}s", err)
+				log.EventLog("FS err: %{err}s", err)
 				select {
 				case fsErrCh <- err:
 				case <-ctx.Done():
@@ -140,10 +140,10 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 			defer func() {
 				if err := f.Close(); err != nil {
 					errs.Incr("changelog-errors", stats.T("op", "close file"))
-					events.Log("Could not close changelog file: %{error}s", err)
+					log.EventLog("Could not close changelog file: %{error}s", err)
 				}
 			}()
-			events.Debug("Opening changelog...")
+			log.EventDebug("Opening changelog...")
 
 			br := bufio.NewReaderSize(f, 60*1024)
 
@@ -198,11 +198,11 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 				}
 				select {
 				case <-time.After(time.Second):
-					events.Debug("Manually checking log")
+					log.EventDebug("Manually checking log")
 					continue
 				case err := <-fsErrCh:
 					if err := readEvents(); err != io.EOF {
-						events.Log("could not consume rest of file: %{error}s", err)
+						log.EventLog("could not consume rest of file: %{error}s", err)
 					}
 					return errors.Wrap(err, "watcher error")
 				case event := <-fsNotifyCh:
@@ -210,16 +210,16 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 					case fsnotify.Write:
 						continue
 					case fsnotify.Create:
-						events.Debug("New changelog created. Consuming the rest of current one...")
+						log.EventDebug("New changelog created. Consuming the rest of current one...")
 						err := readEvents()
 						if err != io.EOF {
 							return errors.Wrap(err, "consume rest of changelog")
 						}
-						events.Debug("Restarting reader")
+						log.EventDebug("Restarting reader")
 						return nil
 					}
 				case <-ctx.Done():
-					events.Debug("Changelog context finished. Exiting.")
+					log.EventDebug("Changelog context finished. Exiting.")
 					return ctx.Err()
 				}
 			}
@@ -230,12 +230,12 @@ func (c *fileChangelog) read(ctx context.Context, fsNotifyCh chan fsnotify.Event
 		case errs.IsCanceled(err):
 			return
 		case os.IsNotExist(errors.Cause(err)):
-			events.Log("Changelog file does not exist, rechecking...")
+			log.EventLog("Changelog file does not exist, rechecking...")
 			select {
 			case <-fsNotifyCh:
-				events.Log("Changelog notified")
+				log.EventLog("Changelog notified")
 			case <-time.After(time.Second):
-				events.Log("Manually checking")
+				log.EventLog("Manually checking")
 			}
 		default:
 			errs.Incr("changelog-errors", stats.T("op", "open file"))
@@ -261,7 +261,7 @@ func (c *fileChangelog) validate() error {
 	switch {
 	case err == nil:
 	case os.IsNotExist(err):
-		events.Log("changelog does not exist. waiting 1s for rotation")
+		log.EventLog("changelog does not exist. waiting 1s for rotation")
 		time.Sleep(time.Second)
 		_, err = os.Stat(c.path)
 		switch {

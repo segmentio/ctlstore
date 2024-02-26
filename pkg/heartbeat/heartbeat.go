@@ -2,7 +2,7 @@ package heartbeat
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/utils"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 )
 
 type (
@@ -56,8 +56,8 @@ func HeartbeatFromConfig(config HeartbeatConfig) (*Heartbeat, error) {
 }
 
 func (h *Heartbeat) Start(ctx context.Context) {
-	events.Log("Heartbeat starting")
-	defer events.Log("Heartbeat stopped")
+	log.EventLog("Heartbeat starting")
+	defer log.EventLog("Heartbeat stopped")
 	utils.CtxFireLoop(ctx, h.interval, func() { h.pulse(ctx) })
 }
 
@@ -98,14 +98,14 @@ func (h *Heartbeat) pulse(ctx context.Context) {
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
-			b, _ := ioutil.ReadAll(resp.Body)
+			b, _ := io.ReadAll(resp.Body)
 			return errors.Errorf("could not make mutation request: %d: %s", resp.StatusCode, b)
 		}
-		events.Log("Heartbeat: %v", heartbeat)
+		log.EventLog("Heartbeat: %v", heartbeat)
 		return nil
 	}()
 	if err != nil {
-		events.Log("Heartbeat failed: %s", err)
+		log.EventLog("Heartbeat failed: %s", err)
 		errs.Incr("heartbeat-errors")
 	}
 }
@@ -121,7 +121,7 @@ func (h *Heartbeat) init() error {
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		b, _ := ioutil.ReadAll(res.Body)
+		b, _ := io.ReadAll(res.Body)
 		return errors.Errorf("could not register writer: %d: %s", res.StatusCode, b)
 	}
 
@@ -137,7 +137,7 @@ func (h *Heartbeat) init() error {
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusConflict {
-		b, _ := ioutil.ReadAll(res.Body)
+		b, _ := io.ReadAll(res.Body)
 		return errors.Errorf("could not make family request: %v: %s", res.StatusCode, b)
 	}
 
@@ -161,7 +161,7 @@ func (h *Heartbeat) init() error {
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusConflict {
-		b, _ := ioutil.ReadAll(res.Body)
+		b, _ := io.ReadAll(res.Body)
 		return errors.Errorf("could not make table request: %v: %s", res.StatusCode, b)
 	}
 

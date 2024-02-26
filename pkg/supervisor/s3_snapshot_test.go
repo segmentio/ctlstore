@@ -55,7 +55,7 @@ func TestS3SnapshotCompression(t *testing.T) {
 			s3snap.sendToS3Func = func(ctx context.Context, key string, bucket string, body io.Reader) (err error) {
 				sent.key = key
 				sent.bucket = bucket
-				sent.bytes, err = ioutil.ReadAll(body)
+				sent.bytes, err = io.ReadAll(body)
 				return
 			}
 			file, err := ioutil.TempFile("", test.name)
@@ -72,7 +72,7 @@ func TestS3SnapshotCompression(t *testing.T) {
 			if test.compression {
 				r, err := gzip.NewReader(bytes.NewReader(sent.bytes))
 				require.NoError(t, err)
-				b, err := ioutil.ReadAll(r)
+				b, err := io.ReadAll(r)
 				require.NoError(t, err)
 				require.Equal(t, test.payload, string(b))
 			} else {

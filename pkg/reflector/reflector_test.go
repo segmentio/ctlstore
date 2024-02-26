@@ -4,13 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"encoding/base64"
-	"github.com/stretchr/testify/assert"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/segmentio/ctlstore/pkg/ctldb"
@@ -18,12 +18,12 @@ import (
 	"github.com/segmentio/ctlstore/pkg/ldbwriter"
 	"github.com/segmentio/ctlstore/pkg/ledger"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/stretchr/testify/require"
 )
 
 func TestShovelSequenceReset(t *testing.T) {
-	tmpPath, err := ioutil.TempDir("", "")
+	tmpPath, err := os.MkdirTemp("", "")
 	require.NoError(t, err)
 	defer os.RemoveAll(tmpPath)
 
@@ -44,7 +44,7 @@ func TestShovelSequenceReset(t *testing.T) {
 	defer ldbDB.Close()
 	ldb.EnsureLdbInitialized(context.TODO(), ldbDB)
 
-	emptyLdbContents, err := ioutil.ReadFile(emptyLdbPath)
+	emptyLdbContents, err := os.ReadFile(emptyLdbPath)
 	require.NoError(t, err)
 
 	encodedEmpty := base64.URLEncoding.EncodeToString(emptyLdbContents)
@@ -66,7 +66,7 @@ func TestShovelSequenceReset(t *testing.T) {
 		LedgerHealth: ledger.HealthConfig{
 			DisableECSBehavior: true,
 		},
-		Logger: events.DefaultLogger,
+		Logger: log.Default(),
 	}
 	reflector, err := ReflectorFromConfig(cfg)
 	require.NoError(t, err)
@@ -116,7 +116,7 @@ func TestShovelSequenceReset(t *testing.T) {
 }
 
 func TestReflector(t *testing.T) {
-	tmpPath, err := ioutil.TempDir("", "")
+	tmpPath, err := os.MkdirTemp("", "")
 	if err != nil {
 		t.Fatalf("Encountered unexpected error creating temp path, %v", err)
 	}
@@ -133,7 +133,7 @@ func TestReflector(t *testing.T) {
 	defer ldbDB.Close()
 	ldb.EnsureLdbInitialized(context.TODO(), ldbDB)
 
-	emptyLdbContents, err := ioutil.ReadFile(emptyLdbPath)
+	emptyLdbContents, err := os.ReadFile(emptyLdbPath)
 	require.NoError(t, err)
 
 	encodedEmpty := base64.URLEncoding.EncodeToString(emptyLdbContents)
@@ -156,7 +156,7 @@ func TestReflector(t *testing.T) {
 			DisableECSBehavior: true,
 			PollInterval:       10 * time.Second,
 		},
-		Logger: events.DefaultLogger,
+		Logger: log.Default(),
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -195,7 +195,7 @@ func TestReflector(t *testing.T) {
 	go func() {
 		close(waitCh)
 		reflector.Start(ctx)
-		events.Log("Reflector terminated")
+		log.EventLog("Reflector terminated")
 		atomic.AddInt64(&isTerminated, 1)
 	}()
 	<-waitCh
@@ -205,7 +205,7 @@ func TestReflector(t *testing.T) {
 		cancel()
 	}
 
-	clBytes, err := ioutil.ReadFile(changelogPath)
+	clBytes, err := os.ReadFile(changelogPath)
 	require.NoError(t, err)
 
 	expectChangelog := "{\"seq\":1,\"family\":\"family1\",\"table\":\"table1234\",\"key\":[{\"name\":\"field1\",\"type\":\"INTEGER\",\"value\":1234}]}\n"

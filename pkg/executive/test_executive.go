@@ -3,7 +3,6 @@ package executive
 import (
 	"context"
 	"database/sql"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -17,7 +16,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/limits"
 	"github.com/segmentio/ctlstore/pkg/sqlgen"
 	"github.com/segmentio/ctlstore/pkg/units"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 )
 
 type TestExecutiveService struct {
@@ -28,7 +27,7 @@ type TestExecutiveService struct {
 }
 
 func NewTestExecutiveService(bindTo string) (*TestExecutiveService, error) {
-	tmpDir, err := ioutil.TempDir("", "")
+	tmpDir, err := os.MkdirTemp("", "")
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +57,7 @@ func NewTestExecutiveService(bindTo string) (*TestExecutiveService, error) {
 	go func() {
 		listener, err := net.Listen("tcp", bindTo)
 		if err != nil {
-			events.Log("Error listening: %{error}+v", err)
+			log.EventLog("Error listening: %{error}+v", err)
 			started.Done()
 			return
 		}
@@ -68,7 +67,7 @@ func NewTestExecutiveService(bindTo string) (*TestExecutiveService, error) {
 		started.Done()
 
 		if err := svc.h.Serve(listener); err != nil && err != http.ErrServerClosed {
-			events.Log("Error serving: %{error}+v", err)
+			log.EventLog("Error serving: %{error}+v", err)
 		}
 	}()
 
@@ -89,7 +88,7 @@ func (s *TestExecutiveService) shutdown() {
 	defer cancel()
 
 	if err := s.h.Shutdown(sctx); err != nil {
-		events.Log("Shutdown error: %{error}+v", err)
+		log.EventLog("Shutdown error: %{error}+v", err)
 	}
 }
 

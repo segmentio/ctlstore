@@ -13,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/events/v2"
+	"github.com/segmentio/log"
 	"github.com/segmentio/stats/v4"
 
 	"github.com/segmentio/ctlstore/pkg/errs"
@@ -69,7 +69,7 @@ func (d *S3Downloader) DownloadTo(w io.Writer) (n int64, err error) {
 		return n, errors.Wrap(err, "copy from s3 to writer")
 	}
 	if compressedSize != nil {
-		events.Log("LDB inflated %d -> %d bytes", *compressedSize, n)
+		log.EventLog("LDB inflated %d -> %d bytes", *compressedSize, n)
 	}
 
 	return

@@ -3,7 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -25,7 +25,7 @@ var (
 func bailResponse(response *http.Response, msg string, args ...interface{}) {
 	msg = fmt.Sprintf(msg, args...)
 	// ok to ignore error here
-	b, _ := ioutil.ReadAll(response.Body)
+	b, _ := io.ReadAll(response.Body)
 	respMsg := fmt.Sprintf("server returned [%d]: %s", response.StatusCode, b)
 	fmt.Fprintln(os.Stderr, fmt.Sprintf("%s: %s", msg, respMsg))
 	os.Exit(1)
