@@ -138,79 +138,73 @@ func TestSqlDmlSourceWithSharding(t *testing.T) {
 	}{
 		{statement: foobar, family: "foo", table: "bar"},
 		{statement: foobar1, family: "foo", table: "bar1"},
-		{statement: foo1bar1, family: "foo1", table: "bar1"},
 		{statement: foo1bar, family: "foo1", table: "bar"},
+		{statement: foo1bar1, family: "foo1", table: "bar1"},
 	}
 
 	testCases := []struct {
-		name              string
-		shardingFamily    string
-		shardingTable     string
-		stContains        []string
-		stNotContains     []string
-		seqModContains    []int64
-		seqModNotContains []int64
-		expectedErr       error
+		name           string
+		shardingFamily string
+		shardingTable  string
+		stContains     []string
+		seqModContains []int64
+		expectedErr    error
 	}{
 		{
-			name:              "Single family single table",
-			shardingFamily:    "foo",
-			shardingTable:     "foo___bar",
-			stContains:        []string{foobar},
-			stNotContains:     []string{foobar1, foo1bar1, foo1bar},
-			seqModContains:    []int64{0},
-			seqModNotContains: []int64{1, 2, 3},
-			expectedErr:       nil,
+			name:           "Single whole family",
+			shardingFamily: "foo",
+			shardingTable:  "",
+			stContains:     []string{foobar, foobar1},
+			seqModContains: []int64{0, 1},
+			expectedErr:    nil,
 		},
 		{
-			name:              "Single family multiple tables",
-			shardingFamily:    "foo",
-			shardingTable:     "foo___bar,foo___bar1",
-			stContains:        []string{foobar, foobar1},
-			stNotContains:     []string{foo1bar1, foo1bar},
-			seqModContains:    []int64{0, 1},
-			seqModNotContains: []int64{2, 3},
-			expectedErr:       nil,
+			name:           "Single qualified table",
+			shardingFamily: "",
+			shardingTable:  "foo___bar",
+			stContains:     []string{foobar},
+			seqModContains: []int64{0},
+			expectedErr:    nil,
 		},
 		{
-			name:              "Multiple families multiple tables",
-			shardingFamily:    "foo,foo1",
-			shardingTable:     "foo___bar,foo1___bar1",
-			stContains:        []string{foobar, foo1bar1},
-			stNotContains:     []string{foo1bar, foobar1},
-			seqModContains:    []int64{0, 2},
-			seqModNotContains: []int64{1, 3},
-			expectedErr:       nil,
+			name:           "Multiple whole families",
+			shardingFamily: "foo,foo1",
+			shardingTable:  "",
+			stContains:     []string{foobar, foobar1, foo1bar, foo1bar1},
+			seqModContains: []int64{0, 1, 2, 3},
+			expectedErr:    nil,
 		},
 		{
-			name:              "All families all tables",
-			shardingFamily:    "foo,foo1",
-			shardingTable:     "foo___bar,foo___bar1,foo1___bar1,foo1___bar",
-			stContains:        []string{foobar, foobar1, foo1bar1, foo1bar},
-			stNotContains:     []string{},
-			seqModContains:    []int64{0, 1, 2, 3},
-			seqModNotContains: []int64{},
-			expectedErr:       nil,
+			name:           "Multiple qualified tables",
+			shardingFamily: "",
+			shardingTable:  "foo___bar,foo___bar1,foo1___bar,foo1___bar1",
+			stContains:     []string{foobar, foobar1, foo1bar, foo1bar1},
+			seqModContains: []int64{0, 1, 2, 3},
+			expectedErr:    nil,
 		},
 		{
-			name:              "No family no table",
-			shardingFamily:    "",
-			shardingTable:     "",
-			stContains:        []string{foobar, foobar1, foo1bar1, foo1bar},
-			stNotContains:     []string{},
-			seqModContains:    []int64{0, 1, 2, 3},
-			seqModNotContains: []int64{},
-			expectedErr:       nil,
+			name:           "Whole family and qualified table",
+			shardingFamily: "foo",
+			shardingTable:  "foo1___bar1",
+			stContains:     []string{foobar, foobar1, foo1bar1},
+			seqModContains: []int64{0, 1, 3},
+			expectedErr:    nil,
 		},
 		{
-			name:              "Single family no table",
-			shardingFamily:    "foo",
-			shardingTable:     "",
-			stContains:        []string{},
-			stNotContains:     []string{foobar, foobar1, foo1bar1, foo1bar},
-			seqModContains:    []int64{},
-			seqModNotContains: []int64{0, 1, 2, 3},
-			expectedErr:       nil,
+			name:           "Whole family override qualified table",
+			shardingFamily: "foo",
+			shardingTable:  "foo___bar",
+			stContains:     []string{foobar, foobar1},
+			seqModContains: []int64{0, 1},
+			expectedErr:    nil,
+		},
+		{
+			name:           "No sharding",
+			shardingFamily: "",
+			shardingTable:  "",
+			stContains:     []string{foobar, foobar1, foo1bar1, foo1bar},
+			seqModContains: []int64{0, 1, 2, 3},
+			expectedErr:    nil,
 		},
 	}
 
@@ -245,11 +239,10 @@ func TestSqlDmlSourceWithSharding(t *testing.T) {
 				st, err := src.Next(ctx)
 				require.NoError(t, err)
 				require.Contains(t, tt.stContains, st.Statement)
-				require.NotContains(t, tt.stNotContains, st.Statement)
 				require.True(t, st.Sequence.Int() > lastSeq)
 				lastSeq = st.Sequence.Int()
-				require.Contains(t, tt.seqModContains, (lastSeq-2)%int64(len(statements)))
-				require.NotContains(t, tt.seqModNotContains, (lastSeq-2)%int64(len(statements)))
+				mod := (lastSeq - 2) % int64(len(statements))
+				require.Contains(t, tt.seqModContains, mod)
 			}
 
 			_, err = src.Next(ctx)
@@ -298,6 +291,11 @@ func TestPrepareString(t *testing.T) {
 		expected string
 	}{
 		{
+			name:     "Empty string",
+			input:    "",
+			expected: "",
+		},
+		{
 			name:     "Single family",
 			input:    "family1",
 			expected: "(\"family1\")",
@@ -306,11 +304,6 @@ func TestPrepareString(t *testing.T) {
 			name:     "Multiple families",
 			input:    "family1,family2,family3",
 			expected: "(\"family1\", \"family2\", \"family3\")",
-		},
-		{
-			name:     "No families",
-			input:    "",
-			expected: "(\"\")",
 		},
 		{
 			name:     "Sharding table",

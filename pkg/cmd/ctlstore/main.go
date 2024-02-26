@@ -54,29 +54,29 @@ type sidecarConfig struct {
 }
 
 type reflectorCliConfig struct {
-	LDBPath                    string                   `conf:"ldb-path" help:"Path to LDB file" validate:"nonzero"`
-	ChangelogPath              string                   `conf:"changelog-path" help:"Path to changelog file"`
-	ChangelogSize              int                      `conf:"changelog-size" help:"Maximum size of the changelog file"`
-	UpstreamDriver             string                   `conf:"upstream-driver" help:"Upstream driver name (e.g. sqlite3)" validate:"nonzero"`
-	UpstreamDSN                string                   `conf:"upstream-dsn" help:"Upstream DSN (e.g. path to file if sqlite3)" validate:"nonzero"`
-	UpstreamLedgerTable        string                   `conf:"upstream-ledger-table" help:"Table on the upstream to look for statement ledger"`
-	UpstreamShardingFamily     string                   `conf:"upstream-sharding-family" help:"Sharding family(s) reflector is targeting"`
-	UpstreamShardingTable      string                   `conf:"upstream-sharding-table" help:"Sharding tables(s) reflector is targeting"`
-	BootstrapURL               string                   `conf:"bootstrap-url" help:"Bootstraps LDB from an S3 URL"`
-	BootstrapRegion            string                   `conf:"bootstrap-region" help:"If specified, indicates which region in which the S3 bucket lives"`
-	PollInterval               time.Duration            `conf:"poll-interval" help:"How often to pull the upstream" validate:"nonzero"`
-	PollJitterCoefficient      float64                  `conf:"poll-jitter-coefficient" help:"Coefficient for poll jittering"`
-	PollTimeout                time.Duration            `conf:"poll-timeout" help:"How long to poll from the source before canceling"`
-	QueryBlockSize             int                      `conf:"query-block-size" help:"Number of ledger entries to get at once"`
-	Debug                      bool                     `conf:"debug" help:"Turns on debug logging"`
-	LedgerHealth               ledgerHealthConfig       `conf:"ledger-latency" help:"Configure ledger latency behavior"`
-	Dogstatsd                  dogstatsdConfig          `conf:"dogstatsd" help:"dogstatsd Configuration"`
-	MetricsBind                string                   `conf:"metrics-bind" help:"address to serve Prometheus metircs"`
-	WALPollInterval            time.Duration            `conf:"wal-poll-interval" help:"How often to pull the sqlite's wal size and status. 0 indicates disabled monitoring'"`
-	WALCheckpointThresholdSize int                      `conf:"wal-checkpoint-threshold-size" help:"Performs a checkpoint after the WAL file exceeds this size in bytes"`
-	WALCheckpointType          ldbwriter.CheckpointType `conf:"wal-checkpoint-type" help:"what type of checkpoint to manually perform once the wal size is exceeded"`
-	BusyTimeoutMS              int                      `conf:"busy-timeout-ms" help:"Set a busy timeout on the connection string for sqlite in milliseconds"`
-	MultiReflector             multiReflectorConfig     `conf:"multi-reflector" help:"Configuration for running multiple reflectors at once"`
+	LDBPath                     string                   `conf:"ldb-path" help:"Path to LDB file" validate:"nonzero"`
+	ChangelogPath               string                   `conf:"changelog-path" help:"Path to changelog file"`
+	ChangelogSize               int                      `conf:"changelog-size" help:"Maximum size of the changelog file"`
+	UpstreamDriver              string                   `conf:"upstream-driver" help:"Upstream driver name (e.g. sqlite3)" validate:"nonzero"`
+	UpstreamDSN                 string                   `conf:"upstream-dsn" help:"Upstream DSN (e.g. path to file if sqlite3)" validate:"nonzero"`
+	UpstreamLedgerTable         string                   `conf:"upstream-ledger-table" help:"Table on the upstream to look for statement ledger"`
+	UpstreamShardingWholeFamily string                   `conf:"upstream-sharding-full-family" help:"Whole sharding family(s) reflector is targeting"`
+	UpstreamShardingFamilyTable string                   `conf:"upstream-sharding-family-table" help:"Fully-qualified sharding tables(s) reflector is targeting"`
+	BootstrapURL                string                   `conf:"bootstrap-url" help:"Bootstraps LDB from an S3 URL"`
+	BootstrapRegion             string                   `conf:"bootstrap-region" help:"If specified, indicates which region in which the S3 bucket lives"`
+	PollInterval                time.Duration            `conf:"poll-interval" help:"How often to pull the upstream" validate:"nonzero"`
+	PollJitterCoefficient       float64                  `conf:"poll-jitter-coefficient" help:"Coefficient for poll jittering"`
+	PollTimeout                 time.Duration            `conf:"poll-timeout" help:"How long to poll from the source before canceling"`
+	QueryBlockSize              int                      `conf:"query-block-size" help:"Number of ledger entries to get at once"`
+	Debug                       bool                     `conf:"debug" help:"Turns on debug logging"`
+	LedgerHealth                ledgerHealthConfig       `conf:"ledger-latency" help:"Configure ledger latency behavior"`
+	Dogstatsd                   dogstatsdConfig          `conf:"dogstatsd" help:"dogstatsd Configuration"`
+	MetricsBind                 string                   `conf:"metrics-bind" help:"address to serve Prometheus metircs"`
+	WALPollInterval             time.Duration            `conf:"wal-poll-interval" help:"How often to pull the sqlite's wal size and status. 0 indicates disabled monitoring'"`
+	WALCheckpointThresholdSize  int                      `conf:"wal-checkpoint-threshold-size" help:"Performs a checkpoint after the WAL file exceeds this size in bytes"`
+	WALCheckpointType           ldbwriter.CheckpointType `conf:"wal-checkpoint-type" help:"what type of checkpoint to manually perform once the wal size is exceeded"`
+	BusyTimeoutMS               int                      `conf:"busy-timeout-ms" help:"Set a busy timeout on the connection string for sqlite in milliseconds"`
+	MultiReflector              multiReflectorConfig     `conf:"multi-reflector" help:"Configuration for running multiple reflectors at once"`
 }
 
 type multiReflectorConfig struct {
@@ -575,20 +575,20 @@ func multiReflector(ctx context.Context, args []string) {
 
 func defaultReflectorCLIConfig(isSupervisor bool) reflectorCliConfig {
 	config := reflectorCliConfig{
-		LDBPath:                "",
-		ChangelogPath:          "",
-		ChangelogSize:          1 * 1024 * 1024,
-		UpstreamDriver:         "",
-		UpstreamDSN:            "",
-		UpstreamLedgerTable:    "ctlstore_dml_ledger",
-		UpstreamShardingFamily: "flagon2,cob",
-		UpstreamShardingTable:  "flagon2___flags,cob___kvs",
-		BootstrapURL:           "",
-		PollInterval:           1 * time.Second,
-		PollJitterCoefficient:  0.25,
-		QueryBlockSize:         100,
-		Dogstatsd:              defaultDogstatsdConfig(),
-		PollTimeout:            5 * time.Second,
+		LDBPath:                     "",
+		ChangelogPath:               "",
+		ChangelogSize:               1 * 1024 * 1024,
+		UpstreamDriver:              "",
+		UpstreamDSN:                 "",
+		UpstreamLedgerTable:         "ctlstore_dml_ledger",
+		UpstreamShardingWholeFamily: "flagon2,cob",
+		UpstreamShardingFamilyTable: "flagon2___flags,cob___kvs",
+		BootstrapURL:                "",
+		PollInterval:                1 * time.Second,
+		PollJitterCoefficient:       0.25,
+		QueryBlockSize:              100,
+		Dogstatsd:                   defaultDogstatsdConfig(),
+		PollTimeout:                 5 * time.Second,
 		LedgerHealth: ledgerHealthConfig{
 			Disable:                 false,
 			MaxHealthyLatency:       time.Minute,
@@ -658,8 +658,8 @@ func newReflector(cliCfg reflectorCliConfig, isSupervisor bool, i int) (*reflect
 			Driver:                cliCfg.UpstreamDriver,
 			DSN:                   cliCfg.UpstreamDSN,
 			LedgerTable:           cliCfg.UpstreamLedgerTable,
-			ShardingFamily:        cliCfg.UpstreamShardingFamily,
-			ShardingTable:         cliCfg.UpstreamShardingTable,
+			ShardingFamily:        cliCfg.UpstreamShardingWholeFamily,
+			ShardingTable:         cliCfg.UpstreamShardingFamilyTable,
 			PollInterval:          cliCfg.PollInterval,
 			PollJitterCoefficient: cliCfg.PollJitterCoefficient,
 			QueryBlockSize:        cliCfg.QueryBlockSize,
