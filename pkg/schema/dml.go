@@ -15,9 +15,11 @@ var currentTestDmlSeq int64
 type DMLSequence int64
 
 type DMLStatement struct {
-	Sequence  DMLSequence
-	Timestamp time.Time
-	Statement string
+	Sequence   DMLSequence
+	Timestamp  time.Time
+	Statement  string
+	FamilyName FamilyName
+	TableName  TableName
 }
 
 func (seq DMLSequence) Int() int64 {
@@ -31,6 +33,17 @@ func NewTestDMLStatement(statement string) DMLStatement {
 		Sequence:  nextTestDmlSeq(),
 		Timestamp: time.Now(),
 	}
+}
+
+func NewTestDMLStatementWithSharding(statement string, familyName FamilyName, tableName TableName) DMLStatement {
+	return DMLStatement{
+		Statement:  statement,
+		Sequence:   nextTestDmlSeq(),
+		Timestamp:  time.Now(),
+		FamilyName: familyName,
+		TableName:  tableName,
+	}
+
 }
 
 func nextTestDmlSeq() DMLSequence {

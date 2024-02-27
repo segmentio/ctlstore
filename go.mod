@@ -20,7 +20,7 @@ require (
 	github.com/segmentio/conf v1.1.0
 	github.com/segmentio/errors-go v1.0.0
 	github.com/segmentio/events/v2 v2.3.2
-	github.com/segmentio/go-sqlite3 v1.12.0
+	github.com/segmentio/go-sqlite3 v1.14.22-segment
 	github.com/segmentio/stats/v4 v4.6.2
 	github.com/stretchr/testify v1.8.1
 	golang.org/x/sync v0.3.0

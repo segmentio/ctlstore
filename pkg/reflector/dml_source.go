@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -29,6 +30,8 @@ type sqlDmlSource struct {
 	db               *sql.DB
 	lastSequence     schema.DMLSequence
 	ledgerTableName  string
+	shardingFamily   string
+	shardingTable    string
 	queryBlockSize   int
 	buffer           []schema.DMLStatement
 	scanLoopCallBack func()
@@ -44,10 +47,8 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 			blocksize = defaultQueryBlockSize
 		}
 
-		// table layout is: seq, leader_ts, statement
-		qs := sqlgen.SqlSprintf("SELECT seq, leader_ts, statement FROM $1 WHERE seq > ? ORDER BY seq LIMIT $2",
-			source.ledgerTableName,
-			fmt.Sprintf("%d", blocksize))
+		// table layout is: seq, leader_ts, statement, family_name, table_name
+		qs := generateSQLQuery(source.ledgerTableName, source.shardingFamily, source.shardingTable, blocksize)
 
 		// HMM: do we lean too hard on the LIMIT here? in the loop below
 		// we'll end up spinning if the DB keeps feeding us data
@@ -62,9 +63,11 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 		defer rows.Close()
 
 		row := struct {
-			seq       int64
-			leaderTs  string // this is a string b/c the driver errors when trying to Scan into a *time.Time.
-			statement string
+			seq        int64
+			leaderTs   string // this is a string b/c the driver errors when trying to Scan into a *time.Time.
+			statement  string
+			familyName string
+			tableName  string
 		}{}
 
 		for {
@@ -76,7 +79,7 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 				break
 			}
 
-			err = rows.Scan(&row.seq, &row.leaderTs, &row.statement)
+			err = rows.Scan(&row.seq, &row.leaderTs, &row.statement, &row.familyName, &row.tableName)
 			if err != nil {
 				return statement, errors.Wrap(err, "scan row")
 			}
@@ -91,9 +94,11 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 			}
 
 			dmlst := schema.DMLStatement{
-				Sequence:  schema.DMLSequence(row.seq),
-				Statement: row.statement,
-				Timestamp: timestamp,
+				Sequence:   schema.DMLSequence(row.seq),
+				Statement:  row.statement,
+				Timestamp:  timestamp,
+				FamilyName: schema.FamilyName{Name: row.familyName},
+				TableName:  schema.TableName{Name: row.tableName},
 			}
 
 			source.buffer = append(source.buffer, dmlst)
@@ -121,4 +126,38 @@ func (source *sqlDmlSource) Next(ctx context.Context) (statement schema.DMLState
 
 	err = errNoNewStatements
 	return
+}
+
+// Helper function to generate the SQL query
+func generateSQLQuery(ledgerTableName, shardingFamily, shardingTable string, blocksize int) string {
+	baseQuery := "SELECT seq, leader_ts, statement, family_name, table_name FROM $1 WHERE "
+	whereClause := "seq > ?"
+	limitClause := " ORDER BY seq LIMIT $4"
+
+	if shardingFamily != "" {
+		whereClause += fmt.Sprintf(" AND family_name IN $2")
+	}
+
+	if shardingTable != "" {
+		whereClause += fmt.Sprintf(" AND CONCAT(family_name,'___',table_name) IN $3")
+	}
+
+	if shardingFamily != "" && shardingTable != "" {
+		whereClause = fmt.Sprintf("seq > ? AND (family_name IN $2 OR CONCAT(family_name,'___',table_name) IN $3)")
+	}
+
+	return sqlgen.SqlSprintf(baseQuery+whereClause+limitClause,
+		ledgerTableName,
+		prepareString(shardingFamily),
+		prepareString(shardingTable),
+		fmt.Sprintf("%d", blocksize))
+}
+
+// Helper function to prepare the family string for SQL query
+func prepareString(str string) string {
+	if str == "" {
+		return ""
+	}
+
+	return "(\"" + strings.ReplaceAll(str, ",", "\", \"") + "\")"
 }

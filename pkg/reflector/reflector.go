@@ -49,6 +49,8 @@ type UpstreamConfig struct {
 	Driver                string
 	DSN                   string
 	LedgerTable           string
+	ShardingFamily        string
+	ShardingTable         string
 	QueryBlockSize        int
 	PollInterval          time.Duration
 	PollTimeout           time.Duration
@@ -254,6 +256,8 @@ func ReflectorFromConfig(config ReflectorConfig) (*Reflector, error) {
 			db:              upstreamdb,
 			lastSequence:    lastSeq,
 			ledgerTableName: config.Upstream.LedgerTable,
+			shardingFamily:  config.Upstream.ShardingFamily,
+			shardingTable:   config.Upstream.ShardingTable,
 			queryBlockSize:  config.Upstream.QueryBlockSize,
 		}
 
