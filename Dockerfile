@@ -1,10 +1,10 @@
-FROM golang:1.20-alpine
+FROM golang:1.22-alpine
 ENV SRC github.com/segmentio/ctlstore
 ARG VERSION
 
 RUN apk --update add gcc git curl alpine-sdk libc6-compat ca-certificates sqlite \
-  && curl -SsL https://github.com/segmentio/chamber/releases/download/v2.13.2/chamber-v2.13.2-linux-amd64 -o /bin/chamber \
-  && curl -sL https://github.com/peak/s5cmd/releases/download/v2.1.0/s5cmd_2.1.0_Linux-64bit.tar.gz -o s5cmd.gz && tar -xzf s5cmd.gz -C /bin \
+  && curl -SsL https://github.com/segmentio/chamber/releases/download/v2.14.0/chamber-v2.14.0-linux-amd64 -o /bin/chamber \
+  && curl -sL https://github.com/peak/s5cmd/releases/download/v2.2.2/s5cmd_2.2.2_Linux-64bit.tar.gz -o s5cmd.gz && tar -xzf s5cmd.gz -C /bin \
   && chmod +x /bin/chamber \
   && chmod +x /bin/s5cmd
 
@@ -12,10 +12,10 @@ RUN apk --update add gcc git curl alpine-sdk libc6-compat ca-certificates sqlite
 COPY . /go/src/${SRC}
 WORKDIR /go/src/${SRC}
 RUN go mod vendor
-RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=$VERSION" ${SRC}/pkg/cmd/ctlstore \
+RUN CGO_ENABLED=1 go install -trimpath -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=$VERSION" ${SRC}/pkg/cmd/ctlstore \
   && cp ${GOPATH}/bin/ctlstore /usr/local/bin
 
-RUN CGO_ENABLED=1 go install -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=$VERSION" ${SRC}/pkg/cmd/ctlstore-cli \
+RUN CGO_ENABLED=1 go install -trimpath -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=$VERSION" ${SRC}/pkg/cmd/ctlstore-cli \
   && cp ${GOPATH}/bin/ctlstore-cli /usr/local/bin
 
 FROM alpine

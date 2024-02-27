@@ -21,11 +21,11 @@ clean:
 
 .PHONY: install
 install:
-	$Qgo install ./pkg/cmd/ctlstore
+	$Qgo install -trimpath ./pkg/cmd/ctlstore
 
 .PHONY: build
 build: deps
-	$Qgo build -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=${VERSION} -X github.com/segmentio/ctlstore/pkg/globalstats.version=${VERSION}" -o ./bin/ctlstore ./pkg/cmd/ctlstore
+	$Qgo build -trimpath -ldflags="-X github.com/segmentio/ctlstore/pkg/version.version=${VERSION} -X github.com/segmentio/ctlstore/pkg/globalstats.version=${VERSION}" -o ./bin/ctlstore ./pkg/cmd/ctlstore
 
 .PHONY: docker
 docker:
@@ -70,9 +70,8 @@ fmtfix:
 
 .PHONY: test
 test:
-	$Qgo test $(GOTESTFLAGS) ./...
+	$Qgo test -trimpath $(GOTESTFLAGS) ./...
 
 .PHONY: bench
 bench:
-	$Qgo test $(GOTESTFLAGS) -bench .
-
+	$Qgo test -trimpath $(GOTESTFLAGS) -bench .
