@@ -208,7 +208,7 @@ func TestReflector(t *testing.T) {
 	clBytes, err := ioutil.ReadFile(changelogPath)
 	require.NoError(t, err)
 
-	expectChangelog := "{\"seq\":1,\"family\":\"family1\",\"table\":\"table1234\",\"key\":[{\"name\":\"field1\",\"type\":\"INTEGER\",\"value\":1234}]}\n"
+	expectChangelog := "{\"seq\":1,\"ledgerSeq\":2,\"tx\":false,\"family\":\"family1\",\"table\":\"table1234\",\"key\":[{\"name\":\"field1\",\"type\":\"INTEGER\",\"value\":1234}]}\n"
 	if diff := cmp.Diff(expectChangelog, string(clBytes)); diff != "" {
 		t.Errorf("Changelog contents differ\n%s", diff)
 	}

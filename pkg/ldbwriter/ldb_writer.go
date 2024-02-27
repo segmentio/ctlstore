@@ -28,9 +28,10 @@ type LDBWriteCallback interface {
 // LDBWriteMetadata contains the metadata about a statement that was written
 // to the LDB.
 type LDBWriteMetadata struct {
-	DB        *sql.DB
-	Statement schema.DMLStatement
-	Changes   []sqlite.SQLiteWatchChange
+	DB          *sql.DB
+	Statement   schema.DMLStatement
+	Changes     []sqlite.SQLiteWatchChange
+	Transaction bool
 }
 
 // ldbWriter applies statements to a SQL database

@@ -2,8 +2,8 @@ package changelog
 
 import (
 	"encoding/json"
-
 	"github.com/pkg/errors"
+	"github.com/segmentio/ctlstore/pkg/schema"
 	"github.com/segmentio/events/v2"
 )
 
@@ -16,25 +16,27 @@ type (
 		WriteLine WriteLine
 	}
 	ChangelogEntry struct {
-		Seq    int64
-		Family string
-		Table  string
-		Key    []interface{}
+		Seq         int64
+		Family      string
+		Table       string
+		Key         []interface{}
+		LedgerSeq   schema.DMLSequence
+		Transaction bool
 	}
 )
 
-func NewChangelogEntry(seq int64, family string, table string, key []interface{}) *ChangelogEntry {
-	return &ChangelogEntry{Seq: seq, Family: family, Table: table, Key: key}
-}
-
 func (w *ChangelogWriter) WriteChange(e ChangelogEntry) error {
 	structure := struct {
-		Seq    int64         `json:"seq"`
-		Family string        `json:"family"`
-		Table  string        `json:"table"`
-		Key    []interface{} `json:"key"`
+		Seq         int64         `json:"seq"`
+		LedgerSeq   int64         `json:"ledgerSeq"`
+		Transaction bool          `json:"tx"`
+		Family      string        `json:"family"`
+		Table       string        `json:"table"`
+		Key         []interface{} `json:"key"`
 	}{
 		e.Seq,
+		e.LedgerSeq.Int(),
+		e.Transaction,
 		e.Family,
 		e.Table,
 		e.Key,

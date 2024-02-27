@@ -319,7 +319,7 @@ func (e *dbExecutive) AddFields(familyName string, tableName string, fieldNames 
 			}
 
 			// We first write the column modification to the DML ledger within the transaction.
-			// It's important that this is done befored the DDL is applied to the ctldb, as
+			// It's important that this is done before the DDL is applied to the ctldb, as
 			// the DDL is not able to be rolled back. In this way, if the DDL fails, the DML
 			// can be rolled back.
 			dlw := dmlLedgerWriter{Tx: tx, TableName: dmlLedgerTableName}

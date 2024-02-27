@@ -135,7 +135,7 @@ func TestChangelog(t *testing.T) {
 			numEvents:        10000,
 			rotateAfterBytes: 1024 * 128,
 			writeDelay:       100 * time.Microsecond,
-			mustRotateN:      8,
+			mustRotateN:      9,
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
