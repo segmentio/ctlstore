@@ -84,11 +84,12 @@ func TestReflectorCtl(t *testing.T) {
 // context root.
 func TestReflectorCtlContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
-	ctx2, _ := context.WithCancel(ctx)
+	ctx2, cancel2 := context.WithCancel(ctx)
+	defer cancel2()
 	cancel()
 	select {
 	case <-ctx2.Done():
 	default:
-		t.Fatal("context should have been canceled")
+		t.Fatal("child context should have been canceled")
 	}
 }

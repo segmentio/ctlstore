@@ -166,7 +166,7 @@ func (e *dbExecutive) CreateTable(familyName string, tableName string, fieldName
 
 	err = tbl.Validate()
 	if err != nil {
-		return &errs.BadRequestError{err.Error()}
+		return &errs.BadRequestError{Err: err.Error()}
 	}
 
 	ddl, err := tbl.AsCreateTableDDL()

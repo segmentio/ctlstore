@@ -34,7 +34,7 @@ jobs:
 
       - name: Test
         run: |
-          make test
+          make fmtchk vet test
 
       - name: build
         run: |

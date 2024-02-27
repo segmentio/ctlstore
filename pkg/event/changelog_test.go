@@ -161,16 +161,16 @@ func TestChangelog(t *testing.T) {
 				rotateAfter:      test.rotateAfter,
 				rotateAfterBytes: test.rotateAfterBytes,
 			}
+			var writeErr error
 			var wg sync.WaitGroup
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
 				err := flw.writeN(ctx, test.numEvents)
 				if err != nil {
-					t.Fatal(err)
+					writeErr = err
 				}
 			}()
-			defer wg.Wait()
 			for i := 0; i < test.numEvents; i++ {
 				event, err := cl.next(ctx)
 				if err != nil {
@@ -181,6 +181,10 @@ func TestChangelog(t *testing.T) {
 
 			if test.mustRotateN > 0 {
 				require.EqualValues(t, test.mustRotateN, atomic.LoadInt64(&flw.rotations))
+			}
+			wg.Wait()
+			if writeErr != nil {
+				t.Fatal(writeErr)
 			}
 		})
 	}

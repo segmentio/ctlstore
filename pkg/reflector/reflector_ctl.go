@@ -137,14 +137,17 @@ func (r *ReflectorCtl) lifecycle(appCtx context.Context) {
 	for {
 		select {
 		case <-appCtx.Done():
-			// the application is quitting
+			// the application is quitting - cancel the reflector
 			events.Log("reflectorCtl stopping due to context err=%v", appCtx.Err())
+			if cancel != nil {
+				cancel()
+			}
 			return
 		case msg := <-r.messages:
 			// another goroutine has asked for the reflector to either
 			// be started or stopped.
 			switch msg.desired {
-			case true:
+			case true: // start the reflector
 				if !running {
 					ctx, cancel = context.WithCancel(appCtx)
 					wg.Add(1)
@@ -155,7 +158,7 @@ func (r *ReflectorCtl) lifecycle(appCtx context.Context) {
 					running = true
 				}
 				msg.sendErr(appCtx, nil)
-			case false:
+			case false: // stop the reflector
 				if running {
 					cancel()
 					done := make(chan struct{})

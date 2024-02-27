@@ -55,6 +55,11 @@ func (s *shovel) Start(ctx context.Context) error {
 		safeCancel()
 		var sctx context.Context
 		sctx, cancel = context.WithTimeout(ctx, s.pollTimeout)
+		safeCancel = func() {
+			if cancel != nil {
+				cancel()
+			}
+		}
 
 		stats.Incr("shovel.loop_enter")
 		s.logger().Debug("shovel polling...")

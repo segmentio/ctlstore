@@ -25,9 +25,9 @@ func TestMetaTableAsCreateTableDDL(t *testing.T) {
 		FamilyName: famName,
 		TableName:  tblName,
 		Fields: []schema.NamedFieldType{
-			{schema.FieldName{Name: "field1"}, schema.FTString},
-			{schema.FieldName{Name: "field2"}, schema.FTInteger},
-			{schema.FieldName{Name: "field3"}, schema.FTDecimal},
+			{Name: schema.FieldName{Name: "field1"}, FieldType: schema.FTString},
+			{Name: schema.FieldName{Name: "field2"}, FieldType: schema.FTInteger},
+			{Name: schema.FieldName{Name: "field3"}, FieldType: schema.FTDecimal},
 		},
 		KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}}},
 	}
@@ -176,10 +176,10 @@ func TestMetaTableUpsertDML(t *testing.T) {
 					FamilyName: famName,
 					TableName:  tblName,
 					Fields: []schema.NamedFieldType{
-						{schema.FieldName{Name: "field1"}, schema.FTString},
-						{schema.FieldName{Name: "field2"}, schema.FTString},
-						{schema.FieldName{Name: "field3"}, schema.FTInteger},
-						{schema.FieldName{Name: "field4"}, schema.FTByteString},
+						{Name: schema.FieldName{Name: "field1"}, FieldType: schema.FTString},
+						{Name: schema.FieldName{Name: "field2"}, FieldType: schema.FTString},
+						{Name: schema.FieldName{Name: "field3"}, FieldType: schema.FTInteger},
+						{Name: schema.FieldName{Name: "field4"}, FieldType: schema.FTByteString},
 					},
 					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
 				}
@@ -200,9 +200,9 @@ func TestMetaTableUpsertDML(t *testing.T) {
 					FamilyName: famName,
 					TableName:  tblName,
 					Fields: []schema.NamedFieldType{
-						{schema.FieldName{Name: "field1"}, schema.FTString},
-						{schema.FieldName{Name: "field2"}, schema.FTString},
-						{schema.FieldName{Name: "field3"}, schema.FTInteger},
+						{Name: schema.FieldName{Name: "field1"}, FieldType: schema.FTString},
+						{Name: schema.FieldName{Name: "field2"}, FieldType: schema.FTString},
+						{Name: schema.FieldName{Name: "field3"}, FieldType: schema.FTInteger},
 					},
 					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
 				}
@@ -222,9 +222,9 @@ func TestMetaTableUpsertDML(t *testing.T) {
 					FamilyName: famName,
 					TableName:  tblName,
 					Fields: []schema.NamedFieldType{
-						{schema.FieldName{Name: "field1"}, schema.FTString},
-						{schema.FieldName{Name: "field2"}, schema.FTString},
-						{schema.FieldName{Name: "field3"}, schema.FTInteger},
+						{Name: schema.FieldName{Name: "field1"}, FieldType: schema.FTString},
+						{Name: schema.FieldName{Name: "field2"}, FieldType: schema.FTString},
+						{Name: schema.FieldName{Name: "field3"}, FieldType: schema.FTInteger},
 					},
 					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
 				}
@@ -261,9 +261,9 @@ func TestMetaTableDeleteDML(t *testing.T) {
 					FamilyName: famName,
 					TableName:  tblName,
 					Fields: []schema.NamedFieldType{
-						{schema.FieldName{Name: "field1"}, schema.FTString},
-						{schema.FieldName{Name: "field2"}, schema.FTByteString},
-						{schema.FieldName{Name: "field3"}, schema.FTInteger},
+						{Name: schema.FieldName{Name: "field1"}, FieldType: schema.FTString},
+						{Name: schema.FieldName{Name: "field2"}, FieldType: schema.FTByteString},
+						{Name: schema.FieldName{Name: "field3"}, FieldType: schema.FTInteger},
 					},
 					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}, {Name: "field2"}}},
 				}
@@ -285,8 +285,8 @@ func TestMetaTableDeleteDML(t *testing.T) {
 					FamilyName: famName,
 					TableName:  tblName,
 					Fields: []schema.NamedFieldType{
-						{schema.FieldName{Name: "field1"}, schema.FTString},
-						{schema.FieldName{Name: "field2"}, schema.FTString},
+						{Name: schema.FieldName{Name: "field1"}, FieldType: schema.FTString},
+						{Name: schema.FieldName{Name: "field2"}, FieldType: schema.FTString},
 					},
 					KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}}},
 				}
@@ -313,8 +313,8 @@ func TestMetaTableClearTableDDL(t *testing.T) {
 		FamilyName: famName,
 		TableName:  tblName,
 		Fields: []schema.NamedFieldType{
-			{schema.FieldName{Name: "field1"}, schema.FTString},
-			{schema.FieldName{Name: "field2"}, schema.FTByteString},
+			{Name: schema.FieldName{Name: "field1"}, FieldType: schema.FTString},
+			{Name: schema.FieldName{Name: "field2"}, FieldType: schema.FTByteString},
 		},
 		KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}}},
 	}
@@ -334,7 +334,7 @@ func TestMetaTableDropTableDDL(t *testing.T) {
 		FamilyName: famName,
 		TableName:  tblName,
 		Fields: []schema.NamedFieldType{
-			{schema.FieldName{Name: "field1"}, schema.FTString},
+			{Name: schema.FieldName{Name: "field1"}, FieldType: schema.FTString},
 		},
 		KeyFields: schema.PrimaryKey{Fields: []schema.FieldName{{Name: "field1"}}},
 	}

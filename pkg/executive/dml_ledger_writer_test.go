@@ -23,6 +23,7 @@ func TestDMLLogWriterAdd(t *testing.T) {
 
 	for i, testCase := range suite {
 		testName := fmt.Sprintf("[%d] %s", i, testCase.desc)
+		statements := testCase.statements
 		t.Run(testName, func(t *testing.T) {
 			t.Parallel()
 			ctx := context.Background()
@@ -42,7 +43,7 @@ func TestDMLLogWriterAdd(t *testing.T) {
 			defer w.Close()
 
 			seqs := []schema.DMLSequence{}
-			for _, stString := range testCase.statements {
+			for _, stString := range statements {
 				seq, err := w.Add(ctx, stString)
 				if err != nil {
 					t.Fatalf("Unexpected error: %v", err)
@@ -81,7 +82,7 @@ func TestDMLLogWriterAdd(t *testing.T) {
 
 			i := 0
 			for rows.Next() {
-				if i+1 > len(testCase.statements) {
+				if i+1 > len(statements) {
 					t.Errorf("Scanned more statements than expected")
 					break
 				}
@@ -98,7 +99,7 @@ func TestDMLLogWriterAdd(t *testing.T) {
 					t.Errorf("Expected %v, got %v", want, got)
 				}
 
-				if want, got := testCase.statements[i], rowStmt; want != got {
+				if want, got := statements[i], rowStmt; want != got {
 					t.Errorf("Expected %v, got %v", want, got)
 				}
 

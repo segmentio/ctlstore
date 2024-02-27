@@ -632,7 +632,7 @@ func newReflector(cliCfg reflectorCliConfig, isSupervisor bool, i int) (*reflect
 		events.Log("DEPRECATION NOTICE: use --disable-ecs-behavior instead of --disable to control this ledger monitor behavior")
 	}
 	id := fmt.Sprintf("%s-%d", path.Base(cliCfg.LDBPath), i)
-	l := events.NewLogger(events.DefaultHandler).With(events.Args{{"id", id}})
+	l := events.NewLogger(events.DefaultHandler).With(events.Args{{Name: "id", Value: id}})
 	l.EnableDebug = cliCfg.Debug
 	return reflectorpkg.ReflectorFromConfig(reflectorpkg.ReflectorConfig{
 		LDBPath:         cliCfg.LDBPath,

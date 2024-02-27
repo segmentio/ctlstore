@@ -62,7 +62,7 @@ generate:
 
 .PHONY: fmtcheck
 fmtchk:
-	$Qexit $(shell gofmt -l . | grep -v '^vendor' | wc -l)
+	go run github.com/kevinburke/differ@latest gofmt -l .
 
 .PHONY: fmtfix
 fmtfix:
@@ -75,4 +75,3 @@ test:
 .PHONY: bench
 bench:
 	$Qgo test $(GOTESTFLAGS) -bench .
-
