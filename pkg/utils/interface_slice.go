@@ -6,14 +6,13 @@ import "reflect"
 //
 // - Returns empty slice if no args are passed
 //
-// - For a single argument which is of a slice type, the slice
-//   is converted and returned.
+//   - For a single argument which is of a slice type, the slice
+//     is converted and returned.
 //
-// - For a single argument which is not a slice type, the value is
-//   returned within a single-element slice.
+//   - For a single argument which is not a slice type, the value is
+//     returned within a single-element slice.
 //
 // - For multiple arguments, returns a slice with all the args
-//
 func InterfaceSlice(any ...interface{}) []interface{} {
 	if len(any) == 0 {
 		return []interface{}{}

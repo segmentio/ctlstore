@@ -62,7 +62,11 @@ generate:
 
 .PHONY: fmtcheck
 fmtchk:
-	go run github.com/kevinburke/differ@latest gofmt -l .
+	@OUTPUT=$$(gofmt -l . | grep -v vendor/); \
+		if [ -n "$$OUTPUT" ]; then \
+			echo "Some files were not gofmtted:\\n$$OUTPUT"; \
+			exit 1; \
+		fi
 
 .PHONY: fmtfix
 fmtfix:

@@ -19,7 +19,6 @@ type LDBWriterWithChangelog struct {
 	Seq             int64
 }
 
-//
 // NOTE: How does the changelog work?
 //
 // This is sort of the crux of how the changelog comes together. The Reflector
@@ -33,7 +32,6 @@ type LDBWriterWithChangelog struct {
 // This is pretty complex, but after enumerating about 8 different options, it
 // ended up actually being the most simple. Other options involved not-so-great
 // options like parsing SQL or maintaining triggers on every table.
-//
 func (w *LDBWriterWithChangelog) ApplyDMLStatement(ctx context.Context, statement schema.DMLStatement) error {
 	err := w.LdbWriter.ApplyDMLStatement(ctx, statement)
 	if err != nil {
