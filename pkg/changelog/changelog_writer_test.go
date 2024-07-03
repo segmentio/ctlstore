@@ -32,5 +32,5 @@ func TestWriteChange(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.EqualValues(t, 1, len(mock.Lines))
-	require.Equal(t, `{"seq":42,"family":"family1","table":"table1","key":[18014398509481984,"foo"]}`, mock.Lines[0])
+	require.Equal(t, `{"seq":42,"ledgerSeq":0,"tx":false,"family":"family1","table":"table1","key":[18014398509481984,"foo"]}`, mock.Lines[0])
 }

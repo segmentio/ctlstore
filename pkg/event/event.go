@@ -2,8 +2,10 @@ package event
 
 // Event is the type that the Iterator produces
 type Event struct {
-	Sequence  int64
-	RowUpdate RowUpdate
+	Sequence       int64
+	LedgerSequence int64
+	Transaction    bool
+	RowUpdate      RowUpdate
 }
 
 // RowUpdate represents a single row update

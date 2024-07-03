@@ -114,7 +114,7 @@ type supervisorCliConfig struct {
 type ledgerHealthConfig struct {
 	Disable                 bool          `conf:"disable" help:"disable ledger latency health attributing (DEPRECATED: use disable-ecs-behavior instead)"`
 	DisableECSBehavior      bool          `conf:"disable-ecs-behavior" help:"disable ledger latency health attributing"`
-	MaxHealthyLatency       time.Duration `conf:"max-healty-latency" help:"Max latency considered healthy"`
+	MaxHealthyLatency       time.Duration `conf:"max-healthy-latency" help:"Max latency considered healthy"`
 	AttributeName           string        `conf:"attribute-name" help:"The name of the attribute"`
 	HealthyAttributeValue   string        `conf:"healthy-attribute-value" help:"The value of the attribute if healthy"`
 	UnhealthyAttributeValue string        `conf:"unhealth-attribute-value" help:"The value of the attribute if unhealthy"`

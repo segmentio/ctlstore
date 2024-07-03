@@ -121,3 +121,7 @@ func FetchSeqFromLdb(ctx context.Context, db *sql.DB) (schema.DMLSequence, error
 	}
 	return schema.DMLSequence(seq), err
 }
+
+func IsInternalTable(name string) bool {
+	return name == LDBSeqTableName || name == LDBLastUpdateTableName
+}
