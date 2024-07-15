@@ -1,15 +1,22 @@
 version: '2.2'
 services:
-    mysql:
-        image: mysql:5.6
-        platform: linux/amd64
-        restart:
-            always
-        ports:
-              - "3306:3306"
-        environment:
-            MYSQL_ROOT_PASSWORD: ctldbpw
-            MYSQL_DATABASE: ctldb
-            MYSQL_USER: ctldb
-            MYSQL_PASSWORD: ctldbpw
-        mem_limit: 536870912
+  mysql:
+    image: mysql:5.6
+    # If you are on arm64 and experiencing issues with the tests (hangs,
+    # connection reset) then try the following in order:
+
+    # - stopping and removing all downloaded container images
+    # - ensuring you have the latest Docker Desktop version
+    # - factory reset your Docker Desktop settings
+
+    # If you are still running into issues please post in #help-infra-seg.
+    platform: linux/amd64
+    restart: always
+    ports:
+    - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ctldbpw
+      MYSQL_DATABASE: ctldb
+      MYSQL_USER: ctldb
+      MYSQL_PASSWORD: ctldbpw
+    mem_limit: 536870912
