@@ -1,6 +1,8 @@
 module github.com/segmentio/ctlstore
 
-go 1.22
+go 1.22.0
+
+toolchain go1.23.4
 
 require (
 	github.com/AlekSi/pointer v1.0.0
