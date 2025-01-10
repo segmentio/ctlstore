@@ -8,7 +8,7 @@ import (
 	"github.com/segmentio/ctlstore/pkg/globalstats"
 	"github.com/segmentio/ctlstore/pkg/ldb"
 	"github.com/segmentio/events/v2"
-	"github.com/segmentio/stats/v4"
+	"github.com/segmentio/stats/v5"
 	"path"
 	"strconv"
 	"sync/atomic"

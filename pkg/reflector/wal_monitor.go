@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/segmentio/events/v2"
-	"github.com/segmentio/stats/v4"
+	"github.com/segmentio/stats/v5"
 
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/ldbwriter"

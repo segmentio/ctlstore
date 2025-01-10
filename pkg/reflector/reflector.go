@@ -28,7 +28,7 @@ import (
 	"github.com/segmentio/events/v2"
 	_ "github.com/segmentio/events/v2/log" // lets events actually log
 
-	"github.com/segmentio/stats/v4"
+	"github.com/segmentio/stats/v5"
 )
 
 // Reflector represents a fully materialized reflector, which polls an

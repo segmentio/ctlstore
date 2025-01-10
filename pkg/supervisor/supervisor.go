@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/segmentio/ctlstore/pkg/reflector"
 	"github.com/segmentio/events/v2"
-	"github.com/segmentio/stats/v4"
+	"github.com/segmentio/stats/v5"
 )
 
 type Supervisor interface {
