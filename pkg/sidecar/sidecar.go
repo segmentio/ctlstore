@@ -11,8 +11,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/segmentio/ctlstore"
 	"github.com/segmentio/errors-go"
-	"github.com/segmentio/stats/v4"
-	"github.com/segmentio/stats/v4/httpstats"
+	"github.com/segmentio/stats/v5"
+	"github.com/segmentio/stats/v5/httpstats"
 )
 
 type (

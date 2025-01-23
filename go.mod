@@ -1,6 +1,8 @@
 module github.com/segmentio/ctlstore
 
-go 1.20
+go 1.22.0
+
+toolchain go1.23.4
 
 require (
 	github.com/AlekSi/pointer v1.0.0
@@ -10,7 +12,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.38.5
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/go-sql-driver/mysql v1.4.1
-	github.com/google/go-cmp v0.5.8
+	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.7.3
 	github.com/julienschmidt/httprouter v1.2.0
@@ -21,9 +23,9 @@ require (
 	github.com/segmentio/errors-go v1.0.0
 	github.com/segmentio/events/v2 v2.3.2
 	github.com/segmentio/go-sqlite3 v1.14.22-segment
-	github.com/segmentio/stats/v4 v4.6.2
-	github.com/stretchr/testify v1.8.1
-	golang.org/x/sync v0.6.0
+	github.com/segmentio/stats/v5 v5.3.1
+	github.com/stretchr/testify v1.8.4
+	golang.org/x/sync v0.10.0
 )
 
 require (
@@ -45,17 +47,20 @@ require (
 	github.com/aws/smithy-go v1.14.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/mdlayher/genetlink v0.0.0-20190313224034-60417448a851 // indirect
-	github.com/mdlayher/netlink v0.0.0-20190313131330-258ea9dff42c // indirect
-	github.com/mdlayher/taskstats v0.0.0-20190313225729-7cbba52ee072 // indirect
+	github.com/josharian/native v1.1.0 // indirect
+	github.com/mdlayher/genetlink v1.3.2 // indirect
+	github.com/mdlayher/netlink v1.7.2 // indirect
+	github.com/mdlayher/socket v0.5.1 // indirect
+	github.com/mdlayher/taskstats v0.0.0-20241218144709-977b30d474ce // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/segmentio/fasthash v0.0.0-20180216231524-a72b379d632e // indirect
+	github.com/segmentio/fasthash v1.0.3 // indirect
 	github.com/segmentio/go-snakecase v1.1.0 // indirect
 	github.com/segmentio/objconv v1.0.1 // indirect
-	golang.org/x/mod v0.15.0 // indirect
-	golang.org/x/net v0.20.0 // indirect
-	golang.org/x/sys v0.17.0 // indirect
-	golang.org/x/tools v0.17.0 // indirect
+	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0 // indirect
+	golang.org/x/mod v0.21.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/tools v0.25.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/mold.v2 v2.2.0 // indirect
