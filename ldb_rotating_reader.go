@@ -4,15 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/segmentio/ctlstore/pkg/errs"
-	"github.com/segmentio/ctlstore/pkg/globalstats"
-	"github.com/segmentio/ctlstore/pkg/ldb"
-	"github.com/segmentio/events/v2"
-	"github.com/segmentio/stats/v4"
 	"path"
 	"strconv"
 	"sync/atomic"
 	"time"
+
+	"github.com/segmentio/ctlstore/pkg/errs"
+	"github.com/segmentio/ctlstore/pkg/globalstats"
+	"github.com/segmentio/ctlstore/pkg/ldb"
+	"github.com/segmentio/events/v2"
+	"github.com/segmentio/stats/v5"
 )
 
 // LDBRotatingReader reads data from multiple LDBs on a rotating schedule.

@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
 	"github.com/pkg/errors"
 	"github.com/segmentio/events/v2"
-	"github.com/segmentio/stats/v4"
+	"github.com/segmentio/stats/v5"
 
 	"github.com/segmentio/ctlstore/pkg/errs"
 	"github.com/segmentio/ctlstore/pkg/ldb"

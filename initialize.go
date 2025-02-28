@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/segmentio/ctlstore/pkg/globalstats"
-	"github.com/segmentio/stats/v4"
+	"github.com/segmentio/stats/v5"
 )
 
 type Config struct {
